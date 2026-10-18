@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Kevin Player · Connexion</title>
+    <style>
+      :root {
+        --bg: #0b0b0f;
+        --card: #16161d;
+        --fg: #fff;
+        --muted: rgba(255, 255, 255, 0.62);
+        --line: rgba(255, 255, 255, 0.16);
+        --accent: #fff;
+        --err: #ff6b5a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      main {
+        max-width: 460px;
+        margin: 0 auto;
+        padding: 28px 16px 48px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        font-size: 20px;
+      }
+      .mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: #fff;
+        display: grid;
+        place-items: center;
+      }
+      .mark::after {
+        content: '';
+        border-left: 12px solid #000;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        margin-left: 3px;
+      }
+      h1 {
+        font-size: 30px;
+        line-height: 1.1;
+        margin: 28px 0 8px;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+      }
+      p {
+        color: var(--muted);
+        margin: 0 0 18px;
+      }
+      .seg {
+        display: flex;
+        gap: 8px;
+        margin: 18px 0;
+      }
+      .seg button {
+        flex: 1;
+        padding: 11px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--fg);
+        font: inherit;
+        font-weight: 700;
+      }
+      .seg button.on {
+        background: #fff;
+        color: #000;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        color: var(--muted);
+        margin: 14px 0 6px;
+      }
+      input[type='text'],
+      input[type='url'],
+      input[type='password'] {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--fg);
+        font: inherit;
+        font-size: 17px;
+      }
+      .check {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        margin: 20px 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .check input {
+        width: 20px;
+        height: 20px;
+        margin-top: 1px;
+      }
+      .go {
+        width: 100%;
+        padding: 16px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--accent);
+        color: #000;
+        font: inherit;
+        font-size: 18px;
+        font-weight: 800;
+      }
+      .go:disabled {
+        opacity: 0.5;
+      }
+      .err {
+        color: var(--err);
+        margin-top: 12px;
+        min-height: 22px;
+      }
+      .done {
+        text-align: center;
+        padding-top: 40px;
+      }
+      .done .big {
+        font-size: 64px;
+      }
+      .lock {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 26px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand"><span class="mark"></span>Kevin Player</div>
+      <section id="form">
+        <h1>Connecte ton écran</h1>
+        <p>Saisis ici les informations données par ton fournisseur. Elles arrivent directement sur ton écran, sans rien taper à la télécommande.</p>
+        <div class="seg">
+          <button type="button" data-m="xtream" class="on">Xtream Codes</button>
+          <button type="button" data-m="m3u">Lien M3U</button>
+        </div>
+        <div id="fx">
+          <label for="server">Adresse du serveur</label>
+          <input id="server" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://exemple.com:8080" />
+          <label for="user">Identifiant</label>
+          <input id="user" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          <label for="pass">Mot de passe</label>
+          <input id="pass" type="password" autocomplete="off" />
+        </div>
+        <div id="fm" hidden>
+          <label for="url">Lien de la playlist M3U</label>
+          <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://…" />
+        </div>
+        <label for="epg">Guide TV (XMLTV) — facultatif</label>
+        <input id="epg" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <label class="check"><input id="accept" type="checkbox" /> <span>J'utilise uniquement des contenus que j'ai le droit de regarder. Kevin Player ne fournit aucune chaîne ni aucun contenu.</span></label>
+        <button class="go" id="go" type="button">Envoyer à mon écran</button>
+        <div class="err" id="err"></div>
+        <p class="lock">🔒 Chiffré de bout en bout : seul ton écran peut lire ces informations. Elles ne sont pas conservées.</p>
+      </section>
+      <section id="done" class="done" hidden>
+        <div class="big">✓</div>
+        <h1>C'est envoyé</h1>
+        <p>Regarde ton écran : la connexion démarre toute seule. Tu peux fermer cette page.</p>
+      </section>
+    </main>
+    <script>
+      (function () {
+        'use strict';
+        var q = new URLSearchParams(location.search);
+        var sid = q.get('s') || '';
+        var project = q.get('p') || '';
+        var apiKey = q.get('a') || '';
+        var ep = q.get('e') || '';
+        var tvKey = location.hash.slice(1);
+        // la clé publique de l'écran ne reste pas dans l'historique
+        try {
+          history.replaceState(null, '', location.pathname + location.search);
+        } catch (e) {}
+        var mode = 'xtream';
+        var $ = function (id) {
+          return document.getElementById(id);
+        };
+        var err = function (t) {
+          $('err').textContent = t || '';
+        };
+        if (!/^[A-Za-z0-9_-]{22}$/.test(sid) || !tvKey || !project || !apiKey) {
+          err('Ce lien est incomplet. Scanne à nouveau le QR code affiché sur ton écran.');
+          $('go').disabled = true;
+        }
+        if (!(window.crypto && crypto.subtle)) {
+          err('Ce navigateur ne permet pas le chiffrement. Ouvre la page avec Safari ou Chrome.');
+          $('go').disabled = true;
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (b) {
+          b.onclick = function () {
+            mode = b.getAttribute('data-m');
+            Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (x) {
+              x.classList.toggle('on', x === b);
+            });
+            $('fx').hidden = mode !== 'xtream';
+            $('fm').hidden = mode !== 'm3u';
+          };
+        });
+        function b64u(buf) {
+          var s = '';
+          var a = new Uint8Array(buf);
+          for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]);
+          return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        function unb64u(s) {
+          var t = s.replace(/-/g, '+').replace(/_/g, '/');
+          var bin = atob(t + '==='.slice((t.length + 3) % 4));
+          var out = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+          return out;
+        }
+        var http = /^https?:\/\/\S+$/i;
+        $('go').onclick = async function () {
+          err('');
+          var v = function (id) {
+            return $(id).value.trim();
+          };
+          var data;
+          if (mode === 'xtream') {
+            if (!v('server') || !v('user') || !$('pass').value) return err('Remplis les trois champs.');
+            data = { mode: 'xtream', server: v('server'), user: v('user'), pass: $('pass').value, epg: v('epg') };
+          } else {
+            if (!http.test(v('url'))) return err('Le lien doit commencer par http:// ou https://');
+            data = { mode: 'm3u', url: v('url'), epg: v('epg') };
+          }
+          if (data.epg && !http.test(data.epg)) return err('Le lien du guide doit commencer par http:// ou https://');
+          if (!$('accept').checked) return err('Coche la case pour continuer.');
+          data.accept = true;
+          $('go').disabled = true;
+          try {
+            var tv = await crypto.subtle.importKey('raw', unb64u(tvKey), { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+            var mine = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
+            var key = await crypto.subtle.deriveKey({ name: 'ECDH', public: tv }, mine.privateKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+            var iv = crypto.getRandomValues(new Uint8Array(12));
+            var ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(JSON.stringify(data)));
+            var pub = await crypto.subtle.exportKey('raw', mine.publicKey);
+            data = null;
+            var base =
+              ep && /^http:\/\/127\.0\.0\.1:/.test(ep)
+                ? ep
+                : 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(project) + '/databases/(default)/documents';
+            var r = await fetch(base + '/qr/' + sid + '?currentDocument.exists=false&key=' + encodeURIComponent(apiKey), {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fields: {
+                  e: { stringValue: b64u(pub) },
+                  i: { stringValue: b64u(iv) },
+                  c: { stringValue: b64u(ct) },
+                  at: { integerValue: String(Date.now()) },
+                },
+              }),
+            });
+            if (!r.ok) throw new Error(r.status === 400 ? 'used' : 'http');
+            $('pass').value = '';
+            $('form').hidden = true;
+            $('done').hidden = false;
+          } catch (e) {
+            $('go').disabled = false;
+            err(
+              e && e.message === 'used'
+                ? 'Ce QR code a déjà servi. Affiche-en un nouveau sur ton écran.'
+                : 'Envoi impossible. Vérifie ta connexion Internet et réessaie.',
+            );
+          }
+        };
+      })();
+    </script>
+  </body>
+</html>

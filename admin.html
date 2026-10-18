@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Kevin Player · Licences</title>
+    <style>
+      :root {
+        --bg: #0b0b0f;
+        --card: #16161d;
+        --fg: #fff;
+        --muted: rgba(255, 255, 255, 0.62);
+        --line: rgba(255, 255, 255, 0.14);
+        --ok: #5bd38c;
+        --err: #ff6b5a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      main {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 24px 16px 60px;
+      }
+      h1 {
+        font-size: 26px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 28px 0 10px;
+      }
+      p.m {
+        color: var(--muted);
+        margin: 0 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: flex-end;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      input,
+      select {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #0f0f14;
+        color: var(--fg);
+        font: inherit;
+        min-width: 0;
+      }
+      button {
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: 0;
+        background: #fff;
+        color: #000;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button.ghost {
+        background: transparent;
+        color: var(--fg);
+        border: 1px solid var(--line);
+        font-weight: 600;
+      }
+      .table {
+        width: 100%;
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 720px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 13px;
+      }
+      code {
+        font: 600 14px ui-monospace, Menlo, Consolas, monospace;
+      }
+      .off {
+        color: var(--err);
+      }
+      .ok {
+        color: var(--ok);
+      }
+      .dev {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .dev button {
+        padding: 2px 8px;
+        font-size: 12px;
+      }
+      #msg {
+        min-height: 22px;
+        margin-top: 10px;
+      }
+      .new {
+        margin-top: 12px;
+        font-size: 22px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Kevin Player · Licences</h1>
+      <p class="m">Réservé à l'administrateur. Les clés créées ici s'activent dans l'appli (Réglages › Licence).</p>
+
+      <section id="login" class="card">
+        <div class="row">
+          <div><label for="pid">ID du projet Firebase</label><input id="pid" /></div>
+          <div><label for="key">apiKey</label><input id="key" size="34" /></div>
+        </div>
+        <div class="row" style="margin-top: 10px">
+          <div><label for="email">E-mail administrateur</label><input id="email" type="email" autocomplete="username" /></div>
+          <div><label for="pw">Mot de passe</label><input id="pw" type="password" autocomplete="current-password" /></div>
+          <button id="signin">Se connecter</button>
+        </div>
+      </section>
+
+      <section id="app" hidden>
+        <h2>Nouvelle licence</h2>
+        <div class="card">
+          <div class="row">
+            <div>
+              <label for="max">Appareils</label>
+              <select id="max">
+                <option>1</option>
+                <option>2</option>
+                <option selected>3</option>
+                <option>5</option>
+              </select>
+            </div>
+            <div>
+              <label for="dur">Durée</label>
+              <select id="dur">
+                <option value="0" selected>À vie</option>
+                <option value="1">1 mois</option>
+                <option value="3">3 mois</option>
+                <option value="6">6 mois</option>
+                <option value="12">12 mois</option>
+              </select>
+            </div>
+            <div style="flex: 1">
+              <label for="note">Note (visible ici seulement)</label>
+              <input id="note" style="width: 100%" placeholder="ex. commande n°123" />
+            </div>
+            <button id="create">Créer la clé</button>
+          </div>
+          <div class="new" id="newkey"></div>
+        </div>
+        <h2>Licences</h2>
+        <div class="row" style="margin-bottom: 10px">
+          <input id="filter" placeholder="Rechercher une clé ou une note" style="flex: 1" />
+          <button class="ghost" id="reload">Actualiser</button>
+          <button class="ghost" id="signout">Se déconnecter</button>
+        </div>
+        <div class="table">
+          <table>
+            <thead>
+              <tr><th>Clé</th><th>État</th><th>Appareils</th><th>Expire</th><th>Note</th><th></th></tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+      <div id="msg"></div>
+    </main>
+    <script>
+      (function () {
+        'use strict';
+        var A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        var $ = function (id) {
+          return document.getElementById(id);
+        };
+        var st = { pid: '', key: '', token: '', list: [], notes: {} };
+        try {
+          var saved = JSON.parse(localStorage.getItem('kpadmin') || '{}');
+          $('pid').value = saved.pid || '';
+          $('key').value = saved.key || '';
+          $('email').value = saved.email || '';
+        } catch (e) {}
+        var msg = function (t, bad) {
+          $('msg').textContent = t || '';
+          $('msg').className = bad ? 'off' : 'ok';
+        };
+        var esc = function (s) {
+          return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+          });
+        };
+        function enc(v) {
+          if (typeof v === 'boolean') return { booleanValue: v };
+          if (typeof v === 'number') return { integerValue: String(Math.round(v)) };
+          if (typeof v === 'string') return { stringValue: v };
+          var f = {};
+          Object.keys(v).forEach(function (k) {
+            f[k] = enc(v[k]);
+          });
+          return { mapValue: { fields: f } };
+        }
+        function dec(x) {
+          if (!x) return null;
+          if ('stringValue' in x) return x.stringValue;
+          if ('integerValue' in x) return Number(x.integerValue);
+          if ('booleanValue' in x) return x.booleanValue;
+          if ('mapValue' in x) return decF(x.mapValue.fields || {});
+          return null;
+        }
+        function decF(f) {
+          var o = {};
+          Object.keys(f || {}).forEach(function (k) {
+            o[k] = dec(f[k]);
+          });
+          return o;
+        }
+        var base = function () {
+          return 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(st.pid) + '/databases/(default)/documents';
+        };
+        async function api(method, path, query, body) {
+          var r = await fetch(base() + '/' + path + '?key=' + encodeURIComponent(st.key) + (query || ''), {
+            method: method,
+            headers: Object.assign({ Authorization: 'Bearer ' + st.token }, body ? { 'Content-Type': 'application/json' } : {}),
+            body: body ? JSON.stringify(body) : undefined,
+          });
+          var j = await r.json().catch(function () {
+            return null;
+          });
+          if (!r.ok) throw new Error((j && j.error && j.error.message) || 'HTTP ' + r.status);
+          return j;
+        }
+        $('signin').onclick = async function () {
+          st.pid = $('pid').value.trim();
+          st.key = $('key').value.trim();
+          try {
+            var r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + encodeURIComponent(st.key), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: $('email').value.trim(), password: $('pw').value, returnSecureToken: true }),
+            });
+            var j = await r.json();
+            if (!r.ok) throw new Error((j.error && j.error.message) || 'refus');
+            st.token = j.idToken;
+            $('pw').value = '';
+            localStorage.setItem('kpadmin', JSON.stringify({ pid: st.pid, key: st.key, email: $('email').value.trim() }));
+            $('login').hidden = true;
+            $('app').hidden = false;
+            msg('Connecté (UID ' + j.localId + ')');
+            load();
+          } catch (e) {
+            msg('Connexion refusée : ' + e.message, true);
+          }
+        };
+        $('signout').onclick = function () {
+          st.token = '';
+          $('app').hidden = true;
+          $('login').hidden = false;
+          msg('');
+        };
+        async function load() {
+          try {
+            var all = [];
+            var tok = '';
+            do {
+              var j = await api('GET', 'lic', '&pageSize=300' + (tok ? '&pageToken=' + encodeURIComponent(tok) : ''));
+              (j.documents || []).forEach(function (d) {
+                var o = decF(d.fields);
+                o.id = d.name.split('/').pop();
+                o.created = Date.parse(d.createTime) || 0;
+                all.push(o);
+              });
+              tok = j.nextPageToken || '';
+            } while (tok);
+            var notes = {};
+            tok = '';
+            do {
+              var n = await api('GET', 'licnote', '&pageSize=300' + (tok ? '&pageToken=' + encodeURIComponent(tok) : ''));
+              (n.documents || []).forEach(function (d) {
+                notes[d.name.split('/').pop()] = (decF(d.fields).note || '');
+              });
+              tok = n.nextPageToken || '';
+            } while (tok);
+            st.list = all.sort(function (a, b) {
+              return b.created - a.created;
+            });
+            st.notes = notes;
+            draw();
+          } catch (e) {
+            msg('Lecture impossible : ' + e.message + ' (règles Firestore et UID administrateur ?)', true);
+          }
+        }
+        var fmt = function (k) {
+          return k.match(/.{4}/g).join('-');
+        };
+        var day = function (t) {
+          return t ? new Date(t).toLocaleDateString('fr-FR') : 'Jamais';
+        };
+        function draw() {
+          var f = $('filter').value.trim().toUpperCase().replace(/-/g, '');
+          $('rows').innerHTML = st.list
+            .filter(function (l) {
+              return !f || l.id.indexOf(f) >= 0 || String(st.notes[l.id] || '').toUpperCase().indexOf($('filter').value.trim().toUpperCase()) >= 0;
+            })
+            .map(function (l) {
+              var dev = l.dev || {};
+              var ids = Object.keys(dev);
+              var expired = l.exp && l.exp < Date.now();
+              return (
+                '<tr><td><code>' + fmt(l.id) + '</code></td><td>' +
+                (l.off ? '<span class="off">Révoquée</span>' : expired ? '<span class="off">Expirée</span>' : '<span class="ok">Active</span>') +
+                '</td><td>' + ids.length + ' / ' + (l.max || 1) +
+                ids
+                  .map(function (id) {
+                    return '<div class="dev">' + esc((dev[id] && dev[id].n) || 'Appareil') + ' · ' + day(dev[id] && dev[id].at) +
+                      ' <button class="ghost" data-free="' + l.id + '" data-dev="' + id + '">Libérer</button></div>';
+                  })
+                  .join('') +
+                '</td><td>' + day(l.exp) + '</td><td>' + esc(st.notes[l.id] || '') + '</td><td><button class="ghost" data-tog="' + l.id + '">' +
+                (l.off ? 'Réactiver' : 'Révoquer') + '</button></td></tr>'
+              );
+            })
+            .join('');
+        }
+        $('filter').oninput = draw;
+        $('reload').onclick = load;
+        $('rows').onclick = async function (ev) {
+          var t = ev.target;
+          var l;
+          try {
+            if (t.getAttribute('data-tog')) {
+              l = st.list.find(function (x) {
+                return x.id === t.getAttribute('data-tog');
+              });
+              await api('PATCH', 'lic/' + l.id, '&updateMask.fieldPaths=off', { fields: { off: enc(!l.off) } });
+              msg(l.off ? 'Licence réactivée' : 'Licence révoquée');
+              load();
+            } else if (t.getAttribute('data-free')) {
+              l = st.list.find(function (x) {
+                return x.id === t.getAttribute('data-free');
+              });
+              var dev = Object.assign({}, l.dev || {});
+              delete dev[t.getAttribute('data-dev')];
+              await api('PATCH', 'lic/' + l.id, '&updateMask.fieldPaths=dev', { fields: { dev: enc(dev) } });
+              msg('Appareil libéré : la place peut servir à un autre appareil.');
+              load();
+            }
+          } catch (e) {
+            msg('Échec : ' + e.message, true);
+          }
+        };
+        $('create').onclick = async function () {
+          var r = crypto.getRandomValues(new Uint8Array(16));
+          var k = '';
+          for (var i = 0; i < 16; i++) k += A[r[i] % 32];
+          var months = Number($('dur').value);
+          var exp = 0;
+          if (months) {
+            var d = new Date();
+            d.setMonth(d.getMonth() + months);
+            exp = d.getTime();
+          }
+          try {
+            await api('PATCH', 'lic/' + k, '&currentDocument.exists=false', {
+              fields: { max: enc(Number($('max').value)), exp: enc(exp), dev: { mapValue: { fields: {} } }, at: enc(Date.now()) },
+            });
+            var note = $('note').value.trim();
+            if (note) await api('PATCH', 'licnote/' + k, '', { fields: { note: enc(note) } });
+            $('newkey').innerHTML = 'Nouvelle clé : <code>' + fmt(k) + '</code>';
+            $('note').value = '';
+            load();
+          } catch (e) {
+            msg('Création impossible : ' + e.message, true);
+          }
+        };
+      })();
+    </script>
+  </body>
+</html>
