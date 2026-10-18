@@ -1,0 +1,51 @@
+<!doctype html>
+<!--
+  Kevin Player — page relais des bandes-annonces (publiée avec GitHub Pages, voir BANDE-ANNONCE.md).
+  YouTube exige depuis 2025 qu'un lecteur intégré soit placé sur une vraie adresse web : l'appli TV
+  (page locale) affiche donc cette page, qui contient le lecteur YouTube et relaie les messages
+  dans les deux sens (lecture, pause, avance, fin, erreurs). Aucune donnée n'est collectée.
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>Bande-annonce</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #000;
+        overflow: hidden;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var id = (/[?&]v=([\w-]{11})/.exec(location.search) || [])[1];
+        if (!id) return;
+        var f = document.createElement('iframe');
+        f.allow = 'autoplay; encrypted-media; fullscreen';
+        f.src =
+          'https://www.youtube.com/embed/' +
+          id +
+          '?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3' +
+          '&enablejsapi=1&hl=fr&cc_lang_pref=fr&origin=' +
+          encodeURIComponent(location.origin);
+        document.body.appendChild(f);
+        window.addEventListener('message', function (ev) {
+          if (ev.source === f.contentWindow)
+            parent.postMessage(ev.data, '*'); // YouTube → Kevin Player
+          else if (ev.source === parent) f.contentWindow.postMessage(ev.data, '*'); // Kevin Player → YouTube
+        });
+      })();
+    </script>
+  </body>
+</html>
