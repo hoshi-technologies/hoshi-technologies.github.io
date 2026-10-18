@@ -23,7 +23,12 @@
         margin: 0;
         background: var(--bg);
         color: var(--fg);
-        font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        font:
+          15px/1.45 system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
       }
       main {
         max-width: 1000px;
@@ -108,7 +113,11 @@
         font-size: 13px;
       }
       code {
-        font: 600 14px ui-monospace, Menlo, Consolas, monospace;
+        font:
+          600 14px ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
       }
       .off {
         color: var(--err);
@@ -143,7 +152,10 @@
   <body>
     <main>
       <h1>Kevin Player · Licences</h1>
-      <p class="m">Réservé à l'administrateur. Les clés créées ici s'activent dans l'appli (Réglages › Licence).</p>
+      <p class="m">
+        Réservé à l'administrateur. Les clés créées ici s'activent dans l'appli (Réglages ›
+        Licence).
+      </p>
 
       <section id="login" class="card">
         <div class="row">
@@ -151,8 +163,14 @@
           <div><label for="key">apiKey</label><input id="key" size="34" /></div>
         </div>
         <div class="row" style="margin-top: 10px">
-          <div><label for="email">E-mail administrateur</label><input id="email" type="email" autocomplete="username" /></div>
-          <div><label for="pw">Mot de passe</label><input id="pw" type="password" autocomplete="current-password" /></div>
+          <div>
+            <label for="email">E-mail administrateur</label
+            ><input id="email" type="email" autocomplete="username" />
+          </div>
+          <div>
+            <label for="pw">Mot de passe</label
+            ><input id="pw" type="password" autocomplete="current-password" />
+          </div>
           <button id="signin">Se connecter</button>
         </div>
       </section>
@@ -197,7 +215,14 @@
         <div class="table">
           <table>
             <thead>
-              <tr><th>Clé</th><th>État</th><th>Appareils</th><th>Expire</th><th>Note</th><th></th></tr>
+              <tr>
+                <th>Clé</th>
+                <th>État</th>
+                <th>Appareils</th>
+                <th>Expire</th>
+                <th>Note</th>
+                <th></th>
+              </tr>
             </thead>
             <tbody id="rows"></tbody>
           </table>
@@ -254,14 +279,24 @@
           return o;
         }
         var base = function () {
-          return 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(st.pid) + '/databases/(default)/documents';
+          return (
+            'https://firestore.googleapis.com/v1/projects/' +
+            encodeURIComponent(st.pid) +
+            '/databases/(default)/documents'
+          );
         };
         async function api(method, path, query, body) {
-          var r = await fetch(base() + '/' + path + '?key=' + encodeURIComponent(st.key) + (query || ''), {
-            method: method,
-            headers: Object.assign({ Authorization: 'Bearer ' + st.token }, body ? { 'Content-Type': 'application/json' } : {}),
-            body: body ? JSON.stringify(body) : undefined,
-          });
+          var r = await fetch(
+            base() + '/' + path + '?key=' + encodeURIComponent(st.key) + (query || ''),
+            {
+              method: method,
+              headers: Object.assign(
+                { Authorization: 'Bearer ' + st.token },
+                body ? { 'Content-Type': 'application/json' } : {},
+              ),
+              body: body ? JSON.stringify(body) : undefined,
+            },
+          );
           var j = await r.json().catch(function () {
             return null;
           });
@@ -272,16 +307,27 @@
           st.pid = $('pid').value.trim();
           st.key = $('key').value.trim();
           try {
-            var r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + encodeURIComponent(st.key), {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: $('email').value.trim(), password: $('pw').value, returnSecureToken: true }),
-            });
+            var r = await fetch(
+              'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' +
+                encodeURIComponent(st.key),
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: $('email').value.trim(),
+                  password: $('pw').value,
+                  returnSecureToken: true,
+                }),
+              },
+            );
             var j = await r.json();
             if (!r.ok) throw new Error((j.error && j.error.message) || 'refus');
             st.token = j.idToken;
             $('pw').value = '';
-            localStorage.setItem('kpadmin', JSON.stringify({ pid: st.pid, key: st.key, email: $('email').value.trim() }));
+            localStorage.setItem(
+              'kpadmin',
+              JSON.stringify({ pid: st.pid, key: st.key, email: $('email').value.trim() }),
+            );
             $('login').hidden = true;
             $('app').hidden = false;
             msg('Connecté (UID ' + j.localId + ')');
@@ -301,7 +347,11 @@
             var all = [];
             var tok = '';
             do {
-              var j = await api('GET', 'lic', '&pageSize=300' + (tok ? '&pageToken=' + encodeURIComponent(tok) : ''));
+              var j = await api(
+                'GET',
+                'lic',
+                '&pageSize=300' + (tok ? '&pageToken=' + encodeURIComponent(tok) : ''),
+              );
               (j.documents || []).forEach(function (d) {
                 var o = decF(d.fields);
                 o.id = d.name.split('/').pop();
@@ -313,9 +363,13 @@
             var notes = {};
             tok = '';
             do {
-              var n = await api('GET', 'licnote', '&pageSize=300' + (tok ? '&pageToken=' + encodeURIComponent(tok) : ''));
+              var n = await api(
+                'GET',
+                'licnote',
+                '&pageSize=300' + (tok ? '&pageToken=' + encodeURIComponent(tok) : ''),
+              );
               (n.documents || []).forEach(function (d) {
-                notes[d.name.split('/').pop()] = (decF(d.fields).note || '');
+                notes[d.name.split('/').pop()] = decF(d.fields).note || '';
               });
               tok = n.nextPageToken || '';
             } while (tok);
@@ -325,7 +379,10 @@
             st.notes = notes;
             draw();
           } catch (e) {
-            msg('Lecture impossible : ' + e.message + ' (règles Firestore et UID administrateur ?)', true);
+            msg(
+              'Lecture impossible : ' + e.message + ' (règles Firestore et UID administrateur ?)',
+              true,
+            );
           }
         }
         var fmt = function (k) {
@@ -338,24 +395,55 @@
           var f = $('filter').value.trim().toUpperCase().replace(/-/g, '');
           $('rows').innerHTML = st.list
             .filter(function (l) {
-              return !f || l.id.indexOf(f) >= 0 || String(st.notes[l.id] || '').toUpperCase().indexOf($('filter').value.trim().toUpperCase()) >= 0;
+              return (
+                !f ||
+                l.id.indexOf(f) >= 0 ||
+                String(st.notes[l.id] || '')
+                  .toUpperCase()
+                  .indexOf($('filter').value.trim().toUpperCase()) >= 0
+              );
             })
             .map(function (l) {
               var dev = l.dev || {};
               var ids = Object.keys(dev);
               var expired = l.exp && l.exp < Date.now();
               return (
-                '<tr><td><code>' + fmt(l.id) + '</code></td><td>' +
-                (l.off ? '<span class="off">Révoquée</span>' : expired ? '<span class="off">Expirée</span>' : '<span class="ok">Active</span>') +
-                '</td><td>' + ids.length + ' / ' + (l.max || 1) +
+                '<tr><td><code>' +
+                fmt(l.id) +
+                '</code></td><td>' +
+                (l.off
+                  ? '<span class="off">Révoquée</span>'
+                  : expired
+                    ? '<span class="off">Expirée</span>'
+                    : '<span class="ok">Active</span>') +
+                '</td><td>' +
+                ids.length +
+                ' / ' +
+                (l.max || 1) +
                 ids
                   .map(function (id) {
-                    return '<div class="dev">' + esc((dev[id] && dev[id].n) || 'Appareil') + ' · ' + day(dev[id] && dev[id].at) +
-                      ' <button class="ghost" data-free="' + l.id + '" data-dev="' + id + '">Libérer</button></div>';
+                    return (
+                      '<div class="dev">' +
+                      esc((dev[id] && dev[id].n) || 'Appareil') +
+                      ' · ' +
+                      day(dev[id] && dev[id].at) +
+                      ' <button class="ghost" data-free="' +
+                      l.id +
+                      '" data-dev="' +
+                      id +
+                      '">Libérer</button></div>'
+                    );
                   })
                   .join('') +
-                '</td><td>' + day(l.exp) + '</td><td>' + esc(st.notes[l.id] || '') + '</td><td><button class="ghost" data-tog="' + l.id + '">' +
-                (l.off ? 'Réactiver' : 'Révoquer') + '</button></td></tr>'
+                '</td><td>' +
+                day(l.exp) +
+                '</td><td>' +
+                esc(st.notes[l.id] || '') +
+                '</td><td><button class="ghost" data-tog="' +
+                l.id +
+                '">' +
+                (l.off ? 'Réactiver' : 'Révoquer') +
+                '</button></td></tr>'
               );
             })
             .join('');
@@ -370,7 +458,9 @@
               l = st.list.find(function (x) {
                 return x.id === t.getAttribute('data-tog');
               });
-              await api('PATCH', 'lic/' + l.id, '&updateMask.fieldPaths=off', { fields: { off: enc(!l.off) } });
+              await api('PATCH', 'lic/' + l.id, '&updateMask.fieldPaths=off', {
+                fields: { off: enc(!l.off) },
+              });
               msg(l.off ? 'Licence réactivée' : 'Licence révoquée');
               load();
             } else if (t.getAttribute('data-free')) {
@@ -379,7 +469,9 @@
               });
               var dev = Object.assign({}, l.dev || {});
               delete dev[t.getAttribute('data-dev')];
-              await api('PATCH', 'lic/' + l.id, '&updateMask.fieldPaths=dev', { fields: { dev: enc(dev) } });
+              await api('PATCH', 'lic/' + l.id, '&updateMask.fieldPaths=dev', {
+                fields: { dev: enc(dev) },
+              });
               msg('Appareil libéré : la place peut servir à un autre appareil.');
               load();
             }
@@ -400,7 +492,12 @@
           }
           try {
             await api('PATCH', 'lic/' + k, '&currentDocument.exists=false', {
-              fields: { max: enc(Number($('max').value)), exp: enc(exp), dev: { mapValue: { fields: {} } }, at: enc(Date.now()) },
+              fields: {
+                max: enc(Number($('max').value)),
+                exp: enc(exp),
+                dev: { mapValue: { fields: {} } },
+                at: enc(Date.now()),
+              },
             });
             var note = $('note').value.trim();
             if (note) await api('PATCH', 'licnote/' + k, '', { fields: { note: enc(note) } });

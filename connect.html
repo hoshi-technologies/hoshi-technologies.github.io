@@ -22,7 +22,12 @@
         margin: 0;
         background: var(--bg);
         color: var(--fg);
-        font: 16px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        font:
+          16px/1.45 system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
       }
       main {
         max-width: 460px;
@@ -153,14 +158,25 @@
       <div class="brand"><span class="mark"></span>Kevin Player</div>
       <section id="form">
         <h1>Connecte ton écran</h1>
-        <p>Saisis ici les informations données par ton fournisseur. Elles arrivent directement sur ton écran, sans rien taper à la télécommande.</p>
+        <p>
+          Saisis ici les informations données par ton fournisseur. Elles arrivent directement sur
+          ton écran, sans rien taper à la télécommande.
+        </p>
         <div class="seg">
           <button type="button" data-m="xtream" class="on">Xtream Codes</button>
           <button type="button" data-m="m3u">Lien M3U</button>
         </div>
         <div id="fx">
           <label for="server">Adresse du serveur</label>
-          <input id="server" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://exemple.com:8080" />
+          <input
+            id="server"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="http://exemple.com:8080"
+          />
           <label for="user">Identifiant</label>
           <input id="user" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" />
           <label for="pass">Mot de passe</label>
@@ -168,14 +184,38 @@
         </div>
         <div id="fm" hidden>
           <label for="url">Lien de la playlist M3U</label>
-          <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://…" />
+          <input
+            id="url"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="http://…"
+          />
         </div>
         <label for="epg">Guide TV (XMLTV) — facultatif</label>
-        <input id="epg" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" />
-        <label class="check"><input id="accept" type="checkbox" /> <span>J'utilise uniquement des contenus que j'ai le droit de regarder. Kevin Player ne fournit aucune chaîne ni aucun contenu.</span></label>
+        <input
+          id="epg"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+        <label class="check"
+          ><input id="accept" type="checkbox" />
+          <span
+            >J'utilise uniquement des contenus que j'ai le droit de regarder. Kevin Player ne
+            fournit aucune chaîne ni aucun contenu.</span
+          ></label
+        >
         <button class="go" id="go" type="button">Envoyer à mon écran</button>
         <div class="err" id="err"></div>
-        <p class="lock">🔒 Chiffré de bout en bout : seul ton écran peut lire ces informations. Elles ne sont pas conservées.</p>
+        <p class="lock">
+          🔒 Chiffré de bout en bout : seul ton écran peut lire ces informations. Elles ne sont pas
+          conservées.
+        </p>
       </section>
       <section id="done" class="done" hidden>
         <div class="big">✓</div>
@@ -242,40 +282,77 @@
           };
           var data;
           if (mode === 'xtream') {
-            if (!v('server') || !v('user') || !$('pass').value) return err('Remplis les trois champs.');
-            data = { mode: 'xtream', server: v('server'), user: v('user'), pass: $('pass').value, epg: v('epg') };
+            if (!v('server') || !v('user') || !$('pass').value)
+              return err('Remplis les trois champs.');
+            data = {
+              mode: 'xtream',
+              server: v('server'),
+              user: v('user'),
+              pass: $('pass').value,
+              epg: v('epg'),
+            };
           } else {
             if (!http.test(v('url'))) return err('Le lien doit commencer par http:// ou https://');
             data = { mode: 'm3u', url: v('url'), epg: v('epg') };
           }
-          if (data.epg && !http.test(data.epg)) return err('Le lien du guide doit commencer par http:// ou https://');
+          if (data.epg && !http.test(data.epg))
+            return err('Le lien du guide doit commencer par http:// ou https://');
           if (!$('accept').checked) return err('Coche la case pour continuer.');
           data.accept = true;
           $('go').disabled = true;
           try {
-            var tv = await crypto.subtle.importKey('raw', unb64u(tvKey), { name: 'ECDH', namedCurve: 'P-256' }, false, []);
-            var mine = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
-            var key = await crypto.subtle.deriveKey({ name: 'ECDH', public: tv }, mine.privateKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+            var tv = await crypto.subtle.importKey(
+              'raw',
+              unb64u(tvKey),
+              { name: 'ECDH', namedCurve: 'P-256' },
+              false,
+              [],
+            );
+            var mine = await crypto.subtle.generateKey(
+              { name: 'ECDH', namedCurve: 'P-256' },
+              true,
+              ['deriveKey'],
+            );
+            var key = await crypto.subtle.deriveKey(
+              { name: 'ECDH', public: tv },
+              mine.privateKey,
+              { name: 'AES-GCM', length: 256 },
+              false,
+              ['encrypt'],
+            );
             var iv = crypto.getRandomValues(new Uint8Array(12));
-            var ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(JSON.stringify(data)));
+            var ct = await crypto.subtle.encrypt(
+              { name: 'AES-GCM', iv: iv },
+              key,
+              new TextEncoder().encode(JSON.stringify(data)),
+            );
             var pub = await crypto.subtle.exportKey('raw', mine.publicKey);
             data = null;
             var base =
               ep && /^http:\/\/127\.0\.0\.1:/.test(ep)
                 ? ep
-                : 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(project) + '/databases/(default)/documents';
-            var r = await fetch(base + '/qr/' + sid + '?currentDocument.exists=false&key=' + encodeURIComponent(apiKey), {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                fields: {
-                  e: { stringValue: b64u(pub) },
-                  i: { stringValue: b64u(iv) },
-                  c: { stringValue: b64u(ct) },
-                  at: { integerValue: String(Date.now()) },
-                },
-              }),
-            });
+                : 'https://firestore.googleapis.com/v1/projects/' +
+                  encodeURIComponent(project) +
+                  '/databases/(default)/documents';
+            var r = await fetch(
+              base +
+                '/qr/' +
+                sid +
+                '?currentDocument.exists=false&key=' +
+                encodeURIComponent(apiKey),
+              {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  fields: {
+                    e: { stringValue: b64u(pub) },
+                    i: { stringValue: b64u(iv) },
+                    c: { stringValue: b64u(ct) },
+                    at: { integerValue: String(Date.now()) },
+                  },
+                }),
+              },
+            );
             if (!r.ok) throw new Error(r.status === 400 ? 'used' : 'http');
             $('pass').value = '';
             $('form').hidden = true;
