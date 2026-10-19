@@ -176,6 +176,45 @@
       </section>
 
       <section id="app" hidden>
+        <h2>Support IA</h2>
+        <div class="card">
+          <div class="row">
+            <div style="flex: 1">
+              <label for="supurl">Adresse du serveur de support</label>
+              <input
+                id="supurl"
+                style="width: 100%"
+                placeholder="https://kevin-player-support.….workers.dev"
+              />
+            </div>
+            <div style="flex: 1">
+              <label for="suptok">Jeton d'administration (ADMIN_TOKEN)</label>
+              <input id="suptok" type="password" style="width: 100%" autocomplete="off" />
+            </div>
+            <button id="supload">Afficher</button>
+          </div>
+          <div id="supbox" hidden style="margin-top: 14px">
+            <p class="m" id="supstat" style="margin: 0 0 10px"></p>
+            <div class="row">
+              <button id="suptoggle" class="ghost"></button>
+              <div>
+                <label for="supbudget">Budget par heure ($)</label>
+                <input
+                  id="supbudget"
+                  type="number"
+                  min="0.1"
+                  max="100"
+                  step="0.1"
+                  style="width: 110px"
+                />
+              </div>
+              <button id="supsave" class="ghost">Enregistrer le budget</button>
+              <button id="supreset" class="ghost">Réarmer le coupe-circuit</button>
+            </div>
+            <h2 style="margin-top: 18px">Demandes transmises</h2>
+            <div id="supesc"></div>
+          </div>
+        </div>
         <h2>Réglages de vente</h2>
         <div class="card">
           <div class="row">
@@ -359,6 +398,115 @@
           $('app').hidden = true;
           $('login').hidden = false;
           msg('');
+        };
+        /* ---------- Support IA : état, interrupteur, budget, demandes transmises ---------- */
+        try {
+          var sv = JSON.parse(localStorage.getItem('kpsupport') || '{}');
+          $('supurl').value = sv.url || '';
+        } catch (e) {}
+        var supTok = '';
+        async function sup(method, op, data) {
+          var base = $('supurl').value.trim().replace(/\/+$/, '');
+          var r = await fetch(base + '/v1/admin/' + op, {
+            method: method,
+            headers: Object.assign(
+              { Authorization: 'Bearer ' + supTok },
+              data ? { 'Content-Type': 'application/json' } : {},
+            ),
+            body: data ? JSON.stringify(data) : undefined,
+          });
+          var j = await r.json().catch(function () {
+            return {};
+          });
+          if (!r.ok) throw new Error(r.status === 401 ? 'jeton refusé' : 'HTTP ' + r.status);
+          return j;
+        }
+        var supState = null;
+        async function supShow() {
+          try {
+            supState = await sup('GET', 'status');
+            var st = supState;
+            $('supstat').textContent =
+              'Assistant ' +
+              (st.aiOff ? 'COUPÉ' : 'actif') +
+              ' · dépense : ' +
+              st.spendHour.toFixed(3) +
+              ' $ cette heure, ' +
+              st.spendDay.toFixed(3) +
+              ' $ aujourd’hui' +
+              ' · ' +
+              st.lastMinute +
+              ' appel(s) la dernière minute' +
+              (st.breakerUntil
+                ? ' · coupe-circuit actif jusqu’à ' +
+                  new Date(st.breakerUntil).toLocaleTimeString('fr-FR')
+                : '');
+            $('suptoggle').textContent = st.aiOff ? 'Rallumer l’assistant' : 'Couper l’assistant';
+            $('supbudget').value = st.hourlyBudget;
+            var list = await sup('GET', 'escalations');
+            $('supesc').innerHTML = list.length
+              ? list
+                  .map(function (e) {
+                    return (
+                      '<div class="card" style="margin-bottom:8px"><b>' +
+                      (e.type === 'contact'
+                        ? 'Message'
+                        : 'Transmis par l’assistant · ' + esc(e.categorie)) +
+                      '</b> · ' +
+                      new Date(e.at).toLocaleString('fr-FR') +
+                      '<br><span class="m">' +
+                      esc(e.plat) +
+                      ' · ' +
+                      esc(e.ver) +
+                      ' · ' +
+                      esc(e.lic) +
+                      (e.email
+                        ? ' · <a href="mailto:' + esc(e.email) + '">' + esc(e.email) + '</a>'
+                        : '') +
+                      '</span><p style="white-space:pre-wrap">' +
+                      esc(e.resume) +
+                      '</p><button class="ghost" data-res="' +
+                      esc(e.dev) +
+                      '">Problème réglé (efface le journal de l’appareil)</button> <button class="ghost" data-del="' +
+                      esc(e.id) +
+                      '">Supprimer</button></div>'
+                    );
+                  })
+                  .join('')
+              : '<p class="m">Aucune demande.</p>';
+            $('supbox').hidden = false;
+          } catch (e) {
+            msg('Support : ' + e.message, true);
+          }
+        }
+        $('supload').onclick = function () {
+          supTok = $('suptok').value.trim();
+          localStorage.setItem('kpsupport', JSON.stringify({ url: $('supurl').value.trim() }));
+          supShow();
+        };
+        $('suptoggle').onclick = async function () {
+          await sup('POST', 'config', { aiOff: !(supState && supState.aiOff) });
+          supShow();
+        };
+        $('supsave').onclick = async function () {
+          await sup('POST', 'config', { hourlyBudget: Number($('supbudget').value) });
+          msg('Budget enregistré');
+          supShow();
+        };
+        $('supreset').onclick = async function () {
+          await sup('POST', 'breaker-reset', {});
+          supShow();
+        };
+        $('supesc').onclick = async function (ev) {
+          var t = ev.target;
+          if (t.getAttribute('data-res')) {
+            await sup('POST', 'resolve', { dev: t.getAttribute('data-res') });
+            msg('Noté : le journal de l’appareil sera effacé à son prochain lancement.');
+          }
+          if (t.getAttribute('data-del')) {
+            await sup('POST', 'delete', { id: t.getAttribute('data-del') });
+            supShow();
+          }
         };
         async function loadCfg() {
           try {
