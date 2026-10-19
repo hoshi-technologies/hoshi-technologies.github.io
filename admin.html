@@ -176,6 +176,24 @@
       </section>
 
       <section id="app" hidden>
+        <h2>Réglages de vente</h2>
+        <div class="card">
+          <div class="row">
+            <div>
+              <label for="trial">Essai gratuit (jours)</label>
+              <input id="trial" type="number" min="1" max="90" value="10" style="width: 110px" />
+            </div>
+            <div style="flex: 1">
+              <label for="buy">Lien d'achat affiché dans l'appli</label>
+              <input id="buy" style="width: 100%" placeholder="ex. kevinplayer.fr" />
+            </div>
+            <button id="savecfg">Enregistrer</button>
+          </div>
+          <p class="m" style="margin: 10px 0 0">
+            Pris en compte par les appareils à leur prochaine vérification (au lancement, puis une
+            fois par jour).
+          </p>
+        </div>
         <h2>Nouvelle licence</h2>
         <div class="card">
           <div class="row">
@@ -342,7 +360,28 @@
           $('login').hidden = false;
           msg('');
         };
+        async function loadCfg() {
+          try {
+            var c = decF((await api('GET', 'config/app')).fields);
+            if (c.trialDays) $('trial').value = c.trialDays;
+            $('buy').value = c.buyUrl || '';
+          } catch (e) {
+            /* pas encore enregistrés */
+          }
+        }
+        $('savecfg').onclick = async function () {
+          var d = Math.max(1, Math.min(90, Math.round(Number($('trial').value) || 10)));
+          try {
+            await api('PATCH', 'config/app', '', {
+              fields: { trialDays: enc(d), buyUrl: enc($('buy').value.trim().slice(0, 120)) },
+            });
+            msg('Réglages de vente enregistrés : essai de ' + d + ' jours.');
+          } catch (e) {
+            msg('Enregistrement impossible : ' + e.message, true);
+          }
+        };
         async function load() {
+          loadCfg();
           try {
             var all = [];
             var tok = '';
