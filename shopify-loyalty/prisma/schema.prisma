@@ -39,6 +39,32 @@ model Program {
   widgetTitle    String   @default("Mes récompenses")
   widgetColor    String   @default("#5C6AC4")
   widgetPosition String   @default("right") // right | left
+
+  // Anniversaire
+  birthdayPoints   Int      @default(200)
+
+  // Parrainage
+  referralEnabled     Boolean @default(true)
+  referrerPoints      Int     @default(500)     // gagnés par le parrain à la 1re commande du filleul
+  friendRewardType    String  @default("AMOUNT") // AMOUNT | PERCENT | FREE_SHIPPING
+  friendRewardValue   Float   @default(10)
+  friendMinSubtotal   Float?
+
+  // Réseaux sociaux (points gagnés une fois par réseau)
+  socialPoints   Int     @default(50)
+  instagramUrl   String?
+  facebookUrl    String?
+  tiktokUrl      String?
+
+  // Campagne de points bonus (ex. points x2)
+  bonusMultiplier Float     @default(1)
+  bonusStartsAt   DateTime?
+  bonusEndsAt     DateTime?
+  bonusLabel      String?
+
+  // Expiration des points après N mois sans activité (0 = jamais)
+  expirationMonths Int @default(0)
+
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -104,12 +130,18 @@ model Member {
   manualTierId   String?       // niveau imposé par le marchand (sinon calculé)
   manualTier     Tier?         @relation(fields: [manualTierId], references: [id], onDelete: SetNull)
   appliedTag     String?       // étiquette de niveau actuellement posée sur le client Shopify
+  birthday       String?       // « MM-JJ »
+  birthdaySetAt  DateTime?
+  referralCode   String?       // code de parrainage personnel
+  lastActivityAt DateTime      @default(now())
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   transactions   Transaction[]
   redemptions    Redemption[]
+  referrals      Referral[]
 
   @@unique([shop, customerId])
+  @@unique([shop, referralCode])
   @@index([shop, points])
 }
 
@@ -143,7 +175,31 @@ model Redemption {
   discountId String?
   pointsCost Int
   createdAt  DateTime @default(now())
+  usedAt     DateTime? // renseigné quand le code est utilisé dans une commande
+  orderId    String?
+  orderTotal Float?
 
+  @@unique([shop, code])
   @@index([shop, createdAt])
   @@index([memberId])
+}
+
+/// Parrainage : un ami invité par un membre reçoit un code de bienvenue
+model Referral {
+  id          String    @id @default(cuid())
+  shop        String
+  referrerId  String
+  referrer    Member    @relation(fields: [referrerId], references: [id], onDelete: Cascade)
+  friendEmail String
+  code        String    // code de réduction offert à l'ami
+  discountId  String?
+  status      String    @default("PENDING") // PENDING | COMPLETED
+  orderId     String?
+  orderTotal  Float?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([shop, friendEmail])
+  @@unique([shop, code])
+  @@index([referrerId])
 }

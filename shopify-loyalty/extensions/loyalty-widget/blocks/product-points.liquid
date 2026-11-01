@@ -1,0 +1,33 @@
+{%- comment -%}
+  Bloc d'application pour la fiche produit :
+  « Gagnez 45 points avec cet achat » (tient compte du niveau et des campagnes bonus).
+{%- endcomment -%}
+{%- if product -%}
+  {%- capture prices -%}{ {%- for v in product.variants -%}"{{ v.id }}":{{ v.price }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }{%- endcapture -%}
+  <div
+    class="hoshi-product-points"
+    data-hoshi-product-points
+    data-price="{{ product.selected_or_first_available_variant.price }}"
+    data-prices='{{ prices | strip }}'
+    data-template="{{ block.settings.text | escape }}"
+    hidden
+  ></div>
+  <script src="{{ 'loyalty.js' | asset_url }}" defer></script>
+  <link rel="stylesheet" href="{{ 'loyalty.css' | asset_url }}">
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Points produit",
+  "target": "section",
+  "enabled_on": { "templates": ["product"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Texte ({points} et {name} sont remplacés)",
+      "default": "Gagnez {points} {name} avec cet achat"
+    }
+  ]
+}
+{% endschema %}

@@ -128,14 +128,17 @@ export function tierPerks(
   const list: string[] = [];
   if (tier.discountType !== "NONE" && tier.discountValue > 0) {
     const value =
-      tier.discountType === "PERCENT" ? `-${tier.discountValue} %` : `-${tier.discountValue} €`;
+      tier.discountType === "PERCENT"
+        ? `-${tier.discountValue.toLocaleString("fr-FR")} %`
+        : `-${tier.discountValue.toLocaleString("fr-FR")} €`;
     list.push(
       `${value} sur toutes les commandes` +
         (tier.discountMinSubtotal ? ` dès ${tier.discountMinSubtotal} €` : ""),
     );
   }
   if (tier.freeShipping) list.push("Livraison offerte");
-  if (tier.multiplier > 1) list.push(`${pointsName} ×${tier.multiplier}`);
+  const fr = (n: number) => n.toLocaleString("fr-FR");
+  if (tier.multiplier > 1) list.push(`${pointsName} ×${fr(tier.multiplier)}`);
   if (tier.perks?.trim()) list.push(...tier.perks.split("\n").map((p) => p.trim()).filter(Boolean));
   return list;
 }
@@ -295,6 +298,8 @@ export async function addPoints(args: {
         data: {
           points: newBalance,
           lifetimePoints: member.lifetimePoints + lifetimeDelta,
+          // L'expiration n'est pas une activité du client
+          ...(args.type !== "EXPIRE" ? { lastActivityAt: new Date() } : {}),
         },
       });
     });
@@ -331,12 +336,27 @@ interface OrderPayload {
   name?: string;
   current_subtotal_price?: string;
   subtotal_price?: string;
+  current_total_price?: string;
+  total_price?: string;
+  email?: string | null;
+  discount_codes?: { code: string; amount?: string }[];
   customer?: {
     id: number | string;
     email?: string | null;
     first_name?: string | null;
     last_name?: string | null;
   } | null;
+}
+
+/** Multiplicateur de la campagne bonus en cours (1 si aucune). */
+export function activeBonus(
+  program: Pick<Program, "bonusMultiplier" | "bonusStartsAt" | "bonusEndsAt">,
+  now = new Date(),
+): number {
+  if (program.bonusMultiplier <= 1) return 1;
+  if (program.bonusStartsAt && now < program.bonusStartsAt) return 1;
+  if (program.bonusEndsAt && now > program.bonusEndsAt) return 1;
+  return program.bonusMultiplier;
 }
 
 /** Crédite les points d'une commande ; retourne l'identifiant du membre concerné. */
@@ -357,11 +377,12 @@ export async function handleOrderPaid(shop: string, order: OrderPayload): Promis
   const subtotal = parseFloat(
     order.current_subtotal_price ?? order.subtotal_price ?? "0",
   );
+  const bonus = activeBonus(program);
   const points = Math.floor(
-    subtotal * program.pointsPerUnit * (tier?.multiplier ?? 1),
+    subtotal * program.pointsPerUnit * (tier?.multiplier ?? 1) * bonus,
   );
   const orderRef = String(order.id);
-  const label = order.name ?? `#${orderRef}`;
+  const label = (order.name ?? `#${orderRef}`) + (bonus > 1 ? ` (bonus ×${bonus})` : "");
 
   const result = await addPoints({
     shop,
@@ -559,7 +580,7 @@ export async function redeemReward(
   // Débit conditionnel : évite un double échange simultané.
   const debited = await db.member.updateMany({
     where: { id: member.id, points: { gte: reward.pointsCost } },
-    data: { points: { decrement: reward.pointsCost } },
+    data: { points: { decrement: reward.pointsCost }, lastActivityAt: new Date() },
   });
   if (debited.count === 0) {
     await admin.graphql(DISCOUNT_DELETE, { variables: { id: discountId } }).catch(() => {});
@@ -599,26 +620,46 @@ export async function redeemReward(
 
 export async function getDashboardStats(shop: string) {
   const since = new Date(Date.now() - 30 * 24 * 3600 * 1000);
-  const [members, newMembers, earned, spent, redemptions, recent] =
+  since.setHours(0, 0, 0, 0);
+  const [members, newMembers, earned, spent, redemptions, used, referrals, recent, daily] =
     await Promise.all([
       db.member.count({ where: { shop } }),
       db.member.count({ where: { shop, createdAt: { gte: since } } }),
-      db.transaction.aggregate({
-        where: { shop, points: { gt: 0 } },
-        _sum: { points: true },
-      }),
-      db.transaction.aggregate({
-        where: { shop, type: "REDEEM" },
-        _sum: { points: true },
-      }),
+      db.transaction.aggregate({ where: { shop, points: { gt: 0 } }, _sum: { points: true } }),
+      db.transaction.aggregate({ where: { shop, type: "REDEEM" }, _sum: { points: true } }),
       db.redemption.count({ where: { shop } }),
+      db.redemption.aggregate({
+        where: { shop, usedAt: { not: null } },
+        _count: { _all: true },
+        _sum: { orderTotal: true },
+      }),
+      db.referral.aggregate({
+        where: { shop, status: "COMPLETED" },
+        _count: { _all: true },
+        _sum: { orderTotal: true },
+      }),
       db.transaction.findMany({
         where: { shop },
         orderBy: { createdAt: "desc" },
         take: 8,
         include: { member: true },
       }),
+      db.transaction.findMany({
+        where: { shop, points: { gt: 0 }, createdAt: { gte: since } },
+        select: { points: true, createdAt: true },
+      }),
     ]);
+
+  // Points gagnés par jour sur 30 jours (jours vides inclus)
+  const byDay = new Map<string, number>();
+  for (let i = 0; i <= 30; i++) {
+    const d = new Date(since.getTime() + i * 24 * 3600 * 1000);
+    byDay.set(d.toISOString().slice(0, 10), 0);
+  }
+  for (const t of daily) {
+    const key = t.createdAt.toISOString().slice(0, 10);
+    if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0) + t.points);
+  }
 
   return {
     members,
@@ -626,19 +667,27 @@ export async function getDashboardStats(shop: string) {
     pointsEarned: earned._sum.points ?? 0,
     pointsSpent: -(spent._sum.points ?? 0),
     redemptions,
+    rewardsUsed: used._count._all,
+    rewardRevenue: used._sum.orderTotal ?? 0,
+    referrals: referrals._count._all,
+    referralRevenue: referrals._sum.orderTotal ?? 0,
+    pendingReferrals: await db.referral.count({ where: { shop, status: "PENDING" } }),
+    daily: [...byDay.entries()].map(([date, points]) => ({ date, points })),
     recent,
   };
 }
 
 /** Données GDPR : supprime toutes les données d'un client. */
-export async function redactCustomer(shop: string, customerId: string | number) {
+export async function redactCustomer(shop: string, customerId: string | number, email?: string | null) {
   await db.member.deleteMany({ where: { shop, customerId: customerGid(customerId) } });
+  if (email) await db.referral.deleteMany({ where: { shop, friendEmail: email.toLowerCase() } });
 }
 
 export async function redactShop(shop: string) {
   await db.$transaction([
     db.transaction.deleteMany({ where: { shop } }),
     db.redemption.deleteMany({ where: { shop } }),
+    db.referral.deleteMany({ where: { shop } }),
     db.member.deleteMany({ where: { shop } }),
     db.reward.deleteMany({ where: { shop } }),
     db.tier.deleteMany({ where: { shop } }),

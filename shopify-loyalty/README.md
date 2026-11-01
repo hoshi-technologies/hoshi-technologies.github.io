@@ -2,9 +2,12 @@
 
 Application Shopify intégrée à l'administration permettant de lancer un
 programme de fidélité complet en quelques minutes : points, niveaux clients
-avec remises automatiques, récompenses et widget sur la boutique.
+avec remises automatiques, récompenses, parrainage, anniversaire, réseaux
+sociaux, campagnes de points bonus et widget sur la boutique.
 
-![Widget sur la boutique](docs/widget.png)
+| Widget client | Arrivée d'un ami parrainé |
+| --- | --- |
+| ![Widget sur la boutique](docs/widget.png) | ![Fenêtre de parrainage](docs/parrainage.png) |
 
 ## Fonctionnalités
 
@@ -12,11 +15,11 @@ avec remises automatiques, récompenses et widget sur la boutique.
 
 | Page | Rôle |
 | --- | --- |
-| Tableau de bord | Statistiques (membres, points distribués/échangés, récompenses), activité récente, liste « Bien démarrer » |
+| Tableau de bord | Statistiques (membres, points distribués/échangés, récompenses), **CA généré par les récompenses et le parrainage**, graphique des points sur 30 jours, activité récente, liste « Bien démarrer » |
 | Membres | **Ajouter un client** (recherche dans vos clients Shopify) en choisissant son niveau, import de tous les clients, filtre par niveau, fiche client : historique, ajustement du solde, **changement de niveau**, envoi d'une récompense, retrait du programme |
 | Récompenses | Montant fixe, pourcentage ou livraison offerte ; coût en points, minimum de commande, masquer/afficher |
 | Niveaux clients | Niveaux **automatiques** (selon les points cumulés) ou **manuels** (attribués par le marchand, ex. « Ambassadrice », « Pro »). Avantages par niveau : **remise permanente** (% ou montant, avec minimum d'achat), **livraison offerte**, multiplicateur de points, avantages libres affichés au client |
-| Réglages | Activation, points par euro, bonus de bienvenue et de première commande, couleur/titre/position du widget avec **aperçu en direct** |
+| Réglages | Points par euro, bonus de bienvenue et de 1re commande, **anniversaire**, **parrainage**, **réseaux sociaux**, **campagne de points bonus** (×1,5 / ×2 / ×3 avec dates), **expiration** des points inactifs, apparence du widget avec **aperçu en direct** |
 
 Un programme prêt à l'emploi (3 niveaux, 3 récompenses) est créé à la première ouverture.
 
@@ -33,10 +36,23 @@ cumulent avec les codes de récompense. Les étiquettes peuvent aussi servir à 
 campagnes e-mail ou à votre thème. Le bouton « Resynchroniser avec Shopify » de la
 page Niveaux recrée tout en cas de modification manuelle.
 
+### Toutes les façons de gagner des points
+
+| Action | Fonctionnement |
+| --- | --- |
+| Inscription | Bonus de bienvenue |
+| Achat | X points par euro × multiplicateur du niveau × campagne bonus en cours |
+| 1re commande | Bonus supplémentaire |
+| Anniversaire | Le client saisit sa date dans le widget ; points crédités le jour J (date à saisir au moins 30 jours avant, non modifiable, une fois par an) |
+| Parrainage | Lien personnel `?parrain=CODE` ; l'ami saisit son e-mail et reçoit un code de bienvenue à usage unique ; le parrain est crédité quand ce code est utilisé dans une commande payée (un parrainage par e-mail, réservé aux nouveaux clients, auto-parrainage impossible) |
+| Réseaux sociaux | Points pour suivre Instagram, Facebook, TikTok (une fois par réseau) |
+
 **Pour les clients (extension de thème)**
 
 - *Intégration d'application* « Fidélité Hoshi » : bouton flottant + panneau (solde, niveau et ses avantages, progression, récompenses, codes obtenus).
 - *Bloc d'application* « Carte fidélité » à placer dans n'importe quelle page.
+- *Bloc d'application* « Points produit » pour la fiche produit : « Gagnez 124 points avec cet achat » (tient compte du niveau du client et de la campagne bonus, suit le changement de variante).
+- Fenêtre d'accueil pour les amis parrainés, bandeau de campagne bonus, date d'expiration des points.
 - Échange en un clic : un code de réduction **personnel, à usage unique** est créé et peut être appliqué directement au panier.
 
 **Automatique**
@@ -50,12 +66,18 @@ page Niveaux recrée tout en cas de modification manuelle.
 
 Tous les webhooks sont idempotents : un webhook rejoué ne crédite jamais deux fois.
 
+**Tâches périodiques** : toutes les heures, le serveur crédite les anniversaires du jour
+et fait expirer les points des membres inactifs (si l'option est activée). Ces tâches sont
+idempotentes ; définissez `DISABLE_JOBS=1` pour les désactiver sur une instance.
+
 ## Architecture
 
 ```
 app/
   loyalty.server.ts        logique métier (points, niveaux, échanges, stats)
   levels.server.ts         synchro des niveaux avec Shopify (étiquettes, segments, remises automatiques)
+  engagement.server.ts     parrainage, anniversaire, réseaux sociaux, expiration, suivi des codes
+  jobs.server.ts           tâches périodiques
   routes/app.*.tsx         pages d'administration (Polaris web components)
   routes/webhooks.*.tsx    webhooks Shopify
   routes/proxy.$.tsx       API du widget via le proxy d'application (/apps/fidelite/loyalty)

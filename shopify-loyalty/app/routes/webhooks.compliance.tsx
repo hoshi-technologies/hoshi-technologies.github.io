@@ -6,7 +6,8 @@ import { customerGid, redactCustomer, redactShop } from "../loyalty.server";
 /** Webhooks RGPD obligatoires pour les applications publiques. */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { shop, topic, payload } = await authenticate.webhook(request);
-  const customerId = (payload as { customer?: { id?: number } }).customer?.id;
+  const customer = (payload as { customer?: { id?: number; email?: string } }).customer;
+  const customerId = customer?.id;
 
   switch (topic) {
     case "CUSTOMERS_DATA_REQUEST": {
@@ -22,7 +23,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       break;
     }
     case "CUSTOMERS_REDACT":
-      if (customerId) await redactCustomer(shop, customerId);
+      if (customerId) await redactCustomer(shop, customerId, customer?.email);
       break;
     case "SHOP_REDACT":
       await redactShop(shop);

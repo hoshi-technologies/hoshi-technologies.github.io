@@ -21,6 +21,7 @@ import {
   tierPerks,
 } from "../loyalty.server";
 import { syncMemberTag } from "../levels.server";
+import { pointsExpireAt } from "../engagement.server";
 import {
   ColorDot,
   PointsDelta,
@@ -39,6 +40,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     include: {
       transactions: { orderBy: { createdAt: "desc" }, take: 50 },
       redemptions: { orderBy: { createdAt: "desc" }, take: 20 },
+      referrals: { orderBy: { createdAt: "desc" }, take: 20 },
     },
   });
   if (!member) throw new Response("Membre introuvable", { status: 404 });
@@ -60,6 +62,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     tiers: tiers.map((t) => ({ id: t.id, name: t.name, mode: t.mode })),
     rewards,
     customerAdminUrl: `shopify://admin/customers/${numericId(member.customerId)}`,
+    expiresAt: member.points > 0 ? pointsExpireAt(program, member) : null,
   };
 };
 
@@ -95,7 +98,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 };
 
 export default function MemberDetail() {
-  const { member, pointsName, tier, autoTier, next, rewards, customerAdminUrl, tiers } =
+  const { member, pointsName, tier, autoTier, next, rewards, customerAdminUrl, tiers, expiresAt } =
     useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   useActionToast(fetcher.data);
@@ -199,6 +202,7 @@ export default function MemberDetail() {
               <s-table-header listSlot="primary">Récompense</s-table-header>
               <s-table-header>Code</s-table-header>
               <s-table-header format="numeric">Coût</s-table-header>
+              <s-table-header>Statut</s-table-header>
               <s-table-header>Date</s-table-header>
             </s-table-header-row>
             <s-table-body>
@@ -207,6 +211,9 @@ export default function MemberDetail() {
                   <s-table-cell>{r.title}</s-table-cell>
                   <s-table-cell><s-badge>{r.code}</s-badge></s-table-cell>
                   <s-table-cell>{formatNumber(r.pointsCost)}</s-table-cell>
+                  <s-table-cell>
+                    {r.usedAt ? <s-badge tone="success">Utilisé</s-badge> : <s-badge>Disponible</s-badge>}
+                  </s-table-cell>
                   <s-table-cell>{formatDate(r.createdAt)}</s-table-cell>
                 </s-table-row>
               ))}
@@ -253,6 +260,23 @@ export default function MemberDetail() {
           </s-stack>
         </s-section>
       )}
+
+      <s-section slot="aside" heading="Informations">
+        <s-stack gap="small">
+          <s-text>
+            🎂 Anniversaire :{" "}
+            {member.birthday
+              ? new Date(`2024-${member.birthday}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })
+              : "non renseigné"}
+          </s-text>
+          <s-text>🤝 Code de parrainage : {member.referralCode ?? "—"}</s-text>
+          <s-text>
+            👥 Filleuls : {member.referrals.filter((r) => r.status === "COMPLETED").length} converti(s) sur{" "}
+            {member.referrals.length} invité(s)
+          </s-text>
+          {expiresAt && <s-text>⏳ Points valables jusqu'au {new Date(expiresAt).toLocaleDateString("fr-FR")}</s-text>}
+        </s-stack>
+      </s-section>
 
       <s-section slot="aside" heading="Niveau du client">
         <s-stack gap="base">

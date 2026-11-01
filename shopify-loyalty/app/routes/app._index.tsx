@@ -3,7 +3,8 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
-import { getDashboardStats, getProgram } from "../loyalty.server";
+import { activeBonus, getDashboardStats, getProgram } from "../loyalty.server";
+import { DailyBars } from "../components/chart";
 import {
   PointsDelta,
   StatCard,
@@ -23,6 +24,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   ]);
   return {
     program,
+    bonus: activeBonus(program),
     stats,
     rewards,
     tiers,
@@ -31,8 +33,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Dashboard() {
-  const { program, stats, rewards, tiers, apiKey } =
+  const { program, bonus, stats, rewards, tiers, apiKey } =
     useLoaderData<typeof loader>();
+  const euros = (n: number) =>
+    new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
   const themeEditorUrl = `shopify://admin/themes/current/editor?context=apps&activateAppId=${apiKey}/loyalty-embed`;
 
   const steps = [
@@ -75,6 +79,15 @@ export default function Dashboard() {
         <s-banner tone="warning" heading="Le programme est en pause">
           Vos clients ne gagnent plus de points et ne peuvent plus échanger de
           récompenses. <s-link href="/app/program">Le réactiver</s-link>
+        </s-banner>
+      )}
+
+      {bonus > 1 && (
+        <s-banner tone="info" heading={`Campagne en cours : ${program.pointsName} ×${bonus}`}>
+          {program.bonusEndsAt
+            ? `Jusqu'au ${new Date(program.bonusEndsAt).toLocaleDateString("fr-FR")}.`
+            : "Sans date de fin."}{" "}
+          <s-link href="/app/program">Modifier</s-link>
         </s-banner>
       )}
 
@@ -124,8 +137,28 @@ export default function Dashboard() {
         <StatCard emoji="👥" label="Membres" value={stats.members} hint={`+${stats.newMembers} ces 30 derniers jours`} />
         <StatCard emoji="✨" label={`${capitalize(program.pointsName)} distribués`} value={stats.pointsEarned} />
         <StatCard emoji="🎁" label={`${capitalize(program.pointsName)} échangés`} value={stats.pointsSpent} />
-        <StatCard emoji="🏷️" label="Récompenses obtenues" value={stats.redemptions} />
+        <StatCard emoji="🏷️" label="Récompenses obtenues" value={stats.redemptions} hint={`${stats.rewardsUsed} utilisée(s) en commande`} />
       </s-grid>
+
+      <s-grid gridTemplateColumns="@container (inline-size > 640px) 1fr 1fr 1fr, 1fr" gap="base">
+        <StatCard
+          emoji="💶"
+          label="CA généré par les récompenses"
+          value={euros(stats.rewardRevenue)}
+          hint="Commandes passées avec un code fidélité"
+        />
+        <StatCard
+          emoji="🤝"
+          label="Filleuls convertis"
+          value={stats.referrals}
+          hint={`${stats.pendingReferrals} invitation(s) en attente`}
+        />
+        <StatCard emoji="🛒" label="CA généré par le parrainage" value={euros(stats.referralRevenue)} hint="1res commandes des filleuls" />
+      </s-grid>
+
+      <s-section heading={`${program.pointsName.charAt(0).toUpperCase() + program.pointsName.slice(1)} gagnés par jour (30 derniers jours)`}>
+        <DailyBars data={stats.daily} unit={program.pointsName} />
+      </s-section>
 
       <s-section heading="Activité récente">
         {stats.recent.length === 0 ? (
@@ -214,6 +247,7 @@ export default function Dashboard() {
             Depuis le widget, il échange ses points contre un code de réduction
             personnel.
           </s-list-item>
+          <s-list-item>Il gagne aussi des points en parrainant, pour son anniversaire et en vous suivant sur les réseaux.</s-list-item>
         </s-unordered-list>
       </s-section>
     </s-page>

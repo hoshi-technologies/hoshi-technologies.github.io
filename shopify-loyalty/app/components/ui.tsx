@@ -83,6 +83,10 @@ const TX_LABELS: Record<string, { label: string; tone: "success" | "info" | "cri
   REDEEM: { label: "Échange", tone: "caution" },
   REFUND: { label: "Remboursement", tone: "critical" },
   ADJUST: { label: "Ajustement", tone: "neutral" },
+  BIRTHDAY: { label: "Anniversaire", tone: "info" },
+  REFERRAL: { label: "Parrainage", tone: "success" },
+  SOCIAL: { label: "Réseaux sociaux", tone: "info" },
+  EXPIRE: { label: "Expiration", tone: "critical" },
 };
 
 export function TransactionBadge({ type }: { type: string }) {
