@@ -371,6 +371,53 @@
       .hide {
         display: none !important;
       }
+      .reus {
+        display: grid;
+        gap: 10px;
+      }
+      .reu h3 {
+        font-size: 14px;
+        margin: 0 0 6px;
+      }
+      .reu h3 small {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      .crs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .crs button {
+        padding: 6px 9px;
+        font-size: 13px;
+        line-height: 1.2;
+        text-align: left;
+      }
+      .crs button small {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .crs button.on {
+        outline: 2px solid var(--accent);
+      }
+      .crs button.done {
+        opacity: 0.6;
+      }
+      .status {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 8px 0 0;
+      }
+      .live {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--good);
+        margin-right: 6px;
+      }
     </style>
   </head>
   <body>
@@ -383,6 +430,25 @@
         Analyse des courses hippiques : chaque cheval reçoit une note sur 20 et des probabilités de victoire et de place,
         calculées à partir de sa musique, de sa carrière, de son entourage et des cotes.
       </p>
+
+      <!-- Programme automatique -->
+      <section class="card">
+        <h2>Programme des courses</h2>
+        <div class="row">
+          <label class="f">Journée<select id="progDate"></select></label>
+          <label class="f"
+            >Afficher
+            <select id="progFilter">
+              <option value="fr">Courses en France</option>
+              <option value="all">Toutes les courses</option>
+            </select>
+          </label>
+          <button id="btnProgNext" class="primary">Prochaine course</button>
+          <button id="btnProgRefresh" class="ghost">Actualiser</button>
+        </div>
+        <p id="progStatus" class="status">Chargement du programme…</p>
+        <div id="progList" class="reus" style="margin-top: 12px"></div>
+      </section>
 
       <!-- Course -->
       <section class="card">
@@ -745,12 +811,21 @@
             schedule();
           });
         });
+        function leaveProgram() {
+          if (typeof prog === 'undefined') return;
+          prog.sel = null;
+          store.prog = null;
+          clearInterval(prog.timer);
+          renderProgram();
+        }
         $('btnDemo').onclick = function () {
+          leaveProgram();
           state.race = demoRace();
           renderRace();
           schedule();
         };
         $('btnNew').onclick = function () {
+          leaveProgram();
           state.race = emptyRace();
           for (var i = 0; i < 6; i++) $('btnAdd').onclick();
           renderRace();
@@ -780,6 +855,7 @@
         $('savedList').onchange = function () {
           var r = store.saved[$('savedList').value];
           if (!r) return;
+          leaveProgram();
           state.race = JSON.parse(JSON.stringify(r));
           renderRace();
           schedule();
@@ -902,6 +978,329 @@
           }
         };
 
+        // ---------------- Programme automatique ----------------
+        // Sources, dans l'ordre : données publiées par la tâche automatique (data/),
+        // puis l'API PMU en direct si le navigateur l'autorise (cotes fraîches).
+        var PMU_API = 'https://online.turfinfo.api.pmu.fr/rest/client/1/programme/';
+        var prog = { day: null, stats: null, sel: store.prog || null, timer: null };
+        function isoToPmu(iso) {
+          return iso.slice(8, 10) + iso.slice(5, 7) + iso.slice(0, 4);
+        }
+        function parisIso(offset) {
+          var d = new Date(Date.now() + (offset || 0) * 86400000);
+          try {
+            return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(d);
+          } catch (e) {
+            return d.toISOString().slice(0, 10);
+          }
+        }
+        function getJson(url) {
+          return fetch(url, { cache: 'no-cache' }).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          });
+        }
+        function fmtDay(iso) {
+          var d = new Date(iso + 'T12:00:00');
+          var s = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+          if (iso === parisIso(0)) s = "Aujourd'hui · " + s;
+          else if (iso === parisIso(1)) s = 'Demain · ' + s;
+          else if (iso === parisIso(-1)) s = 'Hier · ' + s;
+          return s;
+        }
+        function fmtHour(ms) {
+          if (!ms) return '';
+          return new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+        }
+        function setStatus(txt, live) {
+          $('progStatus').innerHTML = (live ? '<span class="live"></span>' : '') + txt;
+        }
+
+        // Programme d'une journée lu directement sur l'API PMU (si autorisé).
+        function liveDay(iso) {
+          return getJson(PMU_API + isoToPmu(iso)).then(function (j) {
+            var reus = (j.programme && j.programme.reunions) || [];
+            return {
+              date: iso,
+              live: true,
+              reunions: reus.map(function (r) {
+                return {
+                  r: r.numOfficiel,
+                  hippodrome: (r.hippodrome && r.hippodrome.libelleCourt) || '',
+                  pays: (r.pays && r.pays.code) || '',
+                  courses: (r.courses || []).map(function (c) {
+                    var sp = ((c.specialite || '') + ' ' + (c.discipline || '')).toUpperCase();
+                    return {
+                      c: c.numOrdre,
+                      libelle: c.libelle || '',
+                      heure: c.heureDepart,
+                      distance: c.distance || '',
+                      discipline: /ATTELE/.test(sp) ? 'trot attelé' : /MONTE/.test(sp) ? 'trot monté' : /HAIE|STEEPLE|CROSS|OBSTACLE/.test(sp) ? 'obstacle' : 'plat',
+                      terrain: (c.penetrometre && c.penetrometre.intitule) || '',
+                      nPartants: c.nombreDeclaresPartants,
+                      arrivee: c.ordreArrivee || null,
+                      partants: null,
+                    };
+                  }),
+                };
+              }),
+            };
+          });
+        }
+        function loadDay(iso) {
+          setStatus('Chargement du programme…');
+          return getJson('data/' + iso + '.json')
+            .catch(function () {
+              return liveDay(iso);
+            })
+            .then(function (day) {
+              prog.day = day;
+              renderProgram();
+              var upd = day.updated ? ' · mis à jour le ' + new Date(day.updated).toLocaleString('fr-FR') : '';
+              setStatus(day.live ? 'Programme PMU en direct' : 'Programme publié automatiquement' + upd, day.live);
+              return day;
+            })
+            .catch(function () {
+              prog.day = null;
+              $('progList').innerHTML = '';
+              setStatus(
+                "Programme indisponible pour cette journée. La récupération automatique publie les courses chaque heure ; en attendant, utilisez la saisie ou l'import ci-dessous.",
+              );
+            });
+        }
+        function visibleReunions() {
+          if (!prog.day) return [];
+          var fr = $('progFilter').value === 'fr';
+          return prog.day.reunions.filter(function (r) {
+            return !fr || !r.pays || r.pays === 'FRA';
+          });
+        }
+        function renderProgram() {
+          var reus = visibleReunions();
+          if (!reus.length) {
+            $('progList').innerHTML = '<p class="muted">Aucune réunion.</p>';
+            return;
+          }
+          $('progList').innerHTML = reus
+            .map(function (r) {
+              return (
+                '<div class="reu"><h3>R' +
+                r.r +
+                ' · ' +
+                esc(r.hippodrome) +
+                (r.pays && r.pays !== 'FRA' ? ' <small>(' + esc(r.pays) + ')</small>' : '') +
+                '</h3><div class="crs">' +
+                r.courses
+                  .map(function (c) {
+                    var on = prog.sel && prog.sel.date === prog.day.date && prog.sel.r == r.r && prog.sel.c == c.c;
+                    var n = c.partants ? c.partants.filter((p) => !p.nonPartant).length : c.nPartants;
+                    return (
+                      '<button data-r="' +
+                      r.r +
+                      '" data-c="' +
+                      c.c +
+                      '" class="' +
+                      (on ? 'on ' : '') +
+                      (c.arrivee ? 'done' : '') +
+                      '" title="' +
+                      esc(c.libelle) +
+                      '">C' +
+                      c.c +
+                      ' · ' +
+                      fmtHour(c.heure) +
+                      '<small>' +
+                      esc(c.discipline) +
+                      (c.distance ? ' · ' + c.distance + ' m' : '') +
+                      (n ? ' · ' + n + ' part.' : '') +
+                      (c.arrivee ? ' · arrivée' : '') +
+                      '</small></button>'
+                    );
+                  })
+                  .join('') +
+                '</div></div>'
+              );
+            })
+            .join('');
+        }
+        function findCourse(r, c) {
+          if (!prog.day) return null;
+          for (var i = 0; i < prog.day.reunions.length; i++) {
+            var reu = prog.day.reunions[i];
+            if (reu.r != r) continue;
+            for (var k = 0; k < reu.courses.length; k++) if (reu.courses[k].c == c) return { reu: reu, course: reu.courses[k] };
+          }
+          return null;
+        }
+        // Jockey / entraîneur : taux de victoire tirés des arrivées archivées.
+        function rateFrom(map, name) {
+          var s = name && map && map[name];
+          if (!s || s[0] < 3) return '';
+          return (((s[1] + 0.08 * 10) / (s[0] + 10)) * 100).toFixed(1);
+        }
+        function enrich(runners, dateIso) {
+          var st = prog.stats;
+          return runners.map(function (p) {
+            var r = {};
+            FIELDS.forEach(function (f) {
+              r[f] = p[f] != null ? String(p[f]) : '';
+            });
+            ['jockeyNom', 'entraineurNom', 'distanceCheval', 'recul', 'arrivee'].forEach(function (f) {
+              if (p[f] != null && p[f] !== '') r[f] = p[f];
+            });
+            r.nonPartant = !!p.nonPartant;
+            if (st) {
+              if (!r.jockey) r.jockey = rateFrom(st.jockeys, p.jockeyNom);
+              if (!r.entraineur) r.entraineur = rateFrom(st.entraineurs, p.entraineurNom);
+              var last = st.chevaux && st.chevaux[p.nom];
+              if (!r.repos && last && last < dateIso)
+                r.repos = String(Math.round((new Date(dateIso + 'T12:00:00') - new Date(last + 'T12:00:00')) / 86400000));
+            }
+            return r;
+          });
+        }
+        // Trot : affiche le recul (m) déduit de la distance de chaque cheval.
+        function withRecul(runners, dis) {
+          if (!/trot/.test(dis)) return runners;
+          var d = runners.map((r) => parseFloat(r.distanceCheval)).filter((x) => x > 0);
+          if (!d.length) return runners;
+          var min = Math.min.apply(null, d);
+          runners.forEach(function (r) {
+            var x = parseFloat(r.distanceCheval);
+            if (x > 0 && !r.poids) r.poids = String(x - min);
+          });
+          return runners;
+        }
+        function livePartants(iso, r, c) {
+          return getJson(PMU_API + isoToPmu(iso) + '/R' + r + '/C' + c + '/participants').then(function (j) {
+            var list = T.fromPmuParticipants(j);
+            (j.participants || []).forEach(function (p, i) {
+              if (p.ordreArrivee) list[i].arrivee = p.ordreArrivee;
+            });
+            return list;
+          });
+        }
+        function selectCourse(r, c, quiet) {
+          var f = findCourse(r, c);
+          if (!f) return;
+          var iso = prog.day.date;
+          prog.sel = { date: iso, r: r, c: c };
+          store.prog = prog.sel;
+          renderProgram();
+          var apply = function (partants, live) {
+            var keepOpen = state.race && state.race.auto && state.race.auto.r == r && state.race.auto.c == c && state.race.auto.date === iso;
+            state.race = {
+              name: 'R' + r + 'C' + c + ' ' + f.reu.hippodrome + ' · ' + f.course.libelle + ' (' + fmtHour(f.course.heure) + ')',
+              discipline: f.course.discipline,
+              distance: f.course.distance,
+              terrain: f.course.terrain,
+              runners: withRecul(enrich(partants, iso), f.course.discipline),
+              auto: { date: iso, r: r, c: c },
+            };
+            if (!keepOpen) openRows = {};
+            renderRace();
+            schedule();
+            setStatus(
+              'R' + r + 'C' + c + ' chargée' + (live ? ' avec les cotes PMU en direct' : ' (données publiées)') + ' · ' + new Date().toLocaleTimeString('fr-FR'),
+              live,
+            );
+            if (!quiet) $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
+          // Cotes les plus fraîches possibles : API en direct, sinon données publiées.
+          livePartants(iso, r, c)
+            .then(function (list) {
+              apply(list, true);
+            })
+            .catch(function () {
+              if (f.course.partants && f.course.partants.length) apply(f.course.partants, false);
+              else setStatus('Partants indisponibles pour R' + r + 'C' + c + '.');
+            });
+          planRefresh(f.course);
+        }
+        // Actualisation automatique des cotes toutes les 5 minutes avant le départ.
+        function planRefresh(course) {
+          clearInterval(prog.timer);
+          if (!course.heure || course.arrivee) return;
+          prog.timer = setInterval(function () {
+            if (!prog.sel || document.hidden) return;
+            if (Date.now() > course.heure + 3600000) return clearInterval(prog.timer);
+            refreshCurrent(true);
+          }, 5 * 60000);
+        }
+        function refreshCurrent(quiet) {
+          var sel = prog.sel;
+          if (!sel) return loadDay($('progDate').value);
+          return loadDay(sel.date).then(function () {
+            if (findCourse(sel.r, sel.c)) selectCourse(sel.r, sel.c, quiet);
+          });
+        }
+        function nextCourse() {
+          var now = Date.now(),
+            best = null;
+          visibleReunions().forEach(function (r) {
+            r.courses.forEach(function (c) {
+              if (!c.heure || c.arrivee || c.heure < now - 5 * 60000) return;
+              if (!best || c.heure < best.heure) best = { r: r.r, c: c.c, heure: c.heure };
+            });
+          });
+          return best;
+        }
+        $('progList').addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-r]');
+          if (b) selectCourse(b.dataset.r, b.dataset.c);
+        });
+        $('progDate').onchange = function () {
+          prog.sel = null;
+          loadDay(this.value);
+        };
+        $('progFilter').onchange = renderProgram;
+        $('btnProgRefresh').onclick = function () {
+          refreshCurrent(false);
+        };
+        $('btnProgNext').onclick = function () {
+          var go = function () {
+            var n = nextCourse();
+            if (n) selectCourse(n.r, n.c);
+            else setStatus('Plus de course à venir pour cette journée.');
+          };
+          if ($('progDate').value !== parisIso(0)) {
+            $('progDate').value = parisIso(0);
+            loadDay(parisIso(0)).then(go);
+          } else go();
+        };
+        function initProgram() {
+          var days = [parisIso(-1), parisIso(0), parisIso(1)];
+          var statsP = getJson('data/stats.json')
+            .then(function (s) {
+              prog.stats = s;
+            })
+            .catch(function () {});
+          var idxP = getJson('data/index.json')
+            .then(function (ix) {
+              (ix.days || []).forEach(function (d) {
+                if (days.indexOf(d) < 0) days.push(d);
+              });
+            })
+            .catch(function () {});
+          Promise.all([statsP, idxP]).then(function () {
+            days.sort().reverse();
+            $('progDate').innerHTML = days
+              .map(function (d) {
+                return '<option value="' + d + '">' + esc(fmtDay(d)) + '</option>';
+              })
+              .join('');
+            // Reprend la dernière course consultée si elle est récente, sinon la prochaine course du jour.
+            var sel = prog.sel;
+            var start = sel && days.indexOf(sel.date) >= 0 && sel.date >= parisIso(-1) ? sel.date : parisIso(0);
+            $('progDate').value = start;
+            loadDay(start).then(function () {
+              if (!prog.day) return;
+              if (sel && sel.date === start && findCourse(sel.r, sel.c)) return selectCourse(sel.r, sel.c, true);
+              var n = nextCourse();
+              if (n) selectCourse(n.r, n.c, true);
+            });
+          });
+        }
+
         // ---------------- Réglages ----------------
         function renderSettings() {
           var s = state.settings;
@@ -1008,6 +1407,9 @@
           var placeLabel =
             a.placesPayees === 0 ? 'Pas de pari placé (moins de 4 partants)' : 'Placé = ' + a.placesPayees + ' premiers';
 
+          var hasArr = a.runners.some(function (x) {
+            return x.runner.arrivee;
+          });
           var html = '<div class="kpis">';
           html += '<div class="kpi"><small>Partants</small><strong>' + a.nPartants + '</strong><br><small>' + placeLabel + '</small></div>';
           html += '<div class="kpi"><small>Meilleure note</small><strong>' + label(list[0]) + '</strong><br><small>' + list[0].note.toFixed(1) + ' / 20</small></div>';
@@ -1026,7 +1428,7 @@
           html += '</div>';
 
           html +=
-            '<div class="scroll"><table class="res"><thead><tr><th>Rang</th><th>Cheval</th><th>Note /20</th><th title="Probabilité de gagner">Gagnant</th><th title="Probabilité d\'être placé (règle PMU)">Placé</th><th title="Probabilité de finir dans les 3 premiers">Top 3</th><th>Cote</th><th title="Cote correspondant à notre probabilité de victoire">Cote juste</th><th title="Probabilité × cote : au-dessus de 1, la cote est généreuse">Valeur</th><th title="Part des critères renseignés">Fiabilité</th></tr></thead><tbody>';
+            '<div class="scroll"><table class="res"><thead><tr><th>Rang</th><th>Cheval</th><th>Note /20</th><th title="Probabilité de gagner">Gagnant</th><th title="Probabilité d\'être placé (règle PMU)">Placé</th><th title="Probabilité de finir dans les 3 premiers">Top 3</th><th>Cote</th><th title="Cote correspondant à notre probabilité de victoire">Cote juste</th><th title="Probabilité × cote : au-dessus de 1, la cote est généreuse">Valeur</th><th title="Part des critères renseignés">Fiabilité</th>' + (hasArr ? '<th>Arrivée</th>' : '') + '</tr></thead><tbody>';
           list.forEach(function (x, k) {
             var id = x.runner.num + '|' + x.runner.nom;
             var val = x.value == null ? '—' : '<span class="pill ' + (x.value >= 1.1 ? 'good' : x.value >= 0.9 ? 'mid' : 'bad') + '">' + x.value.toFixed(2) + '</span>';
@@ -1055,7 +1457,14 @@
               val +
               '</td><td>' +
               Math.round(x.confidence * 100) +
-              ' %</td></tr>';
+              ' %</td>' +
+              (hasArr
+                ? '<td>' +
+                  (x.runner.arrivee
+                    ? '<span class="pill ' + (x.runner.arrivee <= Math.max(a.placesPayees, 1) ? 'good' : 'bad') + '">' + x.runner.arrivee + (x.runner.arrivee === 1 ? 'er' : 'e') + '</span>'
+                    : '<span class="muted">—</span>')
+                  : '') +
+              '</tr>';
             var subs = T.CRITERIA.map(function (c) {
               var v = x.scores[c.key];
               return (
@@ -1082,7 +1491,7 @@
             html +=
               '<tr class="detail' +
               (openRows[id] ? '' : ' hide') +
-              '"><td colspan="10"><div class="subs">' +
+              '"><td colspan="' + (hasArr ? 11 : 10) + '"><div class="subs">' +
               subs +
               '</div>' +
               musHtml(x.musique) +
@@ -1171,6 +1580,7 @@
         renderSettings();
         renderSaved();
         render();
+        initProgram();
       })();
     </script>
   </body>

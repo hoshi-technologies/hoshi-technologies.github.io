@@ -195,6 +195,7 @@
     var dMin = dKnown.length ? Math.min.apply(null, dKnown) : null;
     var reculs = runners.map(function (r, i) {
       var v = num(r.recul);
+      if (v === null) v = num(r.poids); // colonne « Poids/Recul » au trot
       if (v !== null) return v;
       return dists[i] !== null ? dists[i] - dMin : null;
     });

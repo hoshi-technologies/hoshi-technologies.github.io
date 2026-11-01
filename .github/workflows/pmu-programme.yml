@@ -1,0 +1,39 @@
+name: Programme PMU (Hoshi Turf)
+
+# Récupère automatiquement les courses, partants, cotes et arrivées
+# et les publie dans hippique/data/ pour la page Hoshi Turf.
+on:
+  schedule:
+    - cron: '7 5-21 * * *' # toutes les heures de 6 h à 23 h (heure de Paris, environ)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pmu-programme
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Récupérer le programme
+        run: node scripts/pmu-fetch.mjs
+      - name: Publier les données
+        run: |
+          git add hippique/data
+          if git diff --cached --quiet; then
+            echo "Aucun changement."
+            exit 0
+          fi
+          git config user.name "hoshi-turf-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Hoshi Turf : programme PMU du $(TZ=Europe/Paris date +'%d/%m/%Y %Hh%M')"
+          git pull --rebase --autostash
+          git push
