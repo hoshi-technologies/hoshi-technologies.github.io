@@ -1,4 +1,6 @@
 cache/
 sortie*/
+paquets*/
 __pycache__/
 .godot/
+.pytest_cache/

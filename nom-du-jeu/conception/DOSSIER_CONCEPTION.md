@@ -1,7 +1,7 @@
 # Dossier de conception : [NOM DU JEU]
 
 > **Document vivant.** Toute session de travail commence par le relire et se termine par sa mise à jour : section « Journal des décisions » et sections modifiées.
-> Version 0.1, du 1er novembre 2026. Statut : proposé, en attente de validation par le propriétaire.
+> Version 0.2, du 1er novembre 2026. Statut : accepté par le propriétaire.
 
 ---
 
@@ -207,7 +207,7 @@ Les seuils de population se règlent dans un fichier de données. En mode Ville 
 
 ## 10. Le prototype de plaisir (étape 2) : ce qu'il doit prouver
 
-- **Ville :** Annecy (lac, montagne, données de bonne qualité). À confirmer par le propriétaire.
+- **Ville :** Annecy (lac, montagne, données de bonne qualité). Paquet : `donnees/villes/fr-annecy_quartier_v1`.
 - **Taille :** Quartier. **Mode :** Fondation, avec le calque fantôme de la vraie ville.
 - **Contenu :** zones habitat, commerce et activités ; routes ; eau ; électricité ; école ; un bus simple ; budget de base ; croissance visible.
 - **Durée :** 20 minutes de partie.
@@ -233,4 +233,6 @@ Les seuils de population se règlent dans un fichier de données. En mode Ville 
 | 2026-11-01 | Outils et assets payants acceptés s'ils sont les meilleurs pour le projet. | Propriétaire |
 | 2026-11-01 | Moteur : Godot 4.7 avec C#, simulation indépendante du moteur. | Recommandation acceptée avec l'étape 0 |
 | 2026-11-01 | Données : Overture Maps et Copernicus partout ; IGN et INSEE (France) ; Census et USGS (États-Unis). Liste de villes vérifiées au lancement. | Recommandation acceptée avec l'étape 0 |
+| 2026-11-01 | Dossier de conception accepté (« je te fais confiance ») : mode Fondation et Annecy pour le prototype. | Propriétaire |
+| 2026-11-01 | Lot 3 : outil de préparation de ville (extraire hors moteur, construire déterministe), format de paquet v1, paquet Annecy Quartier produit. | Lot 3 |
 | 2026-11-01 | Accès Anticipé recommandé, prix visé de 24,99 $ puis 29,99 $ à la 1.0. | Recommandation, **à confirmer à l'étape 7** |

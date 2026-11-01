@@ -1,0 +1,87 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "e5b040b15ce85a0c4e3a1ea699195f99f8dba87f62925cf55fec00a6eb3b565d",
+  "eau.json.gz": "f9b0f92084c42594eb3b48868942398a31a41fab74e9a10ee8aeb0ea9d152f8e",
+  "relief.f32": "0f288689a6b785026eb16b27e9b6228d253f5f7fc21c93dcc645cc7c37f4252e",
+  "routes.json.gz": "1e70ffb2ad4e997265fe9a3afb400aa24c4c2290a332eff5346076baa4321e7b",
+  "sols.json.gz": "bc6374e5a13ab66c12e5f33b7a8b67d23fe6b05f750355a52c1fdfbc69f57355"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 93,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 79,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (France : INSEE, données carroyées)",
+   "methode": "surface habitable estimée / 40 m² par habitant",
+   "quoi": "population",
+   "valeur": 107200
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 9615,
+  "cours_eau": 93,
+  "km_routes_carrossables": 298.3,
+  "note_sur_100": 78,
+  "pct_batiments_detection_ia": 3,
+  "pct_batiments_osm": 97,
+  "pct_hauteur_reelle": 7,
+  "pct_routes_nommees": 61,
+  "pct_usage_reel": 21,
+  "plans_eau": 66,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 559
+ },
+ "relief": {
+  "alt_max_m": 723.5900268554688,
+  "alt_min_m": 414.5899963378906,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 45.8992,
+   "lon": 6.1294
+  },
+  "cote_km": 4.0,
+  "id": "fr-annecy",
+  "nom": "Annecy",
+  "pays": "FR",
+  "region": "Auvergne-Rhône-Alpes",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

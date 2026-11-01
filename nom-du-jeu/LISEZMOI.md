@@ -3,9 +3,15 @@
 Jeu solo de simulation de ville pour PC Windows, destiné à Steam.
 Promesse : « Prends les commandes de ta vraie ville, partout dans le monde. »
 
-## État actuel : étape 0 (validation), en attente de ton accord
+## État actuel : lot 3 terminé (préparation des données d'une ville)
 
-Aucun jeu n'a encore été créé. Ce dossier ne contient que :
+| Dossier | Contenu |
+|---|---|
+| `conception/DOSSIER_CONCEPTION.md` | Le dossier de conception (référence pour tout le projet) |
+| `outils/preparation_ville/` | L'outil qui prépare une vraie ville (voir son LISEZMOI) |
+| `donnees/villes/fr-annecy_quartier_v1/` | Le paquet d'Annecy (4 × 4 km), avec `apercu.png` |
+
+Étape 0 :
 
 | Dossier | Contenu |
 |---|---|

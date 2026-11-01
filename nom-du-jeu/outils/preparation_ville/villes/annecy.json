@@ -1,0 +1,11 @@
+{
+  "id": "fr-annecy",
+  "nom": "Annecy",
+  "pays": "FR",
+  "region": "Auvergne-Rhône-Alpes",
+  "centre": {"lat": 45.8992, "lon": 6.1294},
+  "taille": "quartier",
+  "cote_km": 4.0,
+  "statut": "en_verification",
+  "notes": "Ville du prototype : lac, montagne, centre historique. Données OSM de bonne qualité (étape 0)."
+}

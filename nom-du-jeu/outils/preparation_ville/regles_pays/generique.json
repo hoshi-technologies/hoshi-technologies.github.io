@@ -1,0 +1,13 @@
+{
+  "pays": "generique",
+  "hauteur_etage_m": 3.0,
+  "etages_par_defaut": {
+    "petit_moins_60m2": 1,
+    "moins_150m2": 2,
+    "moins_600m2": 3,
+    "plus_600m2": 4
+  },
+  "m2_habitable_par_habitant": 35,
+  "part_surface_habitable": 0.8,
+  "relief_rayon_sol_m": 90
+}
