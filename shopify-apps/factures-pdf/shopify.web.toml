@@ -1,0 +1,8 @@
+# Pour `shopify app dev` : comment lancer le serveur de l'appli en développement.
+# Shopify CLI fournit SHOPIFY_API_KEY, SHOPIFY_API_SECRET, SHOPIFY_APP_URL et PORT.
+name = "factures-pdf"
+roles = ["frontend", "backend"]
+webhooks_path = "/webhooks"
+
+[commands]
+dev = "npm run dev"

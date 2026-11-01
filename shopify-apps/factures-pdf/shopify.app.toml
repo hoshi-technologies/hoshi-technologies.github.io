@@ -31,3 +31,5 @@ embedded = false
 
 [build]
 include_config_on_deploy = true
+# `shopify app dev` remplace application_url par l'adresse du tunnel de développement.
+automatically_update_urls_on_dev = true

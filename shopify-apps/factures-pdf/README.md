@@ -152,6 +152,46 @@ pièce jointe**, et une appli ne peut pas les modifier. L'appli envoie donc son 
 avec le PDF attaché, via un fournisseur SMTP. En complément, le code Liquid fourni ajoute un
 bouton « Télécharger ma facture » dans la confirmation de commande de Shopify.
 
+## Tester l'appli
+
+### 1. Mode démo : en 2 minutes, sans compte Shopify
+
+Prérequis : [Node.js 22](https://nodejs.org) (version « LTS »).
+
+```sh
+cd shopify-apps/factures-pdf
+npm install
+npm run demo            # ou : npm run demo -- en   (de, es, it, nl, pt-BR)
+```
+
+Ouvrez http://localhost:3000. Shopify est simulé (boutique fictive, abonnement de test) ;
+le bouton « + Simuler une commande payée » crée une commande, chaque fois dans une autre
+langue. Les e-mails ne partent pas : ils s'affichent dans le terminal. Tout est effacé à
+l'arrêt (Ctrl+C). La recherche dans le registre SIRENE, elle, interroge la vraie API.
+
+Autres commandes : `npm test` (tests automatiques), `npm run preview` (facture d'exemple
+`apercu-facture.pdf`).
+
+### 2. Sur une vraie boutique de test Shopify (gratuit)
+
+1. Créez un compte [Shopify Partners](https://www.shopify.com/fr/partenaires) (gratuit),
+   puis une **boutique de développement** : Boutiques › Ajouter une boutique.
+2. Installez [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) :
+   `npm install -g @shopify/cli`.
+3. Dans `shopify-apps/factures-pdf`, lancez `shopify app config link` et choisissez
+   « Créer une nouvelle appli » : le `client_id` de `shopify.app.toml` est rempli.
+4. Dans le tableau de bord de l'appli : *Accès aux données client protégées* › cochez
+   nom, e-mail et adresse (sans examen pour une boutique de développement).
+5. Optionnel, pour recevoir vraiment les e-mails : `export SMTP_URL=smtp://…` et
+   `export MAIL_FROM=…` (par exemple un compte gratuit Brevo). Sans cela, les factures
+   sont créées mais pas envoyées.
+6. Lancez `shopify app dev` : la CLI crée un tunnel HTTPS, déclare les webhooks et
+   propose d'installer l'appli sur la boutique de test (touche `p` pour l'ouvrir).
+7. Dans la boutique : Paramètres › Paiements › activez la **passerelle de test (Bogus)**,
+   puis passez une commande avec la carte « 1 ». La facture apparaît dans l'appli.
+
+Les abonnements y sont des abonnements de test (`BILLING_TEST=true`) : aucun prélèvement.
+
 ## Architecture
 
 ```
