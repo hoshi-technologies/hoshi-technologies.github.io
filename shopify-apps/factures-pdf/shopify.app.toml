@@ -2,7 +2,7 @@
 # Remplacez client_id et les URL par celles de votre appli (Partner Dashboard / Dev Dashboard).
 
 client_id = "VOTRE_CLIENT_ID"
-name = "Factures PDF"
+name = "Hoshi Factures"
 application_url = "https://factures.exemple.fr"
 embedded = true
 

@@ -60,12 +60,12 @@ export default {
     quotaBody:
       'Hallo,\n\nJe winkel heeft de limiet van {limit} facturen per maand van het abonnement {plan} bereikt.\n' +
       'Nieuwe bestellingen staan in de wacht: hun facturen worden niet aangemaakt of verzonden.\n\n' +
-      'Kies een hoger abonnement in Shopify > Apps > PDF-facturen > Abonnement om ze aan te maken ' +
-      'en automatisch te blijven factureren.\n\nHet PDF-facturen-team',
+      'Kies een hoger abonnement in Shopify > Apps > Hoshi Factures > Abonnement om ze aan te maken ' +
+      'en automatisch te blijven factureren.\n\nHet Hoshi Factures-team',
   },
   notReady: 'Je factuur is nog niet beschikbaar. Ze wordt aangemaakt zodra de bestelling is betaald: probeer het over een paar minuten opnieuw.',
   admin: {
-    appName: 'PDF-facturen',
+    appName: 'Hoshi Factures',
     loading: 'Laden…',
     save: 'Opslaan',
     saved: 'Instellingen opgeslagen',

@@ -98,7 +98,7 @@ export function renderInvoicePdf(invoice, { number, issuedAt, settings, shopName
       Title: xmpSafe(`${dict.email.filename} ${number}`),
       Author: xmpSafe(settings.companyName || shopName),
       Subject: xmpSafe(`${t.order} ${invoice.orderName}`),
-      Creator: 'Factures PDF',
+      Creator: 'Hoshi Factures',
     },
   });
   doc.registerFont('Regular', FONTS.regular);

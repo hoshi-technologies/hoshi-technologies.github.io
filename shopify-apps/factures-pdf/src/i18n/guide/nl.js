@@ -6,7 +6,7 @@ export default [
     steps: [
       'Open in de Shopify App Store de pagina van de app en klik op „Installeren”.',
       'Sta leestoegang tot je bestellingen toe: de app heeft die nodig voor de facturen, maar kan niets wijzigen.',
-      'De app opent in je Shopify-beheer, onder Apps › PDF-facturen. Naam, adres en e-mail van je winkel zijn al ingevuld.',
+      'De app opent in je Shopify-beheer, onder Apps › Hoshi Factures. Naam, adres en e-mail van je winkel zijn al ingevuld.',
       'Volg op het tabblad Start de lijst „Aan de slag”: die verdwijnt zodra de drie stappen klaar zijn.',
     ],
     tips: ['Je begint met het gratis abonnement ({freeLimit} facturen per maand), zonder creditcard.'],

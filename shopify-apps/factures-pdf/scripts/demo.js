@@ -160,5 +160,5 @@ app.listen(PORT, async () => {
   });
   await newOrder();
   await newOrder();
-  console.log(`\nFactures PDF – mode démo\n  Ouvrez http://localhost:${PORT} dans votre navigateur.\n  Arrêt : Ctrl+C (les données de démo sont effacées).\n`);
+  console.log(`\nHoshi Factures – mode démo\n  Ouvrez http://localhost:${PORT} dans votre navigateur.\n  Arrêt : Ctrl+C (les données de démo sont effacées).\n`);
 });

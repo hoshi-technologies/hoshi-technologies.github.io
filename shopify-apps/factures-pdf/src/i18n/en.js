@@ -61,11 +61,11 @@ export default {
       'Hello,\n\nYour store has reached the limit of {limit} invoices per month on the {plan} plan.\n' +
       'New orders are on hold: their invoices are neither created nor sent.\n\n' +
       'To generate them and keep invoicing automatically, choose a higher plan in ' +
-      'Shopify > Apps > PDF Invoices > Plan.\n\nThe PDF Invoices team',
+      'Shopify > Apps > Hoshi Factures > Plan.\n\nThe Hoshi Factures team',
   },
   notReady: 'Your invoice is not available yet. It is generated as soon as the order is paid: please try again in a few minutes.',
   admin: {
-    appName: 'PDF Invoices',
+    appName: 'Hoshi Factures',
     loading: 'Loading…',
     save: 'Save',
     saved: 'Settings saved',

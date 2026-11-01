@@ -60,8 +60,8 @@ async function setup() {
 }
 
 test('formules : noms d’abonnement reconnus, début de mois', () => {
-  assert.equal(planFromSubscriptionName('Factures PDF – Essentiel').key, 'essentiel');
-  assert.equal(planFromSubscriptionName('Factures PDF – Gratuit'), null);
+  assert.equal(planFromSubscriptionName('Hoshi Factures – Essentiel').key, 'essentiel');
+  assert.equal(planFromSubscriptionName('Hoshi Factures – Gratuit'), null);
   assert.equal(planFromSubscriptionName('autre'), null);
   assert.equal(monthStart(new Date('2026-11-17T10:00:00Z')), '2026-11-01T00:00:00.000Z');
 });
@@ -101,7 +101,7 @@ test('abonnement : création, validation par webhook, factures en attente géné
     assert.equal(res.status, 200);
     assert.equal(res.body.confirmationUrl, `https://${SHOP}/admin/charges/confirm`);
     const create = ctx.graphqlCalls.find((c) => c.query.includes('appSubscriptionCreate')).variables;
-    assert.equal(create.name, 'Factures PDF – Essentiel');
+    assert.equal(create.name, 'Hoshi Factures – Essentiel');
     assert.equal(create.test, true);
     assert.equal(create.trialDays, 7);
     assert.equal(create.returnUrl, `https://${SHOP}/admin/apps/cle-api`);
@@ -109,7 +109,7 @@ test('abonnement : création, validation par webhook, factures en attente géné
     assert.equal((await ctx.call('/billing/subscribe', 'POST', { plan: 'free' })).status, 400);
 
     // Le marchand accepte : Shopify envoie app_subscriptions/update.
-    await ctx.webhook('app_subscriptions/update', { app_subscription: { admin_graphql_api_id: 'gid://shopify/AppSubscription/1', name: 'Factures PDF – Essentiel', status: 'ACTIVE' } });
+    await ctx.webhook('app_subscriptions/update', { app_subscription: { admin_graphql_api_id: 'gid://shopify/AppSubscription/1', name: 'Hoshi Factures – Essentiel', status: 'ACTIVE' } });
     res = await ctx.call('/billing');
     assert.deepEqual([res.body.current, res.body.limit, res.body.remaining, res.body.pending], ['essentiel', 200, 190, 1]);
 
@@ -119,7 +119,7 @@ test('abonnement : création, validation par webhook, factures en attente géné
     assert.equal(ctx.store.listInvoices(SHOP)[0].number.slice(-5), '00011', 'numérotation continue');
 
     // Ancien abonnement annulé (changement de formule) : sans effet sur l'abonnement actif.
-    await ctx.webhook('app_subscriptions/update', { app_subscription: { admin_graphql_api_id: 'gid://shopify/AppSubscription/0', name: 'Factures PDF – Illimité', status: 'CANCELLED' } });
+    await ctx.webhook('app_subscriptions/update', { app_subscription: { admin_graphql_api_id: 'gid://shopify/AppSubscription/0', name: 'Hoshi Factures – Illimité', status: 'CANCELLED' } });
     assert.equal(ctx.store.getShop(SHOP).plan, 'essentiel');
 
     res = await ctx.call('/billing/cancel', 'POST');
@@ -133,7 +133,7 @@ test('abonnement : création, validation par webhook, factures en attente géné
 test('la formule est resynchronisée avec Shopify à l’ouverture de l’appli', async () => {
   const ctx = await setup();
   try {
-    ctx.setActive([{ id: 'gid://shopify/AppSubscription/9', name: 'Factures PDF – Illimité', status: 'ACTIVE', test: true }]);
+    ctx.setActive([{ id: 'gid://shopify/AppSubscription/9', name: 'Hoshi Factures – Illimité', status: 'ACTIVE', test: true }]);
     await ctx.call('/session', 'POST');
     let { body } = await ctx.call('/billing');
     assert.equal(body.current, 'illimite');

@@ -61,11 +61,11 @@ export default {
       'Hallo,\n\nIhr Shop hat das Limit von {limit} Rechnungen pro Monat im Tarif {plan} erreicht.\n' +
       'Neue Bestellungen werden zurückgestellt: Ihre Rechnungen werden weder erstellt noch versendet.\n\n' +
       'Um sie zu erstellen und weiterhin automatisch abzurechnen, wählen Sie einen höheren Tarif unter ' +
-      'Shopify > Apps > PDF-Rechnungen > Tarif.\n\nIhr PDF-Rechnungen-Team',
+      'Shopify > Apps > Hoshi Factures > Tarif.\n\nIhr Hoshi Factures-Team',
   },
   notReady: 'Ihre Rechnung ist noch nicht verfügbar. Sie wird erstellt, sobald die Bestellung bezahlt ist: Bitte versuchen Sie es in einigen Minuten erneut.',
   admin: {
-    appName: 'PDF-Rechnungen',
+    appName: 'Hoshi Factures',
     loading: 'Wird geladen…',
     save: 'Speichern',
     saved: 'Einstellungen gespeichert',

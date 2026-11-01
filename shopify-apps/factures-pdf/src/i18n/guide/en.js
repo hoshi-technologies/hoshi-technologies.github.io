@@ -6,7 +6,7 @@ export default [
     steps: [
       'On the Shopify App Store, open the app page and click “Install”.',
       'Accept read access to your orders: the app needs it to create invoices, but cannot change them.',
-      'The app opens in your Shopify admin, under Apps › PDF Invoices. Your store name, address and email are already filled in.',
+      'The app opens in your Shopify admin, under Apps › Hoshi Factures. Your store name, address and email are already filled in.',
       'On the Home tab, follow the “Getting started” list: it disappears once the three steps are done.',
     ],
     tips: ['You start on the Free plan ({freeLimit} invoices per month), no credit card needed.'],

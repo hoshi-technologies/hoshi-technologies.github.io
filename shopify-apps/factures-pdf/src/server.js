@@ -395,6 +395,6 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   });
   if (!service.transport) console.warn('SMTP_URL absent : les factures seront créées mais pas envoyées.');
   createApp({ config, store, service }).listen(config.port, () => {
-    console.log(`Factures PDF à l'écoute sur le port ${config.port} (${config.appUrl})`);
+    console.log(`Hoshi Factures à l'écoute sur le port ${config.port} (${config.appUrl})`);
   });
 }

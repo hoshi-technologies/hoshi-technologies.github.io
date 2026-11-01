@@ -15,7 +15,7 @@ export const PLANS = {
 export const BILLING_CURRENCY = 'USD';
 
 /** Nom de l'abonnement côté Shopify (visible sur la facture du marchand). */
-export const subscriptionName = (plan) => `Factures PDF – ${plan.name}`;
+export const subscriptionName = (plan) => `Hoshi Factures – ${plan.name}`;
 
 export function planFromSubscriptionName(name) {
   return Object.values(PLANS).find((p) => p.price > 0 && subscriptionName(p) === name) ?? null;

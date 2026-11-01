@@ -218,7 +218,7 @@ test('page d’admin servie dans la langue de l’administrateur Shopify', async
   try {
     const de = await (await fetch(`${ctx.base}/?shop=${SHOP}&locale=de`)).text();
     assert.match(de, /<html lang="de">/);
-    assert.match(de, /"appName":"PDF-Rechnungen"/);
+    assert.match(de, /"appName":"Hoshi Factures"/);
     const pt = await (await fetch(`${ctx.base}/?locale=pt-PT`)).text();
     assert.match(pt, /"lang":"pt-BR"/);
     const unknown = await (await fetch(`${ctx.base}/?locale=ja`)).text();

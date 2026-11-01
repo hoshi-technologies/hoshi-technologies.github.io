@@ -1,4 +1,4 @@
-# Factures PDF : appli Shopify
+# Hoshi Factures : appli Shopify (dossier `factures-pdf`)
 
 Une facture PDF numérotée est créée automatiquement à chaque commande et envoyée au client
 par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Shopify
@@ -257,7 +257,7 @@ les réglages changent.
    docker run -p 3000:3000 -v factures-data:/data --env-file .env factures-pdf
    ```
 5. **Publier la configuration** (droits et webhooks) : `shopify app deploy`.
-6. **Installer** l'appli sur une boutique de développement, ouvrir *Applis › Factures PDF*,
+6. **Installer** l'appli sur une boutique de développement, ouvrir *Applis › Hoshi Factures*,
    compléter les informations légales, puis passer une commande de test.
 
 Développement local : `npm install`, `npm test`, `npm run dev` (avec un tunnel HTTPS, par ex.

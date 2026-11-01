@@ -1,4 +1,4 @@
-# Fiche App Store : Factures PDF & Factur-X
+# Fiche App Store : Hoshi Factures
 
 Textes prêts à coller dans le formulaire de la fiche (Partner Dashboard › Applis › Distribution
 › Fiche de l'App Store). Les longueurs ont été vérifiées par rapport aux limites habituelles du
@@ -7,8 +7,8 @@ formulaire affiche les limites exactes en vigueur.
 
 ## Français (langue principale)
 
-**Nom de l'appli** (23 caractères)
-> Factures PDF & Factur-X
+**Nom de l'appli** (30 caractères)
+> Hoshi Factures: PDF & Factur-X
 
 **Introduction** (97 caractères)
 > Factures PDF conformes créées et envoyées à chaque commande. Prêtes pour la facture électronique.
@@ -31,8 +31,8 @@ formulaire affiche les limites exactes en vigueur.
 
 ## English
 
-**App name** (23 characters)
-> PDF Invoices & Factur-X
+**App name** (30 characters)
+> Hoshi Factures: PDF & Factur-X
 
 **Introduction** (82 characters)
 > Compliant PDF invoices created and emailed for every order. Ready for e-invoicing.
@@ -76,7 +76,7 @@ Les captures se régénèrent avec `npm run screenshots`, le site avec `npm run 
 
 À coller dans le champ « Instructions de test » (en anglais, langue des vérificateurs) :
 
-> 1. Install the app on the review store and open it (Apps › PDF Invoices).
+> 1. Install the app on the review store and open it (Apps › Hoshi Factures).
 > 2. Settings tab: business details are pre-filled from the store. For a French company, type a
 >    SIRET (e.g. 40483304800022) in “Auto-fill”, click “Search” then “Use”, and click “Save”.
 > 3. Click “Preview PDF” to download a sample invoice.

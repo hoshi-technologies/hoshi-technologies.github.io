@@ -6,7 +6,7 @@ export default [
     steps: [
       'Öffnen Sie im Shopify App Store die Seite der App und klicken Sie auf „Installieren“.',
       'Erlauben Sie den Lesezugriff auf Ihre Bestellungen: Die App braucht ihn für die Rechnungen, kann aber nichts ändern.',
-      'Die App öffnet sich in Ihrem Shopify-Admin unter Apps › PDF-Rechnungen. Name, Adresse und E-Mail Ihres Shops sind bereits ausgefüllt.',
+      'Die App öffnet sich in Ihrem Shopify-Admin unter Apps › Hoshi Factures. Name, Adresse und E-Mail Ihres Shops sind bereits ausgefüllt.',
       'Folgen Sie im Tab „Start“ der Liste „Erste Schritte“: Sie verschwindet, sobald die drei Schritte erledigt sind.',
     ],
     tips: ['Sie starten mit dem kostenlosen Tarif ({freeLimit} Rechnungen pro Monat), ohne Kreditkarte.'],

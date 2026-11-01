@@ -61,11 +61,11 @@ export default {
       'Hola:\n\nSu tienda ha alcanzado el límite de {limit} facturas al mes del plan {plan}.\n' +
       'Los nuevos pedidos quedan en espera: sus facturas no se crean ni se envían.\n\n' +
       'Para generarlas y seguir facturando automáticamente, elija un plan superior en ' +
-      'Shopify > Aplicaciones > Facturas PDF > Plan.\n\nEl equipo de Facturas PDF',
+      'Shopify > Aplicaciones > Hoshi Factures > Plan.\n\nEl equipo de Hoshi Factures',
   },
   notReady: 'Su factura aún no está disponible. Se genera en cuanto se paga el pedido: vuelva a intentarlo en unos minutos.',
   admin: {
-    appName: 'Facturas PDF',
+    appName: 'Hoshi Factures',
     loading: 'Cargando…',
     save: 'Guardar',
     saved: 'Ajustes guardados',

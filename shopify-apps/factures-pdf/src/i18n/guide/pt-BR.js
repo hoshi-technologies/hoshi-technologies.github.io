@@ -6,7 +6,7 @@ export default [
     steps: [
       'Na Shopify App Store, abra a página do app e clique em "Instalar".',
       'Aceite o acesso de leitura aos seus pedidos: o app precisa dele para criar as faturas, mas não pode alterá-los.',
-      'O app abre no seu admin da Shopify, em Apps › Faturas PDF. Nome, endereço e e-mail da loja já vêm preenchidos.',
+      'O app abre no seu admin da Shopify, em Apps › Hoshi Factures. Nome, endereço e e-mail da loja já vêm preenchidos.',
       'Na aba Início, siga a lista "Primeiros passos": ela some quando as três etapas forem concluídas.',
     ],
     tips: ['Você começa no plano Grátis ({freeLimit} faturas por mês), sem cartão de crédito.'],

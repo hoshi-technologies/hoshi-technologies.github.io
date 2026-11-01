@@ -68,7 +68,7 @@ function shell({ lang, title, description, body, active = '' }) {
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="brand" href="${p.home}"><span class="logo">F</span>${esc(app)}</a>
+  <a class="brand" href="${p.home}"><span class="logo">H</span>${esc(app)}</a>
   <nav>
     <a href="${p.home}#features">${esc(s.nav.features)}</a>
     <a href="${p.home}#pricing">${esc(s.nav.pricing)}</a>
