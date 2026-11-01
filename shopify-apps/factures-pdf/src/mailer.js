@@ -5,6 +5,7 @@
 
 import nodemailer from 'nodemailer';
 import { fillTemplate } from './settings.js';
+import { dictionary } from './i18n/index.js';
 
 export function createTransport(url) {
   if (!url) return null;
@@ -16,16 +17,20 @@ const escapeHtml = (text) =>
   String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 export function buildInvoiceEmail({ invoice, settings, shopName, from }) {
-  const boutique = settings.companyName || shopName;
+  const t = dictionary(invoice.language || settings.fallbackLanguage).email;
+  const shop = settings.companyName || shopName;
   const vars = {
-    prenom: invoice.customer_first_name || invoice.customer_name || '',
-    nom: invoice.customer_name || '',
-    numero_facture: invoice.number,
-    commande: invoice.order_name,
-    boutique,
+    first_name: invoice.customer_first_name || invoice.customer_name || '',
+    name: invoice.customer_name || '',
+    invoice_number: invoice.number,
+    order: invoice.order_name,
+    shop,
   };
-  const text = fillTemplate(settings.emailBody, vars).replace(/^Bonjour ,/, 'Bonjour,');
-  const html = `<!doctype html><html lang="fr"><body style="font-family:Helvetica,Arial,sans-serif;color:#111827;line-height:1.5">
+  let text = fillTemplate(settings.emailBody || t.body, vars);
+  // Pas de prénom connu : « Bonjour ,» devient « Bonjour, ».
+  const [emptyGreeting, greeting] = t.greetingFallback;
+  if (text.startsWith(emptyGreeting)) text = greeting + text.slice(emptyGreeting.length);
+  const html = `<!doctype html><html><body style="font-family:Helvetica,Arial,sans-serif;color:#111827;line-height:1.5">
 ${text
   .split(/\n{2,}/)
   .map((p) => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
@@ -33,16 +38,16 @@ ${text
 </body></html>`;
 
   return {
-    from: { name: boutique, address: from },
+    from: { name: shop, address: from },
     to: invoice.customer_email,
     replyTo: settings.email || undefined,
     bcc: settings.bccMerchant && settings.email ? settings.email : undefined,
-    subject: fillTemplate(settings.emailSubject, vars),
+    subject: fillTemplate(settings.emailSubject || t.subject, vars),
     text,
     html,
     attachments: [
       {
-        filename: `Facture-${invoice.number}.pdf`,
+        filename: `${t.filename}-${invoice.number}.pdf`,
         content: Buffer.from(invoice.pdf),
         contentType: 'application/pdf',
       },

@@ -1,14 +1,15 @@
 <!doctype html>
-<html lang="fr">
+<html lang="%LANG%">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="shopify-api-key" content="%SHOPIFY_API_KEY%">
   <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
-  <title>Factures PDF</title>
+  <title>PDF</title>
   <style>
     :root { --bg:#f1f1f1; --card:#fff; --text:#303030; --muted:#616161; --border:#e3e3e3; --accent:#303030; --ok:#0c5132; --okbg:#cdfee1; --err:#8e1f0b; --errbg:#fedad9; --warnbg:#fff1e3; }
     * { box-sizing: border-box; }
+    [hidden] { display:none !important; }
     body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
     main { max-width:960px; margin:0 auto; padding:20px 16px 60px; }
     h1 { font-size:20px; margin:4px 0 16px; }
@@ -29,6 +30,8 @@
     button:disabled { opacity:.5; cursor:default; }
     .banner { border-radius:10px; padding:10px 14px; margin-bottom:16px; }
     .banner.warn { background:var(--warnbg); }
+    .banner.ok { background:var(--okbg); color:var(--ok); }
+    .badge.fx { background:#e0e7ff; color:#3730a3; }
     table { width:100%; border-collapse:collapse; }
     th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--border); vertical-align:middle; }
     th { color:var(--muted); font-weight:500; font-size:13px; }
@@ -54,117 +57,152 @@
 </head>
 <body>
 <main>
-  <h1>Factures PDF</h1>
-  <div id="mail-warning" class="banner warn" hidden>
-    L'envoi d'e-mails n'est pas encore configuré sur le serveur de l'appli (SMTP_URL, MAIL_FROM) :
-    les factures sont créées mais pas envoyées.
-  </div>
+  <h1 data-i18n="appName"></h1>
+  <div id="mail-warning" class="banner warn" data-i18n="mailWarning" hidden></div>
 
   <section class="card" id="billing">
-    <h2>Abonnement</h2>
-    <p class="help" id="usage-text">Chargement…</p>
+    <h2 data-i18n="billing.title"></h2>
+    <p class="help" id="usage-text" data-i18n="loading"></p>
     <div class="usage" id="usage-bar"><span style="width:0"></span></div>
     <div class="banner info" id="pending-banner" hidden style="margin:12px 0 0">
       <span id="pending-text"></span>
-      <button type="button" class="primary" id="generate-pending">Générer leurs factures</button>
+      <button type="button" class="primary" id="generate-pending" data-i18n="billing.generate"></button>
     </div>
     <div class="plans" id="plans"></div>
   </section>
 
   <form id="settings">
     <section class="card">
-      <h2>Fonctionnement</h2>
-      <p class="help">Une facture numérotée est créée automatiquement pour chaque commande, puis envoyée au client.</p>
+      <h2 data-i18n="general.title"></h2>
+      <p class="help" data-i18n="general.help"></p>
       <div class="grid">
         <div>
-          <label for="trigger">Créer la facture</label>
+          <label for="trigger" data-i18n="general.trigger"></label>
           <select id="trigger" name="trigger">
-            <option value="paid">quand la commande est payée (recommandé)</option>
-            <option value="create">dès que la commande est passée</option>
+            <option value="paid" data-i18n="general.triggerPaid"></option>
+            <option value="create" data-i18n="general.triggerCreate"></option>
           </select>
         </div>
         <div>
-          <label for="numberPrefix">Préfixe des numéros <small>ex. F-2026-00001</small></label>
+          <label for="numberPrefix"><span data-i18n="general.prefix"></span> <small data-i18n="general.prefixHint"></small></label>
           <input type="text" id="numberPrefix" name="numberPrefix" maxlength="12">
         </div>
         <div>
-          <label for="nextNumber">Prochain numéro <small>ne peut qu'augmenter</small></label>
+          <label for="nextNumber"><span data-i18n="general.next"></span> <small data-i18n="general.nextHint"></small></label>
           <input type="number" id="nextNumber" name="nextNumber" min="1" step="1">
         </div>
+        <div>
+          <label for="invoiceLanguage" data-i18n="general.language"></label>
+          <select id="invoiceLanguage" name="invoiceLanguage" data-languages="auto"></select>
+        </div>
+        <div id="fallback-field">
+          <label for="fallbackLanguage" data-i18n="general.fallback"></label>
+          <select id="fallbackLanguage" name="fallbackLanguage" data-languages></select>
+        </div>
         <div class="full">
-          <label class="check"><input type="checkbox" name="autoSend"> Envoyer la facture au client par e-mail (PDF en pièce jointe)</label>
-          <label class="check"><input type="checkbox" name="bccMerchant"> M'envoyer une copie de chaque facture (à l'adresse e-mail ci-dessous)</label>
+          <label class="check"><input type="checkbox" name="autoSend"> <span data-i18n="general.autoSend"></span></label>
+          <label class="check"><input type="checkbox" name="bccMerchant"> <span data-i18n="general.bcc"></span></label>
         </div>
       </div>
     </section>
 
     <section class="card">
-      <h2>Votre entreprise</h2>
-      <p class="help">Ces informations figurent sur les factures. Vérifiez les mentions obligatoires avec votre expert-comptable.</p>
+      <h2 data-i18n="company.title"></h2>
+      <p class="help" data-i18n="company.help"></p>
       <div class="grid">
-        <div><label for="companyName">Raison sociale</label><input type="text" id="companyName" name="companyName"></div>
-        <div><label for="legalForm">Forme juridique et capital <small>ex. SAS au capital de 10 000 €</small></label><input type="text" id="legalForm" name="legalForm"></div>
-        <div class="full"><label for="address">Adresse</label><textarea id="address" name="address"></textarea></div>
-        <div><label for="siret">SIRET</label><input type="text" id="siret" name="siret"></div>
-        <div><label for="rcs">RCS / RM <small>ex. RCS Lyon 123 456 789</small></label><input type="text" id="rcs" name="rcs"></div>
-        <div><label for="vatNumber">N° de TVA intracommunautaire</label><input type="text" id="vatNumber" name="vatNumber"></div>
-        <div><label for="email">E-mail</label><input type="email" id="email" name="email"></div>
-        <div><label for="phone">Téléphone</label><input type="text" id="phone" name="phone"></div>
-        <div><label for="website">Site web</label><input type="text" id="website" name="website"></div>
-        <div class="full"><label class="check"><input type="checkbox" name="vatExempt"> Franchise en base de TVA (micro-entreprise) : « TVA non applicable, art. 293 B du CGI »</label></div>
+        <div><label for="companyName" data-i18n="company.name"></label><input type="text" id="companyName" name="companyName"></div>
+        <div><label for="legalForm"><span data-i18n="company.legalForm"></span> <small data-i18n="company.legalFormHint"></small></label><input type="text" id="legalForm" name="legalForm"></div>
+        <div class="full"><label for="address"><span data-i18n="company.address"></span> <small data-i18n="company.addressHint"></small></label><textarea id="address" name="address"></textarea></div>
+        <div><label for="countryCode" data-i18n="company.country"></label><select id="countryCode" name="countryCode"></select></div>
+        <div><label for="supplyType" data-i18n="company.supplyType"></label><select id="supplyType" name="supplyType">
+          <option value="goods" data-i18n="company.supplyGoods"></option><option value="services" data-i18n="company.supplyServices"></option><option value="mixed" data-i18n="company.supplyMixed"></option>
+        </select></div>
+        <div><label for="siret" data-i18n="company.siret"></label><input type="text" id="siret" name="siret"></div>
+        <div><label for="rcs"><span data-i18n="company.rcs"></span> <small data-i18n="company.rcsHint"></small></label><input type="text" id="rcs" name="rcs"></div>
+        <div><label for="vatNumber" data-i18n="company.vat"></label><input type="text" id="vatNumber" name="vatNumber"></div>
+        <div><label for="email" data-i18n="company.email"></label><input type="email" id="email" name="email"></div>
+        <div><label for="phone" data-i18n="company.phone"></label><input type="text" id="phone" name="phone"></div>
+        <div><label for="website" data-i18n="company.website"></label><input type="text" id="website" name="website"></div>
+        <div class="full"><label class="check"><input type="checkbox" name="vatExempt"> <span data-i18n="company.vatExempt"></span></label></div>
       </div>
     </section>
 
     <section class="card">
-      <h2>Apparence</h2>
+      <h2 data-i18n="facturx.title"></h2>
+      <p class="help" data-i18n="facturx.help"></p>
+      <label class="check"><input type="checkbox" name="facturx"> <span data-i18n="facturx.enable"></span></label>
+      <div id="facturx-status" class="banner" style="margin:10px 0 0"></div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="look.title"></h2>
       <div class="grid">
-        <div class="full"><label for="logoUrl">Adresse du logo <small>PNG ou JPEG en https, par ex. depuis Contenu › Fichiers</small></label><input type="url" id="logoUrl" name="logoUrl" placeholder="https://cdn.shopify.com/…/logo.png"></div>
-        <div><label for="accentColor">Couleur principale</label><input type="text" id="accentColor" name="accentColor" placeholder="#1f2937"></div>
-        <div class="full"><label for="legalNotice">Mentions en bas de facture</label><textarea id="legalNotice" name="legalNotice"></textarea></div>
-        <div class="full"><label for="footerNote">Message de remerciement</label><input type="text" id="footerNote" name="footerNote"></div>
+        <div class="full"><label for="logoUrl"><span data-i18n="look.logo"></span> <small data-i18n="look.logoHint"></small></label><input type="url" id="logoUrl" name="logoUrl" placeholder="https://cdn.shopify.com/…/logo.png"></div>
+        <div><label for="accentColor" data-i18n="look.color"></label><input type="text" id="accentColor" name="accentColor" placeholder="#1f2937"></div>
+        <div class="full"><label for="legalNotice"><span data-i18n="look.legal"></span> <small data-i18n="look.defaultHint"></small></label><textarea id="legalNotice" name="legalNotice"></textarea></div>
+        <div class="full"><label for="footerNote"><span data-i18n="look.footer"></span> <small data-i18n="look.defaultHint"></small></label><input type="text" id="footerNote" name="footerNote"></div>
       </div>
     </section>
 
     <section class="card">
-      <h2>E-mail au client</h2>
-      <p class="help">Variables : <code>{{prenom}}</code> <code>{{nom}}</code> <code>{{numero_facture}}</code> <code>{{commande}}</code> <code>{{boutique}}</code></p>
+      <h2 data-i18n="email.title"></h2>
+      <p class="help"><span data-i18n="email.variables"></span> <code>{{first_name}}</code> <code>{{name}}</code> <code>{{invoice_number}}</code> <code>{{order}}</code> <code>{{shop}}</code></p>
       <div class="grid">
-        <div class="full"><label for="emailSubject">Objet</label><input type="text" id="emailSubject" name="emailSubject"></div>
-        <div class="full"><label for="emailBody">Message</label><textarea id="emailBody" name="emailBody" style="min-height:140px"></textarea></div>
+        <div class="full"><label for="emailSubject"><span data-i18n="email.subject"></span> <small data-i18n="look.defaultHint"></small></label><input type="text" id="emailSubject" name="emailSubject"></div>
+        <div class="full"><label for="emailBody"><span data-i18n="email.body"></span> <small data-i18n="look.defaultHint"></small></label><textarea id="emailBody" name="emailBody" style="min-height:140px"></textarea></div>
       </div>
       <div class="actions">
-        <button type="button" id="preview">Aperçu du PDF</button>
-        <button type="submit" class="primary" id="save">Enregistrer</button>
+        <button type="button" id="preview" data-i18n="preview"></button>
+        <button type="submit" class="primary" id="save" data-i18n="save"></button>
       </div>
     </section>
   </form>
 
   <section class="card">
-    <h2>Lien dans l'e-mail de confirmation de Shopify <small>(facultatif)</small></h2>
-    <p class="help">
-      Pour ajouter aussi un bouton « Télécharger ma facture » dans les notifications de Shopify,
-      collez ce code dans <b>Paramètres › Notifications › Confirmation de commande</b> (et « Commande payée » si besoin).
-    </p>
+    <h2><span data-i18n="liquid.title"></span> <small data-i18n="liquid.optional"></small></h2>
+    <p class="help" data-i18n="liquid.help"></p>
     <pre id="liquid"></pre>
-    <div class="actions"><button type="button" id="copy-liquid">Copier le code</button></div>
+    <div class="actions"><button type="button" id="copy-liquid" data-i18n="liquid.copy"></button></div>
   </section>
 
   <section class="card">
-    <h2>Factures émises</h2>
+    <h2 data-i18n="invoices.title"></h2>
     <div class="scroll">
       <table>
-        <thead><tr><th>N°</th><th>Commande</th><th>Client</th><th>Date</th><th class="num">Total TTC</th><th>E-mail</th><th></th></tr></thead>
-        <tbody id="invoices"><tr><td colspan="7" class="empty">Chargement…</td></tr></tbody>
+        <thead><tr>
+          <th data-i18n="invoices.number"></th><th data-i18n="invoices.order"></th><th data-i18n="invoices.customer"></th>
+          <th data-i18n="invoices.date"></th><th class="num" data-i18n="invoices.total"></th><th data-i18n="invoices.email"></th><th></th>
+        </tr></thead>
+        <tbody id="invoices"><tr><td colspan="7" class="empty" data-i18n="loading"></td></tr></tbody>
       </table>
     </div>
   </section>
 </main>
 
 <script>
+  /*%I18N%*/
   const APP_URL = '%APP_URL%';
+  const { lang, t: T, languages } = window.I18N;
+  const INTL = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE', es: 'es-ES', it: 'it-IT', nl: 'nl-NL', 'pt-BR': 'pt-BR' }[lang] || 'en';
+  const t = (key, vars = {}) => String(T[key] ?? key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
   const form = document.getElementById('settings');
   const escape = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const toast = (message, isError = false) => (window.shopify?.toast ? shopify.toast.show(message, { isError }) : alert(message));
+
+  // Textes statiques, listes de langues et de pays.
+  document.title = t('appName');
+  for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
+  for (const select of document.querySelectorAll('select[data-languages]')) {
+    const options = select.dataset.languages === 'auto' ? [{ code: 'auto', name: t('general.languageAuto') }, ...languages] : languages;
+    select.innerHTML = options.map((l) => `<option value="${escape(l.code)}">${escape(l.name)}</option>`).join('');
+  }
+  const regionNames = new Intl.DisplayNames([INTL], { type: 'region' });
+  const COUNTRIES = 'AT BE BG BR CA CH CY CZ DE DK EE ES FI FR GB GR HR HU IE IT LT LU LV MT NL NO PL PT RO SE SI SK US AU'.split(' ')
+    .map((code) => ({ code, name: regionNames.of(code) }))
+    .sort((a, b) => a.name.localeCompare(b.name, INTL));
+  document.getElementById('countryCode').innerHTML = COUNTRIES.map((c) => `<option value="${c.code}">${escape(c.name)}</option>`).join('');
+  const syncFallback = () => { document.getElementById('fallback-field').hidden = form.elements.invoiceLanguage.value !== 'auto'; };
+  form.elements.invoiceLanguage.addEventListener('change', syncFallback);
 
   async function api(path, options = {}) {
     const token = await shopify.idToken();
@@ -174,12 +212,22 @@
     });
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      throw new Error(body.error || `Erreur ${response.status}`);
+      throw new Error(body.error || `Error ${response.status}`);
     }
     return response.headers.get('content-type')?.includes('application/json') ? response.json() : response.blob();
   }
 
-  function fillForm({ settings, nextNumber }) {
+  function showFacturx(issues) {
+    const box = document.getElementById('facturx-status');
+    const enabled = form.elements.facturx.checked;
+    box.hidden = !enabled;
+    box.className = `banner ${issues.length ? 'warn' : 'ok'}`;
+    box.textContent = issues.length
+      ? `${t('facturx.missing')} ${issues.filter((i) => T[`facturx.issue.${i}`]).map((i) => t(`facturx.issue.${i}`)).join(', ')}`.replace(/\.?$/, '.')
+      : t('facturx.ready');
+  }
+
+  function fillForm({ settings, nextNumber, facturxIssues }) {
     for (const [key, value] of Object.entries(settings)) {
       const field = form.elements[key];
       if (!field) continue;
@@ -187,7 +235,10 @@
       else field.value = value;
     }
     form.elements.nextNumber.value = nextNumber;
+    syncFallback();
+    showFacturx(facturxIssues);
   }
+  form.elements.facturx.addEventListener('change', () => showFacturx([]));
 
   function readForm() {
     const settings = {};
@@ -195,7 +246,7 @@
       if (!field.name || field.name === 'nextNumber') continue;
       settings[field.name] = field.type === 'checkbox' ? field.checked : field.value;
     }
-    return { settings, nextNumber: Number(form.elements.nextNumber.value) };
+    return { settings, nextNumber: Number(form.elements.nextNumber.value), locale: lang };
   }
 
   function download(blob, filename) {
@@ -207,27 +258,26 @@
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   }
 
-  const money = (cents, currency) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(cents / 100);
-  const STATUS = { sent: 'Envoyé', failed: 'Échec', pending: 'Non envoyé' };
+  const money = (cents, currency) => new Intl.NumberFormat(INTL, { style: 'currency', currency }).format(cents / 100);
 
   async function loadInvoices() {
     const { invoices } = await api('/invoices');
     const tbody = document.getElementById('invoices');
     if (!invoices.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucune facture pour l\'instant. Elles apparaîtront ici à chaque nouvelle commande.</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="7" class="empty">${escape(t('invoices.empty'))}</td></tr>`;
       return;
     }
     tbody.innerHTML = invoices.map((inv) => `
       <tr>
-        <td><b>${escape(inv.number)}</b></td>
+        <td><b>${escape(inv.number)}</b>${inv.facturx ? ` <span class="badge fx">${escape(t('facturx.badge'))}</span>` : ''}</td>
         <td>${escape(inv.order_name)}</td>
         <td>${escape(inv.customer_name)}<br><small>${escape(inv.customer_email)}</small></td>
-        <td>${new Date(inv.issued_at).toLocaleDateString('fr-FR')}</td>
+        <td>${new Date(inv.issued_at).toLocaleDateString(INTL)} <small>${escape(inv.language)}</small></td>
         <td class="num">${money(inv.total_cents, inv.currency)}</td>
-        <td><span class="badge ${escape(inv.email_status)}" title="${escape(inv.email_error)}">${STATUS[inv.email_status] ?? escape(inv.email_status)}</span></td>
+        <td><span class="badge ${escape(inv.email_status)}" title="${escape(inv.email_error)}">${escape(t(`invoices.${inv.email_status}`))}</span></td>
         <td class="num">
           <button class="small" data-pdf="${inv.id}" data-number="${escape(inv.number)}">PDF</button>
-          <button class="small" data-send="${inv.id}">${inv.email_status === 'sent' ? 'Renvoyer' : 'Envoyer'}</button>
+          <button class="small" data-send="${inv.id}">${escape(t(inv.email_status === 'sent' ? 'invoices.resend' : 'invoices.send'))}</button>
         </td>
       </tr>`).join('');
   }
@@ -238,10 +288,10 @@
     button.disabled = true;
     try {
       if (button.dataset.pdf) {
-        download(await api(`/invoices/${button.dataset.pdf}/pdf`), `Facture-${button.dataset.number}.pdf`);
+        download(await api(`/invoices/${button.dataset.pdf}/pdf`), `${button.dataset.number}.pdf`);
       } else if (button.dataset.send) {
         await api(`/invoices/${button.dataset.send}/send`, { method: 'POST' });
-        toast('Facture envoyée');
+        toast(t('invoices.sentToast'));
         await loadInvoices();
       }
     } catch (error) {
@@ -258,7 +308,7 @@
     save.disabled = true;
     try {
       fillForm(await api('/settings', { method: 'PUT', body: JSON.stringify(readForm()) }));
-      toast('Réglages enregistrés');
+      toast(t('saved'));
     } catch (error) {
       toast(error.message, true);
     } finally {
@@ -268,7 +318,7 @@
 
   document.getElementById('preview').addEventListener('click', async () => {
     try {
-      download(await api('/preview', { method: 'POST', body: JSON.stringify(readForm()) }), 'Apercu-facture.pdf');
+      download(await api('/preview', { method: 'POST', body: JSON.stringify(readForm()) }), 'preview.pdf');
     } catch (error) {
       toast(error.message, true);
     }
@@ -276,46 +326,45 @@
 
   const liquid =
     '{% assign facture_jeton = order_status_url | split: "/orders/" | last | split: "/" | first %}\n' +
-    `<p><a href="${APP_URL}/f/{{ facture_jeton }}" style="color:#ffffff;background:#1f2937;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block">Télécharger ma facture (PDF)</a></p>`;
+    `<p><a href="${APP_URL}/f/{{ facture_jeton }}" style="color:#ffffff;background:#1f2937;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block">${t('liquid.button')}</a></p>`;
   document.getElementById('liquid').textContent = liquid;
   document.getElementById('copy-liquid').addEventListener('click', async () => {
     await navigator.clipboard.writeText(liquid);
-    toast('Code copié');
+    toast(t('liquid.copied'));
   });
 
-  const usd = (n) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(n);
+  // ---------- Abonnement ----------
+  const usd = (n) => new Intl.NumberFormat(INTL, { style: 'currency', currency: 'USD' }).format(n);
 
   async function loadBilling() {
     const b = await api('/billing');
-    const current = b.plans.find((p) => p.key === b.current);
+    const planName = (key) => t(`plan.${key}`);
     const bar = document.getElementById('usage-bar');
     if (b.limit === null) {
-      document.getElementById('usage-text').textContent = `Formule ${current.name} : ${b.used} facture(s) ce mois-ci, sans limite.`;
+      document.getElementById('usage-text').textContent = t('billing.usageUnlimited', { plan: planName(b.current), used: b.used });
       bar.hidden = true;
     } else {
-      document.getElementById('usage-text').textContent =
-        `Formule ${current.name} : ${b.used} / ${b.limit} factures utilisées ce mois-ci.`;
+      document.getElementById('usage-text').textContent = t('billing.usage', { plan: planName(b.current), used: b.used, limit: b.limit });
       bar.hidden = false;
       bar.classList.toggle('full', b.remaining === 0);
       bar.firstElementChild.style.width = `${Math.min(100, (100 * b.used) / b.limit)}%`;
     }
-    const banner = document.getElementById('pending-banner');
-    banner.hidden = !b.pending;
+    document.getElementById('pending-banner').hidden = !b.pending;
     document.getElementById('pending-text').textContent =
-      `${b.pending} commande(s) en attente de facture : la limite mensuelle a été atteinte.` +
-      (b.remaining === 0 ? ' Passez à une formule supérieure pour les facturer.' : '');
+      t('billing.pending', { n: b.pending }) + (b.remaining === 0 ? ` ${t('billing.pendingUpgrade')}` : '');
     document.getElementById('generate-pending').disabled = b.remaining === 0;
 
     document.getElementById('plans').innerHTML = b.plans.map((p) => {
       const isCurrent = p.key === b.current;
-      const limit = p.monthlyLimit === null ? 'Factures illimitées' : `${p.monthlyLimit} factures par mois`;
-      const price = `${usd(p.price)} <small>/ mois</small>`;
-      const trial = p.trialDays ? `<small>${p.trialDays} jours d'essai gratuit</small>` : '<small>&nbsp;</small>';
+      const limit = p.monthlyLimit === null ? t('billing.unlimited') : t('billing.invoicesPerMonth', { n: p.monthlyLimit });
+      const trial = p.trialDays ? `<small>${escape(t('billing.trial', { n: p.trialDays }))}</small>` : '<small>&nbsp;</small>';
       let action;
-      if (isCurrent) action = p.price ? '<button type="button" data-cancel>Résilier</button>' : '<button type="button" disabled>Formule actuelle</button>';
-      else if (p.price) action = `<button type="button" class="primary" data-plan="${escape(p.key)}">Choisir</button>`;
-      else action = '<button type="button" disabled>Disponible après résiliation</button>';
-      return `<div class="plan${isCurrent ? ' current' : ''}"><b>${escape(p.name)}</b><span class="price">${price}</span><span>${limit}</span>${trial}${action}</div>`;
+      if (isCurrent) action = p.price ? `<button type="button" data-cancel>${escape(t('billing.cancel'))}</button>` : `<button type="button" disabled>${escape(t('billing.current'))}</button>`;
+      else if (p.price) action = `<button type="button" class="primary" data-plan="${escape(p.key)}">${escape(t('billing.choose'))}</button>`;
+      else action = `<button type="button" disabled>${escape(t('billing.afterCancel'))}</button>`;
+      return `<div class="plan${isCurrent ? ' current' : ''}"><b>${escape(planName(p.key))}</b>` +
+        `<span class="price">${usd(p.price)} <small>${escape(t('billing.perMonth'))}</small></span>` +
+        `<span>${escape(limit)}</span>${trial}${action}</div>`;
     }).join('');
   }
 
@@ -330,9 +379,9 @@
         return;
       }
       if ('cancel' in button.dataset) {
-        if (!confirm("Résilier l'abonnement et revenir à la formule gratuite (10 factures par mois) ?")) return;
+        if (!confirm(t('billing.confirmCancel'))) return;
         await api('/billing/cancel', { method: 'POST' });
-        toast('Abonnement résilié');
+        toast(t('billing.cancelled'));
         await loadBilling();
       }
     } catch (error) {
@@ -346,7 +395,7 @@
     event.target.disabled = true;
     try {
       const { created } = await api('/pending/generate', { method: 'POST' });
-      toast(`${created} facture(s) générée(s)`);
+      toast(t('billing.generated', { n: created }));
       await Promise.all([loadBilling(), loadInvoices()]);
     } catch (error) {
       toast(error.message, true);
@@ -355,9 +404,9 @@
 
   (async () => {
     try {
-      const session = await api('/session', { method: 'POST' });
-      await loadBilling();
+      const session = await api('/session', { method: 'POST', body: JSON.stringify({ locale: lang }) });
       document.getElementById('mail-warning').hidden = session.mailConfigured;
+      await loadBilling();
       fillForm(await api('/settings'));
       await loadInvoices();
     } catch (error) {

@@ -212,3 +212,20 @@ test('le PDF contient les mentions attendues', async (t) => {
     assert.ok(text.includes(expected), `absent du PDF : ${expected}`);
   }
 });
+
+test('page d’admin servie dans la langue de l’administrateur Shopify', async () => {
+  const ctx = await setup();
+  try {
+    const de = await (await fetch(`${ctx.base}/?shop=${SHOP}&locale=de`)).text();
+    assert.match(de, /<html lang="de">/);
+    assert.match(de, /"appName":"PDF-Rechnungen"/);
+    const pt = await (await fetch(`${ctx.base}/?locale=pt-PT`)).text();
+    assert.match(pt, /"lang":"pt-BR"/);
+    const unknown = await (await fetch(`${ctx.base}/?locale=ja`)).text();
+    assert.match(unknown, /"lang":"en"/);
+    const notReady = await (await fetch(`${ctx.base}/f/inconnu0000000000000`, { headers: { 'Accept-Language': 'es-ES,es;q=0.9' } })).text();
+    assert.match(notReady, /Su factura aún no está disponible/);
+  } finally {
+    ctx.close();
+  }
+});

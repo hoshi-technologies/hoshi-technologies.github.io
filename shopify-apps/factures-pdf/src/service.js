@@ -4,6 +4,8 @@ import { buildInvoice, formatInvoiceNumber } from './invoice.js';
 import { renderInvoicePdf } from './pdf.js';
 import { buildInvoiceEmail } from './mailer.js';
 import { getPlan, monthKey, monthStart } from './plans.js';
+import { buildFacturxXml, facturxIssues } from './facturx.js';
+import { dictionary, format, invoiceLanguage } from './i18n/index.js';
 
 export class InvoiceService {
   constructor({ store, transport, mailFrom, fetchImpl = fetch, logger = console }) {
@@ -32,9 +34,33 @@ export class InvoiceService {
     return logo;
   }
 
-  async renderPdf(invoice, { number, issuedAt, settings, shopName }) {
+  /**
+   * PDF de la facture dans la langue voulue, au format Factur-X si les réglages le permettent.
+   * Renvoie { pdf, facturx } (facturx = true si le XML est embarqué).
+   */
+  async renderPdf(invoice, { number, issuedAt, settings, shopName, lang }) {
     const logo = await this.loadLogo(settings.logoUrl);
-    return renderInvoicePdf(invoice, { number, issuedAt, settings, shopName, logo });
+    const t = dictionary(lang).invoice;
+    const withFacturx = settings.facturx && facturxIssues(settings, invoice).length === 0;
+    const facturxXml = withFacturx
+      ? buildFacturxXml(invoice, {
+          number,
+          issuedAt,
+          settings,
+          shopName,
+          texts: {
+            discount: t.discountReason,
+            shipping: t.shipping,
+            notePMD: settings.legalNotice || t.notePMD,
+            notePMT: t.notePMT,
+            noteAAB: t.noteAAB,
+            paymentTermsPaid: t.paymentTermsPaid,
+            paymentTermsDue: t.paymentTermsDue,
+          },
+        })
+      : null;
+    const pdf = await renderInvoicePdf(invoice, { number, issuedAt, settings, shopName, logo, lang, facturxXml });
+    return { pdf, facturx: withFacturx };
   }
 
   /**
@@ -91,15 +117,13 @@ export class InvoiceService {
     if (!this.transport || !this.mailFrom || !settings.email) return;
     if (!this.store.markQuotaNotified(shop, monthKey())) return;
     const { plan } = this.usage(shop);
+    const dict = dictionary(settings.fallbackLanguage);
+    const vars = { limit: plan.monthlyLimit, plan: dict.admin[`plan.${plan.key}`] };
     await this.transport.sendMail({
-      from: { name: 'Factures PDF', address: this.mailFrom },
+      from: { name: dict.admin.appName, address: this.mailFrom },
       to: settings.email,
-      subject: `Limite de ${plan.monthlyLimit} factures atteinte ce mois-ci`,
-      text:
-        `Bonjour,\n\nVotre boutique a atteint la limite de ${plan.monthlyLimit} factures par mois de la formule ${plan.name}.\n` +
-        "Les nouvelles commandes sont mises en attente : leurs factures ne sont ni créées ni envoyées.\n\n" +
-        "Pour les générer et continuer à facturer automatiquement, choisissez une formule supérieure dans " +
-        "Shopify > Applis > Factures PDF > Abonnement.\n\nL'équipe Factures PDF",
+      subject: format(dict.email.quotaSubject, vars),
+      text: format(dict.email.quotaBody, vars),
     });
   }
 
@@ -123,7 +147,8 @@ export class InvoiceService {
       }
       const issuedAt = new Date().toISOString();
       const number = formatInvoiceNumber(settings.numberPrefix, seq, new Date(issuedAt));
-      const pdf = await this.renderPdf(invoice, { number, issuedAt, settings, shopName });
+      const lang = invoiceLanguage(settings, invoice.locale);
+      const { pdf, facturx } = await this.renderPdf(invoice, { number, issuedAt, settings, shopName, lang });
 
       const saved = this.store.insertInvoice(shop, seq, {
         orderId: invoice.orderId,
@@ -136,6 +161,8 @@ export class InvoiceService {
         customerFirstName: invoice.customer.firstName,
         totalCents: invoice.totalTtcCents,
         currency: invoice.currency,
+        language: lang,
+        facturx,
         pdf,
       });
       this.store.deletePendingOrder(shop, order.id);

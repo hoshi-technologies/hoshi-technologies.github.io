@@ -1,7 +1,7 @@
-// Génère un exemple de facture : `npm run preview` → ./apercu-facture.pdf
+// Génère un exemple de facture Factur-X : `npm run preview -- [fichier.pdf] [langue]`
 import { readFileSync, writeFileSync } from 'node:fs';
 import { buildInvoice } from '../src/invoice.js';
-import { renderInvoicePdf } from '../src/pdf.js';
+import { InvoiceService } from '../src/service.js';
 import { DEFAULT_SETTINGS } from '../src/settings.js';
 
 const order = JSON.parse(readFileSync(new URL('../src/sample-order.json', import.meta.url)));
@@ -16,12 +16,14 @@ const settings = {
   email: 'contact@atelier-exemple.fr',
   website: 'atelier-exemple.fr',
 };
-const pdf = await renderInvoicePdf(buildInvoice(order), {
+const [out = 'apercu-facture.pdf', lang = 'fr'] = process.argv.slice(2);
+const service = new InvoiceService({ store: null, transport: null, mailFrom: null });
+const { pdf, facturx } = await service.renderPdf(buildInvoice(order), {
   number: 'F-2026-00042',
   issuedAt: '2026-10-28T14:13:00+01:00',
   settings,
   shopName: 'atelier-exemple',
+  lang,
 });
-const out = process.argv[2] || 'apercu-facture.pdf';
 writeFileSync(out, pdf);
-console.log(`Aperçu écrit dans ${out}`);
+console.log(`Aperçu écrit dans ${out} (${lang}${facturx ? ', Factur-X' : ''})`);

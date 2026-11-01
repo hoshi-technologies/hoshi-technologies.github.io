@@ -20,6 +20,8 @@ import {
   SUBSCRIPTION_CANCEL,
   ACTIVE_SUBSCRIPTIONS,
 } from './shopify.js';
+import { facturxIssues } from './facturx.js';
+import { LANGUAGES, dictionary, resolveLanguage, matchLanguage, invoiceLanguage } from './i18n/index.js';
 import { PLANS, BILLING_CURRENCY, subscriptionName, planFromSubscriptionName } from './plans.js';
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
@@ -104,19 +106,20 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     const token = String(req.params.token).replace(/\.pdf$/, '');
     const invoice = /^[A-Za-z0-9_-]{16,}$/.test(token) ? store.findInvoiceByToken(token) : null;
     if (!invoice) {
+      const lang = resolveLanguage(req.acceptsLanguages(...LANGUAGES.map((l) => l.code), 'pt') || 'en');
+      const dict = dictionary(lang);
       return res
         .status(404)
         .type('html')
         .send(
-          '<!doctype html><meta charset="utf-8"><title>Facture</title><body style="font-family:sans-serif;padding:2rem">' +
-            "<p>Votre facture n'est pas encore disponible. Elle est générée dès le paiement de la commande : " +
-            'réessayez dans quelques minutes.</p>',
+          `<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width">` +
+            `<title>${dict.email.filename}</title><body style="font-family:sans-serif;padding:2rem"><p>${dict.notReady}</p>`,
         );
     }
     res.set('Cache-Control', 'private, no-store');
     res.set('X-Robots-Tag', 'noindex');
     res.type('application/pdf');
-    res.set('Content-Disposition', `inline; filename="Facture-${invoice.number}.pdf"`);
+    res.set('Content-Disposition', `inline; filename="${dictionary(invoice.language).email.filename}-${invoice.number}.pdf"`);
     res.send(Buffer.from(invoice.pdf));
   });
 
@@ -127,7 +130,15 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
       'Content-Security-Policy',
       `frame-ancestors ${shop ? `https://${shop} ` : ''}https://admin.shopify.com;`,
     );
-    res.type('html').send(ADMIN_HTML.replaceAll('%SHOPIFY_API_KEY%', config.apiKey).replaceAll('%APP_URL%', config.appUrl));
+    // Shopify passe la langue de l'administrateur dans ?locale= (fr, en, pt-BR…).
+    const lang = resolveLanguage(req.query.locale, 'en');
+    const i18n = { lang, t: dictionary(lang).admin, languages: LANGUAGES };
+    res.type('html').send(
+      ADMIN_HTML.replaceAll('%SHOPIFY_API_KEY%', config.apiKey)
+        .replaceAll('%APP_URL%', config.appUrl)
+        .replaceAll('%LANG%', lang)
+        .replace('/*%I18N%*/', () => `window.I18N = ${JSON.stringify(i18n).replace(/</g, '\\u003c')};`),
+    );
   });
 
   // ---------- API de l'admin, authentifiée par le jeton de session App Bridge ----------
@@ -158,6 +169,9 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
         const a = info.billingAddress ?? {};
         store.saveSettings(req.shop, {
           ...s,
+          fallbackLanguage: matchLanguage(req.body?.locale) ?? s.fallbackLanguage,
+          timezone: s.timezone || info.ianaTimezone || '',
+          countryCode: a.countryCodeV2 || s.countryCode,
           companyName: s.companyName || a.company || info.name,
           email: s.email || info.contactEmail || info.email,
           phone: s.phone || a.phone || '',
@@ -179,9 +193,14 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     res.json({ shop: req.shop, mailConfigured: Boolean(service.transport && service.mailFrom) });
   });
 
+  const settingsResponse = (row) => ({
+    settings: row.settings,
+    nextNumber: row.next_number,
+    facturxIssues: facturxIssues(row.settings),
+  });
+
   api.get('/settings', (req, res) => {
-    const row = store.ensureShop(req.shop);
-    res.json({ settings: row.settings, nextNumber: row.next_number });
+    res.json(settingsResponse(store.ensureShop(req.shop)));
   });
 
   api.put('/settings', (req, res) => {
@@ -196,7 +215,7 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     }
     store.saveSettings(req.shop, settings);
     service.logos.delete(settings.logoUrl); // le logo a pu changer à la même adresse
-    res.json({ settings, nextNumber: store.getShop(req.shop).next_number });
+    res.json(settingsResponse(store.getShop(req.shop)));
   });
 
   api.get('/invoices', (req, res) => {
@@ -285,11 +304,13 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
   api.post('/preview', async (req, res) => {
     const row = store.ensureShop(req.shop);
     const settings = sanitizeSettings(req.body.settings ?? {}, row.settings);
-    const pdf = await service.renderPdf(buildInvoice(SAMPLE_ORDER), {
-      number: `${settings.numberPrefix}${new Date().getFullYear()}-APERCU`,
+    const lang = invoiceLanguage(settings, req.body.locale);
+    const { pdf } = await service.renderPdf(buildInvoice(SAMPLE_ORDER), {
+      number: `${settings.numberPrefix}${new Date().getFullYear()}-${dictionary(lang).invoice.preview}`,
       issuedAt: new Date().toISOString(),
       settings,
       shopName: req.shop.replace('.myshopify.com', ''),
+      lang,
     });
     res.type('application/pdf').send(pdf);
   });

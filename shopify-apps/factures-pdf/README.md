@@ -21,6 +21,11 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
 - **Lien de téléchargement** à coller dans la notification « Confirmation de commande » de
   Shopify (code Liquid fourni dans l'admin) : le client retrouve aussi sa facture depuis
   l'e-mail habituel de la boutique.
+- **Factur-X (EN 16931)** : chaque PDF est un PDF/A-3 qui embarque le fichier
+  `factur-x.xml`, lisible par les logiciels comptables et les plateformes de facturation
+  électronique (voir ci-dessous).
+- **7 langues** : français, anglais, allemand, espagnol, italien, néerlandais, portugais
+  (Brésil), pour la facture, l'e-mail, la page publique et l'interface d'administration.
 - **Historique** des factures émises, téléchargement du PDF, statut d'envoi.
 - **Aperçu** du PDF avec une commande fictive avant d'enregistrer les réglages.
 - **RGPD** : webhooks obligatoires de Shopify (`customers/data_request`, `customers/redact`,
@@ -58,11 +63,49 @@ Positionnement face à la concurrence (fiches App Store, fin 2026) :
 | FF Factures Client en France | 20 / mois | 19 $ illimité (Factur-X) |
 | Order Printer Pro | 50 / mois | 10 $ / 500 |
 
-Les concurrents français proposent presque tous **Factur-X** (PDF + XML, utile pour la
-facturation électronique B2B) : c'est la prochaine fonctionnalité à ajouter pour justifier
-un prix au niveau du marché.
+Les concurrents français proposent presque tous **Factur-X** : c'est désormais aussi le
+cas de l'appli, ce qui permettrait de remonter les prix vers ceux du marché.
 
 Aperçu d'une facture : `npm run preview` génère `apercu-facture.pdf`.
+
+## Factur-X
+
+- Profil **EN 16931** (syntaxe CII), PDF/A-3b avec polices embarquées (Liberation Sans,
+  licence SIL OFL, dans `assets/fonts/`), XML joint en relation « Alternative » et
+  métadonnées XMP Factur-X.
+- Produit automatiquement dès que la raison sociale, l'adresse, le pays et le n° de TVA
+  (ou, en franchise de TVA, le SIRET) sont renseignés ; sinon la facture reste un PDF
+  simple et l'admin indique ce qui manque.
+- Conforme aux règles françaises de la réforme 2026 (schematron BR-FR) : SIREN du vendeur,
+  cadre de facturation (B1/B2 biens, S1/S2 services, M1/M2 mixte selon le réglage « Vous
+  vendez » et le paiement), mentions codées pénalités (PMD), indemnité de 40 € (PMT) et
+  escompte (AAB), date d'échéance.
+- La TVA est calculée par taux sur le total HT (règle BR-CO-17) ; l'écart d'arrondi de
+  Shopify (calcul ligne par ligne) est reporté sur une ligne, sans jamais changer le TTC payé.
+- Validation effectuée sur 12 cas (prix TTC et HT, arrondis, micro-entreprise, commande
+  impayée, client sans adresse, 7 langues) avec la bibliothèque Python `factur-x` : XSD
+  officiel + schematron EN 16931 + schematron français BR-FR, **0 erreur**. La conformité
+  PDF/A elle-même n'a pas été vérifiée par veraPDF.
+
+  ```sh
+  pip install factur-x saxonche
+  npm run preview -- facture.pdf fr
+  python scripts/validate-facturx.py facture.pdf
+  ```
+
+## Langues
+
+- **Interface d'administration** : dans la langue de l'administrateur Shopify (paramètre
+  `locale` transmis par Shopify), anglais par défaut.
+- **Factures et e-mails** : dans la langue du client (`customer_locale` de la commande),
+  sinon dans la langue de repli choisie ; ou une langue fixe pour toutes les factures.
+- Les textes laissés vides (mentions, remerciement, objet et corps de l'e-mail) utilisent le
+  texte par défaut traduit ; un texte personnalisé est utilisé tel quel dans toutes les langues.
+- Variables d'e-mail : `{{first_name}}`, `{{name}}`, `{{invoice_number}}`, `{{order}}`,
+  `{{shop}}` (les anciens noms `{{prenom}}`, `{{numero_facture}}`… restent acceptés).
+- Japonais, chinois et coréen ne sont pas encore proposés : il faudrait embarquer une police
+  CJK de plus de 10 Mo. Ajouter une langue latine = un fichier dans `src/i18n/`, un test
+  vérifie qu'il a toutes les clés.
 
 ## Pourquoi un e-mail séparé ?
 
@@ -78,7 +121,9 @@ src/
   server.js     serveur Express : webhooks, API de l'admin, lien public /f/<jeton>
   service.js    création de la facture (file d'attente → numérotation sans trou) et envoi
   invoice.js    commande Shopify → lignes HT, remises, TVA par taux, totaux (centimes)
-  pdf.js        mise en page A4 (pdfkit), multi-pages, pied de page légal
+  pdf.js        mise en page A4 PDF/A-3 (pdfkit), multi-pages, Factur-X embarqué
+  facturx.js    XML Factur-X EN 16931 (CII) et métadonnées XMP
+  i18n/         traductions (fr, en, de, es, it, nl, pt-BR)
   mailer.js     e-mail HTML + texte, PDF en pièce jointe (nodemailer)
   plans.js      formules d'abonnement (prix, quotas, essai)
   shopify.js    signature des webhooks, jetons de session, échange de jeton, Billing API
@@ -146,5 +191,6 @@ Développement local : `npm install`, `npm test`, `npm run dev` (avec un tunnel 
 - Export ZIP / CSV des factures par période (pour le comptable) et archivage externe.
 - Bouton « Télécharger la facture » dans le compte client (extension Customer Account).
 - Factures en plusieurs langues selon la langue de la commande.
-- Format Factur-X (PDF/A-3 avec XML EN 16931) pour les clients professionnels.
+- SIREN et n° de TVA du client professionnel dans le Factur-X (B2B).
+- Japonais / chinois / coréen (police CJK).
 - Fiche App Store (politique de confidentialité, captures d'écran).

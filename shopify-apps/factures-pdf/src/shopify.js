@@ -87,7 +87,8 @@ export const SHOP_INFO_QUERY = `#graphql
       email
       contactEmail
       url
-      billingAddress { company address1 address2 zip city country phone }
+      ianaTimezone
+      billingAddress { company address1 address2 zip city country countryCodeV2 phone }
     }
   }`;
 

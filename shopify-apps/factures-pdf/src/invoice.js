@@ -8,7 +8,7 @@ export function toCents(amount) {
 
 const sum = (items, pick) => (items ?? []).reduce((total, item) => total + pick(item), 0);
 
-function lineFrom({ label, sku, quantity, unitCents, discountCents, taxLines, taxesIncluded }) {
+function lineFrom({ label, sku, shipping = false, quantity, unitCents, discountCents, taxLines, taxesIncluded }) {
   const grossCents = unitCents * quantity;
   const netCents = grossCents - discountCents; // prix payé, TTC ou HT selon la boutique
   const taxCents = sum(taxLines, (t) => toCents(t.price));
@@ -17,6 +17,7 @@ function lineFrom({ label, sku, quantity, unitCents, discountCents, taxLines, ta
   const unitHtCents = taxesIncluded ? Math.round(unitCents / (1 + rate)) : unitCents;
   return {
     label,
+    shipping,
     sku: sku || '',
     quantity,
     unitHtCents,
@@ -27,6 +28,51 @@ function lineFrom({ label, sku, quantity, unitCents, discountCents, taxLines, ta
     totalHtCents,
     totalTtcCents: totalHtCents + taxCents,
   };
+}
+
+/**
+ * TVA calculée par taux sur le total HT (règle EN 16931 BR-CO-17 : TVA = base × taux,
+ * arrondie au centime). Shopify arrondit ligne par ligne : l'écart éventuel (1 ou 2 centimes)
+ * est reporté sur une ligne pour que lignes, récapitulatif et totaux restent cohérents.
+ * Prix TTC : le TTC payé par le client ne change jamais, seule la ventilation HT/TVA bouge.
+ */
+function balanceVat(lines, taxesIncluded) {
+  const groups = new Map();
+  for (const line of lines) {
+    const key = line.rate.toFixed(4);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(line);
+  }
+  const vat = [];
+  for (const group of groups.values()) {
+    const rate = group[0].rate;
+    const taxOf = (base) => Math.round(base * rate);
+    let base = sum(group, (l) => l.totalHtCents);
+    if (taxesIncluded) {
+      const ttc = sum(group, (l) => l.totalTtcCents);
+      const guess = Math.round(ttc / (1 + rate));
+      const exact = [0, -1, 1, -2, 2].map((d) => guess + d).find((b) => b + taxOf(b) === ttc);
+      base = exact ?? guess;
+    }
+    const diff = base - sum(group, (l) => l.totalHtCents);
+    if (diff) {
+      // Ligne absorbant l'écart : une remise suffisante, sinon quantité 1, sinon la plus grosse.
+      const target =
+        group.find((l) => l.discountHtCents >= -diff && l.discountHtCents - diff >= 0) ??
+        group.find((l) => l.quantity === 1) ??
+        group.reduce((a, b) => (b.totalHtCents > a.totalHtCents ? b : a));
+      target.totalHtCents += diff;
+      if (target.quantity === 1 && target.discountHtCents === 0) target.unitHtCents = target.totalHtCents;
+      else target.discountHtCents = target.unitHtCents * target.quantity - target.totalHtCents;
+    }
+    const tax = taxesIncluded ? sum(group, (l) => l.totalTtcCents) - base : taxOf(base);
+    for (const line of group) {
+      line.taxCents = taxOf(line.totalHtCents);
+      line.totalTtcCents = line.totalHtCents + line.taxCents;
+    }
+    vat.push({ rate, baseCents: base, taxCents: tax });
+  }
+  return vat.sort((a, b) => a.rate - b.rate);
 }
 
 function variantLabel(item) {
@@ -73,7 +119,8 @@ export function buildInvoice(order) {
     if (price === 0 && !shipping.title) continue;
     lines.push(
       lineFrom({
-        label: `Livraison${shipping.title ? ` – ${shipping.title}` : ''}`,
+        label: shipping.title || '',
+        shipping: true,
         quantity: 1,
         unitCents: price,
         discountCents: sum(shipping.discount_allocations, (d) => toCents(d.amount)),
@@ -83,20 +130,13 @@ export function buildInvoice(order) {
     );
   }
 
-  const vatByRate = new Map();
-  for (const line of lines) {
-    const key = line.rate.toFixed(4);
-    const entry = vatByRate.get(key) ?? { rate: line.rate, baseCents: 0, taxCents: 0 };
-    entry.baseCents += line.totalHtCents;
-    entry.taxCents += line.taxCents;
-    vatByRate.set(key, entry);
-  }
-
+  const vat = balanceVat(lines, taxesIncluded);
   const totalHtCents = sum(lines, (l) => l.totalHtCents);
-  const totalTaxCents = sum(lines, (l) => l.taxCents);
+  const totalTaxCents = sum(vat, (v) => v.taxCents);
   const totalTtcCents = totalHtCents + totalTaxCents;
   const shopifyTotalCents = toCents(order.current_total_price ?? order.total_price);
 
+  const rawBuyer = order.billing_address ?? order.shipping_address ?? order.customer?.default_address ?? null;
   const billing = formatAddress(order.billing_address) ?? formatAddress(order.customer?.default_address);
   const shipping = formatAddress(order.shipping_address);
   const customerName =
@@ -118,8 +158,17 @@ export function buildInvoice(order) {
     },
     billing,
     shipping,
+    buyer: rawBuyer && {
+      company: rawBuyer.company || '',
+      address1: rawBuyer.address1 || '',
+      address2: rawBuyer.address2 || '',
+      zip: rawBuyer.zip || '',
+      city: rawBuyer.city || '',
+      countryCode: rawBuyer.country_code || '',
+    },
+    locale: order.customer_locale || '',
     lines,
-    vat: [...vatByRate.values()].sort((a, b) => a.rate - b.rate),
+    vat,
     totalHtCents,
     totalTaxCents,
     totalTtcCents,

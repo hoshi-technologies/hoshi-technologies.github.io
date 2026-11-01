@@ -45,6 +45,8 @@ export function openDatabase(path) {
       customer_first_name TEXT,
       total_cents INTEGER NOT NULL,
       currency TEXT NOT NULL,
+      language TEXT NOT NULL DEFAULT 'fr',
+      facturx INTEGER NOT NULL DEFAULT 0,
       pdf BLOB NOT NULL,
       email_status TEXT NOT NULL DEFAULT 'pending',
       email_error TEXT,
@@ -160,7 +162,7 @@ export class Store {
     return this.db
       .prepare(
         `SELECT id, order_id, order_name, number, issued_at, customer_email, customer_name,
-                total_cents, currency, email_status, email_error, email_sent_at
+                total_cents, currency, language, facturx, email_status, email_error, email_sent_at
            FROM invoices WHERE shop = ? ORDER BY id DESC LIMIT ?`,
       )
       .all(shop, limit);
@@ -181,8 +183,9 @@ export class Store {
       const { lastInsertRowid } = this.db
         .prepare(
           `INSERT INTO invoices (shop, order_id, order_name, order_token, number, issued_at,
-                                 customer_email, customer_name, customer_first_name, total_cents, currency, pdf)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                                 customer_email, customer_name, customer_first_name, total_cents, currency,
+                                 language, facturx, pdf)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(
           shop,
@@ -196,6 +199,8 @@ export class Store {
           record.customerFirstName,
           record.totalCents,
           record.currency,
+          record.language,
+          record.facturx ? 1 : 0,
           record.pdf,
         );
       this.db.exec('COMMIT');
