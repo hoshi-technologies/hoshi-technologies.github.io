@@ -133,6 +133,20 @@ Godot (affichage, sons, interface, Steam)
 - **Le socle ne connaît pas les modules suivants.** La vraie gestion et les élections s'y branchent par des « événements » : « budget calculé », « fin de mois », etc. S'ils sont désactivés, le socle fonctionne seul.
 - **Les sauvegardes portent un numéro de version.** À chaque mise à jour, un convertisseur fait passer les anciennes sauvegardes de version N à N+1, et des tests les vérifient automatiquement.
 
+### 2.5 Décision du propriétaire (1er novembre 2026) : on prend les meilleurs outils, même payants
+
+Le prix n'est donc plus un critère. La recommandation **Godot 4.7 avec C#** est maintenue, pour des raisons de qualité et non d'argent :
+1. **Godot tourne dans l'environnement où l'IA travaille.** Je peux lancer le jeu, ses tests et ses mesures moi-même avant de te livrer un lot. Unity et Unreal ne s'utilisent que sur ton PC Windows, avec ton compte : chaque vérification passerait par toi, ce qui ralentirait beaucoup le projet.
+2. **La simulation est écrite en C# pur, sans dépendre du moteur.** Si Godot montrait une vraie limite (affichage, outils), on pourrait passer à Unity en gardant toute la simulation. Ce choix n'est donc pas un pari sans retour.
+3. **Le vrai risque est la beauté du jeu, et il se règle surtout par des assets de qualité, pas par le moteur.** C'est là que le budget payant aura le plus d'effet.
+
+Outils payants à prendre quand ils servent vraiment :
+- packs 3D stylisés de qualité professionnelle, en vérifiant que leur licence autorise Godot et la vente sur Steam ;
+- banques de sons professionnelles et musique sous licence ou commandée ;
+- traductions humaines ;
+- un environnement de code confortable si tu codes toi-même (JetBrains Rider ; Visual Studio Community est gratuit) ;
+- un monteur pour la bande-annonce.
+
 ---
 
 ## 3. Données : licences et test sur 20 villes
