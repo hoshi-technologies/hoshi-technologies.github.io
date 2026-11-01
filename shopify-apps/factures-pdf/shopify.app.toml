@@ -1,7 +1,8 @@
 # Configuration de l'appli pour Shopify CLI (`shopify app deploy`).
-# Remplacez client_id et les URL par celles de votre appli (Partner Dashboard / Dev Dashboard).
+# client_id : appli « Hoshi Factures » du tableau de bord développeur Shopify. Les URL sont
+# remplacées automatiquement par `shopify app dev` (tunnel) ; à remplacer par l'URL de production.
 
-client_id = "VOTRE_CLIENT_ID"
+client_id = "29382e5537f3d51df592997c1947800a"
 name = "Hoshi Factures"
 application_url = "https://factures.exemple.fr"
 embedded = true
