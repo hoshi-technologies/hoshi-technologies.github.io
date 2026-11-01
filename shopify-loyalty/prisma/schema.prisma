@@ -59,14 +59,33 @@ model Reward {
   @@index([shop])
 }
 
-/// Palier VIP (Bronze, Argent, Or...) atteint selon les points cumulés
+/// Niveau client (Bronze, Argent, Or, Ambassadrice...)
+/// - AUTO   : atteint automatiquement selon les points cumulés
+/// - MANUAL : attribué uniquement par le marchand
 model Tier {
-  id         String @id @default(cuid())
-  shop       String
-  name       String
-  minPoints  Int    // points cumulés depuis l'inscription
-  multiplier Float  @default(1)
-  color      String @default("#B08D57")
+  id                  String   @id @default(cuid())
+  shop                String
+  name                String
+  mode                String   @default("AUTO") // AUTO | MANUAL
+  minPoints           Int      @default(0)      // points cumulés (niveaux AUTO)
+  multiplier          Float    @default(1)
+  color               String   @default("#B08D57")
+
+  // Avantages appliqués automatiquement au paiement
+  discountType        String   @default("NONE") // NONE | PERCENT | AMOUNT
+  discountValue       Float    @default(0)
+  discountMinSubtotal Float?
+  freeShipping        Boolean  @default(false)
+  perks               String?  // autres avantages (texte affiché au client)
+
+  // Synchronisation Shopify
+  tag                 String?  // étiquette client, ex. « Fidélité Or »
+  segmentId           String?
+  discountId          String?
+  shippingDiscountId  String?
+  syncError           String?
+
+  members             Member[]
 
   @@index([shop])
 }
@@ -82,6 +101,9 @@ model Member {
   points         Int           @default(0)
   lifetimePoints Int           @default(0)
   ordersCount    Int           @default(0)
+  manualTierId   String?       // niveau imposé par le marchand (sinon calculé)
+  manualTier     Tier?         @relation(fields: [manualTierId], references: [id], onDelete: SetNull)
+  appliedTag     String?       // étiquette de niveau actuellement posée sur le client Shopify
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   transactions   Transaction[]

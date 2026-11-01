@@ -1,6 +1,6 @@
 /**
  * Logique métier du programme de fidélité : réglages, membres, points,
- * paliers VIP et échange de récompenses contre des codes de réduction.
+ * niveaux clients et échange de récompenses contre des codes de réduction.
  */
 import { Prisma } from "@prisma/client";
 import type { Member, Program, Reward, Tier } from "@prisma/client";
@@ -49,9 +49,9 @@ export async function getProgram(shop: string): Promise<Program> {
       const program = await tx.program.create({ data: { shop } });
       await tx.tier.createMany({
         data: [
-          { shop, name: "Bronze", minPoints: 0, multiplier: 1, color: "#B08D57" },
-          { shop, name: "Argent", minPoints: 500, multiplier: 1.25, color: "#9CA3AF" },
-          { shop, name: "Or", minPoints: 1500, multiplier: 1.5, color: "#D4A017" },
+          { shop, name: "Bronze", minPoints: 0, multiplier: 1, color: "#B08D57", tag: "Fidélité Bronze" },
+          { shop, name: "Argent", minPoints: 500, multiplier: 1.25, color: "#9CA3AF", tag: "Fidélité Argent" },
+          { shop, name: "Or", minPoints: 1500, multiplier: 1.5, color: "#D4A017", tag: "Fidélité Or" },
         ],
       });
       await tx.reward.createMany({
@@ -76,21 +76,68 @@ export async function getTiers(shop: string): Promise<Tier[]> {
   return db.tier.findMany({ where: { shop }, orderBy: { minPoints: "asc" } });
 }
 
-/** Palier atteint pour un total de points cumulés. */
-export function tierFor(tiers: Tier[], lifetimePoints: number): Tier | null {
-  let current: Tier | null = null;
+type TierLike = Pick<Tier, "id" | "mode" | "minPoints">;
+type MemberTierInfo = { lifetimePoints: number; manualTierId?: string | null };
+
+/** Niveau automatique atteint pour un total de points cumulés. */
+export function tierFor<T extends TierLike>(tiers: T[], lifetimePoints: number): T | null {
+  let current: T | null = null;
   for (const tier of [...tiers].sort((a, b) => a.minPoints - b.minPoints)) {
-    if (lifetimePoints >= tier.minPoints) current = tier;
+    if (tier.mode !== "MANUAL" && lifetimePoints >= tier.minPoints) current = tier;
   }
   return current;
 }
 
-export function nextTier(tiers: Tier[], lifetimePoints: number): Tier | null {
+/** Niveau effectif d'un membre : celui imposé par le marchand, sinon celui des points. */
+export function memberTier<T extends TierLike>(tiers: T[], member: MemberTierInfo): T | null {
+  if (member.manualTierId) {
+    const manual = tiers.find((t) => t.id === member.manualTierId);
+    if (manual) return manual;
+  }
+  return tierFor(tiers, member.lifetimePoints);
+}
+
+/** Prochain niveau automatique (aucun si le niveau est imposé). */
+export function nextTier<T extends TierLike>(tiers: T[], member: MemberTierInfo): T | null {
+  if (member.manualTierId && tiers.some((t) => t.id === member.manualTierId)) return null;
   return (
     [...tiers]
       .sort((a, b) => a.minPoints - b.minPoints)
-      .find((t) => t.minPoints > lifetimePoints) ?? null
+      .find((t) => t.mode !== "MANUAL" && t.minPoints > member.lifetimePoints) ?? null
   );
+}
+
+/** Étiquette client Shopify unique pour un nouveau niveau. */
+export async function uniqueTierTag(shop: string, name: string, exceptId?: string) {
+  const base = `Fidélité ${name}`.replace(/,/g, " ").trim().slice(0, 40);
+  const others = await db.tier.findMany({
+    where: { shop, ...(exceptId ? { id: { not: exceptId } } : {}) },
+    select: { tag: true },
+  });
+  const used = new Set(others.map((t) => t.tag?.toLowerCase()));
+  let tag = base;
+  for (let i = 2; used.has(tag.toLowerCase()); i++) tag = `${base} ${i}`;
+  return tag;
+}
+
+/** Description lisible des avantages d'un niveau. */
+export function tierPerks(
+  tier: Pick<Tier, "discountType" | "discountValue" | "discountMinSubtotal" | "freeShipping" | "multiplier" | "perks">,
+  pointsName = "points",
+): string[] {
+  const list: string[] = [];
+  if (tier.discountType !== "NONE" && tier.discountValue > 0) {
+    const value =
+      tier.discountType === "PERCENT" ? `-${tier.discountValue} %` : `-${tier.discountValue} €`;
+    list.push(
+      `${value} sur toutes les commandes` +
+        (tier.discountMinSubtotal ? ` dès ${tier.discountMinSubtotal} €` : ""),
+    );
+  }
+  if (tier.freeShipping) list.push("Livraison offerte");
+  if (tier.multiplier > 1) list.push(`${pointsName} ×${tier.multiplier}`);
+  if (tier.perks?.trim()) list.push(...tier.perks.split("\n").map((p) => p.trim()).filter(Boolean));
+  return list;
 }
 
 /* ------------------------------------------------------------------ */
@@ -158,6 +205,54 @@ export async function ensureMember(
     if (updated) member = updated;
   }
   return member;
+}
+
+/**
+ * Ajout manuel d'un client au programme par le marchand, avec niveau
+ * éventuellement imposé et bonus de bienvenue facultatif.
+ */
+export async function addMemberManually(
+  shop: string,
+  customer: CustomerInfo,
+  options: { manualTierId?: string | null; welcomeBonus?: boolean },
+): Promise<{ member: Member; created: boolean }> {
+  const customerId = customerGid(customer.id);
+  const existing = await db.member.findUnique({
+    where: { shop_customerId: { shop, customerId } },
+  });
+
+  let member: Member;
+  if (existing) {
+    member = existing;
+  } else if (options.welcomeBonus) {
+    member = await ensureMember(shop, customer);
+  } else {
+    member = await db.member.create({
+      data: {
+        shop,
+        customerId,
+        email: customer.email ?? null,
+        firstName: customer.firstName ?? null,
+        lastName: customer.lastName ?? null,
+      },
+    });
+  }
+
+  if (options.manualTierId !== undefined) {
+    member = await setMemberTier(shop, member.id, options.manualTierId);
+  }
+  return { member, created: !existing };
+}
+
+/** Impose un niveau à un membre (null = niveau calculé selon ses points). */
+export async function setMemberTier(shop: string, memberId: string, tierId: string | null) {
+  if (tierId) {
+    const tier = await db.tier.findFirst({ where: { id: tierId, shop } });
+    if (!tier) throw new Error("Niveau introuvable");
+  }
+  const member = await db.member.findFirst({ where: { id: memberId, shop } });
+  if (!member) throw new Error("Membre introuvable");
+  return db.member.update({ where: { id: member.id }, data: { manualTierId: tierId } });
 }
 
 /**
@@ -244,7 +339,8 @@ interface OrderPayload {
   } | null;
 }
 
-export async function handleOrderPaid(shop: string, order: OrderPayload) {
+/** Crédite les points d'une commande ; retourne l'identifiant du membre concerné. */
+export async function handleOrderPaid(shop: string, order: OrderPayload): Promise<string | undefined> {
   if (!order.customer?.id) return; // commande invité : pas de points
   const program = await getProgram(shop);
   if (!program.enabled) return;
@@ -257,7 +353,7 @@ export async function handleOrderPaid(shop: string, order: OrderPayload) {
   });
 
   const tiers = await getTiers(shop);
-  const tier = tierFor(tiers, member.lifetimePoints);
+  const tier = memberTier(tiers, member);
   const subtotal = parseFloat(
     order.current_subtotal_price ?? order.subtotal_price ?? "0",
   );
@@ -277,7 +373,7 @@ export async function handleOrderPaid(shop: string, order: OrderPayload) {
   });
 
   // Webhook déjà traité : on s'arrête là.
-  if (!result && points > 0) return;
+  if (!result && points > 0) return member.id;
 
   const updated = await db.member.update({
     where: { id: member.id },
@@ -294,6 +390,7 @@ export async function handleOrderPaid(shop: string, order: OrderPayload) {
       reference: orderRef,
     });
   }
+  return member.id;
 }
 
 interface RefundPayload {
@@ -302,7 +399,7 @@ interface RefundPayload {
   refund_line_items?: { subtotal?: number | string }[];
 }
 
-export async function handleRefund(shop: string, refund: RefundPayload) {
+export async function handleRefund(shop: string, refund: RefundPayload): Promise<string | undefined> {
   const orderRef = String(refund.order_id);
   const earned = await db.transaction.findUnique({
     where: { shop_type_reference: { shop, type: "ORDER", reference: orderRef } },
@@ -336,6 +433,7 @@ export async function handleRefund(shop: string, refund: RefundPayload) {
     description: `Remboursement (${orderRef})`,
     reference: String(refund.id),
   });
+  return earned.memberId;
 }
 
 /* ------------------------------------------------------------------ */
@@ -386,7 +484,7 @@ async function createDiscountCode(
     appliesOncePerCustomer: true,
     context: { customers: { add: [member.customerId] } },
     combinesWith: {
-      orderDiscounts: false,
+      orderDiscounts: true, // cumulable avec la remise du niveau client
       productDiscounts: true,
       shippingDiscounts: reward.type !== "FREE_SHIPPING",
     },

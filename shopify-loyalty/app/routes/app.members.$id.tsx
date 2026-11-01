@@ -4,7 +4,7 @@ import type {
   HeadersFunction,
   LoaderFunctionArgs,
 } from "react-router";
-import { useFetcher, useLoaderData } from "react-router";
+import { redirect, useFetcher, useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
@@ -12,11 +12,15 @@ import {
   adjustPoints,
   getProgram,
   getTiers,
+  memberTier,
   nextTier,
   numericId,
   redeemReward,
+  setMemberTier,
   tierFor,
+  tierPerks,
 } from "../loyalty.server";
+import { syncMemberTag } from "../levels.server";
 import {
   ColorDot,
   PointsDelta,
@@ -47,8 +51,13 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   return {
     member,
     pointsName: program.pointsName,
-    tier: tierFor(tiers, member.lifetimePoints),
-    next: nextTier(tiers, member.lifetimePoints),
+    tier: (() => {
+      const t = memberTier(tiers, member);
+      return t ? { ...t, perkList: tierPerks(t, program.pointsName) } : null;
+    })(),
+    autoTier: tierFor(tiers, member.lifetimePoints),
+    next: nextTier(tiers, member),
+    tiers: tiers.map((t) => ({ id: t.id, name: t.name, mode: t.mode })),
     rewards,
     customerAdminUrl: `shopify://admin/customers/${numericId(member.customerId)}`,
   };
@@ -60,6 +69,18 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const memberId = String(params.id);
 
   try {
+    if (data.intent === "tier") {
+      await setMemberTier(session.shop, memberId, data.tierId ? String(data.tierId) : null);
+      await syncMemberTag(admin, session.shop, memberId);
+      return { ok: true, message: "Niveau mis à jour" };
+    }
+    if (data.intent === "remove") {
+      // Retire l'étiquette de niveau dans Shopify puis supprime le membre.
+      await setMemberTier(session.shop, memberId, null);
+      await syncMemberTag(admin, session.shop, memberId, []); // aucun niveau → étiquette retirée
+      await db.member.deleteMany({ where: { id: memberId, shop: session.shop } });
+      return redirect("/app/members");
+    }
     if (data.intent === "redeem") {
       const { code } = await redeemReward(admin, session.shop, memberId, String(data.rewardId));
       return { ok: true, message: `Code créé : ${code}` };
@@ -74,7 +95,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 };
 
 export default function MemberDetail() {
-  const { member, pointsName, tier, next, rewards, customerAdminUrl } = useLoaderData<typeof loader>();
+  const { member, pointsName, tier, autoTier, next, rewards, customerAdminUrl, tiers } =
+    useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   useActionToast(fetcher.data);
 
@@ -82,6 +104,8 @@ export default function MemberDetail() {
   const [reason, setReason] = useState("");
   const [direction, setDirection] = useState("add");
   const [rewardId, setRewardId] = useState(rewards[0]?.id ?? "");
+  const [tierChoice, setTierChoice] = useState(member.manualTierId ?? "");
+  useEffect(() => setTierChoice(member.manualTierId ?? ""), [member.manualTierId]);
 
   useEffect(() => {
     if (fetcher.data && "adjusted" in fetcher.data) setReason("");
@@ -123,7 +147,7 @@ export default function MemberDetail() {
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ opacity: 0.8, fontSize: 13 }}>Palier</div>
+              <div style={{ opacity: 0.8, fontSize: 13 }}>Niveau{member.manualTierId ? " (attribué)" : ""}</div>
               <div style={{ fontSize: 22, fontWeight: 700 }}>★ {tier?.name ?? "Aucun"}</div>
               <div style={{ opacity: 0.8, fontSize: 13 }}>
                 {formatNumber(member.lifetimePoints)} cumulés · {member.ordersCount} commande(s)
@@ -230,16 +254,62 @@ export default function MemberDetail() {
         </s-section>
       )}
 
-      {tier && (
-        <s-section slot="aside" heading="Avantage du palier">
-          <s-stack direction="inline" gap="small" alignItems="center">
-            <ColorDot color={tier.color} />
-            <s-text>
-              {tier.name} : ×{tier.multiplier} sur les points des commandes
-            </s-text>
-          </s-stack>
-        </s-section>
-      )}
+      <s-section slot="aside" heading="Niveau du client">
+        <s-stack gap="base">
+          <s-select
+            label="Niveau"
+            details={
+              tierChoice
+                ? "Niveau imposé : il ne change plus avec les points."
+                : `Automatique : actuellement ${autoTier?.name ?? "aucun"}, évolue avec les ${pointsName}.`
+            }
+            value={tierChoice}
+            onChange={(e) => setTierChoice(e.currentTarget.value)}
+          >
+            <s-option value="">Automatique (selon les {pointsName})</s-option>
+            {tiers.map((t) => (
+              <s-option key={t.id} value={t.id}>
+                {t.name}
+                {t.mode === "MANUAL" ? " (sur invitation)" : ""}
+              </s-option>
+            ))}
+          </s-select>
+          <s-button
+            disabled={tierChoice === (member.manualTierId ?? "")}
+            onClick={() => fetcher.submit({ intent: "tier", tierId: tierChoice }, { method: "POST", encType: "application/json" })}
+            {...(busy ? { loading: true } : {})}
+          >
+            Appliquer le niveau
+          </s-button>
+          {tier && (
+            <s-stack gap="small-200">
+              <s-stack direction="inline" gap="small" alignItems="center">
+                <ColorDot color={tier.color} />
+                <s-text type="strong">Avantages {tier.name}</s-text>
+              </s-stack>
+              {tier.perkList.length ? (
+                tier.perkList.map((p) => <s-text key={p}>✓ {p}</s-text>)
+              ) : (
+                <s-text color="subdued">Aucun avantage défini pour ce niveau.</s-text>
+              )}
+              {member.appliedTag && <s-text color="subdued">Étiquette Shopify : {member.appliedTag}</s-text>}
+            </s-stack>
+          )}
+        </s-stack>
+      </s-section>
+
+      <s-section slot="aside" heading="Zone sensible">
+        <s-button
+          tone="critical"
+          variant="secondary"
+          onClick={() => {
+            if (confirm("Retirer ce client du programme ? Son solde et son historique seront supprimés."))
+              fetcher.submit({ intent: "remove" }, { method: "POST", encType: "application/json" });
+          }}
+        >
+          Retirer du programme
+        </s-button>
+      </s-section>
     </s-page>
   );
 }

@@ -6,8 +6,8 @@ application_url = "https://example.com"
 embedded = true
 
 [access_scopes]
-# Clients (membres), commandes (gain de points) et réductions (récompenses)
-scopes = "read_customers,read_orders,write_discounts"
+# Clients (membres + étiquettes de niveau + segments), commandes (points) et réductions
+scopes = "write_customers,read_orders,write_discounts"
 
 [auth]
 redirect_urls = ["https://example.com/auth/callback"]

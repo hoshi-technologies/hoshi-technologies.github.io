@@ -21,7 +21,7 @@ export default function Landing() {
         <h1 className={styles.heading}>Hoshi Fidélité</h1>
         <p className={styles.text}>
           Le programme de fidélité le plus simple pour votre boutique Shopify :
-          points, paliers VIP et récompenses en quelques clics.
+          points, niveaux clients avec remises automatiques et récompenses en quelques clics.
         </p>
         {showForm && (
           <Form className={styles.form} method="post" action="/auth/login">
@@ -40,8 +40,8 @@ export default function Landing() {
             chaque commande, sans aucune configuration technique.
           </li>
           <li>
-            <strong>Paliers VIP.</strong> Bronze, Argent, Or : récompensez vos
-            meilleurs clients avec des multiplicateurs de points.
+            <strong>Niveaux clients.</strong> Bronze, Argent, Or ou niveaux sur invitation, avec remises automatiques et
+            multiplicateurs de points pour vos meilleurs clients.
           </li>
           <li>
             <strong>Widget élégant.</strong> Un bouton flottant aux couleurs de

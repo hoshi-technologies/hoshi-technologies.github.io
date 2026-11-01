@@ -50,9 +50,9 @@ export default function Dashboard() {
     },
     {
       done: tiers > 0,
-      title: "Définir des paliers VIP",
-      text: "Bronze, Argent, Or… avec plus de points pour les meilleurs clients.",
-      action: { label: "Paliers", href: "/app/tiers" },
+      title: "Définir vos niveaux clients",
+      text: "Bronze, Argent, Or ou niveaux sur invitation, avec remises automatiques.",
+      action: { label: "Niveaux clients", href: "/app/tiers" },
     },
     {
       done: false,
@@ -208,7 +208,8 @@ export default function Dashboard() {
         <s-unordered-list>
           <s-list-item>Le client crée un compte : bonus de bienvenue.</s-list-item>
           <s-list-item>Chaque commande payée rapporte des points.</s-list-item>
-          <s-list-item>Plus il cumule, plus son palier VIP monte.</s-list-item>
+          <s-list-item>Plus il cumule, plus son niveau monte (ou vous lui attribuez un niveau).</s-list-item>
+          <s-list-item>Chaque niveau peut donner une remise automatique au paiement.</s-list-item>
           <s-list-item>
             Depuis le widget, il échange ses points contre un code de réduction
             personnel.

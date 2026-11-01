@@ -236,7 +236,7 @@ function WidgetPreview({
           <div style={{ fontSize: 26, fontWeight: 700 }}>
             {balance} <span style={{ fontSize: 14, fontWeight: 500 }}>{pointsName}</span>
           </div>
-          <div style={{ fontSize: 12, marginTop: 6, opacity: 0.9 }}>Palier Argent ★</div>
+          <div style={{ fontSize: 12, marginTop: 6, opacity: 0.9 }}>Niveau Argent ★</div>
         </div>
         <div style={{ padding: 12, display: "grid", gap: 8 }}>
           {(rewards.length ? rewards : [{ title: "5 € de réduction", cost: 500 }]).map((r) => (

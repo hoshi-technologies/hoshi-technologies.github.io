@@ -18,7 +18,7 @@ export default function App() {
         <s-link href="/app">Tableau de bord</s-link>
         <s-link href="/app/members">Membres</s-link>
         <s-link href="/app/rewards">Récompenses</s-link>
-        <s-link href="/app/tiers">Paliers VIP</s-link>
+        <s-link href="/app/tiers">Niveaux clients</s-link>
         <s-link href="/app/program">Réglages</s-link>
       </s-app-nav>
       <Outlet />

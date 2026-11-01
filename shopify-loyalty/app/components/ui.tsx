@@ -35,7 +35,7 @@ export function StatCard({
   );
 }
 
-/** Pastille de couleur (palier, couleur du widget...). */
+/** Pastille de couleur (niveau, couleur du widget...). */
 export function ColorDot({ color, size = 12 }: { color: string; size?: number }) {
   return (
     <span

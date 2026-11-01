@@ -73,7 +73,14 @@
         }).join("") + "</div>"
       : "";
 
-    return rewardsList(state, m) + codes + ways;
+    var perks = m.tier && m.tier.perks && m.tier.perks.length
+      ? '<div class="hl-section"><div class="hl-section-title">Mes avantages ' + esc(m.tier.name) + "</div>" +
+        m.tier.perks.map(function (perk) {
+          return '<div class="hl-way"><span>✨</span><div>' + esc(perk) + "</div></div>";
+        }).join("") + "</div>"
+      : "";
+
+    return perks + rewardsList(state, m) + codes + ways;
   }
 
   function rewardsList(state, member) {
