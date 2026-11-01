@@ -1,0 +1,77 @@
+.index {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #eef0ff 0%, #fdf6ec 100%);
+  font-family: Inter, -apple-system, system-ui, sans-serif;
+  color: #1f2140;
+}
+.content {
+  max-width: 40rem;
+  text-align: center;
+}
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1.25rem;
+  background: #5c6ac4;
+  color: #fff;
+  font-size: 2rem;
+  box-shadow: 0 10px 30px rgba(92, 106, 196, 0.35);
+}
+.heading {
+  font-size: 2.5rem;
+  margin: 1rem 0 0.5rem;
+}
+.text {
+  font-size: 1.15rem;
+  color: #4a4d6b;
+  margin-bottom: 2rem;
+}
+.form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.label {
+  display: grid;
+  gap: 0.25rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+.input {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #c9cce6;
+  border-radius: 0.6rem;
+  min-width: 16rem;
+  font-size: 1rem;
+}
+.button {
+  padding: 0.7rem 1.4rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: #5c6ac4;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  text-align: left;
+}
+.list li {
+  background: #fff;
+  border-radius: 0.8rem;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(31, 33, 64, 0.06);
+}

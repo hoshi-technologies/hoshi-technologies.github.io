@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite pour démarrer ; passez à PostgreSQL/MySQL en production si besoin.
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+/// Réglages du programme de fidélité (un par boutique)
+model Program {
+  shop           String   @id
+  enabled        Boolean  @default(true)
+  pointsName     String   @default("points")
+  pointsPerUnit  Float    @default(1)    // points gagnés par unité de devise dépensée
+  signupPoints   Int      @default(100)  // bonus à l'inscription
+  firstOrderPoints Int    @default(0)    // bonus sur la première commande
+  widgetTitle    String   @default("Mes récompenses")
+  widgetColor    String   @default("#5C6AC4")
+  widgetPosition String   @default("right") // right | left
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+/// Récompense échangeable contre des points
+model Reward {
+  id          String       @id @default(cuid())
+  shop        String
+  title       String
+  type        String       // AMOUNT | PERCENT | FREE_SHIPPING
+  value       Float        @default(0)
+  pointsCost  Int
+  minSubtotal Float?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  redemptions Redemption[]
+
+  @@index([shop])
+}
+
+/// Palier VIP (Bronze, Argent, Or...) atteint selon les points cumulés
+model Tier {
+  id         String @id @default(cuid())
+  shop       String
+  name       String
+  minPoints  Int    // points cumulés depuis l'inscription
+  multiplier Float  @default(1)
+  color      String @default("#B08D57")
+
+  @@index([shop])
+}
+
+/// Client membre du programme
+model Member {
+  id             String        @id @default(cuid())
+  shop           String
+  customerId     String        // GID Shopify : gid://shopify/Customer/123
+  email          String?
+  firstName      String?
+  lastName       String?
+  points         Int           @default(0)
+  lifetimePoints Int           @default(0)
+  ordersCount    Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  transactions   Transaction[]
+  redemptions    Redemption[]
+
+  @@unique([shop, customerId])
+  @@index([shop, points])
+}
+
+/// Historique des mouvements de points
+model Transaction {
+  id          String   @id @default(cuid())
+  shop        String
+  memberId    String
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  points      Int      // positif = gain, négatif = dépense/retrait
+  type        String   // SIGNUP | ORDER | FIRST_ORDER | REDEEM | REFUND | ADJUST
+  description String
+  reference   String?  // identifiant unique (commande, remboursement) pour éviter les doublons
+  createdAt   DateTime @default(now())
+
+  @@unique([shop, type, reference])
+  @@index([shop, createdAt])
+  @@index([memberId, createdAt])
+}
+
+/// Code de réduction généré lors d'un échange de points
+model Redemption {
+  id         String   @id @default(cuid())
+  shop       String
+  memberId   String
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  rewardId   String?
+  reward     Reward?  @relation(fields: [rewardId], references: [id], onDelete: SetNull)
+  title      String
+  code       String
+  discountId String?
+  pointsCost Int
+  createdAt  DateTime @default(now())
+
+  @@index([shop, createdAt])
+  @@index([memberId])
+}

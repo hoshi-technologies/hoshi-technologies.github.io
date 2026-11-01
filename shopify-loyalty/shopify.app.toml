@@ -1,0 +1,53 @@
+# Configuration de l'application Shopify « Hoshi Fidélité ».
+# `npm run config:link` remplit client_id et application_url automatiquement.
+client_id = ""
+name = "Hoshi Fidélité"
+application_url = "https://example.com"
+embedded = true
+
+[access_scopes]
+# Clients (membres), commandes (gain de points) et réductions (récompenses)
+scopes = "read_customers,read_orders,write_discounts"
+
+[auth]
+redirect_urls = ["https://example.com/auth/callback"]
+
+[app_proxy]
+# Le widget de la boutique appelle https://<boutique>/apps/fidelite/...
+url = "https://example.com/proxy"
+subpath = "fidelite"
+prefix = "apps"
+
+[webhooks]
+api_version = "2026-10"
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/uninstalled"
+  topics = ["app/uninstalled"]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/scopes_update"
+  topics = ["app/scopes_update"]
+
+  # Points gagnés à chaque commande payée
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/orders/paid"
+  topics = ["orders/paid"]
+
+  # Points retirés en cas de remboursement
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/refunds/create"
+  topics = ["refunds/create"]
+
+  # Bonus de bienvenue à la création d'un compte client
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/customers/create"
+  topics = ["customers/create"]
+
+  # Webhooks RGPD obligatoires
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/compliance"
+  compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+
+[pos]
+embedded = false

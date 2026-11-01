@@ -1,0 +1,50 @@
+{%- comment -%}
+  Intégration d'application : bouton flottant + panneau de fidélité.
+  À activer dans Éditeur de thème > Intégrations d'applications.
+{%- endcomment -%}
+<div
+  id="hoshi-loyalty"
+  class="hoshi-loyalty"
+  data-endpoint="/apps/fidelite/loyalty"
+  data-logged-in="{% if customer %}true{% else %}false{% endif %}"
+  data-first-name="{{ customer.first_name | escape }}"
+  data-login-url="{{ routes.account_login_url }}"
+  data-register-url="{{ routes.account_register_url }}"
+  data-position="{{ block.settings.position }}"
+  data-label="{{ block.settings.label | escape }}"
+  data-guest-text="{{ block.settings.guest_text | escape }}"
+></div>
+<script src="{{ 'loyalty.js' | asset_url }}" defer></script>
+<link rel="stylesheet" href="{{ 'loyalty.css' | asset_url }}" media="print" onload="this.media='all'">
+
+{% schema %}
+{
+  "name": "Fidélité Hoshi",
+  "target": "body",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Texte du bouton (vide = titre défini dans l'application)",
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        { "value": "app", "label": "Réglage de l'application" },
+        { "value": "right", "label": "En bas à droite" },
+        { "value": "left", "label": "En bas à gauche" }
+      ],
+      "default": "app"
+    },
+    {
+      "type": "textarea",
+      "id": "guest_text",
+      "label": "Message pour les visiteurs non connectés",
+      "default": "Créez un compte pour gagner des points à chaque achat et profiter de réductions exclusives."
+    }
+  ]
+}
+{% endschema %}
