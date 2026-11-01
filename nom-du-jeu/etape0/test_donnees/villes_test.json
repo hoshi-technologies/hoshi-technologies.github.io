@@ -1,0 +1,22 @@
+[
+ {"nom": "Paris (Le Marais)", "pays": "FR", "lat": 48.8590, "lon": 2.3580, "type": "grande ville"},
+ {"nom": "Lyon (Presqu'île)", "pays": "FR", "lat": 45.7600, "lon": 4.8330, "type": "grande ville"},
+ {"nom": "Annecy", "pays": "FR", "lat": 45.8992, "lon": 6.1294, "type": "ville moyenne, lac, montagne"},
+ {"nom": "Saint-Malo", "pays": "FR", "lat": 48.6493, "lon": -2.0257, "type": "ville littorale"},
+ {"nom": "Gordes", "pays": "FR", "lat": 43.9116, "lon": 5.2003, "type": "village"},
+ {"nom": "New York (Midtown)", "pays": "US", "lat": 40.7549, "lon": -73.9840, "type": "mégapole"},
+ {"nom": "Austin (centre)", "pays": "US", "lat": 30.2672, "lon": -97.7431, "type": "grande ville"},
+ {"nom": "Denver (centre)", "pays": "US", "lat": 39.7392, "lon": -104.9903, "type": "grande ville, altitude"},
+ {"nom": "Marfa", "pays": "US", "lat": 30.3094, "lon": -104.0206, "type": "petite ville rurale"},
+ {"nom": "Berlin (Mitte)", "pays": "DE", "lat": 52.5200, "lon": 13.4050, "type": "grande ville"},
+ {"nom": "Tokyo (Shibuya)", "pays": "JP", "lat": 35.6580, "lon": 139.7016, "type": "mégapole"},
+ {"nom": "São Paulo (centre)", "pays": "BR", "lat": -23.5505, "lon": -46.6333, "type": "mégapole"},
+ {"nom": "Lagos (Lagos Island)", "pays": "NG", "lat": 6.4550, "lon": 3.3941, "type": "mégapole, peu cartographiée"},
+ {"nom": "Kinshasa (Gombe)", "pays": "CD", "lat": -4.3050, "lon": 15.3100, "type": "mégapole, peu cartographiée"},
+ {"nom": "Dhaka (centre)", "pays": "BD", "lat": 23.7290, "lon": 90.4110, "type": "mégapole très dense"},
+ {"nom": "Le Caire (centre)", "pays": "EG", "lat": 30.0444, "lon": 31.2357, "type": "mégapole"},
+ {"nom": "La Paz", "pays": "BO", "lat": -16.4990, "lon": -68.1350, "type": "ville de montagne"},
+ {"nom": "Port Moresby", "pays": "PG", "lat": -9.4438, "lon": 147.1803, "type": "ville peu cartographiée"},
+ {"nom": "Oulan-Bator", "pays": "MN", "lat": 47.9180, "lon": 106.9170, "type": "ville, quartiers de yourtes"},
+ {"nom": "Reykjavik", "pays": "IS", "lat": 64.1466, "lon": -21.9426, "type": "petite capitale littorale"}
+]

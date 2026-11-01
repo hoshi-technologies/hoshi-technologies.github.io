@@ -1,0 +1,11 @@
+; Banc d'essai moteur - Etape 0 (pas le jeu)
+config_version=5
+
+[application]
+config/name="Banc d'essai city builder"
+run/main_scene="res://bench.tscn"
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/vsync/vsync_mode=0
