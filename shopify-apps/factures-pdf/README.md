@@ -31,6 +31,21 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
 - **RGPD** : webhooks obligatoires de Shopify (`customers/data_request`, `customers/redact`,
   `shop/redact`) gérés.
 
+## Interface et aide
+
+- **4 onglets** : Accueil (checklist de démarrage en 3 étapes, état de l'appli, dernières
+  factures), Réglages, Abonnement, Aide.
+- **Réglages en deux niveaux** : l'essentiel visible (entreprise, envoi), le reste replié
+  (informations complémentaires, numérotation et langue, Factur-X, apparence, e-mail,
+  lien Shopify). Barre « Modifications non enregistrées » avec Enregistrer / Annuler.
+- **FAQ complète** (21 questions en 6 thèmes : démarrer, obligations légales, Factur-X,
+  langues, abonnement, problèmes) dans les 7 langues, avec recherche :
+  - dans l'onglet Aide de l'appli ;
+  - en page publique `/faq?lang=fr` (langue du navigateur par défaut), à indiquer comme
+    lien d'aide dans la fiche App Store.
+  Les prix et quotas affichés viennent de `src/plans.js` ; la question « Comment contacter
+  le support ? » n'apparaît que si `SUPPORT_EMAIL` est configuré. Textes dans `src/i18n/faq/`.
+
 ## Formules et abonnement
 
 | Formule | Prix | Factures | Essai |
@@ -123,6 +138,7 @@ src/
   invoice.js    commande Shopify → lignes HT, remises, TVA par taux, totaux (centimes)
   pdf.js        mise en page A4 PDF/A-3 (pdfkit), multi-pages, Factur-X embarqué
   facturx.js    XML Factur-X EN 16931 (CII) et métadonnées XMP
+  faq-page.js   page publique de la FAQ
   i18n/         traductions (fr, en, de, es, it, nl, pt-BR)
   mailer.js     e-mail HTML + texte, PDF en pièce jointe (nodemailer)
   plans.js      formules d'abonnement (prix, quotas, essai)

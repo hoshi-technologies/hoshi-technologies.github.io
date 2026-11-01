@@ -16,6 +16,8 @@ export function loadConfig(env = process.env) {
     apiVersion: get('SHOPIFY_API_VERSION', '2026-10'),
     // Abonnements de test (aucun prélèvement) : obligatoire sur les boutiques de développement.
     billingTest: get('BILLING_TEST', 'true') !== 'false',
+    // Adresse affichée dans la FAQ et l'aide (question « Comment contacter le support ? »).
+    supportEmail: get('SUPPORT_EMAIL', ''),
     databasePath: get('DATABASE_PATH', './data/factures.sqlite'),
     mail: {
       // smtp://user:pass@smtp.exemple.fr:587 ; "json" pour les tests (aucun envoi réel).

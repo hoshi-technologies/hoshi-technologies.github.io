@@ -229,3 +229,18 @@ test('page d’admin servie dans la langue de l’administrateur Shopify', async
     ctx.close();
   }
 });
+
+test('FAQ publique : langue, prix réels, question support masquée sans adresse', async () => {
+  const ctx = await setup();
+  try {
+    const de = await (await fetch(`${ctx.base}/faq?lang=de`)).text();
+    assert.match(de, /<html lang="de">/);
+    assert.match(de, /Häufige Fragen/);
+    assert.match(de, /Essential \(7,90\s\$ pro Monat\)/);
+    assert.doesNotMatch(de, /Wie erreiche ich den Support/, 'pas de SUPPORT_EMAIL : question retirée');
+    const auto = await (await fetch(`${ctx.base}/faq`, { headers: { 'Accept-Language': 'it-IT,it;q=0.9' } })).text();
+    assert.match(auto, /Domande frequenti/);
+  } finally {
+    ctx.close();
+  }
+});

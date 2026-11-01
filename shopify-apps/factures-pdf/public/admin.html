@@ -19,7 +19,7 @@
     .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
     label { display:block; font-weight:500; margin-bottom:4px; }
     label small { color:var(--muted); font-weight:400; }
-    input[type=text], input[type=email], input[type=url], input[type=number], textarea, select { width:100%; padding:7px 10px; border:1px solid #8a8a8a; border-radius:8px; font:inherit; background:#fff; }
+    input[type=text], input[type=email], input[type=url], input[type=number], input[type=search], textarea, select { width:100%; padding:7px 10px; border:1px solid #8a8a8a; border-radius:8px; font:inherit; background:#fff; }
     textarea { min-height:78px; resize:vertical; }
     .check { display:flex; gap:8px; align-items:flex-start; margin:6px 0; font-weight:400; }
     .full { grid-column:1/-1; }
@@ -53,51 +53,116 @@
     .plan .price small { font-size:13px; font-weight:400; color:var(--muted); }
     .plan button { margin-top:auto; }
     .banner.info { background:#eaf4ff; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    header.top { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    header.top h1 { margin:0; }
+    .tabs { display:flex; gap:4px; background:#e3e3e3; padding:3px; border-radius:10px; flex-wrap:wrap; }
+    .tabs button { border:0; background:transparent; padding:6px 14px; border-radius:8px; font-weight:500; color:var(--muted); }
+    .tabs button[aria-selected="true"] { background:#fff; color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,.12); font-weight:600; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .row h2 { margin:0; }
+    .banner.big { font-weight:600; padding:14px 16px; }
+    .steps { list-style:none; margin:12px 0 0; padding:0; display:grid; gap:8px; }
+    .steps li { display:flex; align-items:center; gap:12px; border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+    .steps li > div { flex:1; }
+    .steps li.done { opacity:.65; }
+    .steps .dot { width:26px; height:26px; flex:none; border-radius:50%; display:grid; place-items:center; font-weight:700; background:#ebebeb; }
+    .steps li.done .dot { background:var(--okbg); color:var(--ok); }
+    details.card > summary { cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; }
+    details.card > summary::-webkit-details-marker { display:none; }
+    details.card > summary::before { content:"›"; font-size:20px; line-height:1; color:var(--muted); transition:transform .15s; }
+    details.card[open] > summary::before { transform:rotate(90deg); }
+    details.card > summary h2 { margin:0; }
+    details.card[open] > summary { margin-bottom:12px; }
+    .top-actions { margin:0 0 12px; }
+    .savebar { position:sticky; bottom:12px; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+               background:#303030; color:#fff; border-radius:12px; padding:10px 14px; box-shadow:0 6px 20px rgba(0,0,0,.25); }
+    .savebar button:not(.primary) { background:transparent; color:#fff; border-color:#8a8a8a; }
+    .savebar button.primary { background:#fff; color:#303030; border-color:#fff; }
+    button.link { border:0; background:none; color:#005bd3; padding:0; font-weight:500; }
+    .color { display:flex; gap:8px; } .color input[type=color] { width:44px; height:36px; padding:2px; border:1px solid #8a8a8a; border-radius:8px; background:#fff; }
+    .search { margin:12px 0 4px; }
+    .faq-section h3 { font-size:14px; margin:18px 0 6px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
+    details.faq { border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
+    details.faq summary { cursor:pointer; padding:10px 12px; font-weight:600; }
+    details.faq p { margin:0; padding:0 12px 12px; }
+    #faq-link { color:#005bd3; font-size:13px; }
   </style>
 </head>
 <body>
 <main>
-  <h1 data-i18n="appName"></h1>
+  <header class="top">
+    <h1 data-i18n="appName"></h1>
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="home" data-i18n="tab.home"></button>
+      <button type="button" role="tab" data-tab="settings" data-i18n="tab.settings"></button>
+      <button type="button" role="tab" data-tab="billing" data-i18n="tab.billing"></button>
+      <button type="button" role="tab" data-tab="help" data-i18n="tab.help"></button>
+    </nav>
+  </header>
   <div id="mail-warning" class="banner warn" data-i18n="mailWarning" hidden></div>
 
-  <section class="card" id="billing">
-    <h2 data-i18n="billing.title"></h2>
-    <p class="help" id="usage-text" data-i18n="loading"></p>
-    <div class="usage" id="usage-bar"><span style="width:0"></span></div>
-    <div class="banner info" id="pending-banner" hidden style="margin:12px 0 0">
-      <span id="pending-text"></span>
-      <button type="button" class="primary" id="generate-pending" data-i18n="billing.generate"></button>
-    </div>
-    <div class="plans" id="plans"></div>
-  </section>
+  <!-- ==================== Accueil ==================== -->
+  <div class="panel" data-panel="home">
+    <section class="card" id="setup" hidden>
+      <div class="row"><h2 data-i18n="setup.title"></h2><small id="setup-progress"></small></div>
+      <ol class="steps" id="steps"></ol>
+    </section>
 
-  <form id="settings">
+    <div class="banner ok big" id="ready" hidden></div>
+
+    <section class="card">
+      <div class="row">
+        <p class="help" id="home-usage" style="margin:0"></p>
+        <button type="button" class="link" data-goto="billing" data-i18n="billing.see"></button>
+      </div>
+      <div class="banner info" id="pending-banner" hidden style="margin:12px 0 0">
+        <span id="pending-text"></span>
+        <button type="button" class="primary" id="generate-pending" data-i18n="billing.generate"></button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="home.recent"></h2>
+      <div class="scroll">
+        <table>
+          <thead><tr>
+            <th data-i18n="invoices.number"></th><th data-i18n="invoices.order"></th><th data-i18n="invoices.customer"></th>
+            <th data-i18n="invoices.date"></th><th class="num" data-i18n="invoices.total"></th><th data-i18n="invoices.email"></th><th></th>
+          </tr></thead>
+          <tbody id="invoices"><tr><td colspan="7" class="empty" data-i18n="loading"></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ==================== Réglages ==================== -->
+  <form class="panel" data-panel="settings" id="settings" hidden>
+    <div class="actions top-actions"><button type="button" class="preview-btn" data-i18n="preview"></button></div>
+
+    <section class="card" id="company-card">
+      <h2 data-i18n="company.title"></h2>
+      <p class="help" data-i18n="company.help"></p>
+      <div class="grid">
+        <div><label for="companyName" data-i18n="company.name"></label><input type="text" id="companyName" name="companyName"></div>
+        <div><label for="email" data-i18n="company.email"></label><input type="email" id="email" name="email"></div>
+        <div class="full"><label for="address"><span data-i18n="company.address"></span> <small data-i18n="company.addressHint"></small></label><textarea id="address" name="address"></textarea></div>
+        <div><label for="countryCode" data-i18n="company.country"></label><select id="countryCode" name="countryCode"></select></div>
+        <div><label for="siret" data-i18n="company.siret"></label><input type="text" id="siret" name="siret"></div>
+        <div><label for="vatNumber" data-i18n="company.vat"></label><input type="text" id="vatNumber" name="vatNumber"></div>
+        <div class="full"><label class="check"><input type="checkbox" name="vatExempt"> <span data-i18n="company.vatExempt"></span></label></div>
+      </div>
+    </section>
+
     <section class="card">
       <h2 data-i18n="general.title"></h2>
       <p class="help" data-i18n="general.help"></p>
       <div class="grid">
-        <div>
+        <div class="full">
           <label for="trigger" data-i18n="general.trigger"></label>
-          <select id="trigger" name="trigger">
+          <select id="trigger" name="trigger" style="max-width:420px">
             <option value="paid" data-i18n="general.triggerPaid"></option>
             <option value="create" data-i18n="general.triggerCreate"></option>
           </select>
-        </div>
-        <div>
-          <label for="numberPrefix"><span data-i18n="general.prefix"></span> <small data-i18n="general.prefixHint"></small></label>
-          <input type="text" id="numberPrefix" name="numberPrefix" maxlength="12">
-        </div>
-        <div>
-          <label for="nextNumber"><span data-i18n="general.next"></span> <small data-i18n="general.nextHint"></small></label>
-          <input type="number" id="nextNumber" name="nextNumber" min="1" step="1">
-        </div>
-        <div>
-          <label for="invoiceLanguage" data-i18n="general.language"></label>
-          <select id="invoiceLanguage" name="invoiceLanguage" data-languages="auto"></select>
-        </div>
-        <div id="fallback-field">
-          <label for="fallbackLanguage" data-i18n="general.fallback"></label>
-          <select id="fallbackLanguage" name="fallbackLanguage" data-languages></select>
         </div>
         <div class="full">
           <label class="check"><input type="checkbox" name="autoSend"> <span data-i18n="general.autoSend"></span></label>
@@ -106,90 +171,107 @@
       </div>
     </section>
 
-    <section class="card">
-      <h2 data-i18n="company.title"></h2>
-      <p class="help" data-i18n="company.help"></p>
+    <details class="card">
+      <summary><h2 data-i18n="settings.moreCompany"></h2></summary>
       <div class="grid">
-        <div><label for="companyName" data-i18n="company.name"></label><input type="text" id="companyName" name="companyName"></div>
         <div><label for="legalForm"><span data-i18n="company.legalForm"></span> <small data-i18n="company.legalFormHint"></small></label><input type="text" id="legalForm" name="legalForm"></div>
-        <div class="full"><label for="address"><span data-i18n="company.address"></span> <small data-i18n="company.addressHint"></small></label><textarea id="address" name="address"></textarea></div>
-        <div><label for="countryCode" data-i18n="company.country"></label><select id="countryCode" name="countryCode"></select></div>
+        <div><label for="rcs"><span data-i18n="company.rcs"></span> <small data-i18n="company.rcsHint"></small></label><input type="text" id="rcs" name="rcs"></div>
+        <div><label for="phone" data-i18n="company.phone"></label><input type="text" id="phone" name="phone"></div>
+        <div><label for="website" data-i18n="company.website"></label><input type="text" id="website" name="website"></div>
         <div><label for="supplyType" data-i18n="company.supplyType"></label><select id="supplyType" name="supplyType">
           <option value="goods" data-i18n="company.supplyGoods"></option><option value="services" data-i18n="company.supplyServices"></option><option value="mixed" data-i18n="company.supplyMixed"></option>
         </select></div>
-        <div><label for="siret" data-i18n="company.siret"></label><input type="text" id="siret" name="siret"></div>
-        <div><label for="rcs"><span data-i18n="company.rcs"></span> <small data-i18n="company.rcsHint"></small></label><input type="text" id="rcs" name="rcs"></div>
-        <div><label for="vatNumber" data-i18n="company.vat"></label><input type="text" id="vatNumber" name="vatNumber"></div>
-        <div><label for="email" data-i18n="company.email"></label><input type="email" id="email" name="email"></div>
-        <div><label for="phone" data-i18n="company.phone"></label><input type="text" id="phone" name="phone"></div>
-        <div><label for="website" data-i18n="company.website"></label><input type="text" id="website" name="website"></div>
-        <div class="full"><label class="check"><input type="checkbox" name="vatExempt"> <span data-i18n="company.vatExempt"></span></label></div>
       </div>
-    </section>
+    </details>
 
-    <section class="card">
-      <h2 data-i18n="facturx.title"></h2>
+    <details class="card">
+      <summary><h2 data-i18n="settings.numbering"></h2></summary>
+      <div class="grid">
+        <div><label for="numberPrefix"><span data-i18n="general.prefix"></span> <small data-i18n="general.prefixHint"></small></label><input type="text" id="numberPrefix" name="numberPrefix" maxlength="12"></div>
+        <div><label for="nextNumber"><span data-i18n="general.next"></span> <small data-i18n="general.nextHint"></small></label><input type="number" id="nextNumber" name="nextNumber" min="1" step="1"></div>
+        <div><label for="invoiceLanguage" data-i18n="general.language"></label><select id="invoiceLanguage" name="invoiceLanguage" data-languages="auto"></select></div>
+        <div id="fallback-field"><label for="fallbackLanguage" data-i18n="general.fallback"></label><select id="fallbackLanguage" name="fallbackLanguage" data-languages></select></div>
+      </div>
+    </details>
+
+    <details class="card" id="facturx-card">
+      <summary><h2 data-i18n="facturx.title"></h2> <span class="badge" id="facturx-badge"></span></summary>
       <p class="help" data-i18n="facturx.help"></p>
       <label class="check"><input type="checkbox" name="facturx"> <span data-i18n="facturx.enable"></span></label>
       <div id="facturx-status" class="banner" style="margin:10px 0 0"></div>
-    </section>
+    </details>
 
-    <section class="card">
-      <h2 data-i18n="look.title"></h2>
+    <details class="card">
+      <summary><h2 data-i18n="look.title"></h2></summary>
       <div class="grid">
         <div class="full"><label for="logoUrl"><span data-i18n="look.logo"></span> <small data-i18n="look.logoHint"></small></label><input type="url" id="logoUrl" name="logoUrl" placeholder="https://cdn.shopify.com/…/logo.png"></div>
-        <div><label for="accentColor" data-i18n="look.color"></label><input type="text" id="accentColor" name="accentColor" placeholder="#1f2937"></div>
+        <div><label for="accentColor" data-i18n="look.color"></label><div class="color"><input type="color" id="accentPicker" aria-label="color"><input type="text" id="accentColor" name="accentColor" placeholder="#1f2937"></div></div>
         <div class="full"><label for="legalNotice"><span data-i18n="look.legal"></span> <small data-i18n="look.defaultHint"></small></label><textarea id="legalNotice" name="legalNotice"></textarea></div>
         <div class="full"><label for="footerNote"><span data-i18n="look.footer"></span> <small data-i18n="look.defaultHint"></small></label><input type="text" id="footerNote" name="footerNote"></div>
       </div>
-    </section>
+    </details>
 
-    <section class="card">
-      <h2 data-i18n="email.title"></h2>
+    <details class="card">
+      <summary><h2 data-i18n="email.title"></h2></summary>
       <p class="help"><span data-i18n="email.variables"></span> <code>{{first_name}}</code> <code>{{name}}</code> <code>{{invoice_number}}</code> <code>{{order}}</code> <code>{{shop}}</code></p>
       <div class="grid">
         <div class="full"><label for="emailSubject"><span data-i18n="email.subject"></span> <small data-i18n="look.defaultHint"></small></label><input type="text" id="emailSubject" name="emailSubject"></div>
         <div class="full"><label for="emailBody"><span data-i18n="email.body"></span> <small data-i18n="look.defaultHint"></small></label><textarea id="emailBody" name="emailBody" style="min-height:140px"></textarea></div>
       </div>
-      <div class="actions">
-        <button type="button" id="preview" data-i18n="preview"></button>
+    </details>
+
+    <details class="card">
+      <summary><h2><span data-i18n="liquid.title"></span> <small data-i18n="liquid.optional"></small></h2></summary>
+      <p class="help" data-i18n="liquid.help"></p>
+      <pre id="liquid"></pre>
+      <div class="actions"><button type="button" id="copy-liquid" data-i18n="liquid.copy"></button></div>
+    </details>
+
+    <div class="savebar" id="savebar" hidden>
+      <span data-i18n="save.unsaved"></span>
+      <div class="actions" style="margin:0">
+        <button type="button" id="discard" data-i18n="save.discard"></button>
         <button type="submit" class="primary" id="save" data-i18n="save"></button>
       </div>
-    </section>
+    </div>
   </form>
 
-  <section class="card">
-    <h2><span data-i18n="liquid.title"></span> <small data-i18n="liquid.optional"></small></h2>
-    <p class="help" data-i18n="liquid.help"></p>
-    <pre id="liquid"></pre>
-    <div class="actions"><button type="button" id="copy-liquid" data-i18n="liquid.copy"></button></div>
-  </section>
+  <!-- ==================== Abonnement ==================== -->
+  <div class="panel" data-panel="billing" hidden>
+    <section class="card" id="billing">
+      <h2 data-i18n="billing.title"></h2>
+      <p class="help" id="usage-text" data-i18n="loading"></p>
+      <div class="usage" id="usage-bar"><span style="width:0"></span></div>
+      <div class="plans" id="plans"></div>
+    </section>
+  </div>
 
-  <section class="card">
-    <h2 data-i18n="invoices.title"></h2>
-    <div class="scroll">
-      <table>
-        <thead><tr>
-          <th data-i18n="invoices.number"></th><th data-i18n="invoices.order"></th><th data-i18n="invoices.customer"></th>
-          <th data-i18n="invoices.date"></th><th class="num" data-i18n="invoices.total"></th><th data-i18n="invoices.email"></th><th></th>
-        </tr></thead>
-        <tbody id="invoices"><tr><td colspan="7" class="empty" data-i18n="loading"></td></tr></tbody>
-      </table>
-    </div>
-  </section>
+  <!-- ==================== Aide ==================== -->
+  <div class="panel" data-panel="help" hidden>
+    <section class="card">
+      <div class="row"><h2 data-i18n="help.title"></h2><a id="faq-link" target="_blank" rel="noopener" data-i18n="help.online"></a></div>
+      <input type="search" id="faq-search" class="search">
+      <div id="faq"></div>
+      <p class="empty" id="faq-empty" data-i18n="help.noResult" hidden></p>
+      <p class="help" id="support" hidden></p>
+    </section>
+  </div>
 </main>
 
 <script>
   /*%I18N%*/
   const APP_URL = '%APP_URL%';
-  const { lang, t: T, languages } = window.I18N;
+  const { lang, t: T, languages, faq, support } = window.I18N;
   const INTL = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE', es: 'es-ES', it: 'it-IT', nl: 'nl-NL', 'pt-BR': 'pt-BR' }[lang] || 'en';
   const t = (key, vars = {}) => String(T[key] ?? key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
-  const form = document.getElementById('settings');
+  const $ = (id) => document.getElementById(id);
+  const form = $('settings');
   const escape = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const toast = (message, isError = false) => (window.shopify?.toast ? shopify.toast.show(message, { isError }) : alert(message));
+  const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+  const state = { settings: null, invoices: [], billing: null };
 
-  // Textes statiques, listes de langues et de pays.
+  // ---------- Textes statiques, listes ----------
   document.title = t('appName');
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
   for (const select of document.querySelectorAll('select[data-languages]')) {
@@ -200,10 +282,22 @@
   const COUNTRIES = 'AT BE BG BR CA CH CY CZ DE DK EE ES FI FR GB GR HR HU IE IT LT LU LV MT NL NO PL PT RO SE SI SK US AU'.split(' ')
     .map((code) => ({ code, name: regionNames.of(code) }))
     .sort((a, b) => a.name.localeCompare(b.name, INTL));
-  document.getElementById('countryCode').innerHTML = COUNTRIES.map((c) => `<option value="${c.code}">${escape(c.name)}</option>`).join('');
-  const syncFallback = () => { document.getElementById('fallback-field').hidden = form.elements.invoiceLanguage.value !== 'auto'; };
-  form.elements.invoiceLanguage.addEventListener('change', syncFallback);
+  $('countryCode').innerHTML = COUNTRIES.map((c) => `<option value="${c.code}">${escape(c.name)}</option>`).join('');
 
+  // ---------- Onglets ----------
+  function showTab(name) {
+    for (const b of document.querySelectorAll('[data-tab]')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
+    for (const p of document.querySelectorAll('[data-panel]')) p.hidden = p.dataset.panel !== name;
+    store.set('tab', name);
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-tab], [data-goto]');
+    if (target) showTab(target.dataset.tab || target.dataset.goto);
+  });
+  showTab(['home', 'settings', 'billing', 'help'].includes(store.get('tab')) ? store.get('tab') : 'home');
+
+  // ---------- API ----------
   async function api(path, options = {}) {
     const token = await shopify.idToken();
     const response = await fetch(`/api${path}`, {
@@ -217,38 +311,6 @@
     return response.headers.get('content-type')?.includes('application/json') ? response.json() : response.blob();
   }
 
-  function showFacturx(issues) {
-    const box = document.getElementById('facturx-status');
-    const enabled = form.elements.facturx.checked;
-    box.hidden = !enabled;
-    box.className = `banner ${issues.length ? 'warn' : 'ok'}`;
-    box.textContent = issues.length
-      ? `${t('facturx.missing')} ${issues.filter((i) => T[`facturx.issue.${i}`]).map((i) => t(`facturx.issue.${i}`)).join(', ')}`.replace(/\.?$/, '.')
-      : t('facturx.ready');
-  }
-
-  function fillForm({ settings, nextNumber, facturxIssues }) {
-    for (const [key, value] of Object.entries(settings)) {
-      const field = form.elements[key];
-      if (!field) continue;
-      if (field.type === 'checkbox') field.checked = value;
-      else field.value = value;
-    }
-    form.elements.nextNumber.value = nextNumber;
-    syncFallback();
-    showFacturx(facturxIssues);
-  }
-  form.elements.facturx.addEventListener('change', () => showFacturx([]));
-
-  function readForm() {
-    const settings = {};
-    for (const field of form.elements) {
-      if (!field.name || field.name === 'nextNumber') continue;
-      settings[field.name] = field.type === 'checkbox' ? field.checked : field.value;
-    }
-    return { settings, nextNumber: Number(form.elements.nextNumber.value), locale: lang };
-  }
-
   function download(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = Object.assign(document.createElement('a'), { href: url, download: filename });
@@ -257,32 +319,57 @@
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   }
-
   const money = (cents, currency) => new Intl.NumberFormat(INTL, { style: 'currency', currency }).format(cents / 100);
 
+  // ---------- Accueil : checklist et état ----------
+  function renderHome() {
+    const s = state.settings;
+    if (!s) return;
+    const companyDone = Boolean(s.companyName && s.address && (s.siret || s.vatNumber));
+    const steps = [
+      { key: 'company', done: companyDone, action: () => { showTab('settings'); $('companyName').focus(); } },
+      { key: 'preview', done: store.get('previewed') === '1', action: preview },
+      { key: 'first', done: state.invoices.length > 0, action: null },
+    ];
+    const done = steps.filter((x) => x.done).length;
+    $('setup').hidden = done === steps.length;
+    $('setup-progress').textContent = t('setup.progress', { done, total: steps.length });
+    $('steps').innerHTML = steps.map((x, i) => `
+      <li class="${x.done ? 'done' : ''}">
+        <span class="dot">${x.done ? '✓' : i + 1}</span>
+        <div><b>${escape(t(`setup.${x.key}`))}</b><br><small>${escape(t(`setup.${x.key}Help`))}</small></div>
+        ${x.done ? `<span class="badge sent">${escape(t('setup.done'))}</span>` : x.action ? `<button type="button" class="primary small" data-step="${i}">${escape(t('setup.go'))}</button>` : ''}
+      </li>`).join('');
+    $('steps').onclick = (event) => { const b = event.target.closest('[data-step]'); if (b) steps[Number(b.dataset.step)].action(); };
+    const ready = $('ready');
+    ready.hidden = !companyDone;
+    ready.textContent = s.autoSend ? t('home.ready') : t('home.readyNoMail');
+  }
+
+  // ---------- Factures ----------
   async function loadInvoices() {
     const { invoices } = await api('/invoices');
-    const tbody = document.getElementById('invoices');
-    if (!invoices.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty">${escape(t('invoices.empty'))}</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = invoices.map((inv) => `
+    state.invoices = invoices;
+    const tbody = $('invoices');
+    tbody.innerHTML = invoices.length
+      ? invoices.map((inv) => `
       <tr>
         <td><b>${escape(inv.number)}</b>${inv.facturx ? ` <span class="badge fx">${escape(t('facturx.badge'))}</span>` : ''}</td>
         <td>${escape(inv.order_name)}</td>
         <td>${escape(inv.customer_name)}<br><small>${escape(inv.customer_email)}</small></td>
-        <td>${new Date(inv.issued_at).toLocaleDateString(INTL)} <small>${escape(inv.language)}</small></td>
+        <td>${new Date(inv.issued_at).toLocaleDateString(INTL)}</td>
         <td class="num">${money(inv.total_cents, inv.currency)}</td>
         <td><span class="badge ${escape(inv.email_status)}" title="${escape(inv.email_error)}">${escape(t(`invoices.${inv.email_status}`))}</span></td>
         <td class="num">
           <button class="small" data-pdf="${inv.id}" data-number="${escape(inv.number)}">PDF</button>
           <button class="small" data-send="${inv.id}">${escape(t(inv.email_status === 'sent' ? 'invoices.resend' : 'invoices.send'))}</button>
         </td>
-      </tr>`).join('');
+      </tr>`).join('')
+      : `<tr><td colspan="7" class="empty">${escape(t('invoices.empty'))}</td></tr>`;
+    renderHome();
   }
 
-  document.getElementById('invoices').addEventListener('click', async (event) => {
+  $('invoices').addEventListener('click', async (event) => {
     const button = event.target.closest('button');
     if (!button) return;
     button.disabled = true;
@@ -302,33 +389,84 @@
     }
   });
 
+  // ---------- Réglages ----------
+  const syncFallback = () => { $('fallback-field').hidden = form.elements.invoiceLanguage.value !== 'auto'; };
+  form.elements.invoiceLanguage.addEventListener('change', syncFallback);
+  $('accentPicker').addEventListener('input', (e) => { $('accentColor').value = e.target.value; markDirty(); });
+  $('accentColor').addEventListener('input', (e) => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('accentPicker').value = e.target.value; });
+
+  function showFacturx(issues) {
+    const box = $('facturx-status');
+    const enabled = form.elements.facturx.checked;
+    box.hidden = !enabled;
+    box.className = `banner ${issues.length ? 'warn' : 'ok'}`;
+    box.textContent = issues.length
+      ? `${t('facturx.missing')} ${issues.filter((i) => T[`facturx.issue.${i}`]).map((i) => t(`facturx.issue.${i}`)).join(', ')}`.replace(/\.?$/, '.')
+      : t('facturx.ready');
+    const badge = $('facturx-badge');
+    badge.className = `badge ${!enabled ? '' : issues.length ? 'failed' : 'sent'}`;
+    badge.textContent = !enabled ? '–' : issues.length ? '!' : '✓';
+  }
+
+  function fillForm({ settings, nextNumber, facturxIssues }) {
+    state.settings = settings;
+    for (const [key, value] of Object.entries(settings)) {
+      const field = form.elements[key];
+      if (!field) continue;
+      if (field.type === 'checkbox') field.checked = value;
+      else field.value = value;
+    }
+    form.elements.nextNumber.value = nextNumber;
+    if (/^#[0-9a-f]{6}$/i.test(settings.accentColor)) $('accentPicker').value = settings.accentColor;
+    syncFallback();
+    showFacturx(facturxIssues);
+    $('savebar').hidden = true;
+    renderHome();
+  }
+
+  function readForm() {
+    const settings = {};
+    for (const field of form.elements) {
+      if (!field.name || field.name === 'nextNumber') continue;
+      settings[field.name] = field.type === 'checkbox' ? field.checked : field.value;
+    }
+    return { settings, nextNumber: Number(form.elements.nextNumber.value), locale: lang };
+  }
+
+  function markDirty() { $('savebar').hidden = false; }
+  form.addEventListener('input', markDirty);
+  form.addEventListener('change', markDirty);
+  $('discard').addEventListener('click', async () => fillForm(await api('/settings')));
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const save = document.getElementById('save');
-    save.disabled = true;
+    $('save').disabled = true;
     try {
       fillForm(await api('/settings', { method: 'PUT', body: JSON.stringify(readForm()) }));
       toast(t('saved'));
     } catch (error) {
       toast(error.message, true);
     } finally {
-      save.disabled = false;
+      $('save').disabled = false;
     }
   });
 
-  document.getElementById('preview').addEventListener('click', async () => {
+  async function preview() {
     try {
       download(await api('/preview', { method: 'POST', body: JSON.stringify(readForm()) }), 'preview.pdf');
+      store.set('previewed', '1');
+      renderHome();
     } catch (error) {
       toast(error.message, true);
     }
-  });
+  }
+  for (const b of document.querySelectorAll('.preview-btn')) b.addEventListener('click', preview);
 
   const liquid =
     '{% assign facture_jeton = order_status_url | split: "/orders/" | last | split: "/" | first %}\n' +
     `<p><a href="${APP_URL}/f/{{ facture_jeton }}" style="color:#ffffff;background:#1f2937;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block">${t('liquid.button')}</a></p>`;
-  document.getElementById('liquid').textContent = liquid;
-  document.getElementById('copy-liquid').addEventListener('click', async () => {
+  $('liquid').textContent = liquid;
+  $('copy-liquid').addEventListener('click', async () => {
     await navigator.clipboard.writeText(liquid);
     toast(t('liquid.copied'));
   });
@@ -337,24 +475,24 @@
   const usd = (n) => new Intl.NumberFormat(INTL, { style: 'currency', currency: 'USD' }).format(n);
 
   async function loadBilling() {
-    const b = await api('/billing');
+    const b = (state.billing = await api('/billing'));
     const planName = (key) => t(`plan.${key}`);
-    const bar = document.getElementById('usage-bar');
-    if (b.limit === null) {
-      document.getElementById('usage-text').textContent = t('billing.usageUnlimited', { plan: planName(b.current), used: b.used });
-      bar.hidden = true;
-    } else {
-      document.getElementById('usage-text').textContent = t('billing.usage', { plan: planName(b.current), used: b.used, limit: b.limit });
-      bar.hidden = false;
+    const usage = b.limit === null
+      ? t('billing.usageUnlimited', { plan: planName(b.current), used: b.used })
+      : t('billing.usage', { plan: planName(b.current), used: b.used, limit: b.limit });
+    $('usage-text').textContent = usage;
+    $('home-usage').textContent = usage;
+    const bar = $('usage-bar');
+    bar.hidden = b.limit === null;
+    if (b.limit !== null) {
       bar.classList.toggle('full', b.remaining === 0);
       bar.firstElementChild.style.width = `${Math.min(100, (100 * b.used) / b.limit)}%`;
     }
-    document.getElementById('pending-banner').hidden = !b.pending;
-    document.getElementById('pending-text').textContent =
-      t('billing.pending', { n: b.pending }) + (b.remaining === 0 ? ` ${t('billing.pendingUpgrade')}` : '');
-    document.getElementById('generate-pending').disabled = b.remaining === 0;
+    $('pending-banner').hidden = !b.pending;
+    $('pending-text').textContent = t('billing.pending', { n: b.pending }) + (b.remaining === 0 ? ` ${t('billing.pendingUpgrade')}` : '');
+    $('generate-pending').disabled = b.remaining === 0;
 
-    document.getElementById('plans').innerHTML = b.plans.map((p) => {
+    $('plans').innerHTML = b.plans.map((p) => {
       const isCurrent = p.key === b.current;
       const limit = p.monthlyLimit === null ? t('billing.unlimited') : t('billing.invoicesPerMonth', { n: p.monthlyLimit });
       const trial = p.trialDays ? `<small>${escape(t('billing.trial', { n: p.trialDays }))}</small>` : '<small>&nbsp;</small>';
@@ -368,7 +506,7 @@
     }).join('');
   }
 
-  document.getElementById('plans').addEventListener('click', async (event) => {
+  $('plans').addEventListener('click', async (event) => {
     const button = event.target.closest('button');
     if (!button || button.disabled) return;
     button.disabled = true;
@@ -391,7 +529,7 @@
     }
   });
 
-  document.getElementById('generate-pending').addEventListener('click', async (event) => {
+  $('generate-pending').addEventListener('click', async (event) => {
     event.target.disabled = true;
     try {
       const { created } = await api('/pending/generate', { method: 'POST' });
@@ -402,13 +540,36 @@
     }
   });
 
+  // ---------- Aide ----------
+  $('faq').innerHTML = faq.map((section) => `<div class="faq-section"><h3>${escape(section.title)}</h3>${section.items
+    .map((item) => `<details class="faq"><summary>${escape(item.q)}</summary><p>${escape(item.a)}</p></details>`).join('')}</div>`).join('');
+  $('faq-search').placeholder = t('help.search');
+  $('faq-link').href = `/faq?lang=${encodeURIComponent(lang)}`;
+  if (support) {
+    $('support').hidden = false;
+    $('support').innerHTML = escape(t('help.contact')).replace('{support}', `<a href="mailto:${escape(support)}">${escape(support)}</a>`);
+  }
+  const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  $('faq-search').addEventListener('input', (event) => {
+    const words = norm(event.target.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of document.querySelectorAll('details.faq')) {
+      const hit = words.every((w) => norm(d.textContent).includes(w));
+      d.hidden = !hit;
+      d.open = hit && words.length > 0;
+      shown += hit;
+    }
+    for (const s of document.querySelectorAll('.faq-section')) s.hidden = !s.querySelector('details.faq:not([hidden])');
+    $('faq-empty').hidden = shown > 0;
+  });
+
+  // ---------- Démarrage ----------
   (async () => {
     try {
       const session = await api('/session', { method: 'POST', body: JSON.stringify({ locale: lang }) });
-      document.getElementById('mail-warning').hidden = session.mailConfigured;
-      await loadBilling();
+      $('mail-warning').hidden = session.mailConfigured;
       fillForm(await api('/settings'));
-      await loadInvoices();
+      await Promise.all([loadBilling(), loadInvoices()]);
     } catch (error) {
       toast(error.message, true);
     }

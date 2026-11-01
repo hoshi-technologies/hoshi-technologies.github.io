@@ -118,3 +118,15 @@ test('PDF/A-3 avec factur-x.xml embarqué, dans la langue demandée', async () =
   const incomplete = await service.renderPdf(invoice, { ...meta, settings: { ...SELLER, vatNumber: '' } });
   assert.equal(incomplete.facturx, false, 'informations légales incomplètes : PDF simple');
 });
+
+test('FAQ : même structure dans les 7 langues, variables remplies', async () => {
+  const { FAQS, faqFor } = await import('../src/i18n/index.js');
+  const shape = (faq) => faq.map((s) => s.items.length);
+  for (const { code } of LANGUAGES) {
+    assert.deepEqual(shape(FAQS[code]), shape(FAQS.fr), `FAQ différente en ${code}`);
+    for (const section of faqFor(code, { freeLimit: 10, essentielPrice: '7,90 $', essentielLimit: 200, illimitePrice: '12,90 $', trialDays: 7, support: 's@x.fr' })) {
+      for (const { q, a } of section.items) assert.doesNotMatch(q + a, /\{\w+\}/, `variable non remplie en ${code} : ${q}`);
+    }
+  }
+  assert.ok(FAQS.fr.flatMap((s) => s.items).length >= 20);
+});

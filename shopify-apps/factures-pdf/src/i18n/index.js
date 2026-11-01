@@ -9,6 +9,13 @@ import es from './es.js';
 import it from './it.js';
 import nl from './nl.js';
 import ptBR from './pt-BR.js';
+import faqFr from './faq/fr.js';
+import faqEn from './faq/en.js';
+import faqDe from './faq/de.js';
+import faqEs from './faq/es.js';
+import faqIt from './faq/it.js';
+import faqNl from './faq/nl.js';
+import faqPtBR from './faq/pt-BR.js';
 
 export const DICTIONARIES = { fr, en, de, es, it, nl, 'pt-BR': ptBR };
 export const LANGUAGES = Object.entries(DICTIONARIES).map(([code, d]) => ({ code, name: d.name }));
@@ -37,4 +44,16 @@ export const format = (text, vars = {}) => String(text).replace(/\{(\w+)\}/g, (m
 export function invoiceLanguage(settings, customerLocale) {
   if (settings.invoiceLanguage && settings.invoiceLanguage !== 'auto') return resolveLanguage(settings.invoiceLanguage);
   return resolveLanguage(customerLocale, settings.fallbackLanguage);
+}
+
+// ---------- FAQ ----------
+export const FAQS = { fr: faqFr, en: faqEn, de: faqDe, es: faqEs, it: faqIt, nl: faqNl, 'pt-BR': faqPtBR };
+
+/** FAQ d'une langue, avec prix, limites et adresse du support à jour. */
+export function faqFor(code, vars) {
+  const sections = FAQS[code] ?? FAQS[DEFAULT_LANGUAGE];
+  return sections.map((section) => ({
+    title: section.title,
+    items: section.items.map(([q, a]) => ({ q: format(q, vars), a: format(a, vars) })),
+  }));
 }
