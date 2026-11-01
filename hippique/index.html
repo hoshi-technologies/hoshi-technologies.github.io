@@ -583,11 +583,13 @@
             <div class="slider">
               <span title="Plus la valeur est basse, plus les écarts de note se traduisent en écarts de probabilité">Dispersion</span
               ><b id="tpV"></b>
-              <input type="range" id="tp" min="5" max="25" step="1" />
+              <input type="range" id="tp" min="2" max="40" step="0.5" />
             </div>
           </div>
           <div class="row" style="margin-top: 12px">
+            <button id="btnCalib" class="ghost" disabled>Réglages calibrés</button>
             <button id="btnReset" class="ghost">Réglages par défaut</button>
+            <span id="settingsSrc" class="hint" style="margin: 0"></span>
           </div>
         </details>
       </section>
@@ -596,6 +598,12 @@
       <section class="card" id="results">
         <h2>4. Analyse</h2>
         <div id="out" class="muted">Saisissez au moins deux partants.</div>
+      </section>
+
+      <!-- Fiabilité / calibrage -->
+      <section class="card" id="calibCard">
+        <h2>Fiabilité du modèle</h2>
+        <div id="calibOut" class="muted">Chargement…</div>
       </section>
 
       <p class="disclaimer">
@@ -656,6 +664,9 @@
           return JSON.parse(JSON.stringify(T.DEFAULT_SETTINGS));
         }
         if (!state.settings) state.settings = defaultSettings();
+        // Origine des réglages : 'default', 'calibrated' ou 'custom' (modifiés à la main).
+        var settingsSource = store.settingsSource || 'default';
+        var calibration = null;
 
         var DEMO = {
           name: 'Exemple : Prix de la Forêt (plat, 1 600 m)',
@@ -1133,9 +1144,8 @@
         }
         // Jockey / entraîneur : taux de victoire tirés des arrivées archivées.
         function rateFrom(map, name) {
-          var s = name && map && map[name];
-          if (!s || s[0] < 3) return '';
-          return (((s[1] + 0.08 * 10) / (s[0] + 10)) * 100).toFixed(1);
+          var v = T.statRate(name && map && map[name]);
+          return v == null ? '' : v.toFixed(1);
         }
         function enrich(runners, dateIso) {
           var st = prog.stats;
@@ -1166,7 +1176,7 @@
           var min = Math.min.apply(null, d);
           runners.forEach(function (r) {
             var x = parseFloat(r.distanceCheval);
-            if (x > 0 && !r.poids) r.poids = String(x - min);
+            if (x > 0) r.poids = String(x - min);
           });
           return runners;
         }
@@ -1281,7 +1291,17 @@
               });
             })
             .catch(function () {});
-          Promise.all([statsP, idxP]).then(function () {
+          var calP = getJson('data/calibration.json')
+            .then(function (c) {
+              calibration = c;
+            })
+            .catch(function () {})
+            .then(function () {
+              renderCalibration();
+              renderSettings();
+              applyCalibration(false);
+            });
+          Promise.all([statsP, idxP, calP]).then(function () {
             days.sort().reverse();
             $('progDate').innerHTML = days
               .map(function (d) {
@@ -1310,7 +1330,7 @@
               c.label +
               '</span><b>' +
               s.weights[c.key] +
-              '</b><input type="range" min="0" max="50" step="1" data-w="' +
+              '</b><input type="range" min="0" max="60" step="0.5" data-w="' +
               c.key +
               '" value="' +
               s.weights[c.key] +
@@ -1321,29 +1341,164 @@
           $('mwV').textContent = Math.round(s.marketWeight * 100) + ' %';
           $('tp').value = s.temperature;
           $('tpV').textContent = s.temperature;
+          $('btnCalib').disabled = !(calibration && calibration.status === 'ok');
+          renderSettingsSrc();
         }
         $('weights').addEventListener('input', function (e) {
           var k = e.target.dataset.w;
           if (!k) return;
           state.settings.weights[k] = +e.target.value;
+          markCustom();
           e.target.previousElementSibling.textContent = e.target.value;
           schedule();
         });
         $('mw').oninput = function () {
           state.settings.marketWeight = this.value / 100;
+          markCustom();
           $('mwV').textContent = this.value + ' %';
           schedule();
         };
         $('tp').oninput = function () {
           state.settings.temperature = +this.value;
+          markCustom();
           $('tpV').textContent = this.value;
           schedule();
         };
         $('btnReset').onclick = function () {
           state.settings = defaultSettings();
+          settingsSource = 'default';
           renderSettings();
           schedule();
         };
+        $('btnCalib').onclick = function () {
+          applyCalibration(true);
+        };
+        function markCustom() {
+          if (settingsSource === 'custom') return;
+          settingsSource = 'custom';
+          renderSettingsSrc();
+        }
+        function renderSettingsSrc() {
+          $('settingsSrc').textContent =
+            settingsSource === 'calibrated'
+              ? 'Réglages calibrés sur les résultats' + (calibration ? ' (' + new Date(calibration.updated).toLocaleDateString('fr-FR') + ')' : '')
+              : settingsSource === 'custom'
+                ? 'Réglages personnalisés'
+                : 'Réglages par défaut';
+        }
+        function applyCalibration(force) {
+          if (!calibration || calibration.status !== 'ok') return;
+          // Appliqués automatiquement, sauf si l'utilisateur a personnalisé ses réglages.
+          if (!force && settingsSource === 'custom') return;
+          var s = defaultSettings();
+          var c = calibration.settings;
+          Object.assign(s.weights, c.weights);
+          s.temperature = c.temperature;
+          s.marketWeight = c.marketWeight;
+          s.placeDiscount = c.placeDiscount;
+          state.settings = s;
+          settingsSource = 'calibrated';
+          renderSettings();
+          schedule();
+        }
+        function renderCalibration() {
+          var el = $('calibOut');
+          var c = calibration;
+          if (!c) {
+            el.innerHTML =
+              "Le calibrage se fait automatiquement chaque jour à partir des arrivées archivées. Aucune donnée n'est encore disponible : les réglages par défaut sont utilisés.";
+            return;
+          }
+          if (c.status !== 'ok') {
+            el.innerHTML =
+              'Calibrage en attente : ' +
+              c.courses +
+              ' courses terminées archivées sur ' +
+              c.minCourses +
+              ' nécessaires (' +
+              c.days +
+              ' journées). Les réglages par défaut sont utilisés en attendant.' +
+              '<div class="bar" style="margin-top:8px"><i style="width:' +
+              Math.min(100, (c.courses / c.minCourses) * 100) +
+              '%;background:var(--accent)"></i></div>';
+            return;
+          }
+          var v = c.validation;
+          var rows = [
+            ['Réglages par défaut', v.defaults],
+            ['Cotes du marché seules', v.marketOnly],
+            ['Modèle calibré', v.calibrated],
+          ];
+          var html =
+            '<p class="hint" style="margin-top:0">Calibré le ' +
+            new Date(c.updated).toLocaleString('fr-FR') +
+            ' sur ' +
+            c.courses.toLocaleString('fr-FR') +
+            ' courses terminées (' +
+            c.days +
+            ' journées). Pour une mesure honnête, les chiffres ci-dessous portent sur les ' +
+            v.testCourses +
+            ' courses les plus récentes (depuis le ' +
+            new Date(v.testFrom + 'T12:00:00').toLocaleDateString('fr-FR') +
+            '), que le calibrage n\'a pas vues.</p>';
+          html +=
+            '<div class="scroll"><table><thead><tr><th></th><th title="Fréquence à laquelle le cheval jugé le plus probable gagne">Favori gagnant</th><th title="Fréquence à laquelle le cheval jugé le plus sûr pour le placé est placé">Base placée</th><th title="Erreur de prévision du gagnant : plus bas = mieux">Erreur gagnant</th><th title="Erreur de prévision du placé : plus bas = mieux">Erreur placé</th></tr></thead><tbody>';
+          rows.forEach(function (r) {
+            var m = r[1];
+            html +=
+              '<tr' +
+              (r[0] === 'Modèle calibré' ? ' style="font-weight:700"' : '') +
+              '><td>' +
+              r[0] +
+              '</td><td>' +
+              pct(m.topWinRate) +
+              '</td><td>' +
+              pct(m.topPlaceRate) +
+              '</td><td>' +
+              m.winLogLoss.toFixed(3) +
+              '</td><td>' +
+              m.placeLogLoss.toFixed(3) +
+              '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+          html +=
+            '<h2 style="margin-top:16px">Probabilités annoncées et résultats réels</h2><p class="hint" style="margin-top:-6px">Pour chaque tranche de probabilité de place annoncée, la part de chevaux réellement placés. Un modèle bien calibré a les deux barres de même longueur.</p>';
+          html += '<div class="scroll"><table><thead><tr><th>Annoncé</th><th>Chevaux</th><th>Prévu</th><th>Réel</th><th style="width:45%"></th></tr></thead><tbody>';
+          c.reliability.forEach(function (b) {
+            if (!b.n) return;
+            html +=
+              '<tr><td>' +
+              Math.round(b.from * 100) +
+              '–' +
+              Math.round(b.to * 100) +
+              ' %</td><td>' +
+              b.n +
+              '</td><td>' +
+              pct(b.predicted) +
+              '</td><td><b>' +
+              pct(b.observed) +
+              '</b></td><td><div class="bar" style="height:6px;margin-bottom:3px"><i style="width:' +
+              b.predicted * 100 +
+              '%;background:var(--muted)"></i></div><div class="bar" style="height:6px"><i style="width:' +
+              b.observed * 100 +
+              '%;background:var(--accent)"></i></div></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          var w = c.settings.weights;
+          html +=
+            '<p class="hint">Réglages retenus : ' +
+            T.CRITERIA.map(function (k) {
+              return k.label.toLowerCase() + ' ' + w[k.key];
+            }).join(', ') +
+            ' ; dispersion ' +
+            c.settings.temperature +
+            ', part du marché ' +
+            Math.round(c.settings.marketWeight * 100) +
+            ' %, correctif places ' +
+            c.settings.placeDiscount +
+            '.</p>';
+          el.innerHTML = html;
+        }
 
         // ---------------- Résultats ----------------
         function pct(p) {
@@ -1549,9 +1704,9 @@
             '<p>Chaque critère reçoit une note de 0 à 100 : la <b>forme</b> pondère les dernières places de la musique (les plus récentes comptent plus, les incidents pénalisent, surtout au trot) ; la <b>régularité</b> vient des taux de victoire et de place en carrière, lissés pour les chevaux peu courus ; la <b>classe</b> compare les gains moyens par course au reste du champ ; jockey, entraîneur, aptitude, poids/recul/corde et fraîcheur complètent le tableau.</p>' +
             '<p>La note /20 combine le score pondéré (60 %) et le rang dans le champ (40 %). Les scores sont transformés en probabilités de victoire (softmax), puis combinés aux probabilités implicites des cotes, marge du PMU retirée' +
             (a.market ? ' (somme des 1/cote : ' + (a.market.overround * 100).toFixed(0) + ' %)' : '') +
-            '. Les probabilités de place proviennent de ' +
+            '. Les probabilités de place sont calculées exactement sur toutes les arrivées possibles (modèle de Plackett-Luce avec correctif pour les 2e et 3e places, qui évite de surestimer les gros outsiders) ; les trios viennent de ' +
             a.settings.simulations.toLocaleString('fr-FR') +
-            ' simulations de l\'arrivée (modèle de Plackett-Luce avec correctif pour les 2e et 3e places, qui évite de surestimer les gros outsiders).</p>' +
+            ' simulations de l\'arrivée.</p><p>Les réglages sont recalibrés chaque jour sur les arrivées réelles archivées (voir « Fiabilité du modèle »).</p>' +
             '<p>Règle du placé PMU : 2 premiers de 4 à 7 partants, 3 premiers à partir de 8.</p></div></details>';
 
           out.innerHTML = html;
@@ -1572,6 +1727,7 @@
             render();
             store.current = state.race;
             store.settings = state.settings;
+            store.settingsSource = settingsSource;
             save(store);
           }, 250);
         }

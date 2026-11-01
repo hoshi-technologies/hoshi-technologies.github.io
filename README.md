@@ -20,4 +20,8 @@ d'aujourd'hui et de demain (réunions, courses, partants, musiques, gains, cotes
 des statistiques cumulées (taux de victoire des jockeys/drivers et des entraîneurs, dernière sortie de chaque
 cheval) qui servent à remplir automatiquement ces colonnes. À l'ouverture, la page charge la prochaine course
 du jour. Si le navigateur peut joindre l'API PMU, elle actualise les cotes toutes les 5 minutes.
+Une fois par jour, `scripts/calibrate.mjs` rejoue les courses terminées archivées (90 jours). Il ajuste les réglages
+du modèle (poids des critères, dispersion, part du marché, correctif des places) pour que les probabilités
+correspondent aux arrivées réelles. Le résultat est écrit dans `hippique/data/calibration.json`, que la page applique
+automatiquement et détaille dans « Fiabilité du modèle ». Il faut au moins 150 courses terminées, soit environ 3 jours.
 Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PMU* → *Run workflow*.

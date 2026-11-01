@@ -22,7 +22,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const Turf = require(path.join(ROOT, 'hippique/engine.js'));
 const DATA = path.join(ROOT, 'hippique/data');
 const API = process.env.PMU_API || 'https://online.turfinfo.api.pmu.fr/rest/client/1/programme/';
-const KEEP_DAYS = 45; // journées détaillées conservées (les statistiques, elles, sont cumulées)
+const KEEP_DAYS = 90; // journées détaillées conservées (servent aussi au calibrage)
 
 // ---------------------------------------------------------------- dates
 function parisDate(offsetDays = 0) {

@@ -25,6 +25,8 @@ jobs:
           node-version: 22
       - name: Récupérer le programme
         run: node scripts/pmu-fetch.mjs
+      - name: Calibrer le modèle (une fois par jour)
+        run: node scripts/calibrate.mjs
       - name: Publier les données
         run: |
           git add hippique/data

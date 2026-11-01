@@ -161,7 +161,7 @@
     marketWeight: 0.5, // part du marché (cotes) dans la probabilité finale
     temperature: 11, // dispersion : plus petit = favoris plus marqués
     placeDiscount: 0.8, // correctif Henery/Lo pour les places 2 et 3
-    simulations: 30000,
+    simulations: 20000, // simulations de l'arrivée (trios)
     seed: 20261101,
   };
 
@@ -195,9 +195,9 @@
     var dMin = dKnown.length ? Math.min.apply(null, dKnown) : null;
     var reculs = runners.map(function (r, i) {
       var v = num(r.recul);
-      if (v === null) v = num(r.poids); // colonne « Poids/Recul » au trot
       if (v !== null) return v;
-      return dists[i] !== null ? dists[i] - dMin : null;
+      if (dists[i] !== null) return dists[i] - dMin;
+      return num(r.poids); // saisie manuelle : colonne « Poids/Recul »
     });
     var pKnown = poids.filter((x) => x !== null);
     var pMean = mean(pKnown);
@@ -317,61 +317,108 @@
     return { pos1: pos1, pos2: pos2, pos3: pos3, trios: trioList };
   }
 
-  /** Analyse complète d'une course. */
-  function analyzeRace(race, userSettings) {
+  function mergeSettings(userSettings) {
     var settings = Object.assign({}, DEFAULT_SETTINGS, userSettings || {});
     settings.weights = Object.assign({}, DEFAULT_SETTINGS.weights, (userSettings || {}).weights || {});
+    return settings;
+  }
 
+  /**
+   * Partie indépendante des réglages : partants retenus, sous-notes, marché.
+   * (Séparée pour que le calibrage puisse tester des milliers de réglages vite.)
+   */
+  function prepareRace(race) {
     var runners = (race.runners || []).filter((r) => !r.nonPartant && (r.nom || r.num));
-    var n = runners.length;
-    if (n < 2) return { error: 'Il faut au moins 2 partants.', runners: [] };
+    if (runners.length < 2) return null;
+    return {
+      runners: runners,
+      subs: computeSubScores(runners, race.discipline),
+      market: marketProbs(runners),
+    };
+  }
 
-    var subs = computeSubScores(runners, race.discipline);
-
-    // Score global : moyenne pondérée des critères connus, critères inconnus
-    // remplacés par une valeur neutre (45) et confiance mesurée.
+  /** Scores pondérés et probabilités de victoire (modèle, marché, combinée). */
+  function winProbs(prep, settings) {
     var totalW = CRITERIA.reduce((s, c) => s + (settings.weights[c.key] || 0), 0) || 1;
-    var results = runners.map(function (r, i) {
-      var s = subs[i].scores,
+    var scores = [],
+      conf = [];
+    for (var i = 0; i < prep.runners.length; i++) {
+      var s = prep.subs[i].scores,
         acc = 0,
         known = 0;
-      CRITERIA.forEach(function (c) {
-        var w = settings.weights[c.key] || 0;
-        var v = s[c.key];
+      for (var k = 0; k < CRITERIA.length; k++) {
+        var w = settings.weights[CRITERIA[k].key] || 0;
+        var v = s[CRITERIA[k].key];
         if (v === null || v === undefined) v = 45;
         else known += w;
         acc += w * v;
-      });
-      return {
-        runner: r,
-        scores: s,
-        musique: subs[i].musique,
-        score: acc / totalW,
-        confidence: known / totalW,
-      };
-    });
-
+      }
+      scores.push(acc / totalW);
+      conf.push(known / totalW);
+    }
     // Probabilité modèle : softmax des scores.
     var T = settings.temperature;
-    var maxS = Math.max.apply(
-      null,
-      results.map((x) => x.score),
-    );
-    var ex = results.map((x) => Math.exp((x.score - maxS) / T));
+    var maxS = Math.max.apply(null, scores);
+    var ex = scores.map((x) => Math.exp((x - maxS) / T));
     var exSum = ex.reduce((a, b) => a + b, 0);
     var pModel = ex.map((e) => e / exSum);
-
     // Combinaison log-linéaire avec le marché.
-    var mk = marketProbs(runners);
+    var mk = prep.market;
     var alpha = mk ? clamp(settings.marketWeight, 0, 1) : 0;
-    var comb = pModel.map(function (p, i) {
-      return mk ? Math.pow(p, 1 - alpha) * Math.pow(mk.probs[i], alpha) : p;
-    });
+    var comb = pModel.map((p, j) => (mk ? Math.pow(p, 1 - alpha) * Math.pow(mk.probs[j], alpha) : p));
     var cSum = comb.reduce((a, b) => a + b, 0);
-    var pWin = comb.map((p) => p / cSum);
+    return { scores: scores, confidence: conf, pModel: pModel, pWin: comb.map((p) => p / cSum) };
+  }
 
-    var sim = simulate(pWin, settings);
+  /**
+   * Probabilités exactes d'arriver 1er, 2e, 3e (Plackett-Luce : le 1er selon pWin,
+   * les 2e et 3e selon pWin^λ, correctif de Henery/Lo pour les places d'honneur).
+   */
+  function positionProbs(pWin, lam) {
+    var n = pWin.length;
+    var a = pWin.map((p) => Math.pow(p, lam));
+    var A = a.reduce((x, y) => x + y, 0);
+    var p2 = new Array(n).fill(0),
+      p3 = new Array(n).fill(0);
+    for (var j = 0; j < n; j++) {
+      var Aj = A - a[j];
+      if (Aj <= 0) continue;
+      for (var k = 0; k < n; k++) {
+        if (k === j) continue;
+        var pjk = (pWin[j] * a[k]) / Aj; // j 1er, k 2e
+        p2[k] += pjk;
+        var Ajk = Aj - a[k];
+        if (Ajk <= 0) continue;
+        for (var i = 0; i < n; i++) if (i !== j && i !== k) p3[i] += (pjk * a[i]) / Ajk;
+      }
+    }
+    return { pos1: pWin.slice(), pos2: p2, pos3: p3 };
+  }
+
+  /** Analyse complète d'une course. */
+  function analyzeRace(race, userSettings) {
+    var settings = mergeSettings(userSettings);
+    var prep = prepareRace(race);
+    if (!prep) return { error: 'Il faut au moins 2 partants.', runners: [] };
+    var runners = prep.runners,
+      n = runners.length,
+      mk = prep.market;
+
+    var wp = winProbs(prep, settings);
+    var pWin = wp.pWin;
+    var pos = positionProbs(pWin, settings.placeDiscount);
+    var sim = simulate(pWin, settings); // pour les trios
     var nPlaces = placesPayees(n);
+
+    var results = runners.map(function (r, i) {
+      return {
+        runner: r,
+        scores: prep.subs[i].scores,
+        musique: prep.subs[i].musique,
+        score: wp.scores[i],
+        confidence: wp.confidence[i],
+      };
+    });
 
     // Note /20 : score absolu (60 %) + rang relatif dans le champ (40 %).
     var order = results
@@ -384,13 +431,13 @@
       var rel = n > 1 ? 1 - rank[i] / (n - 1) : 0.5;
       x.note = clamp((0.6 * x.score + 0.4 * rel * 100) / 5, 0, 20);
       x.rank = rank[i] + 1;
-      x.pModel = pModel[i];
+      x.pModel = wp.pModel[i];
       x.pMarket = mk ? mk.probs[i] : null;
       x.pWin = pWin[i];
-      x.p2 = sim.pos2[i];
-      x.p3 = sim.pos3[i];
-      x.pTop2 = sim.pos1[i] + sim.pos2[i];
-      x.pTop3 = sim.pos1[i] + sim.pos2[i] + sim.pos3[i];
+      x.p2 = pos.pos2[i];
+      x.p3 = pos.pos3[i];
+      x.pTop2 = pWin[i] + pos.pos2[i];
+      x.pTop3 = x.pTop2 + pos.pos3[i];
       x.pPlace = nPlaces === 0 ? null : nPlaces === 2 ? x.pTop2 : x.pTop3;
       x.coteJuste = 1 / pWin[i];
       var cote = num(x.runner.cote);
@@ -446,10 +493,21 @@
     });
   }
 
+  /** Taux de victoire (%) lissé d'un jockey/entraîneur à partir de [courses, victoires, places]. */
+  function statRate(st) {
+    if (!st || st[0] < 3) return null;
+    return ((st[1] + 0.08 * 10) / (st[0] + 10)) * 100;
+  }
+
   var api = {
+    statRate: statRate,
     parseMusique: parseMusique,
     musiqueStats: musiqueStats,
     analyzeRace: analyzeRace,
+    prepareRace: prepareRace,
+    winProbs: winProbs,
+    positionProbs: positionProbs,
+    mergeSettings: mergeSettings,
     marketProbs: marketProbs,
     placesPayees: placesPayees,
     fromPmuParticipants: fromPmuParticipants,
