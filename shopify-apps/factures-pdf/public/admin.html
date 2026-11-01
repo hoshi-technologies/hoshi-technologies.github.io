@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="shopify-api-key" content="%SHOPIFY_API_KEY%">
+  <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+  <title>Factures PDF</title>
+  <style>
+    :root { --bg:#f1f1f1; --card:#fff; --text:#303030; --muted:#616161; --border:#e3e3e3; --accent:#303030; --ok:#0c5132; --okbg:#cdfee1; --err:#8e1f0b; --errbg:#fedad9; --warnbg:#fff1e3; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+    main { max-width:960px; margin:0 auto; padding:20px 16px 60px; }
+    h1 { font-size:20px; margin:4px 0 16px; }
+    h2 { font-size:15px; margin:0 0 4px; }
+    p.help { color:var(--muted); margin:0 0 14px; }
+    .card { background:var(--card); border-radius:12px; box-shadow:0 1px 0 rgba(0,0,0,.07), inset 0 0 0 1px var(--border); padding:16px; margin-bottom:16px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+    label { display:block; font-weight:500; margin-bottom:4px; }
+    label small { color:var(--muted); font-weight:400; }
+    input[type=text], input[type=email], input[type=url], input[type=number], textarea, select { width:100%; padding:7px 10px; border:1px solid #8a8a8a; border-radius:8px; font:inherit; background:#fff; }
+    textarea { min-height:78px; resize:vertical; }
+    .check { display:flex; gap:8px; align-items:flex-start; margin:6px 0; font-weight:400; }
+    .full { grid-column:1/-1; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; margin-top:8px; }
+    button { font:inherit; font-weight:600; border-radius:8px; padding:7px 14px; cursor:pointer; border:1px solid var(--border); background:#fff; color:var(--text); }
+    button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    button.small { padding:3px 10px; font-weight:500; }
+    button:disabled { opacity:.5; cursor:default; }
+    .banner { border-radius:10px; padding:10px 14px; margin-bottom:16px; }
+    .banner.warn { background:var(--warnbg); }
+    table { width:100%; border-collapse:collapse; }
+    th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    th { color:var(--muted); font-weight:500; font-size:13px; }
+    td.num { text-align:right; white-space:nowrap; }
+    .badge { display:inline-block; border-radius:8px; padding:1px 8px; font-size:12px; background:#ebebeb; }
+    .badge.sent { background:var(--okbg); color:var(--ok); }
+    .badge.failed { background:var(--errbg); color:var(--err); }
+    code, pre { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; }
+    pre { background:#f7f7f7; border:1px solid var(--border); border-radius:8px; padding:10px; white-space:pre-wrap; word-break:break-all; margin:0 0 8px; }
+    .scroll { overflow-x:auto; }
+    .empty { color:var(--muted); text-align:center; padding:20px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Factures PDF</h1>
+  <div id="mail-warning" class="banner warn" hidden>
+    L'envoi d'e-mails n'est pas encore configuré sur le serveur de l'appli (SMTP_URL, MAIL_FROM) :
+    les factures sont créées mais pas envoyées.
+  </div>
+
+  <form id="settings">
+    <section class="card">
+      <h2>Fonctionnement</h2>
+      <p class="help">Une facture numérotée est créée automatiquement pour chaque commande, puis envoyée au client.</p>
+      <div class="grid">
+        <div>
+          <label for="trigger">Créer la facture</label>
+          <select id="trigger" name="trigger">
+            <option value="paid">quand la commande est payée (recommandé)</option>
+            <option value="create">dès que la commande est passée</option>
+          </select>
+        </div>
+        <div>
+          <label for="numberPrefix">Préfixe des numéros <small>ex. F-2026-00001</small></label>
+          <input type="text" id="numberPrefix" name="numberPrefix" maxlength="12">
+        </div>
+        <div>
+          <label for="nextNumber">Prochain numéro <small>ne peut qu'augmenter</small></label>
+          <input type="number" id="nextNumber" name="nextNumber" min="1" step="1">
+        </div>
+        <div class="full">
+          <label class="check"><input type="checkbox" name="autoSend"> Envoyer la facture au client par e-mail (PDF en pièce jointe)</label>
+          <label class="check"><input type="checkbox" name="bccMerchant"> M'envoyer une copie de chaque facture (à l'adresse e-mail ci-dessous)</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Votre entreprise</h2>
+      <p class="help">Ces informations figurent sur les factures. Vérifiez les mentions obligatoires avec votre expert-comptable.</p>
+      <div class="grid">
+        <div><label for="companyName">Raison sociale</label><input type="text" id="companyName" name="companyName"></div>
+        <div><label for="legalForm">Forme juridique et capital <small>ex. SAS au capital de 10 000 €</small></label><input type="text" id="legalForm" name="legalForm"></div>
+        <div class="full"><label for="address">Adresse</label><textarea id="address" name="address"></textarea></div>
+        <div><label for="siret">SIRET</label><input type="text" id="siret" name="siret"></div>
+        <div><label for="rcs">RCS / RM <small>ex. RCS Lyon 123 456 789</small></label><input type="text" id="rcs" name="rcs"></div>
+        <div><label for="vatNumber">N° de TVA intracommunautaire</label><input type="text" id="vatNumber" name="vatNumber"></div>
+        <div><label for="email">E-mail</label><input type="email" id="email" name="email"></div>
+        <div><label for="phone">Téléphone</label><input type="text" id="phone" name="phone"></div>
+        <div><label for="website">Site web</label><input type="text" id="website" name="website"></div>
+        <div class="full"><label class="check"><input type="checkbox" name="vatExempt"> Franchise en base de TVA (micro-entreprise) : « TVA non applicable, art. 293 B du CGI »</label></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Apparence</h2>
+      <div class="grid">
+        <div class="full"><label for="logoUrl">Adresse du logo <small>PNG ou JPEG en https, par ex. depuis Contenu › Fichiers</small></label><input type="url" id="logoUrl" name="logoUrl" placeholder="https://cdn.shopify.com/…/logo.png"></div>
+        <div><label for="accentColor">Couleur principale</label><input type="text" id="accentColor" name="accentColor" placeholder="#1f2937"></div>
+        <div class="full"><label for="legalNotice">Mentions en bas de facture</label><textarea id="legalNotice" name="legalNotice"></textarea></div>
+        <div class="full"><label for="footerNote">Message de remerciement</label><input type="text" id="footerNote" name="footerNote"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>E-mail au client</h2>
+      <p class="help">Variables : <code>{{prenom}}</code> <code>{{nom}}</code> <code>{{numero_facture}}</code> <code>{{commande}}</code> <code>{{boutique}}</code></p>
+      <div class="grid">
+        <div class="full"><label for="emailSubject">Objet</label><input type="text" id="emailSubject" name="emailSubject"></div>
+        <div class="full"><label for="emailBody">Message</label><textarea id="emailBody" name="emailBody" style="min-height:140px"></textarea></div>
+      </div>
+      <div class="actions">
+        <button type="button" id="preview">Aperçu du PDF</button>
+        <button type="submit" class="primary" id="save">Enregistrer</button>
+      </div>
+    </section>
+  </form>
+
+  <section class="card">
+    <h2>Lien dans l'e-mail de confirmation de Shopify <small>(facultatif)</small></h2>
+    <p class="help">
+      Pour ajouter aussi un bouton « Télécharger ma facture » dans les notifications de Shopify,
+      collez ce code dans <b>Paramètres › Notifications › Confirmation de commande</b> (et « Commande payée » si besoin).
+    </p>
+    <pre id="liquid"></pre>
+    <div class="actions"><button type="button" id="copy-liquid">Copier le code</button></div>
+  </section>
+
+  <section class="card">
+    <h2>Factures émises</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>N°</th><th>Commande</th><th>Client</th><th>Date</th><th class="num">Total TTC</th><th>E-mail</th><th></th></tr></thead>
+        <tbody id="invoices"><tr><td colspan="7" class="empty">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  const APP_URL = '%APP_URL%';
+  const form = document.getElementById('settings');
+  const escape = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const toast = (message, isError = false) => (window.shopify?.toast ? shopify.toast.show(message, { isError }) : alert(message));
+
+  async function api(path, options = {}) {
+    const token = await shopify.idToken();
+    const response = await fetch(`/api${path}`, {
+      ...options,
+      headers: { Authorization: `Bearer ${token}`, ...(options.body ? { 'Content-Type': 'application/json' } : {}) },
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.error || `Erreur ${response.status}`);
+    }
+    return response.headers.get('content-type')?.includes('application/json') ? response.json() : response.blob();
+  }
+
+  function fillForm({ settings, nextNumber }) {
+    for (const [key, value] of Object.entries(settings)) {
+      const field = form.elements[key];
+      if (!field) continue;
+      if (field.type === 'checkbox') field.checked = value;
+      else field.value = value;
+    }
+    form.elements.nextNumber.value = nextNumber;
+  }
+
+  function readForm() {
+    const settings = {};
+    for (const field of form.elements) {
+      if (!field.name || field.name === 'nextNumber') continue;
+      settings[field.name] = field.type === 'checkbox' ? field.checked : field.value;
+    }
+    return { settings, nextNumber: Number(form.elements.nextNumber.value) };
+  }
+
+  function download(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  const money = (cents, currency) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(cents / 100);
+  const STATUS = { sent: 'Envoyé', failed: 'Échec', pending: 'Non envoyé' };
+
+  async function loadInvoices() {
+    const { invoices } = await api('/invoices');
+    const tbody = document.getElementById('invoices');
+    if (!invoices.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucune facture pour l\'instant. Elles apparaîtront ici à chaque nouvelle commande.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = invoices.map((inv) => `
+      <tr>
+        <td><b>${escape(inv.number)}</b></td>
+        <td>${escape(inv.order_name)}</td>
+        <td>${escape(inv.customer_name)}<br><small>${escape(inv.customer_email)}</small></td>
+        <td>${new Date(inv.issued_at).toLocaleDateString('fr-FR')}</td>
+        <td class="num">${money(inv.total_cents, inv.currency)}</td>
+        <td><span class="badge ${escape(inv.email_status)}" title="${escape(inv.email_error)}">${STATUS[inv.email_status] ?? escape(inv.email_status)}</span></td>
+        <td class="num">
+          <button class="small" data-pdf="${inv.id}" data-number="${escape(inv.number)}">PDF</button>
+          <button class="small" data-send="${inv.id}">${inv.email_status === 'sent' ? 'Renvoyer' : 'Envoyer'}</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('invoices').addEventListener('click', async (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    button.disabled = true;
+    try {
+      if (button.dataset.pdf) {
+        download(await api(`/invoices/${button.dataset.pdf}/pdf`), `Facture-${button.dataset.number}.pdf`);
+      } else if (button.dataset.send) {
+        await api(`/invoices/${button.dataset.send}/send`, { method: 'POST' });
+        toast('Facture envoyée');
+        await loadInvoices();
+      }
+    } catch (error) {
+      toast(error.message, true);
+      await loadInvoices();
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const save = document.getElementById('save');
+    save.disabled = true;
+    try {
+      fillForm(await api('/settings', { method: 'PUT', body: JSON.stringify(readForm()) }));
+      toast('Réglages enregistrés');
+    } catch (error) {
+      toast(error.message, true);
+    } finally {
+      save.disabled = false;
+    }
+  });
+
+  document.getElementById('preview').addEventListener('click', async () => {
+    try {
+      download(await api('/preview', { method: 'POST', body: JSON.stringify(readForm()) }), 'Apercu-facture.pdf');
+    } catch (error) {
+      toast(error.message, true);
+    }
+  });
+
+  const liquid =
+    '{% assign facture_jeton = order_status_url | split: "/orders/" | last | split: "/" | first %}\n' +
+    `<p><a href="${APP_URL}/f/{{ facture_jeton }}" style="color:#ffffff;background:#1f2937;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block">Télécharger ma facture (PDF)</a></p>`;
+  document.getElementById('liquid').textContent = liquid;
+  document.getElementById('copy-liquid').addEventListener('click', async () => {
+    await navigator.clipboard.writeText(liquid);
+    toast('Code copié');
+  });
+
+  (async () => {
+    try {
+      const session = await api('/session', { method: 'POST' });
+      document.getElementById('mail-warning').hidden = session.mailConfigured;
+      fillForm(await api('/settings'));
+      await loadInvoices();
+    } catch (error) {
+      toast(error.message, true);
+    }
+  })();
+</script>
+</body>
+</html>

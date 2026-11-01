@@ -1,0 +1,33 @@
+# Configuration de l'appli pour Shopify CLI (`shopify app deploy`).
+# Remplacez client_id et les URL par celles de votre appli (Partner Dashboard / Dev Dashboard).
+
+client_id = "VOTRE_CLIENT_ID"
+name = "Factures PDF"
+application_url = "https://factures.exemple.fr"
+embedded = true
+
+[access_scopes]
+# Lecture des commandes (les webhooks de commande l'exigent) ; installation gérée par Shopify.
+scopes = "read_orders"
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = ["https://factures.exemple.fr/auth/callback"]
+
+[webhooks]
+api_version = "2026-10"
+
+  [[webhooks.subscriptions]]
+  topics = ["orders/create", "orders/paid", "app/uninstalled"]
+  uri = "/webhooks"
+
+  # Webhooks RGPD obligatoires pour publier sur l'App Store Shopify.
+  [[webhooks.subscriptions]]
+  compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+  uri = "/webhooks"
+
+[pos]
+embedded = false
+
+[build]
+include_config_on_deploy = true
