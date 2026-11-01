@@ -6,11 +6,14 @@ function required(name) {
   return value;
 }
 
+const withHttps = (url) => (/^https?:\/\//.test(url) ? url : `https://${url}`).replace(/\/$/, '');
+
 export function loadConfig(env = process.env) {
   const get = (name, fallback) => env[name] ?? fallback;
   return {
-    port: Number(get('PORT', 3000)),
-    appUrl: (env.SHOPIFY_APP_URL ?? required('SHOPIFY_APP_URL')).replace(/\/$/, ''),
+    // Shopify CLI (`shopify app dev`) fournit le port et l'URL du tunnel sous plusieurs noms.
+    port: Number(env.PORT || env.FRONTEND_PORT || env.BACKEND_PORT || 3000),
+    appUrl: withHttps(env.SHOPIFY_APP_URL || env.APP_URL || env.HOST || required('SHOPIFY_APP_URL')),
     apiKey: env.SHOPIFY_API_KEY ?? required('SHOPIFY_API_KEY'),
     apiSecret: env.SHOPIFY_API_SECRET ?? required('SHOPIFY_API_SECRET'),
     apiVersion: get('SHOPIFY_API_VERSION', '2026-10'),

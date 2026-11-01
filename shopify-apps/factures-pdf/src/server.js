@@ -3,10 +3,6 @@
 import express from 'express';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { loadConfig } from './config.js';
-import { openDatabase } from './db.js';
-import { createTransport } from './mailer.js';
-import { InvoiceService } from './service.js';
 import { sanitizeSettings } from './settings.js';
 import { buildInvoice } from './invoice.js';
 import {
@@ -382,19 +378,4 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
 
   app.use('/api', api);
   return app;
-}
-
-// Démarrage direct : `node src/server.js`
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const config = loadConfig();
-  const store = openDatabase(config.databasePath);
-  const service = new InvoiceService({
-    store,
-    transport: createTransport(config.mail.transport),
-    mailFrom: config.mail.from,
-  });
-  if (!service.transport) console.warn('SMTP_URL absent : les factures seront créées mais pas envoyées.');
-  createApp({ config, store, service }).listen(config.port, () => {
-    console.log(`Hoshi Factures à l'écoute sur le port ${config.port} (${config.appUrl})`);
-  });
 }

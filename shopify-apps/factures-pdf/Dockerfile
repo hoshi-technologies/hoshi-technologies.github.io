@@ -8,4 +8,4 @@ COPY public ./public
 COPY assets ./assets
 VOLUME /data
 EXPOSE 3000
-CMD ["node", "--disable-warning=ExperimentalWarning", "src/server.js"]
+CMD ["node", "--disable-warning=ExperimentalWarning", "src/index.js"]

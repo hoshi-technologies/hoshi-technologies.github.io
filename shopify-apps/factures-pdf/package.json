@@ -4,13 +4,13 @@
   "private": true,
   "description": "Appli Shopify : facture PDF générée à chaque commande et envoyée par e-mail au client.",
   "type": "module",
-  "main": "src/server.js",
+  "main": "src/index.js",
   "engines": {
     "node": ">=22.5"
   },
   "scripts": {
-    "start": "node --disable-warning=ExperimentalWarning src/server.js",
-    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.js",
+    "start": "node --disable-warning=ExperimentalWarning src/index.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/index.js",
     "test": "node --disable-warning=ExperimentalWarning --test \"test/**/*.test.js\"",
     "preview": "node --disable-warning=ExperimentalWarning scripts/preview.js",
     "demo": "node --disable-warning=ExperimentalWarning scripts/demo.js",
