@@ -143,14 +143,18 @@
   // ---------------------------------------------------------------------------
 
   var CRITERIA = [
-    { key: 'forme', label: 'Forme (musique)', weight: 30 },
-    { key: 'regularite', label: 'Régularité carrière', weight: 15 },
-    { key: 'classe', label: 'Classe (gains/course)', weight: 15 },
-    { key: 'jockey', label: 'Jockey / driver', weight: 10 },
-    { key: 'entraineur', label: 'Entraîneur', weight: 10 },
-    { key: 'aptitude', label: 'Aptitude distance/terrain', weight: 8 },
-    { key: 'handicap', label: 'Poids / recul / corde', weight: 6 },
-    { key: 'fraicheur', label: 'Fraîcheur (repos)', weight: 6 },
+    { key: 'forme', label: 'Forme (musique)', weight: 24 },
+    { key: 'regularite', label: 'Régularité carrière', weight: 12 },
+    { key: 'classe', label: 'Classe (gains/course)', weight: 12 },
+    { key: 'jockey', label: 'Jockey / driver', weight: 8 },
+    { key: 'entraineur', label: 'Entraîneur', weight: 8 },
+    { key: 'aptitude', label: 'Aptitude distance/hippodrome', weight: 8 },
+    { key: 'handicap', label: 'Poids / recul / corde / ferrure', weight: 5 },
+    { key: 'fraicheur', label: 'Fraîcheur (repos)', weight: 5 },
+    { key: 'vitesse', label: 'Vitesse (réduction km, trot)', weight: 8 },
+    { key: 'niveau', label: 'Niveau des courses récentes', weight: 5 },
+    { key: 'mouvement', label: 'Mouvement des cotes', weight: 6 },
+    { key: 'avis', label: "Avis de l'entraîneur", weight: 3 },
   ];
 
   var DEFAULT_SETTINGS = {
@@ -174,8 +178,16 @@
   }
 
   /** Calcule les sous-notes de chaque partant (0-100, null si inconnu). */
-  function computeSubScores(runners, discipline) {
+  function computeSubScores(runners, discipline, race) {
     var isTrot = /trot/i.test(discipline || '');
+    race = race || {};
+
+    // Vitesse (trot) : meilleure réduction kilométrique récente, comparée au champ.
+    var rk = runners.map((r) => num(r.rk));
+    var rkKnown = rk.filter((x) => x !== null && x > 0);
+    var rkMean = mean(rkKnown),
+      rkStd = std(rkKnown) || 1;
+    var allocRace = num(race.allocation);
 
     var classeRaw = runners.map(function (r) {
       var g = num(r.gains),
@@ -227,10 +239,37 @@
       s.entraineur = en !== null ? clamp(20 + en * 3, 0, 100) : null;
 
       s.aptitude = r.aptitude in APTITUDE ? APTITUDE[r.aptitude] : null;
+      if (s.aptitude === null) {
+        // Aptitude automatique : réussite (top 3) à distance comparable et sur l'hippodrome.
+        var aD = r.aptD,
+          aH = r.aptH;
+        var parts = [];
+        if (aD && aD[1]) parts.push({ r: shrinkRate(aD[0], aD[1], 0.3, 3), w: aD[1] });
+        if (aH && aH[1]) parts.push({ r: shrinkRate(aH[0], aH[1], 0.3, 3), w: aH[1] * 0.6 });
+        if (parts.length) {
+          var wsum = parts.reduce((a, b) => a + b.w, 0);
+          var rate = parts.reduce((a, b) => a + b.r * b.w, 0) / wsum;
+          s.aptitude = clamp(50 + (rate - 0.3) * 120, 0, 100);
+        }
+      }
+
+      s.vitesse = isTrot && rk[i] !== null && rk[i] > 0 && rkKnown.length > 2 ? zToScore(-(rk[i] - rkMean) / rkStd) : null;
+
+      var al = num(r.alloc);
+      s.niveau = al && allocRace ? clamp(50 + 22 * Math.log(al / allocRace), 0, 100) : null;
+
+      var cRef = num(r.coteRef),
+        cNow = num(r.cote);
+      s.mouvement = cRef > 1 && cNow > 1 ? clamp(50 + 30 * Math.log(cRef / cNow), 0, 100) : null;
+
+      var av = r.avis;
+      s.avis = av === 'POSITIF' ? 75 : av === 'NEGATIF' ? 25 : av === 'NEUTRE' ? 50 : null;
 
       var h = null;
       if (isTrot) {
         if (reculs[i] !== null) h = 55 - (reculs[i] / 25) * 12; // chaque 25 m de recul pénalise
+        // Déferré des 4 pieds : souvent un signe d'objectif ; des 2 : léger mieux.
+        if (r.deferre) h = (h === null ? 50 : h) + (/ANTERIEURS_POSTERIEURS|4/.test(r.deferre) ? 8 : 4);
       } else if (poids[i] !== null && pKnown.length > 1) h = 50 + (pMean - poids[i]) * 3;
       var corde = num(r.corde);
       if (corde !== null && !isTrot && runners.length > 6) {
@@ -252,6 +291,11 @@
 
       return { scores: s, musique: ms };
     });
+  }
+
+  /** Groupe de réglages : le trot et le galop ne se jouent pas sur les mêmes critères. */
+  function disciplineGroup(discipline) {
+    return /trot/i.test(discipline || '') ? 'trot' : 'galop';
   }
 
   /** Probabilités du marché à partir des cotes (marge du bookmaker retirée). */
@@ -332,9 +376,46 @@
     if (runners.length < 2) return null;
     return {
       runners: runners,
-      subs: computeSubScores(runners, race.discipline),
+      subs: computeSubScores(runners, race.discipline, race),
       market: marketProbs(runners),
     };
+  }
+
+  /** Vecteur de caractéristiques d'un partant pour le modèle appris. */
+  function featureVector(prep, i) {
+    var s = prep.subs[i].scores,
+      x = [];
+    for (var k = 0; k < CRITERIA.length; k++) {
+      var v = s[CRITERIA[k].key];
+      x.push(v === null || v === undefined ? 45 : v);
+      x.push(v === null || v === undefined ? 1 : 0); // indicateur « inconnu »
+    }
+    var n = prep.runners.length;
+    x.push(Math.log(prep.market ? Math.max(prep.market.probs[i], 1e-4) : 1 / n) + Math.log(n));
+    x.push(prep.market ? 0 : 1);
+    return x;
+  }
+
+  /** Modèle appris (logit conditionnel) : utilité linéaire des caractéristiques. */
+  function learnedProbs(prep, L) {
+    var n = prep.runners.length,
+      u = [],
+      uNoMk = [];
+    for (var i = 0; i < n; i++) {
+      var x = featureVector(prep, i),
+        a = 0;
+      for (var k = 0; k < x.length; k++) a += (L.beta[k] || 0) * ((x[k] - L.mean[k]) / (L.sd[k] || 1));
+      u.push(a);
+      var m = x.length - 2;
+      uNoMk.push(a - (L.beta[m] || 0) * ((x[m] - L.mean[m]) / (L.sd[m] || 1)));
+    }
+    var soft = function (v) {
+      var mx = Math.max.apply(null, v);
+      var e = v.map((z) => Math.exp(z - mx));
+      var t = e.reduce((p, q) => p + q, 0);
+      return e.map((z) => z / t);
+    };
+    return { pWin: soft(u), pModel: soft(uNoMk) };
   }
 
   /** Scores pondérés et probabilités de victoire (modèle, marché, combinée). */
@@ -367,7 +448,14 @@
     var alpha = mk ? clamp(settings.marketWeight, 0, 1) : 0;
     var comb = pModel.map((p, j) => (mk ? Math.pow(p, 1 - alpha) * Math.pow(mk.probs[j], alpha) : p));
     var cSum = comb.reduce((a, b) => a + b, 0);
-    return { scores: scores, confidence: conf, pModel: pModel, pWin: comb.map((p) => p / cSum) };
+    var out = { scores: scores, confidence: conf, pModel: pModel, pWin: comb.map((p) => p / cSum) };
+    if (settings.learned) {
+      var lp = learnedProbs(prep, settings.learned);
+      out.pWin = lp.pWin;
+      out.pModel = lp.pModel;
+      out.learned = true;
+    }
+    return out;
   }
 
   /**
@@ -489,8 +577,43 @@
         repos: '',
         aptitude: '',
         nonPartant: p.statut === 'NON_PARTANT',
+        coteRef: (p.dernierRapportReference && p.dernierRapportReference.rapport) || '',
+        avis: p.avisEntraineur || '',
+        deferre: /^DEFERRE/.test(p.deferre || '') ? p.deferre : '',
       };
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Paris : cote placé estimée, Kelly
+  // ---------------------------------------------------------------------------
+
+  // Relation cote gagnant → rapport placé : log(rapport - 1) = a + b·log(cote - 1),
+  // apprise sur les rapports définitifs (valeurs par défaut prudentes).
+  var PLACE_ODDS_DEFAULT = { 2: { a: -0.75, b: 0.72 }, 3: { a: -1.1, b: 0.72 } };
+
+  function estimatePlaceOdds(cote, nPlaces, coefs) {
+    var c = num(cote);
+    if (!c || c <= 1 || !nPlaces) return null;
+    var k = (coefs && coefs[nPlaces]) || PLACE_ODDS_DEFAULT[nPlaces];
+    return Math.max(1.1, 1 + Math.exp(k.a + k.b * Math.log(c - 1)));
+  }
+
+  /** Fraction de Kelly : part de la bankroll à miser pour une probabilité p à la cote o. */
+  function kelly(p, o) {
+    if (!p || !o || o <= 1) return 0;
+    return Math.max(0, (p * o - 1) / (o - 1));
+  }
+
+  /** Choisit les réglages calibrés adaptés à la discipline. */
+  function settingsFor(calibration, discipline) {
+    if (!calibration || calibration.status !== 'ok') return null;
+    var g = calibration.groups && calibration.groups[disciplineGroup(discipline)];
+    var s = (g && g.settings) || calibration.settings;
+    if (!s) return null;
+    var out = mergeSettings(s);
+    if (g && g.useLearned && g.learned) out.learned = g.learned;
+    return out;
   }
 
   /** Taux de victoire (%) lissé d'un jockey/entraîneur à partir de [courses, victoires, places]. */
@@ -501,6 +624,12 @@
 
   var api = {
     statRate: statRate,
+    featureVector: featureVector,
+    learnedProbs: learnedProbs,
+    disciplineGroup: disciplineGroup,
+    estimatePlaceOdds: estimatePlaceOdds,
+    kelly: kelly,
+    settingsFor: settingsFor,
     parseMusique: parseMusique,
     musiqueStats: musiqueStats,
     analyzeRace: analyzeRace,

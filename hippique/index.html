@@ -600,6 +600,47 @@
         <div id="out" class="muted">Saisissez au moins deux partants.</div>
       </section>
 
+      <!-- Conseils de mise -->
+      <section class="card" id="advisorCard">
+        <h2>5. Conseils de mise</h2>
+        <div class="row">
+          <label class="f">Bankroll de départ (€)<input id="betBank" inputmode="decimal" style="width: 110px" /></label>
+          <label class="f"
+            >Fraction de Kelly
+            <select id="betKelly">
+              <option value="0.1">1/10 (très prudent)</option>
+              <option value="0.25">1/4 (prudent)</option>
+              <option value="0.5">1/2 (offensif)</option>
+            </select>
+          </label>
+          <label class="f">Mise max par pari (%)<input id="betMax" inputmode="decimal" style="width: 80px" /></label>
+          <label class="f">Valeur minimale<input id="betEdge" inputmode="decimal" style="width: 80px" title="Probabilité × cote minimale pour jouer" /></label>
+          <label class="f">Perte max par jour (€)<input id="betStop" inputmode="decimal" style="width: 100px" /></label>
+          <label class="f"
+            >Paris
+            <select id="betTypes">
+              <option value="gp">Gagnant et placé</option>
+              <option value="p">Placé seulement</option>
+              <option value="g">Gagnant seulement</option>
+            </select>
+          </label>
+        </div>
+        <div id="advisorOut" style="margin-top: 12px"></div>
+      </section>
+
+      <!-- Journal -->
+      <section class="card" id="journalCard">
+        <h2>6. Journal de paris</h2>
+        <div id="journalOut"></div>
+        <div class="row" style="margin-top: 10px">
+          <button id="btnJExport" class="ghost">Exporter</button>
+          <label class="ghost" style="display: inline-flex"
+            ><span class="hint" style="margin: 0 6px 0 0">Importer</span><input id="jImport" type="file" accept="application/json"
+          /></label>
+          <button id="btnJClear" class="ghost">Tout effacer</button>
+        </div>
+      </section>
+
       <!-- Fiabilité / calibrage -->
       <section class="card" id="calibCard">
         <h2>Fiabilité du modèle</h2>
@@ -1154,7 +1195,21 @@
             FIELDS.forEach(function (f) {
               r[f] = p[f] != null ? String(p[f]) : '';
             });
-            ['jockeyNom', 'entraineurNom', 'distanceCheval', 'recul', 'arrivee'].forEach(function (f) {
+            [
+              'jockeyNom',
+              'entraineurNom',
+              'distanceCheval',
+              'recul',
+              'arrivee',
+              'coteRef',
+              'avis',
+              'deferre',
+              'nPerf',
+              'aptD',
+              'aptH',
+              'rk',
+              'alloc',
+            ].forEach(function (f) {
               if (p[f] != null && p[f] !== '') r[f] = p[f];
             });
             r.nonPartant = !!p.nonPartant;
@@ -1180,6 +1235,23 @@
           });
           return runners;
         }
+        // Les données publiées contiennent les performances détaillées : on les garde avec les cotes en direct.
+        function mergePublished(list, published) {
+          if (!published || list === published) return list;
+          var byNum = {};
+          published.forEach(function (p) {
+            byNum[p.num] = p;
+          });
+          return list.map(function (p) {
+            var o = byNum[p.num];
+            if (!o) return p;
+            var m = Object.assign({}, o, p);
+            ['nPerf', 'repos', 'aptD', 'aptH', 'rk', 'alloc'].forEach(function (k) {
+              if (o[k] != null) m[k] = o[k];
+            });
+            return m;
+          });
+        }
         function livePartants(iso, r, c) {
           return getJson(PMU_API + isoToPmu(iso) + '/R' + r + '/C' + c + '/participants').then(function (j) {
             var list = T.fromPmuParticipants(j);
@@ -1203,7 +1275,8 @@
               discipline: f.course.discipline,
               distance: f.course.distance,
               terrain: f.course.terrain,
-              runners: withRecul(enrich(partants, iso), f.course.discipline),
+              allocation: f.course.allocation || '',
+              runners: withRecul(enrich(mergePublished(partants, f.course.partants), iso), f.course.discipline),
               auto: { date: iso, r: r, c: c },
             };
             if (!keepOpen) openRows = {};
@@ -1300,6 +1373,8 @@
               renderCalibration();
               renderSettings();
               applyCalibration(false);
+              initBetForm();
+              renderAdvisor();
             });
           Promise.all([statsP, idxP, calP]).then(function () {
             days.sort().reverse();
@@ -1381,7 +1456,16 @@
         function renderSettingsSrc() {
           $('settingsSrc').textContent =
             settingsSource === 'calibrated'
-              ? 'Réglages calibrés sur les résultats' + (calibration ? ' (' + new Date(calibration.updated).toLocaleDateString('fr-FR') + ')' : '')
+              ? 'Réglages calibrés sur les résultats' +
+                (calibration ? ' (' + new Date(calibration.updated).toLocaleDateString('fr-FR') + ')' : '') +
+                (calibration && calibration.groups && state.race
+                  ? ' · ' +
+                    T.disciplineGroup(state.race.discipline) +
+                    ' : ' +
+                    ({ learned: 'modèle appris sur les résultats', weighted: 'réglages propres à la discipline', global: 'réglages communs' }[
+                      (calibration.groups[T.disciplineGroup(state.race.discipline)] || {}).model
+                    ] || '')
+                  : '')
               : settingsSource === 'custom'
                 ? 'Réglages personnalisés'
                 : 'Réglages par défaut';
@@ -1390,16 +1474,32 @@
           if (!calibration || calibration.status !== 'ok') return;
           // Appliqués automatiquement, sauf si l'utilisateur a personnalisé ses réglages.
           if (!force && settingsSource === 'custom') return;
-          var s = defaultSettings();
-          var c = calibration.settings;
-          Object.assign(s.weights, c.weights);
-          s.temperature = c.temperature;
-          s.marketWeight = c.marketWeight;
-          s.placeDiscount = c.placeDiscount;
-          state.settings = s;
           settingsSource = 'calibrated';
-          renderSettings();
+          syncCalibratedSliders();
           schedule();
+        }
+        // Réglages calibrés du groupe (trot / galop) de la course affichée, reportés sur les curseurs.
+        function syncCalibratedSliders() {
+          var eff = T.settingsFor(calibration, state.race && state.race.discipline);
+          if (!eff) return;
+          var s = defaultSettings();
+          Object.assign(s.weights, eff.weights);
+          s.temperature = eff.temperature;
+          s.marketWeight = eff.marketWeight;
+          s.placeDiscount = eff.placeDiscount;
+          if (JSON.stringify(s) !== JSON.stringify(state.settings)) {
+            state.settings = s;
+            renderSettings();
+          }
+        }
+        // Réglages réellement utilisés pour l'analyse (le modèle appris n'a pas de curseurs).
+        function effectiveSettings() {
+          if (settingsSource === 'calibrated' && calibration && calibration.status === 'ok') {
+            syncCalibratedSliders();
+            renderSettingsSrc();
+            return T.settingsFor(calibration, state.race.discipline) || state.settings;
+          }
+          return state.settings;
         }
         function renderCalibration() {
           var el = $('calibOut');
@@ -1497,6 +1597,69 @@
             ' %, correctif places ' +
             c.settings.placeDiscount +
             '.</p>';
+          if (c.groups) {
+            var lbl = { learned: 'modèle appris sur les résultats', weighted: 'réglages propres', global: 'réglages communs' };
+            html +=
+              '<p class="hint">Modèle utilisé : ' +
+              ['trot', 'galop']
+                .map(function (g) {
+                  var o = c.groups[g];
+                  return o ? g + ' → ' + (lbl[o.model] || o.model) + ' (' + o.courses + ' courses)' : '';
+                })
+                .filter(Boolean)
+                .join(' ; ') +
+              '. Le modèle appris est retenu seulement s\'il prévoit mieux les courses récentes.</p>';
+          }
+          var bt = c.backtest;
+          if (bt) {
+            html +=
+              '<h2 style="margin-top:16px">Simulation de paris</h2><p class="hint" style="margin-top:-6px">Chaque stratégie est rejouée sur les ' +
+              bt.courses +
+              ' courses récentes (depuis le ' +
+              new Date(bt.from + 'T12:00:00').toLocaleDateString('fr-FR') +
+              ') avec les vrais rapports définitifs du PMU, sans que le modèle ait vu ces courses. Mise fixe de 1 € ; la colonne Kelly part de 100 € avec ¼ de Kelly plafonné à 2 % par pari. ✔ = rentable même en retirant deux erreurs-types (marge de hasard).</p>';
+            html +=
+              '<div class="scroll"><table><thead><tr><th>Stratégie</th><th>Paris</th><th>Gagnants</th><th title="Retour sur investissement ± deux erreurs-types">ROI</th><th title="Plus forte baisse depuis un sommet, en mises de 1 €">Pire série</th><th title="Bankroll finale en partant de 100 €">Kelly 100 € →</th><th></th></tr></thead><tbody>';
+            bt.strategies.forEach(function (st) {
+              html +=
+                '<tr' +
+                (st.validated ? ' style="font-weight:700"' : '') +
+                '><td>' +
+                esc(st.label) +
+                '</td><td>' +
+                st.bets +
+                '</td><td>' +
+                (st.bets ? pct(st.hitRate) : '—') +
+                '</td><td><span class="pill ' +
+                (st.validated ? 'good' : st.roi >= 0 ? 'mid' : 'bad') +
+                '">' +
+                (st.bets ? (st.roi >= 0 ? '+' : '') + (st.roi * 100).toFixed(1) + ' %' : '—') +
+                '</span>' +
+                (st.bets ? ' <span class="muted">± ' + (st.roiSE * 200).toFixed(0) + '</span>' : '') +
+                '</td><td>' +
+                (st.bets ? '−' + st.maxDrawdown.toFixed(0) + ' €' : '—') +
+                '</td><td>' +
+                (st.bets ? st.kellyBankroll.toFixed(0) + ' €' : '—') +
+                '</td><td>' +
+                (st.validated ? '✔' : '') +
+                '</td></tr>';
+            });
+            html += '</tbody></table></div>';
+            var ref = bt.strategies.filter((x) => x.id === bt.best)[0];
+            if (ref && ref.curve && ref.curve.length > 1)
+              html +=
+                '<p class="hint" style="margin-bottom:4px">Résultat cumulé (mise fixe de 1 €) de « ' +
+                esc(ref.label) +
+                ' » :</p>' +
+                sparkline([0].concat(ref.curve), 600, 70);
+            var validated = bt.strategies.filter((x) => x.validated);
+            html +=
+              '<p class="hint">' +
+              (validated.length
+                ? 'Au moins une stratégie dépasse la marge de hasard sur cette période. Les conseils de mise l\'utilisent ; surveillez le journal pour confirmer en conditions réelles.'
+                : 'Aucune stratégie ne bat de façon fiable le prélèvement du PMU sur cette période : les conseils de mise recommandent 0 €.') +
+              '</p>';
+          }
           el.innerHTML = html;
         }
 
@@ -1531,14 +1694,433 @@
             '</div>'
           );
         }
+
+        // ---------------- Conseils de mise & journal ----------------
+        var lastAnalysis = null;
+        store.bet = Object.assign({ bank: 100, kelly: 0.25, max: 2, edge: '', stop: 10, types: 'gp' }, store.bet || {});
+        store.journal = store.journal || [];
+        function money(x) {
+          return (Math.round(x * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+        }
+        function journalTotals(filterDate) {
+          var t = { n: 0, settled: 0, staked: 0, returned: 0, won: 0, pending: 0, pendingStake: 0 };
+          store.journal.forEach(function (b) {
+            if (filterDate && b.date !== filterDate) return;
+            t.n++;
+            if (b.status === 'pending') {
+              t.pending++;
+              t.pendingStake += b.stake;
+              return;
+            }
+            t.settled++;
+            t.staked += b.stake;
+            t.returned += b.payout || 0;
+            if (b.status === 'won') t.won++;
+          });
+          t.profit = t.returned - t.staked;
+          return t;
+        }
+        function currentBank() {
+          var t = journalTotals();
+          return (parseFloat(store.bet.bank) || 0) + t.profit - t.pendingStake;
+        }
+        function bestStrategy() {
+          var bt = calibration && calibration.backtest;
+          if (!bt) return null;
+          var val = bt.strategies.filter(function (x) {
+            return x.validated && x.id.indexOf('val_') === 0;
+          });
+          val.sort(function (a, b) {
+            return b.roi - a.roi;
+          });
+          return { validated: val[0] || null, best: bt.strategies.filter((x) => x.id === bt.best)[0] || null };
+        }
+        function defaultEdge() {
+          var bs = bestStrategy();
+          var st = bs && (bs.validated || bs.best);
+          return st && st.threshold ? st.threshold : 1.15;
+        }
+        function initBetForm() {
+          $('betBank').value = store.bet.bank;
+          $('betKelly').value = String(store.bet.kelly);
+          $('betMax').value = store.bet.max;
+          $('betEdge').value = store.bet.edge;
+          $('betEdge').placeholder = String(defaultEdge());
+          $('betStop').value = store.bet.stop;
+          $('betTypes').value = store.bet.types;
+        }
+        ['betBank', 'betKelly', 'betMax', 'betEdge', 'betStop', 'betTypes'].forEach(function (id) {
+          $(id).addEventListener('input', function () {
+            var k = { betBank: 'bank', betKelly: 'kelly', betMax: 'max', betEdge: 'edge', betStop: 'stop', betTypes: 'types' }[id];
+            store.bet[k] = $(id).value;
+            save(store);
+            renderAdvisor();
+          });
+        });
+
+        function renderAdvisor() {
+          var el = $('advisorOut');
+          var a = lastAnalysis;
+          if (!a || a.error) {
+            el.innerHTML = '<span class="muted">Aucune course analysée.</span>';
+            return;
+          }
+          var B = store.bet;
+          var bank = currentBank();
+          var frac = parseFloat(B.kelly) || 0.25;
+          var maxPct = (parseFloat(String(B.max).replace(',', '.')) || 2) / 100;
+          var edge = parseFloat(String(B.edge).replace(',', '.')) || defaultEdge();
+          var stop = parseFloat(String(B.stop).replace(',', '.')) || 0;
+          var today = parisIso(0);
+          var dayT = journalTotals(today);
+          var html = '';
+
+          // Garde-fous
+          var bs = bestStrategy();
+          var proven = !!(bs && bs.validated);
+          if (!calibration || !calibration.backtest) {
+            html +=
+              '<p class="pill bad" style="display:block;border-radius:10px;padding:8px 12px">Simulation de paris pas encore disponible : aucune stratégie n\'est validée, la mise conseillée est de 0 €. Les montants indiqués sont théoriques.</p>';
+          } else if (!proven) {
+            var b = bs.best;
+            html +=
+              '<p class="pill bad" style="display:block;border-radius:10px;padding:8px 12px">Aucune stratégie n\'est rentable de façon fiable sur les ' +
+              calibration.backtest.courses +
+              ' courses récentes simulées' +
+              (b ? ' (meilleure : ' + esc(b.label) + ', ROI ' + (b.roi * 100).toFixed(1) + ' % sur ' + b.bets + ' paris)' : '') +
+              '. Mise conseillée : 0 €. Les montants indiqués sont théoriques.</p>';
+          } else {
+            html +=
+              '<p class="pill good" style="display:block;border-radius:10px;padding:8px 12px">Stratégie validée par la simulation : ' +
+              esc(bs.validated.label) +
+              ', ROI ' +
+              (bs.validated.roi * 100).toFixed(1) +
+              ' % (± ' +
+              (bs.validated.roiSE * 200).toFixed(1) +
+              ') sur ' +
+              bs.validated.bets +
+              ' paris. Les résultats passés ne garantissent pas les résultats futurs.</p>';
+          }
+          var stopped = stop > 0 && -dayT.profit >= stop;
+          if (stopped)
+            html +=
+              '<p class="pill bad" style="display:block;border-radius:10px;padding:8px 12px">Limite de perte du jour atteinte (' +
+              money(-dayT.profit) +
+              ') : plus de paris aujourd\'hui.</p>';
+          var finished = a.runners.some(function (x) {
+            return x.runner.arrivee;
+          });
+
+          // Paris de valeur
+          var coefs = calibration && calibration.placeOdds;
+          var bets = [];
+          a.runners.forEach(function (x) {
+            if (x.confidence < 0.5) return;
+            var cote = parseFloat(String(x.runner.cote).replace(',', '.'));
+            if (!(cote > 1)) return;
+            if (B.types !== 'p' && x.pWin >= 0.03) {
+              var evG = x.pWin * cote;
+              if (evG >= edge) bets.push({ x: x, type: 'g', p: x.pWin, o: cote, ev: evG, est: false });
+            }
+            if (B.types !== 'g' && a.placesPayees) {
+              var oP = T.estimatePlaceOdds(cote, a.placesPayees, coefs);
+              var evP = x.pPlace * oP;
+              if (oP && evP >= edge) bets.push({ x: x, type: 'p', p: x.pPlace, o: oP, ev: evP, est: true });
+            }
+          });
+          bets.sort(function (u, v) {
+            return v.ev - u.ev;
+          });
+          html +=
+            '<p class="hint">Bankroll actuelle : <b>' +
+            money(bank) +
+            '</b> (départ ' +
+            money(parseFloat(B.bank) || 0) +
+            ', résultat du journal ' +
+            money(journalTotals().profit) +
+            '). Valeur minimale ' +
+            edge +
+            ', Kelly × ' +
+            frac +
+            ', plafond ' +
+            (maxPct * 100).toFixed(1) +
+            ' % par pari.</p>';
+          if (!a.market) html += '<p class="hint">Pas de cotes pour cette course : impossible d\'évaluer la valeur des paris.</p>';
+          else if (!bets.length) html += '<p><b>Aucun pari conseillé sur cette course</b> : aucune cote ne dépasse la valeur minimale. Ne pas jouer est souvent le meilleur choix.</p>';
+          else {
+            html +=
+              '<div class="scroll"><table><thead><tr><th>Pari</th><th>Cheval</th><th>Proba</th><th>Cote</th><th title="Probabilité × cote">Valeur</th><th title="Mise selon Kelly fractionné, plafonnée">Mise</th><th></th></tr></thead><tbody>';
+            bets.slice(0, 6).forEach(function (b, k) {
+              var f = Math.min(maxPct, frac * T.kelly(b.p, b.o));
+              var stake = Math.floor(bank * f * 2) / 2; // par pas de 0,50 €
+              var playable = proven && !stopped && !finished && stake >= 1;
+              var shown = stake >= 1 ? money(stake) : '< 1 €';
+              b.stake = Math.max(1, stake);
+              html +=
+                '<tr><td>' +
+                (b.type === 'g' ? 'Simple gagnant' : 'Simple placé') +
+                '</td><td><span class="num-badge">' +
+                esc(b.x.runner.num) +
+                '</span> ' +
+                esc(b.x.runner.nom) +
+                '</td><td>' +
+                pct(b.p) +
+                '</td><td>' +
+                b.o.toFixed(1) +
+                (b.est ? ' <span class="muted" title="Rapport placé estimé à partir de la cote gagnant">(est.)</span>' : '') +
+                '</td><td><span class="pill ' +
+                (b.ev >= 1.05 ? 'good' : b.ev >= 1 ? 'mid' : 'bad') +
+                '">' +
+                b.ev.toFixed(2) +
+                '</span></td><td>' +
+                (playable ? '<b>' + shown + '</b>' : '<b>0 €</b> <span class="muted">(théorique ' + shown + ')</span>') +
+                '</td><td><button data-bet="' +
+                k +
+                '">Noter</button></td></tr>';
+            });
+            html += '</tbody></table></div>';
+            html +=
+              '<p class="hint">« Noter » enregistre le pari dans le journal (vous pouvez modifier la mise). Au PMU, la cote finale n\'est connue qu\'au départ et vos mises la font baisser ; le rapport placé n\'est qu\'une estimation.</p>';
+          }
+          if (finished) html += '<p class="hint">Course terminée : conseils affichés à titre de contrôle.</p>';
+          el.innerHTML = html;
+          el._bets = bets;
+        }
+        $('advisorOut').addEventListener('click', function (e) {
+          var k = e.target.dataset.bet;
+          if (k === undefined) return;
+          var b = this._bets[+k];
+          var v = prompt('Mise réellement jouée (€) sur ' + b.x.runner.nom + ' (' + (b.type === 'g' ? 'gagnant' : 'placé') + ') :', String(b.stake));
+          if (v === null) return;
+          var stake = parseFloat(String(v).replace(',', '.'));
+          if (!(stake > 0)) return;
+          var au = state.race.auto || {};
+          store.journal.push({
+            id: Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            date: au.date || parisIso(0),
+            r: au.r || null,
+            c: au.c || null,
+            course: state.race.name || '',
+            num: b.x.runner.num,
+            nom: b.x.runner.nom,
+            type: b.type,
+            stake: stake,
+            cote: +b.o.toFixed(2),
+            p: +b.p.toFixed(4),
+            status: 'pending',
+            payout: 0,
+          });
+          save(store);
+          renderJournal();
+          renderAdvisor();
+          settleJournal();
+        });
+
+        // Règlement automatique des paris à partir des rapports définitifs publiés.
+        var dayCache = {};
+        function settleJournal() {
+          var pend = store.journal.filter(function (b) {
+            return b.status === 'pending' && b.r && b.c;
+          });
+          var dates = Array.from(new Set(pend.map((b) => b.date)));
+          dates.forEach(function (d) {
+            (dayCache[d] = dayCache[d] || getJson('data/' + d + '.json'))
+              .then(function (day) {
+                var changed = false;
+                pend.forEach(function (b) {
+                  if (b.date !== d) return;
+                  var reu = day.reunions.filter((r) => r.r == b.r)[0];
+                  var c = reu && reu.courses.filter((x) => x.c == b.c)[0];
+                  if (!c) return;
+                  var p = (c.partants || []).filter((x) => String(x.num) === String(b.num))[0];
+                  if (p && p.nonPartant) {
+                    b.status = 'refund';
+                    b.payout = b.stake;
+                    changed = true;
+                  } else if (c.rapports) {
+                    var div = (c.rapports[b.type] || {})[String(b.num)] || 0;
+                    b.payout = +(b.stake * div).toFixed(2);
+                    b.status = div ? 'won' : 'lost';
+                    changed = true;
+                  }
+                });
+                if (changed) {
+                  save(store);
+                  renderJournal();
+                  renderAdvisor();
+                }
+              })
+              .catch(function () {
+                delete dayCache[d];
+              });
+          });
+        }
+        function sparkline(values, w, h) {
+          if (!values || values.length < 2) return '';
+          var mn = Math.min(0, Math.min.apply(null, values)),
+            mx = Math.max(0, Math.max.apply(null, values));
+          var span = mx - mn || 1;
+          var pts = values
+            .map(function (v, i) {
+              return ((i / (values.length - 1)) * w).toFixed(1) + ',' + (h - ((v - mn) / span) * h).toFixed(1);
+            })
+            .join(' ');
+          var zero = (h - ((0 - mn) / span) * h).toFixed(1);
+          var last = values[values.length - 1];
+          return (
+            '<svg viewBox="0 0 ' +
+            w +
+            ' ' +
+            h +
+            '" width="100%" height="' +
+            h +
+            '" preserveAspectRatio="none" role="img" aria-label="Évolution du résultat"><line x1="0" x2="' +
+            w +
+            '" y1="' +
+            zero +
+            '" y2="' +
+            zero +
+            '" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3"/><polyline fill="none" stroke-width="2" vector-effect="non-scaling-stroke" stroke="' +
+            (last >= 0 ? 'var(--good)' : 'var(--bad)') +
+            '" points="' +
+            pts +
+            '"/></svg>'
+          );
+        }
+        function renderJournal() {
+          var el = $('journalOut');
+          var J = store.journal;
+          if (!J.length) {
+            el.innerHTML =
+              '<p class="muted">Aucun pari noté. Utilisez « Noter » dans les conseils de mise : les paris sont réglés automatiquement avec les rapports définitifs du PMU. Le journal est conservé dans ce navigateur ; exportez-le pour le sauvegarder.</p>';
+            return;
+          }
+          var t = journalTotals();
+          var html = '<div class="kpis">';
+          html += '<div class="kpi"><small>Paris réglés</small><strong>' + t.settled + '</strong><br><small>' + t.pending + ' en attente</small></div>';
+          html += '<div class="kpi"><small>Misé</small><strong>' + money(t.staked) + '</strong><br><small>retour ' + money(t.returned) + '</small></div>';
+          html +=
+            '<div class="kpi"><small>Résultat</small><strong style="color:' +
+            (t.profit >= 0 ? 'var(--good)' : 'var(--bad)') +
+            '">' +
+            (t.profit >= 0 ? '+' : '') +
+            money(t.profit) +
+            '</strong><br><small>ROI ' +
+            (t.staked ? ((t.profit / t.staked) * 100).toFixed(1) + ' %' : '—') +
+            '</small></div>';
+          html += '<div class="kpi"><small>Paris gagnants</small><strong>' + (t.settled ? Math.round((t.won / t.settled) * 100) + ' %' : '—') + '</strong><br><small>bankroll ' + money(currentBank()) + '</small></div>';
+          html += '</div>';
+          var cum = 0,
+            curve = [0];
+          J.forEach(function (b) {
+            if (b.status === 'pending') return;
+            cum += (b.payout || 0) - b.stake;
+            curve.push(cum);
+          });
+          html += sparkline(curve, 600, 60);
+          html +=
+            '<div class="scroll" style="margin-top:10px"><table><thead><tr><th>Date</th><th>Course</th><th>Pari</th><th>Mise</th><th>Cote</th><th>Résultat</th><th></th></tr></thead><tbody>';
+          J.slice()
+            .reverse()
+            .slice(0, 50)
+            .forEach(function (b) {
+              var res =
+                b.status === 'pending'
+                  ? '<span class="muted">en attente</span>'
+                  : b.status === 'refund'
+                    ? '<span class="pill mid">remboursé</span>'
+                    : b.status === 'won'
+                      ? '<span class="pill good">+' + money(b.payout - b.stake) + '</span>'
+                      : '<span class="pill bad">−' + money(b.stake) + '</span>';
+              html +=
+                '<tr><td>' +
+                esc(b.date) +
+                '</td><td title="' +
+                esc(b.course) +
+                '">' +
+                (b.r ? 'R' + b.r + 'C' + b.c : '—') +
+                '</td><td>' +
+                (b.type === 'g' ? 'G' : 'P') +
+                ' <span class="num-badge">' +
+                esc(b.num) +
+                '</span> ' +
+                esc(b.nom) +
+                '</td><td>' +
+                money(b.stake) +
+                '</td><td>' +
+                b.cote +
+                '</td><td>' +
+                res +
+                '</td><td><button class="x" data-jdel="' +
+                esc(b.id) +
+                '" title="Supprimer">✕</button></td></tr>';
+            });
+          html += '</tbody></table></div>';
+          el.innerHTML = html;
+        }
+        $('journalOut').addEventListener('click', function (e) {
+          var id = e.target.dataset.jdel;
+          if (!id || !confirm('Supprimer ce pari du journal ?')) return;
+          store.journal = store.journal.filter((b) => b.id !== id);
+          save(store);
+          renderJournal();
+          renderAdvisor();
+        });
+        $('btnJExport').onclick = function () {
+          var blob = new Blob([JSON.stringify({ bet: store.bet, journal: store.journal }, null, 1)], { type: 'application/json' });
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement('a');
+          link.href = url;
+          link.download = 'hoshi-turf-journal-' + parisIso(0) + '.json';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(function () {
+            URL.revokeObjectURL(url);
+          }, 1000);
+        };
+        $('jImport').onchange = function () {
+          var f = this.files && this.files[0];
+          if (!f) return;
+          f.text().then(function (txt) {
+            try {
+              var d = JSON.parse(txt);
+              if (!Array.isArray(d.journal)) throw new Error('journal absent');
+              var ids = {};
+              store.journal.forEach((b) => (ids[b.id] = 1));
+              d.journal.forEach(function (b) {
+                if (!ids[b.id]) store.journal.push(b);
+              });
+              if (d.bet) store.bet = Object.assign(store.bet, d.bet);
+              save(store);
+              initBetForm();
+              renderJournal();
+              renderAdvisor();
+              settleJournal();
+            } catch (e) {
+              alert('Fichier invalide : ' + e.message);
+            }
+          });
+        };
+        $('btnJClear').onclick = function () {
+          if (!store.journal.length || !confirm('Effacer tout le journal de paris ?')) return;
+          store.journal = [];
+          save(store);
+          renderJournal();
+          renderAdvisor();
+        };
+
         var openRows = {};
         function render() {
           var race = {
             discipline: state.race.discipline,
+            allocation: state.race.allocation,
             runners: state.race.runners,
           };
           var out = $('out');
-          var a = T.analyzeRace(race, state.settings);
+          var a = T.analyzeRace(race, effectiveSettings());
+          lastAnalysis = a;
+          renderAdvisor();
           if (a.error) {
             out.innerHTML = '<span class="muted">' + a.error + '</span>';
             return;
@@ -1701,7 +2283,7 @@
 
           html +=
             '<details style="margin-top:14px"><summary>Comment sont calculées les notes ?</summary><div class="hint">' +
-            '<p>Chaque critère reçoit une note de 0 à 100 : la <b>forme</b> pondère les dernières places de la musique (les plus récentes comptent plus, les incidents pénalisent, surtout au trot) ; la <b>régularité</b> vient des taux de victoire et de place en carrière, lissés pour les chevaux peu courus ; la <b>classe</b> compare les gains moyens par course au reste du champ ; jockey, entraîneur, aptitude, poids/recul/corde et fraîcheur complètent le tableau.</p>' +
+            '<p>Chaque critère reçoit une note de 0 à 100 : la <b>forme</b> pondère les dernières places de la musique (les plus récentes comptent plus, les incidents pénalisent, surtout au trot) ; la <b>régularité</b> vient des taux de victoire et de place en carrière, lissés pour les chevaux peu courus ; la <b>classe</b> compare les gains moyens par course au reste du champ ; jockey, entraîneur, aptitude à la distance et à l\'hippodrome (tirée des performances détaillées), poids/recul/corde/ferrure, fraîcheur (jours depuis la dernière course), vitesse au kilomètre (trot), niveau des courses récentes comparé à l\'allocation du jour, mouvement des cotes depuis le matin et avis de l\'entraîneur complètent le tableau.</p>' +
             '<p>La note /20 combine le score pondéré (60 %) et le rang dans le champ (40 %). Les scores sont transformés en probabilités de victoire (softmax), puis combinés aux probabilités implicites des cotes, marge du PMU retirée' +
             (a.market ? ' (somme des 1/cote : ' + (a.market.overround * 100).toFixed(0) + ' %)' : '') +
             '. Les probabilités de place sont calculées exactement sur toutes les arrivées possibles (modèle de Plackett-Luce avec correctif pour les 2e et 3e places, qui évite de surestimer les gros outsiders) ; les trios viennent de ' +
@@ -1735,8 +2317,11 @@
         renderRace();
         renderSettings();
         renderSaved();
+        initBetForm();
+        renderJournal();
         render();
         initProgram();
+        settleJournal();
       })();
     </script>
   </body>

@@ -25,3 +25,21 @@ du modèle (poids des critères, dispersion, part du marché, correctif des plac
 correspondent aux arrivées réelles. Le résultat est écrit dans `hippique/data/calibration.json`, que la page applique
 automatiquement et détaille dans « Fiabilité du modèle ». Il faut au moins 150 courses terminées, soit environ 3 jours.
 Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PMU* → *Run workflow*.
+
+### Précision, simulation de paris et conseils de mise
+
+- **Données enrichies** : pour chaque course, la tâche récupère aussi les performances détaillées. Elles donnent
+  le repos réel, l'aptitude à la distance et à l'hippodrome, la meilleure réduction kilométrique au trot et le
+  niveau des courses récentes. Elle récupère aussi la cote du matin (pour mesurer le mouvement des cotes),
+  l'avis de l'entraîneur, la ferrure, puis les rapports définitifs simple gagnant et simple placé.
+- **Historique** : *Actions* → *Programme PMU* → *Run workflow* avec `backfill` = 60 récupère les 60 derniers jours.
+- **Modèle appris** : `scripts/calibrate.mjs` ajuste des réglages séparés pour le trot et le galop. Dès 600 courses
+  d'entraînement, il apprend aussi un logit conditionnel directement sur les résultats. Pour chaque groupe, il garde
+  le modèle qui prévoit le mieux les courses récentes.
+- **Simulation de paris** : les stratégies (favoris, base placée, paris « valeur » gagnant et placé) sont rejouées
+  sur les 25 % de courses les plus récentes avec les vrais rapports, en mise fixe et en Kelly fractionné. Une
+  stratégie n'est « validée » que si son ROI reste positif après retrait de deux erreurs-types.
+- **Conseils de mise et journal** : la page ne conseille une mise non nulle que si une stratégie est validée.
+  La mise suit ¼ de Kelly, avec un plafond par pari et une perte maximale par jour. Le journal (stocké dans le
+  navigateur, exportable) règle automatiquement les paris avec les rapports définitifs.
+
