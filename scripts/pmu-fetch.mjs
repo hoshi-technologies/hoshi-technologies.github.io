@@ -78,10 +78,81 @@ function arrivalOrder(c) {
   return Array.isArray(c.ordreArrivee) ? c.ordreArrivee.map((g) => (Array.isArray(g) ? g : [g])) : null;
 }
 
-async function fetchDay(iso) {
+// ---------------------------------------------------------------- performances détaillées
+const TROT = /ATTELE|MONTE/i;
+let loggedPlace = false;
+function placeOf(me) {
+  const p = me && me.place;
+  if (p == null) return null;
+  if (typeof p === 'number') return p;
+  if (!loggedPlace) {
+    loggedPlace = true;
+    console.log('  (format place : ' + JSON.stringify(p) + ')');
+  }
+  const v = p.place ?? p.rang ?? p.classement ?? p.ordre;
+  return typeof v === 'number' && v > 0 ? v : null;
+}
+/**
+ * Résumé des courses précédentes d'un cheval, uniquement celles courues AVANT la
+ * course analysée (aucune information postérieure n'est utilisée).
+ */
+function perfSummary(part, ctx) {
+  const list = (part.coursesCourues || [])
+    .filter((c) => c.date && c.date < ctx.dateMs - 3600000)
+    .sort((a, b) => b.date - a.date);
+  if (!list.length) return { nPerf: 0 };
+  const out = { nPerf: list.length };
+  out.repos = Math.round((ctx.dateMs - list[0].date) / 86400000);
+  const sameGroup = (c) => TROT.test(c.discipline || '') === ctx.isTrot;
+  const aptD = [0, 0],
+    aptH = [0, 0],
+    rks = [],
+    allocs = [];
+  list.slice(0, 10).forEach((c, k) => {
+    const me = (c.participants || []).find((p) => p.itsHim);
+    const pl = placeOf(me);
+    const top3 = pl !== null && pl <= 3 ? 1 : 0;
+    if (sameGroup(c) && ctx.distance && c.distance && Math.abs(c.distance - ctx.distance) <= 0.12 * ctx.distance) {
+      aptD[0] += top3;
+      aptD[1]++;
+    }
+    if (ctx.hippodrome && c.hippodrome && c.hippodrome.toUpperCase() === ctx.hippodrome.toUpperCase()) {
+      aptH[0] += top3;
+      aptH[1]++;
+    }
+    if (k < 5 && me && me.reductionKilometrique > 0 && sameGroup(c)) rks.push(me.reductionKilometrique);
+    if (k < 5 && c.allocation > 0) allocs.push(Math.log(c.allocation));
+  });
+  if (aptD[1]) out.aptD = aptD;
+  if (aptH[1]) out.aptH = aptH;
+  if (rks.length) out.rk = Math.min(...rks);
+  if (allocs.length) out.alloc = Math.round(Math.exp(allocs.reduce((a, b) => a + b, 0) / allocs.length));
+  return out;
+}
+
+// ---------------------------------------------------------------- rapports définitifs
+function parseRapports(list) {
+  const out = { g: {}, p: {} };
+  if (!Array.isArray(list)) return null;
+  for (const t of list) {
+    const type = t.typePari || '';
+    const key = type === 'SIMPLE_GAGNANT' ? 'g' : type === 'SIMPLE_PLACE' ? 'p' : null;
+    if (!key || Object.keys(out[key]).length) continue; // garde le premier enjeu (national)
+    for (const r of t.rapports || []) {
+      const div = r.dividendePourUnEuro ?? (r.dividende && t.miseBase ? (r.dividende * 100) / t.miseBase : null);
+      if (div && r.combinaison) out[key][String(r.combinaison).trim()] = div / 100;
+    }
+  }
+  return Object.keys(out.g).length || Object.keys(out.p).length ? out : null;
+}
+
+let loggedCourseKeys = false;
+async function fetchDay(iso, prevDay) {
   const prog = await getJson(API + pmuDate(iso));
   const reunions = prog && prog.programme && prog.programme.reunions;
   if (!reunions) return null;
+  const prev = {};
+  for (const r of (prevDay && prevDay.reunions) || []) for (const c of r.courses) prev[r.r + '-' + c.c] = c;
   const jobs = [];
   const day = { date: iso, updated: new Date().toISOString(), reunions: [] };
   for (const r of reunions) {
@@ -94,6 +165,10 @@ async function fetchDay(iso) {
     };
     day.reunions.push(reu);
     for (const c of r.courses || []) {
+      if (!loggedCourseKeys) {
+        loggedCourseKeys = true;
+        console.log('  (champs course : ' + Object.keys(c).join(',') + ')');
+      }
       const course = {
         c: c.numOrdre || c.numExterne,
         libelle: c.libelle || c.libelleCourt || '',
@@ -101,32 +176,75 @@ async function fetchDay(iso) {
         distance: c.distance || '',
         discipline: discipline(c),
         terrain: terrain(c),
+        allocation: c.montantPrix || c.montantTotalOffert || c.montantOffert1er || '',
         statut: c.statut || '',
         arrivee: arrivalOrder(c),
         partants: [],
       };
       reu.courses.push(course);
-      jobs.push({ R, course });
+      jobs.push({ R, reu, course, old: prev[R + '-' + course.c] });
     }
   }
-  await pool(jobs, 4, async ({ R, course }) => {
+  const base = `${API}${pmuDate(iso)}`;
+  await pool(jobs, 4, async ({ R, reu, course, old }) => {
+    const tag = 'R' + R + 'C' + course.c;
+    // Course terminée déjà complète : rien à retélécharger.
+    if (old && old.rapports && old.partants && old.partants.length && course.arrivee) {
+      course.partants = old.partants;
+      course.rapports = old.rapports;
+      return;
+    }
     try {
-      const j = await getJson(`${API}${pmuDate(iso)}/R${R}/C${course.c}/participants`);
-      if (!j) return;
-      const runners = Turf.fromPmuParticipants(j);
-      const raw = j.participants || [];
-      course.partants = runners.map((x, i) => {
-        const o = {};
-        for (const k of Object.keys(x)) if (x[k] !== '' && x[k] !== false && x[k] != null) o[k] = x[k];
-        if (raw[i] && raw[i].ordreArrivee) o.arrivee = raw[i].ordreArrivee;
-        return o;
-      });
+      const j = await getJson(`${base}/R${R}/C${course.c}/participants`);
+      if (j) {
+        const runners = Turf.fromPmuParticipants(j);
+        const raw = j.participants || [];
+        course.partants = runners.map((x, i) => {
+          const o = {};
+          for (const k of Object.keys(x)) if (x[k] !== '' && x[k] !== false && x[k] != null) o[k] = x[k];
+          if (raw[i] && raw[i].ordreArrivee) o.arrivee = raw[i].ordreArrivee;
+          return o;
+        });
+      }
     } catch (e) {
-      console.warn('  ! R' + R + 'C' + course.c + ' : ' + e.message);
+      console.warn('  ! ' + tag + ' partants : ' + e.message);
+    }
+    // Performances détaillées : une seule fois par course (elles ne changent pas).
+    const oldPerf = {};
+    for (const p of (old && old.partants) || []) if (p.nPerf != null) oldPerf[p.num] = p;
+    if (course.partants.length && Object.keys(oldPerf).length) {
+      for (const p of course.partants)
+        if (oldPerf[p.num]) for (const k of PERF_KEYS) if (oldPerf[p.num][k] != null) p[k] = oldPerf[p.num][k];
+    } else if (course.partants.length) {
+      try {
+        const pf = await getJson(`${base}/R${R}/C${course.c}/performances-detaillees/pretty`);
+        const ctx = {
+          dateMs: course.heure || Date.parse(iso + 'T12:00:00Z'),
+          distance: Number(course.distance) || 0,
+          hippodrome: reu.hippodrome,
+          isTrot: /trot/.test(course.discipline),
+        };
+        const byNum = {};
+        for (const part of (pf && pf.participants) || []) byNum[part.numPmu] = perfSummary(part, ctx);
+        for (const p of course.partants) Object.assign(p, byNum[p.num] || { nPerf: 0 });
+      } catch (e) {
+        console.warn('  ! ' + tag + ' performances : ' + e.message);
+      }
+    }
+    // Rapports définitifs (simple gagnant et simple placé), une fois l'arrivée connue.
+    if (course.arrivee) {
+      if (old && old.rapports) course.rapports = old.rapports;
+      else
+        try {
+          course.rapports = parseRapports(await getJson(`${base}/R${R}/C${course.c}/rapports-definitifs`)) || undefined;
+        } catch (e) {
+          console.warn('  ! ' + tag + ' rapports : ' + e.message);
+        }
     }
   });
   return day;
 }
+const PERF_KEYS = ['nPerf', 'repos', 'aptD', 'aptH', 'rk', 'alloc'];
 
 // ---------------------------------------------------------------- statistiques
 function addStat(map, name, won, placed) {
@@ -169,7 +287,13 @@ async function readJson(f, dflt) {
 }
 async function main() {
   await mkdir(DATA, { recursive: true });
-  const dates = process.argv.slice(2).length ? process.argv.slice(2) : [parisDate(-1), parisDate(0), parisDate(1)];
+  const args = process.argv.slice(2);
+  const bi = args.indexOf('--backfill');
+  const backfill = bi >= 0 ? Math.min(KEEP_DAYS, parseInt(args[bi + 1], 10) || 0) : 0;
+  if (bi >= 0) args.splice(bi, 2);
+  let dates = args.length ? args : [parisDate(-1), parisDate(0), parisDate(1)];
+  // Historique : journées passées manquantes (servent au calibrage et à la simulation de paris).
+  for (let k = backfill; k >= 2; k--) if (!dates.includes(parisDate(-k))) dates.unshift(parisDate(-k));
   const stats = await readJson(path.join(DATA, 'stats.json'), { dates: [], jockeys: {}, entraineurs: {}, chevaux: {} });
 
   let ok = 0;
@@ -177,7 +301,12 @@ async function main() {
     console.log('Programme du ' + iso);
     let day;
     try {
-      day = await fetchDay(iso);
+      const prevDay = await readJson(path.join(DATA, iso + '.json'), null);
+      if (prevDay && iso < parisDate(-1) && prevDay.complete) {
+        console.log('  déjà complète');
+        continue;
+      }
+      day = await fetchDay(iso, prevDay);
     } catch (e) {
       console.warn('  ! ' + e.message);
       continue;
@@ -187,8 +316,12 @@ async function main() {
       continue;
     }
     ok++;
-    const n = day.reunions.reduce((s, r) => s + r.courses.length, 0);
-    console.log(`  ${day.reunions.length} réunions, ${n} courses`);
+    const all = day.reunions.flatMap((r) => r.courses);
+    day.complete = finished(day) && all.every((c) => !c.arrivee || c.rapports);
+    console.log(
+      `  ${day.reunions.length} réunions, ${all.length} courses, ${all.filter((c) => c.rapports).length} avec rapports, ` +
+        `${all.filter((c) => c.partants.some((p) => p.nPerf != null)).length} avec performances`,
+    );
     await writeFile(path.join(DATA, iso + '.json'), JSON.stringify(day));
     if (iso < parisDate(0) && updateStats(stats, day)) console.log('  statistiques mises à jour');
   }
