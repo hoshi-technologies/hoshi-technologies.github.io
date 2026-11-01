@@ -1,20 +1,23 @@
 // Pages publiques de documentation : guide utilisateur (/guide) et FAQ (/faq), en 7 langues.
 // Liens à indiquer dans la fiche App Store ; le guide s'imprime proprement (ou en PDF).
 
+// Liens par défaut : pages servies par l'appli (/guide?lang=fr). Le site statique fournit les siens.
+const defaultLink = (page, lang) => `/${page}?lang=${encodeURIComponent(lang)}`;
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
-function languageSwitcher(lang, languages) {
+function languageSwitcher(lang, languages, page, link) {
   return languages
-    .map((l) => (l.code === lang ? `<strong>${esc(l.name)}</strong>` : `<a href="?lang=${esc(l.code)}" hreflang="${esc(l.code)}">${esc(l.name)}</a>`))
+    .map((l) => (l.code === lang ? `<strong>${esc(l.name)}</strong>` : `<a href="${esc(link(page, l.code))}" hreflang="${esc(l.code)}">${esc(l.name)}</a>`))
     .join(' · ');
 }
 
-function layout({ lang, page, title, t, support, body, script = '' }) {
+function layout({ lang, page, title, t, support, body, script = '', link = defaultLink, home = null }) {
   const nav = [
     ['guide', t['guide.title']],
     ['faq', t['help.title']],
   ]
-    .map(([p, label]) => (p === page ? `<span aria-current="page">${esc(label)}</span>` : `<a href="/${p}?lang=${esc(lang)}">${esc(label)}</a>`))
+    .map(([p, label]) => (p === page ? `<span aria-current="page">${esc(label)}</span>` : `<a href="${esc(link(p, lang))}">${esc(label)}</a>`))
     .join('');
   return `<!doctype html>
 <html lang="${esc(lang)}">
@@ -29,7 +32,7 @@ function layout({ lang, page, title, t, support, body, script = '' }) {
   body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
   main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
   .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
-  .brand { font-weight:700; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
   nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
   nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
   nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
@@ -62,7 +65,7 @@ function layout({ lang, page, title, t, support, body, script = '' }) {
 </head>
 <body>
 <main>
-  <div class="bar"><span class="brand">${esc(t.appName)}</span><nav class="docs">${nav}</nav></div>
+  <div class="bar">${home ? `<a class="brand" href="${esc(home)}">${esc(t.appName)}</a>` : `<span class="brand">${esc(t.appName)}</span>`}<nav class="docs">${nav}</nav></div>
   ${body}
   ${support ? `<footer>${esc(t['help.contact']).replace('{support}', `<a href="mailto:${esc(support)}">${esc(support)}</a>`)}</footer>` : ''}
 </main>
@@ -71,7 +74,7 @@ ${script}
 </html>`;
 }
 
-export function renderGuidePage({ lang, guide, languages, t, support }) {
+export function renderGuidePage({ lang, guide, languages, t, support, link = defaultLink, home = null }) {
   const toc = guide.map((c) => `<li><a href="#${esc(c.id)}">${esc(c.title)}</a></li>`).join('');
   const chapters = guide
     .map(
@@ -85,14 +88,14 @@ export function renderGuidePage({ lang, guide, languages, t, support }) {
     .join('\n');
   const body = `<h1>${esc(t['guide.title'])}</h1>
   <p class="lead">${esc(t['guide.intro'])}</p>
-  <div class="langs">${languageSwitcher(lang, languages)}</div>
+  <div class="langs">${languageSwitcher(lang, languages, 'guide', link)}</div>
   <p><button type="button" class="print" onclick="print()">${esc(t['guide.print'])}</button></p>
   <section class="card"><h2>${esc(t['guide.contents'])}</h2><ol class="toc">${toc}</ol></section>
   ${chapters}`;
-  return layout({ lang, page: 'guide', title: t['guide.title'], t, support, body });
+  return layout({ lang, page: 'guide', title: t['guide.title'], t, support, body, link, home });
 }
 
-export function renderFaqPage({ lang, faq, languages, t, support }) {
+export function renderFaqPage({ lang, faq, languages, t, support, link = defaultLink, home = null }) {
   const sections = faq
     .map(
       (section) => `<section><h2>${esc(section.title)}</h2>${section.items
@@ -101,7 +104,7 @@ export function renderFaqPage({ lang, faq, languages, t, support }) {
     )
     .join('');
   const body = `<h1>${esc(t['help.title'])}</h1>
-  <div class="langs">${languageSwitcher(lang, languages)}</div>
+  <div class="langs">${languageSwitcher(lang, languages, 'faq', link)}</div>
   <input type="search" id="q" placeholder="${esc(t['help.search'])}" aria-label="${esc(t['help.search'])}">
   <div id="faq">${sections}</div>
   <p class="empty" id="empty" hidden>${esc(t['help.noResult'])}</p>`;
@@ -121,5 +124,5 @@ export function renderFaqPage({ lang, faq, languages, t, support }) {
     document.getElementById('empty').hidden = shown > 0;
   });
 </script>`;
-  return layout({ lang, page: 'faq', title: t['help.title'], t, support, body, script });
+  return layout({ lang, page: 'faq', title: t['help.title'], t, support, body, script, link, home });
 }

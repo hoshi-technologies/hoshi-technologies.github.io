@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Invoices – User guide</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">PDF Invoices</a><nav class="docs"><span aria-current="page">User guide</span><a href="faq-en.html">Frequently asked questions</a></nav></div>
+  <h1>User guide</h1>
+  <p class="lead">Everything you need to use the app, step by step.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <strong>English</strong> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a></div>
+  <p><button type="button" class="print" onclick="print()">Print or save as PDF</button></p>
+  <section class="card"><h2>Contents</h2><ol class="toc"><li><a href="#install">Install the app</a></li><li><a href="#company">Add your business details</a></li><li><a href="#look">Customise and check the invoice</a></li><li><a href="#sending">Choose when and how invoices are sent</a></li><li><a href="#shopify-link">Add the invoice link to the Shopify order confirmation (optional)</a></li><li><a href="#daily">Track your invoices day to day</a></li><li><a href="#numbering">Numbering and languages</a></li><li><a href="#facturx">Factur-X: e-invoicing</a></li><li><a href="#billing">Manage your plan</a></li><li><a href="#best-practices">Good practices</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Install the app</span></h2>
+  <p>Installation takes a minute and changes neither your store nor your orders.</p>
+  <ol class="steps"><li>On the Shopify App Store, open the app page and click “Install”.</li><li>Accept read access to your orders: the app needs it to create invoices, but cannot change them.</li><li>The app opens in your Shopify admin, under Apps › PDF Invoices. Your store name, address and email are already filled in.</li><li>On the Home tab, follow the “Getting started” list: it disappears once the three steps are done.</li></ol>
+  <div class="tip"><b>Tip:</b> You start on the Free plan (10 invoices per month), no credit card needed.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Add your business details</span></h2>
+  <p>These details appear on every invoice. They are required for a valid invoice.</p>
+  <ol class="steps"><li>Open the Settings tab, “Your business” card.</li><li>Quickest way (French companies): in “Auto-fill”, type your SIRET (or company name and city), click “Search” then “Use”. Company name, head office address, SIRET, legal form and VAT number are taken from the official register. You can also click “Use Shopify details”.</li><li>Check the company name and email: customers reply to this address and you receive invoice copies there.</li><li>Enter the address on several lines, with the postcode and city on the same line (e.g. “69002 Lyon”), then choose the country.</li><li>Enter your company registration number (SIRET in France) and VAT number.</li><li>VAT-exempt small business: tick the VAT exemption option. VAT disappears from invoices and the legal notice is added.</li><li>Open “More business details” for the legal form and share capital, trade register, phone, website and what you sell (goods, services or both).</li><li>Click “Save” in the bar that appears at the bottom of the screen.</li></ol>
+  <div class="tip"><b>Tip:</b> Have a first invoice checked by your accountant: they know the details specific to your business.</div><div class="tip"><b>Tip:</b> If you are VAT-exempt, also make sure Shopify doesn’t charge taxes to your customers (Settings › Taxes and duties).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Customise and check the invoice</span></h2>
+  <p>Give your invoices your brand’s look, then check the result before the first order.</p>
+  <ol class="steps"><li>In Shopify, open Content › Files, upload your logo (PNG or JPEG) and copy its link.</li><li>In Settings › Appearance, paste the link into “Logo URL” and choose the main color.</li><li>If needed, edit the legal notice and thank-you message. Left empty, they are translated automatically into the customer’s language.</li><li>Click “Preview PDF”: a sample invoice is downloaded with your settings, even unsaved ones.</li><li>Save when you’re happy with the result.</li></ol>
+  <div class="tip"><b>Tip:</b> Settings only apply to the next invoices: an issued invoice never changes.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Choose when and how invoices are sent</span></h2>
+  <p>By default, the invoice is created when the order is paid and emailed to the customer right away.</p>
+  <ol class="steps"><li>In Settings › How it works, choose when to create the invoice: when the order is paid (recommended) or as soon as it is placed.</li><li>Keep “Email the invoice to the customer” ticked for automatic sending, with the PDF attached.</li><li>Tick “Send me a copy of every invoice” to receive each invoice and build your archive.</li><li>To customise the email, open “Email to the customer”: subject and message accept the variables {{first_name}}, {{name}}, {{invoice_number}}, {{order}} and {{shop}}.</li></ol>
+  <div class="tip"><b>Tip:</b> Shopify doesn’t allow attachments in its own emails: the invoice goes in a separate email, sent on behalf of your store.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Add the invoice link to the Shopify order confirmation (optional)</span></h2>
+  <p>Your customers can also get their invoice from your store’s usual confirmation email.</p>
+  <ol class="steps"><li>In Settings, open “Link in the Shopify order confirmation email” and click “Copy code”.</li><li>In Shopify, go to Settings › Notifications › Customer notifications › Order confirmation, then “Edit code”.</li><li>Paste the code where the button should appear, for example right after the order summary.</li><li>Click “Preview” to check, then “Save”.</li></ol>
+  <div class="tip"><b>Tip:</b> If the customer clicks before payment, a page tells them the invoice will be available in a few minutes.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Track your invoices day to day</span></h2>
+  <p>The Home tab lists the latest invoices with their sending status.</p>
+  <ol class="steps"><li>Each row shows the number, order, customer, date, total and email status.</li><li>“Sent”: the customer received the invoice. “Not sent”: automatic sending is off. “Failed”: hover over the status to see why.</li><li>Click “PDF” to download an invoice, or “Resend” to send it to the customer again.</li><li>The Factur-X badge means the invoice also contains the data for e-invoicing.</li></ol>
+  <div class="tip"><b>Tip:</b> If sending failed, check the customer’s address on the Shopify order and ask them to look in their spam folder.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Numbering and languages</span></h2>
+  <p>Numbers follow each other with no gaps, as the law requires, and each customer gets the invoice in their language.</p>
+  <ol class="steps"><li>In Settings › Numbering and language, choose the number prefix (default “F-”, i.e. F-2026-00001).</li><li>If you already issued invoices with another tool, set the next number: it can be increased but never decreased.</li><li>Choose the invoice language: the customer’s (English, French, German, Spanish, Italian, Dutch or Portuguese) or a single language.</li><li>With “Customer’s language”, also choose the fallback language used when the customer’s language is not available.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: e-invoicing</span></h2>
+  <p>With Factur-X, the PDF also contains the invoice data, readable by accounting software and e-invoicing platforms, which become mandatory between businesses in France from 2026–2027.</p>
+  <ol class="steps"><li>Open Settings › Factur-X: the option is on by default.</li><li>If “Factur-X paused” is shown, fill in the missing detail (often the address, country or VAT number) and save.</li><li>When the indicator turns to ✓, all following invoices are Factur-X, with no change for your customers.</li></ol>
+  <div class="tip"><b>Tip:</b> Your accountant can import these invoices directly into their software.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Manage your plan</span></h2>
+  <p>Free plan: 10 invoices per month. Essential: 200 invoices for US$7.90 per month. Unlimited: US$12.90 per month. 7-day free trial on paid plans.</p>
+  <ol class="steps"><li>The Plan tab (and Home) shows how many invoices you used this month. The counter resets on the 1st of every month.</li><li>To change plan, click “Choose” then approve on the Shopify page: the amount is added to your Shopify bill.</li><li>If the limit is reached, new orders are put on hold and you are notified by email. After upgrading, click “Generate their invoices” on Home.</li><li>To go back to the Free plan, click “Cancel”.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Good practices</span></h2>
+  <p>A few habits to keep your accounting stress-free.</p>
+  <ol class="steps"><li>Place a test order after setup (using Shopify Payments test mode) and check the invoice you receive.</li><li>Keep your invoices for 10 years: keep the email copy or download them every month. They are deleted from the app 48 hours after uninstalling.</li><li>An issued invoice cannot be changed: in case of a mistake or refund, issue a credit note with your accounting tool.</li><li>A question? Check the FAQ in the Help tab.</li></ol>
+  
+</section>
+  
+</main>
+
+</body>
+</html>

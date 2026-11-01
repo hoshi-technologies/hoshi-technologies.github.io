@@ -397,6 +397,22 @@
       </tr>`).join('')
       : `<tr><td colspan="7" class="empty">${escape(t('invoices.empty'))}</td></tr>`;
     renderHome();
+    maybeAskForReview();
+  }
+
+  // Demande d'avis : fenêtre officielle de Shopify (App Bridge), une seule fois, quand l'appli
+  // a fait ses preuves (5 factures envoyées). Aucune contrepartie n'est proposée : c'est la
+  // règle de l'App Store. Shopify limite lui-même la fréquence d'affichage.
+  async function maybeAskForReview() {
+    const sent = state.invoices.filter((i) => i.email_status === 'sent').length;
+    if (sent < 5 || store.get('reviewDone') || !window.shopify?.reviews?.request) return;
+    // Si Shopify n'affiche pas la fenêtre (limite de fréquence), on retente une semaine plus tard.
+    if (Date.now() - Number(store.get('reviewAskedAt') || 0) < 7 * 864e5) return;
+    store.set('reviewAskedAt', String(Date.now()));
+    try {
+      const result = await shopify.reviews.request();
+      if (result?.success) store.set('reviewDone', '1');
+    } catch {}
   }
 
   $('invoices').addEventListener('click', async (event) => {

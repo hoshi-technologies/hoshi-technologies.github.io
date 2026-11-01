@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF-Rechnungen – Benutzerhandbuch</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">PDF-Rechnungen</a><nav class="docs"><span aria-current="page">Benutzerhandbuch</span><a href="faq-de.html">Häufige Fragen</a></nav></div>
+  <h1>Benutzerhandbuch</h1>
+  <p class="lead">Alles, was Sie zur Nutzung der App wissen müssen, Schritt für Schritt.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <strong>Deutsch</strong> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a></div>
+  <p><button type="button" class="print" onclick="print()">Drucken oder als PDF speichern</button></p>
+  <section class="card"><h2>Inhalt</h2><ol class="toc"><li><a href="#install">App installieren</a></li><li><a href="#company">Unternehmensdaten eingeben</a></li><li><a href="#look">Rechnung gestalten und prüfen</a></li><li><a href="#sending">Festlegen, wann und wie Rechnungen versendet werden</a></li><li><a href="#shopify-link">Rechnungslink in der Shopify-Bestellbestätigung (optional)</a></li><li><a href="#daily">Rechnungen im Alltag verfolgen</a></li><li><a href="#numbering">Nummerierung und Sprachen</a></li><li><a href="#facturx">Factur-X: die E-Rechnung</a></li><li><a href="#billing">Tarif verwalten</a></li><li><a href="#best-practices">Bewährte Vorgehensweisen</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>App installieren</span></h2>
+  <p>Die Installation dauert eine Minute und verändert weder Ihren Shop noch Ihre Bestellungen.</p>
+  <ol class="steps"><li>Öffnen Sie im Shopify App Store die Seite der App und klicken Sie auf „Installieren“.</li><li>Erlauben Sie den Lesezugriff auf Ihre Bestellungen: Die App braucht ihn für die Rechnungen, kann aber nichts ändern.</li><li>Die App öffnet sich in Ihrem Shopify-Admin unter Apps › PDF-Rechnungen. Name, Adresse und E-Mail Ihres Shops sind bereits ausgefüllt.</li><li>Folgen Sie im Tab „Start“ der Liste „Erste Schritte“: Sie verschwindet, sobald die drei Schritte erledigt sind.</li></ol>
+  <div class="tip"><b>Tipp:</b> Sie starten mit dem kostenlosen Tarif (10 Rechnungen pro Monat), ohne Kreditkarte.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Unternehmensdaten eingeben</span></h2>
+  <p>Diese Angaben stehen auf jeder Rechnung. Sie sind für eine gültige Rechnung erforderlich.</p>
+  <ol class="steps"><li>Öffnen Sie den Tab „Einstellungen“, Karte „Ihr Unternehmen“.</li><li>Am schnellsten (französische Unternehmen): Geben Sie unter „Automatisch ausfüllen“ Ihre SIRET (oder Firmenname und Ort) ein, klicken Sie auf „Suchen“ und dann auf „Übernehmen“. Firmenname, Sitzadresse, SIRET, Rechtsform und USt-IdNr. kommen aus dem amtlichen Register. Sie können auch auf „Shopify-Daten übernehmen“ klicken.</li><li>Prüfen Sie Firmenname und E-Mail: An diese Adresse antworten Kunden und dorthin gehen die Rechnungskopien.</li><li>Geben Sie die Adresse auf mehreren Zeilen ein, mit PLZ und Ort in derselben Zeile (z. B. „10115 Berlin“), und wählen Sie das Land.</li><li>Tragen Sie Registernummer (in Frankreich SIRET) und USt-IdNr. ein.</li><li>Kleinunternehmer ohne Umsatzsteuer: Aktivieren Sie die Option für Kleinunternehmer. Die Steuer verschwindet von den Rechnungen und der Pflichthinweis wird ergänzt.</li><li>Öffnen Sie „Weitere Unternehmensangaben“ für Rechtsform und Stammkapital, Handelsregister, Telefon, Website und die Art Ihrer Verkäufe (Waren, Dienstleistungen oder beides).</li><li>Klicken Sie in der Leiste unten auf dem Bildschirm auf „Speichern“.</li></ol>
+  <div class="tip"><b>Tipp:</b> Lassen Sie eine erste Rechnung von Ihrem Steuerberater prüfen: Er kennt die Angaben für Ihre Tätigkeit.</div><div class="tip"><b>Tipp:</b> Als Kleinunternehmer prüfen Sie auch, dass Shopify Ihren Kunden keine Steuern berechnet (Einstellungen › Steuern und Zölle).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Rechnung gestalten und prüfen</span></h2>
+  <p>Geben Sie Ihren Rechnungen das Aussehen Ihrer Marke und prüfen Sie das Ergebnis vor der ersten Bestellung.</p>
+  <ol class="steps"><li>Öffnen Sie in Shopify Content › Dateien, laden Sie Ihr Logo hoch (PNG oder JPEG) und kopieren Sie den Link.</li><li>Fügen Sie den Link unter Einstellungen › Erscheinungsbild in „Logo-URL“ ein und wählen Sie die Hauptfarbe.</li><li>Passen Sie bei Bedarf die rechtlichen Hinweise und die Dankesnachricht an. Leer gelassen, werden sie automatisch in die Sprache des Kunden übersetzt.</li><li>Klicken Sie auf „PDF-Vorschau“: Eine Beispielrechnung mit Ihren Einstellungen wird heruntergeladen, auch wenn sie noch nicht gespeichert sind.</li><li>Speichern Sie, wenn Ihnen das Ergebnis gefällt.</li></ol>
+  <div class="tip"><b>Tipp:</b> Einstellungen gelten nur für künftige Rechnungen: Eine ausgestellte Rechnung ändert sich nie.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Festlegen, wann und wie Rechnungen versendet werden</span></h2>
+  <p>Standardmäßig wird die Rechnung bei Zahlung erstellt und sofort per E-Mail an den Kunden gesendet.</p>
+  <ol class="steps"><li>Wählen Sie unter Einstellungen › Funktionsweise, wann die Rechnung erstellt wird: wenn die Bestellung bezahlt ist (empfohlen) oder sobald sie aufgegeben wird.</li><li>Lassen Sie „Rechnung per E-Mail an den Kunden senden“ aktiviert für den automatischen Versand mit PDF im Anhang.</li><li>Aktivieren Sie „Mir eine Kopie jeder Rechnung senden“, um jede Rechnung zu erhalten und Ihr Archiv aufzubauen.</li><li>Um die E-Mail anzupassen, öffnen Sie „E-Mail an den Kunden“: Betreff und Text akzeptieren die Variablen {{first_name}}, {{name}}, {{invoice_number}}, {{order}} und {{shop}}.</li></ol>
+  <div class="tip"><b>Tipp:</b> Shopify erlaubt keine Anhänge in den eigenen E-Mails: Die Rechnung kommt in einer separaten E-Mail im Namen Ihres Shops.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Rechnungslink in der Shopify-Bestellbestätigung (optional)</span></h2>
+  <p>Ihre Kunden finden die Rechnung auch über die gewohnte Bestellbestätigung Ihres Shops.</p>
+  <ol class="steps"><li>Öffnen Sie in den Einstellungen „Link in der Shopify-Bestellbestätigung“ und klicken Sie auf „Code kopieren“.</li><li>Gehen Sie in Shopify zu Einstellungen › Benachrichtigungen › Kundenbenachrichtigungen › Bestellbestätigung und dann zu „Code bearbeiten“.</li><li>Fügen Sie den Code dort ein, wo die Schaltfläche erscheinen soll, z. B. direkt nach der Bestellübersicht.</li><li>Klicken Sie zur Kontrolle auf „Vorschau“ und dann auf „Speichern“.</li></ol>
+  <div class="tip"><b>Tipp:</b> Klickt der Kunde vor der Zahlung, erfährt er, dass die Rechnung in wenigen Minuten verfügbar ist.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Rechnungen im Alltag verfolgen</span></h2>
+  <p>Der Tab „Start“ zeigt die neuesten Rechnungen mit ihrem Versandstatus.</p>
+  <ol class="steps"><li>Jede Zeile zeigt Nummer, Bestellung, Kunde, Datum, Summe und E-Mail-Status.</li><li>„Gesendet“: Der Kunde hat die Rechnung erhalten. „Nicht gesendet“: Der automatische Versand ist aus. „Fehlgeschlagen“: Fahren Sie mit der Maus über den Status, um den Grund zu sehen.</li><li>Klicken Sie auf „PDF“, um eine Rechnung herunterzuladen, oder auf „Erneut senden“, um sie dem Kunden noch einmal zu schicken.</li><li>Das Factur-X-Abzeichen bedeutet, dass die Rechnung auch die Daten für die E-Rechnung enthält.</li></ol>
+  <div class="tip"><b>Tipp:</b> Bei einem Fehler prüfen Sie die Adresse des Kunden in der Shopify-Bestellung und bitten ihn, im Spam-Ordner nachzusehen.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Nummerierung und Sprachen</span></h2>
+  <p>Die Nummern sind lückenlos fortlaufend, wie gesetzlich vorgeschrieben, und jeder Kunde erhält die Rechnung in seiner Sprache.</p>
+  <ol class="steps"><li>Wählen Sie unter Einstellungen › Nummerierung und Sprache das Präfix (Standard „F-“, also F-2026-00001).</li><li>Wenn Sie schon mit einem anderen Tool Rechnungen ausgestellt haben, legen Sie die nächste Nummer fest: Sie kann erhöht, aber nie verringert werden.</li><li>Wählen Sie die Rechnungssprache: die des Kunden (Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch oder Portugiesisch) oder eine feste Sprache.</li><li>Bei „Sprache des Kunden“ wählen Sie auch die Ersatzsprache, falls die Sprache des Kunden nicht verfügbar ist.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: die E-Rechnung</span></h2>
+  <p>Mit Factur-X (in Deutschland als ZUGFeRD bekannt) enthält das PDF zusätzlich die Rechnungsdaten, lesbar für Buchhaltungssoftware und E-Rechnungs-Plattformen, die in Frankreich ab 2026–2027 zwischen Unternehmen Pflicht werden.</p>
+  <ol class="steps"><li>Öffnen Sie Einstellungen › Factur-X: Die Option ist standardmäßig aktiviert.</li><li>Wird „Factur-X pausiert“ angezeigt, ergänzen Sie die genannte Angabe (oft Adresse, Land oder USt-IdNr.) und speichern Sie.</li><li>Sobald die Anzeige auf ✓ wechselt, sind alle weiteren Rechnungen im Factur-X-Format, ohne Änderung für Ihre Kunden.</li></ol>
+  <div class="tip"><b>Tipp:</b> Ihr Steuerberater kann diese Rechnungen direkt in seine Software importieren.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Tarif verwalten</span></h2>
+  <p>Kostenlos: 10 Rechnungen pro Monat. Essential: 200 Rechnungen für 7,90 $ pro Monat. Unbegrenzt: 12,90 $ pro Monat. 7 Tage kostenlos testen bei bezahlten Tarifen.</p>
+  <ol class="steps"><li>Der Tab „Tarif“ (und „Start“) zeigt, wie viele Rechnungen Sie in diesem Monat genutzt haben. Der Zähler beginnt am 1. jedes Monats neu.</li><li>Um den Tarif zu wechseln, klicken Sie auf „Auswählen“ und bestätigen auf der Shopify-Seite: Der Betrag erscheint auf Ihrer Shopify-Rechnung.</li><li>Ist das Limit erreicht, werden neue Bestellungen zurückgestellt und Sie erhalten eine E-Mail. Klicken Sie nach dem Tarifwechsel im Tab „Start“ auf „Rechnungen erstellen“.</li><li>Um zum kostenlosen Tarif zurückzukehren, klicken Sie auf „Kündigen“.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Bewährte Vorgehensweisen</span></h2>
+  <p>Ein paar Gewohnheiten für eine entspannte Buchhaltung.</p>
+  <ol class="steps"><li>Geben Sie nach der Einrichtung eine Testbestellung auf (im Testmodus von Shopify Payments) und prüfen Sie die erhaltene Rechnung.</li><li>Bewahren Sie Ihre Rechnungen 10 Jahre auf: Behalten Sie die E-Mail-Kopie oder laden Sie sie monatlich herunter. 48 Stunden nach einer Deinstallation werden sie aus der App gelöscht.</li><li>Eine ausgestellte Rechnung kann nicht geändert werden: Bei einem Fehler oder einer Erstattung erstellen Sie eine Gutschrift mit Ihrer Buchhaltungssoftware.</li><li>Eine Frage? Sehen Sie in den häufigen Fragen im Tab „Hilfe“ nach.</li></ol>
+  
+</section>
+  
+</main>
+
+</body>
+</html>

@@ -23,7 +23,8 @@ import {
 } from './shopify.js';
 import { facturxIssues } from './facturx.js';
 import { lookupFrenchCompany } from './company-lookup.js';
-import { LANGUAGES, dictionary, resolveLanguage, matchLanguage, invoiceLanguage, faqFor, guideFor } from './i18n/index.js';
+import { LANGUAGES, dictionary, resolveLanguage, matchLanguage, invoiceLanguage } from './i18n/index.js';
+import { guideContent, faqContent } from './docs.js';
 import { renderFaqPage, renderGuidePage } from './docs-page.js';
 import { PLANS, BILLING_CURRENCY, subscriptionName, planFromSubscriptionName } from './plans.js';
 
@@ -34,25 +35,9 @@ const SAMPLE_ORDER = JSON.parse(readFileSync(here('./sample-order.json'), 'utf8'
 export function createApp({ config, store, service, fetchImpl = fetch, logger = console }) {
   const app = express();
 
-  /** Prix et quotas réels, insérés dans le guide et la FAQ. */
-  const docVars = (lang) => {
-    const usd = (n) => new Intl.NumberFormat(dictionary(lang).intl, { style: 'currency', currency: BILLING_CURRENCY }).format(n);
-    return {
-      freeLimit: PLANS.free.monthlyLimit,
-      essentielPrice: usd(PLANS.essentiel.price),
-      essentielLimit: PLANS.essentiel.monthlyLimit,
-      illimitePrice: usd(PLANS.illimite.price),
-      trialDays: PLANS.essentiel.trialDays,
-      ...(config.supportEmail ? { support: config.supportEmail } : {}),
-    };
-  };
-  const guide = (lang) => guideFor(lang, docVars(lang));
-  /** FAQ traduite ; sans adresse de support, la question correspondante est retirée. */
-  const faq = (lang) => {
-    const sections = faqFor(lang, docVars(lang));
-    if (config.supportEmail) return sections;
-    return sections.map((sec) => ({ ...sec, items: sec.items.filter((item) => !item.a.includes('{support}')) }));
-  };
+  const guide = (lang) => guideContent(lang, config.supportEmail);
+  const faq = (lang) => faqContent(lang, config.supportEmail);
+
   const graphql = (shop, query, variables) => {
     const { access_token: token } = store.getShop(shop) ?? {};
     if (!token) throw new Error("Appli non initialisée : rechargez la page de l'appli");

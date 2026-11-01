@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factures PDF – Guide d&#39;utilisation</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../index.html">Factures PDF</a><nav class="docs"><span aria-current="page">Guide d&#39;utilisation</span><a href="faq-fr.html">Questions fréquentes</a></nav></div>
+  <h1>Guide d&#39;utilisation</h1>
+  <p class="lead">Tout ce qu&#39;il faut savoir pour utiliser l&#39;appli, étape par étape.</p>
+  <div class="langs"><strong>Français</strong> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a></div>
+  <p><button type="button" class="print" onclick="print()">Imprimer ou enregistrer en PDF</button></p>
+  <section class="card"><h2>Sommaire</h2><ol class="toc"><li><a href="#install">Installer l&#39;appli</a></li><li><a href="#company">Renseigner votre entreprise</a></li><li><a href="#look">Personnaliser et vérifier la facture</a></li><li><a href="#sending">Choisir quand et comment envoyer les factures</a></li><li><a href="#shopify-link">Ajouter le lien de facture dans la confirmation de commande Shopify (facultatif)</a></li><li><a href="#daily">Suivre vos factures au quotidien</a></li><li><a href="#numbering">Numérotation et langues</a></li><li><a href="#facturx">Factur-X : la facture électronique</a></li><li><a href="#billing">Gérer votre abonnement</a></li><li><a href="#best-practices">Bonnes pratiques</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Installer l&#39;appli</span></h2>
+  <p>L&#39;installation prend une minute et ne modifie ni votre boutique ni vos commandes.</p>
+  <ol class="steps"><li>Sur l&#39;App Store Shopify, ouvrez la page de l&#39;appli et cliquez sur « Installer ».</li><li>Acceptez l&#39;accès en lecture à vos commandes : l&#39;appli en a besoin pour établir les factures, mais ne peut pas les modifier.</li><li>L&#39;appli s&#39;ouvre dans votre administration Shopify, menu Applis › Factures PDF. Le nom, l&#39;adresse et l&#39;e-mail de votre boutique sont déjà pré-remplis.</li><li>Sur l&#39;onglet Accueil, suivez la liste « Pour bien démarrer » : elle disparaît une fois les trois étapes terminées.</li></ol>
+  <div class="tip"><b>Conseil :</b> Vous démarrez avec la formule Gratuite (10 factures par mois), sans carte bancaire.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Renseigner votre entreprise</span></h2>
+  <p>Ces informations apparaissent sur chaque facture. Elles sont obligatoires pour une facture valable.</p>
+  <ol class="steps"><li>Ouvrez l’onglet Réglages, carte « Votre entreprise ».</li><li>Le plus rapide : dans « Remplissage automatique », tapez votre SIRET (ou le nom de l&#39;entreprise et la ville), cliquez sur « Rechercher » puis « Utiliser ». Raison sociale, adresse du siège, SIRET, forme juridique et n° de TVA sont repris du registre officiel. Vous pouvez aussi cliquer sur « Reprendre les infos de Shopify ».</li><li>Vérifiez la raison sociale et l&#39;e-mail : c&#39;est à cette adresse que vos clients répondent et que vous recevez la copie des factures.</li><li>Saisissez l&#39;adresse sur plusieurs lignes, avec le code postal et la ville sur la même ligne (par exemple « 69002 Lyon »), puis choisissez le pays.</li><li>Renseignez le SIRET et le n° de TVA intracommunautaire.</li><li>Micro-entrepreneur sans TVA : cochez « Franchise en base de TVA ». La TVA disparaît des factures et la mention légale est ajoutée.</li><li>Ouvrez « Informations complémentaires » pour la forme juridique et le capital, le RCS, le téléphone, le site web et le type de vente (biens, services ou les deux).</li><li>Cliquez sur « Enregistrer » dans la barre qui apparaît en bas de l’écran.</li></ol>
+  <div class="tip"><b>Conseil :</b> Faites valider une première facture par votre expert-comptable : il connaît les mentions propres à votre activité.</div><div class="tip"><b>Conseil :</b> Si vous êtes en franchise de TVA, vérifiez aussi que Shopify ne facture pas de taxes à vos clients (Paramètres › Taxes et droits de douane).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Personnaliser et vérifier la facture</span></h2>
+  <p>Donnez à vos factures l’apparence de votre marque, puis contrôlez le résultat avant la première commande.</p>
+  <ol class="steps"><li>Dans Shopify, ouvrez Contenu › Fichiers, importez votre logo (PNG ou JPEG) et copiez son lien.</li><li>Dans Réglages › Apparence, collez ce lien dans « Adresse du logo » et choisissez la couleur principale.</li><li>Si besoin, modifiez les mentions en bas de facture et le message de remerciement. Laissés vides, ils sont traduits automatiquement dans la langue du client.</li><li>Cliquez sur « Aperçu du PDF » : une facture d’exemple est téléchargée avec vos réglages, même non enregistrés.</li><li>Enregistrez quand le résultat vous convient.</li></ol>
+  <div class="tip"><b>Conseil :</b> Les réglages ne s’appliquent qu’aux factures suivantes : une facture déjà émise ne change jamais.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Choisir quand et comment envoyer les factures</span></h2>
+  <p>Par défaut, la facture est créée au paiement de la commande et envoyée aussitôt au client par e-mail.</p>
+  <ol class="steps"><li>Dans Réglages › Fonctionnement, choisissez quand créer la facture : quand la commande est payée (recommandé) ou dès qu&#39;elle est passée.</li><li>Gardez « Envoyer la facture au client par e-mail » coché pour un envoi automatique, avec le PDF en pièce jointe.</li><li>Cochez « M&#39;envoyer une copie de chaque facture » pour recevoir chaque facture et constituer vos archives.</li><li>Pour personnaliser l&#39;e-mail, ouvrez « E-mail au client » : objet et message acceptent les variables {{first_name}}, {{name}}, {{invoice_number}}, {{order}} et {{shop}}.</li></ol>
+  <div class="tip"><b>Conseil :</b> Shopify n&#39;autorise pas les pièces jointes dans ses propres e-mails : la facture part dans un e-mail séparé, envoyé au nom de votre boutique.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Ajouter le lien de facture dans la confirmation de commande Shopify (facultatif)</span></h2>
+  <p>Vos clients retrouvent aussi leur facture depuis l’e-mail de confirmation habituel de votre boutique.</p>
+  <ol class="steps"><li>Dans Réglages, ouvrez « Lien dans l&#39;e-mail de confirmation de Shopify » et cliquez sur « Copier le code ».</li><li>Dans Shopify, allez dans Paramètres › Notifications › Notifications client › Confirmation de commande, puis « Modifier le code ».</li><li>Collez le code à l&#39;endroit où le bouton doit apparaître, par exemple juste après le récapitulatif de commande.</li><li>Cliquez sur « Aperçu » pour vérifier, puis sur « Enregistrer ».</li></ol>
+  <div class="tip"><b>Conseil :</b> Si le client clique avant le paiement, une page lui indique que la facture sera disponible dans quelques minutes.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Suivre vos factures au quotidien</span></h2>
+  <p>L&#39;onglet Accueil liste les dernières factures émises, avec leur statut d&#39;envoi.</p>
+  <ol class="steps"><li>Chaque ligne indique le numéro, la commande, le client, la date, le total et le statut de l’e-mail.</li><li>« Envoyé » : le client a reçu la facture. « Non envoyé » : l’envoi automatique est désactivé. « Échec » : passez la souris sur le statut pour voir la cause.</li><li>Cliquez sur « PDF » pour télécharger une facture, ou sur « Renvoyer » pour l’envoyer de nouveau au client.</li><li>Le badge Factur-X indique que la facture contient aussi les données pour la facture électronique.</li></ol>
+  <div class="tip"><b>Conseil :</b> En cas d&#39;échec, vérifiez l&#39;adresse du client sur la commande Shopify et demandez-lui de regarder ses courriers indésirables.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Numérotation et langues</span></h2>
+  <p>Les numéros se suivent sans trou, comme la loi l’exige, et chaque client reçoit sa facture dans sa langue.</p>
+  <ol class="steps"><li>Dans Réglages › Numérotation et langue, choisissez le préfixe des numéros (par défaut « F- », soit F-2026-00001).</li><li>Si vous aviez déjà émis des factures avec un autre outil, indiquez le prochain numéro : il peut augmenter mais jamais diminuer.</li><li>Choisissez la langue des factures : celle du client (français, anglais, allemand, espagnol, italien, néerlandais ou portugais) ou une langue unique.</li><li>Avec « Langue du client », choisissez aussi la langue de repli utilisée si la langue du client n&#39;est pas disponible.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X : la facture électronique</span></h2>
+  <p>Avec Factur-X, le PDF contient aussi les données de la facture, lisibles par les logiciels comptables et les plateformes de facturation électronique, obligatoires entre entreprises en France à partir de 2026–2027.</p>
+  <ol class="steps"><li>Ouvrez Réglages › Factur-X : l’option est activée par défaut.</li><li>Si le message « Factur-X en pause » s&#39;affiche, complétez l&#39;information indiquée (souvent l&#39;adresse, le pays ou le n° de TVA) et enregistrez.</li><li>Quand l&#39;indicateur passe au ✓, toutes les factures suivantes sont au format Factur-X, sans rien changer pour vos clients.</li></ol>
+  <div class="tip"><b>Conseil :</b> Votre expert-comptable peut importer directement ces factures dans son logiciel.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Gérer votre abonnement</span></h2>
+  <p>Formule Gratuite : 10 factures par mois. Essentiel : 200 factures pour 7,90 $US par mois. Illimité : 12,90 $US par mois. Essai gratuit de 7 jours sur les formules payantes.</p>
+  <ol class="steps"><li>L&#39;onglet Abonnement (et l&#39;Accueil) indique le nombre de factures utilisées ce mois-ci. Le compteur repart à zéro le 1er de chaque mois.</li><li>Pour changer de formule, cliquez sur « Choisir » puis validez sur la page Shopify : le montant est ajouté à votre facture Shopify.</li><li>Si la limite est atteinte, les nouvelles commandes sont mises en attente et vous êtes prévenu par e-mail. Après être passé à une formule supérieure, cliquez sur « Générer leurs factures » sur l&#39;Accueil.</li><li>Pour revenir à la formule Gratuite, cliquez sur « Résilier ».</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Bonnes pratiques</span></h2>
+  <p>Quelques réflexes pour être serein avec votre comptabilité.</p>
+  <ol class="steps"><li>Passez une commande de test après la configuration (avec le mode test de Shopify Payments) et vérifiez la facture reçue.</li><li>Conservez vos factures 10 ans : gardez la copie reçue par e-mail ou téléchargez-les chaque mois. Elles sont supprimées de l&#39;appli 48 heures après une désinstallation.</li><li>Une facture émise ne se modifie pas : en cas d&#39;erreur ou de remboursement, établissez un avoir avec votre outil comptable.</li><li>Une question ? Consultez la FAQ dans l&#39;onglet Aide.</li></ol>
+  
+</section>
+  
+</main>
+
+</body>
+</html>

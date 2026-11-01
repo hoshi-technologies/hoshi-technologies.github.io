@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF-facturen – Gebruikershandleiding</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">PDF-facturen</a><nav class="docs"><span aria-current="page">Gebruikershandleiding</span><a href="faq-nl.html">Veelgestelde vragen</a></nav></div>
+  <h1>Gebruikershandleiding</h1>
+  <p class="lead">Alles wat je moet weten om de app te gebruiken, stap voor stap.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <strong>Nederlands</strong> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a></div>
+  <p><button type="button" class="print" onclick="print()">Afdrukken of opslaan als pdf</button></p>
+  <section class="card"><h2>Inhoud</h2><ol class="toc"><li><a href="#install">De app installeren</a></li><li><a href="#company">Je bedrijfsgegevens invullen</a></li><li><a href="#look">De factuur aanpassen en controleren</a></li><li><a href="#sending">Kiezen wanneer en hoe facturen worden verstuurd</a></li><li><a href="#shopify-link">De factuurlink toevoegen aan de Shopify-orderbevestiging (optioneel)</a></li><li><a href="#daily">Je facturen dagelijks volgen</a></li><li><a href="#numbering">Nummering en talen</a></li><li><a href="#facturx">Factur-X: de e-factuur</a></li><li><a href="#billing">Je abonnement beheren</a></li><li><a href="#best-practices">Goede gewoonten</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>De app installeren</span></h2>
+  <p>Installeren duurt een minuut en verandert niets aan je winkel of je bestellingen.</p>
+  <ol class="steps"><li>Open in de Shopify App Store de pagina van de app en klik op „Installeren”.</li><li>Sta leestoegang tot je bestellingen toe: de app heeft die nodig voor de facturen, maar kan niets wijzigen.</li><li>De app opent in je Shopify-beheer, onder Apps › PDF-facturen. Naam, adres en e-mail van je winkel zijn al ingevuld.</li><li>Volg op het tabblad Start de lijst „Aan de slag”: die verdwijnt zodra de drie stappen klaar zijn.</li></ol>
+  <div class="tip"><b>Tip:</b> Je begint met het gratis abonnement (10 facturen per maand), zonder creditcard.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Je bedrijfsgegevens invullen</span></h2>
+  <p>Deze gegevens staan op elke factuur. Ze zijn verplicht voor een geldige factuur.</p>
+  <ol class="steps"><li>Open het tabblad Instellingen, kaart „Je bedrijf”.</li><li>Het snelst (Franse bedrijven): typ bij „Automatisch invullen” je SIRET (of bedrijfsnaam en plaats), klik op „Zoeken” en dan op „Gebruiken”. Bedrijfsnaam, adres van de hoofdvestiging, SIRET, rechtsvorm en btw-nummer komen uit het officiële register. Je kunt ook op „Shopify-gegevens overnemen” klikken.</li><li>Controleer bedrijfsnaam en e-mail: klanten antwoorden naar dit adres en hier ontvang je de factuurkopieën.</li><li>Vul het adres in op meerdere regels, met postcode en plaats op dezelfde regel (bijv. „1012 AB Amsterdam”), en kies het land.</li><li>Vul het registratienummer (SIRET in Frankrijk) en het btw-nummer in.</li><li>Vrijgesteld van btw: vink de btw-vrijstelling aan. De btw verdwijnt van de facturen en de wettelijke vermelding wordt toegevoegd.</li><li>Open „Meer bedrijfsgegevens” voor rechtsvorm en kapitaal, handelsregister, telefoon, website en wat je verkoopt (goederen, diensten of beide).</li><li>Klik op „Opslaan” in de balk die onderaan het scherm verschijnt.</li></ol>
+  <div class="tip"><b>Tip:</b> Laat een eerste factuur controleren door je boekhouder: die kent de vermeldingen voor jouw activiteit.</div><div class="tip"><b>Tip:</b> Ben je vrijgesteld van btw, controleer dan ook dat Shopify je klanten geen belasting rekent (Instellingen › Btw en heffingen).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>De factuur aanpassen en controleren</span></h2>
+  <p>Geef je facturen de stijl van je merk en controleer het resultaat vóór de eerste bestelling.</p>
+  <ol class="steps"><li>Open in Shopify Content › Bestanden, upload je logo (PNG of JPEG) en kopieer de link.</li><li>Plak de link bij Instellingen › Weergave in „Logo-URL” en kies de hoofdkleur.</li><li>Pas zo nodig de wettelijke vermeldingen en het bedankbericht aan. Leeg gelaten worden ze automatisch vertaald in de taal van de klant.</li><li>Klik op „PDF-voorbeeld”: een voorbeeldfactuur met je instellingen wordt gedownload, ook als ze nog niet zijn opgeslagen.</li><li>Sla op als je tevreden bent.</li></ol>
+  <div class="tip"><b>Tip:</b> Instellingen gelden alleen voor volgende facturen: een uitgegeven factuur verandert nooit.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Kiezen wanneer en hoe facturen worden verstuurd</span></h2>
+  <p>Standaard wordt de factuur aangemaakt bij betaling en meteen per e-mail naar de klant gestuurd.</p>
+  <ol class="steps"><li>Kies bij Instellingen › Werking wanneer de factuur wordt aangemaakt: wanneer de bestelling is betaald (aanbevolen) of zodra ze is geplaatst.</li><li>Laat „Factuur per e-mail naar de klant sturen” aangevinkt voor automatisch verzenden, met de pdf als bijlage.</li><li>Vink „Stuur mij een kopie van elke factuur” aan om elke factuur te ontvangen en je archief op te bouwen.</li><li>Open „E-mail naar de klant” om de e-mail aan te passen: onderwerp en bericht accepteren de variabelen {{first_name}}, {{name}}, {{invoice_number}}, {{order}} en {{shop}}.</li></ol>
+  <div class="tip"><b>Tip:</b> Shopify staat geen bijlagen toe in zijn eigen e-mails: de factuur gaat in een aparte e-mail, namens je winkel.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>De factuurlink toevoegen aan de Shopify-orderbevestiging (optioneel)</span></h2>
+  <p>Je klanten vinden hun factuur ook via de gewone orderbevestiging van je winkel.</p>
+  <ol class="steps"><li>Open in Instellingen „Link in de orderbevestiging van Shopify” en klik op „Code kopiëren”.</li><li>Ga in Shopify naar Instellingen › Meldingen › Klantmeldingen › Orderbevestiging en dan naar „Code bewerken”.</li><li>Plak de code waar de knop moet verschijnen, bijvoorbeeld direct na het besteloverzicht.</li><li>Klik op „Voorbeeld” om te controleren en daarna op „Opslaan”.</li></ol>
+  <div class="tip"><b>Tip:</b> Klikt de klant vóór de betaling, dan meldt een pagina dat de factuur over enkele minuten beschikbaar is.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Je facturen dagelijks volgen</span></h2>
+  <p>Het tabblad Start toont de laatste facturen met hun verzendstatus.</p>
+  <ol class="steps"><li>Elke regel toont nummer, bestelling, klant, datum, totaal en e-mailstatus.</li><li>„Verzonden”: de klant heeft de factuur ontvangen. „Niet verzonden”: automatisch verzenden staat uit. „Mislukt”: beweeg de muis over de status om de oorzaak te zien.</li><li>Klik op „PDF” om een factuur te downloaden, of op „Opnieuw verzenden” om ze opnieuw naar de klant te sturen.</li><li>Het Factur-X-label betekent dat de factuur ook de gegevens voor e-facturatie bevat.</li></ol>
+  <div class="tip"><b>Tip:</b> Bij een fout controleer je het adres van de klant in de Shopify-bestelling en vraag je hem in zijn spammap te kijken.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Nummering en talen</span></h2>
+  <p>De nummers lopen zonder gaten door, zoals de wet vereist, en elke klant krijgt de factuur in zijn taal.</p>
+  <ol class="steps"><li>Kies bij Instellingen › Nummering en taal het voorvoegsel (standaard „F-”, dus F-2026-00001).</li><li>Heb je al facturen uitgegeven met een ander programma, stel dan het volgende nummer in: het kan omhoog, maar nooit omlaag.</li><li>Kies de taal van de facturen: die van de klant (Nederlands, Engels, Frans, Duits, Spaans, Italiaans of Portugees) of één vaste taal.</li><li>Kies bij „Taal van de klant” ook de reservetaal voor als de taal van de klant niet beschikbaar is.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: de e-factuur</span></h2>
+  <p>Met Factur-X bevat de pdf ook de factuurgegevens, leesbaar voor boekhoudsoftware en e-factuurplatformen, die in Frankrijk vanaf 2026–2027 verplicht worden tussen bedrijven.</p>
+  <ol class="steps"><li>Open Instellingen › Factur-X: de optie staat standaard aan.</li><li>Zie je „Factur-X gepauzeerd”, vul dan het genoemde gegeven aan (vaak adres, land of btw-nummer) en sla op.</li><li>Zodra de indicator ✓ wordt, zijn alle volgende facturen Factur-X, zonder verschil voor je klanten.</li></ol>
+  <div class="tip"><b>Tip:</b> Je boekhouder kan deze facturen direct in zijn software importeren.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Je abonnement beheren</span></h2>
+  <p>Gratis: 10 facturen per maand. Essentieel: 200 facturen voor US$ 7,90 per maand. Onbeperkt: US$ 12,90 per maand. 7 dagen gratis proberen bij betaalde abonnementen.</p>
+  <ol class="steps"><li>Het tabblad Abonnement (en Start) toont hoeveel facturen je deze maand hebt gebruikt. De teller begint op de 1e van elke maand opnieuw.</li><li>Klik op „Kiezen” en keur goed op de Shopify-pagina om van abonnement te wisselen: het bedrag komt op je Shopify-factuur.</li><li>Is de limiet bereikt, dan worden nieuwe bestellingen in de wacht gezet en krijg je een e-mail. Klik na het wisselen op „Facturen aanmaken” op het tabblad Start.</li><li>Klik op „Opzeggen” om terug te gaan naar het gratis abonnement.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Goede gewoonten</span></h2>
+  <p>Een paar gewoonten voor een zorgeloze boekhouding.</p>
+  <ol class="steps"><li>Plaats na de installatie een testbestelling (met de testmodus van Shopify Payments) en controleer de ontvangen factuur.</li><li>Bewaar je facturen 10 jaar: bewaar de kopie per e-mail of download ze elke maand. Ze worden 48 uur na het verwijderen van de app gewist.</li><li>Een uitgegeven factuur kan niet worden gewijzigd: maak bij een fout of terugbetaling een creditnota met je boekhoudsoftware.</li><li>Een vraag? Bekijk de veelgestelde vragen op het tabblad Hulp.</li></ol>
+  
+</section>
+  
+</main>
+
+</body>
+</html>

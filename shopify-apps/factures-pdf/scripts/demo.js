@@ -150,7 +150,9 @@ app.use(inner);
 
 app.listen(PORT, async () => {
   // Installation simulée (infos reprises de « Shopify »), puis deux commandes d'exemple.
-  store.saveSettings(SHOP, sanitizeSettings({ fallbackLanguage: lang }));
+  // DEMO_COMPLETE=1 : entreprise déjà complète (SIRET, TVA), utile pour les captures d'écran.
+  const complete = process.env.DEMO_COMPLETE === '1' ? { siret: '404 833 048 00022', vatNumber: 'FR83404833048', legalForm: 'SAS au capital de 10 000 €' } : {};
+  store.saveSettings(SHOP, sanitizeSettings({ fallbackLanguage: lang, ...complete }));
   await fetch(`${config.appUrl}/api/session`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token()}`, 'Content-Type': 'application/json' },

@@ -192,6 +192,23 @@ Autres commandes : `npm test` (tests automatiques), `npm run preview` (facture d
 
 Les abonnements y sont des abonnements de test (`BILLING_TEST=true`) : aucun prélèvement.
 
+## Vendre l'appli : site, pages légales, fiche App Store
+
+- `npm run site` génère le site public dans `/factures-pdf` à la racine du dépôt (GitHub
+  Pages) : présentation (fr, en), politique de confidentialité, conditions d'utilisation,
+  guide et FAQ dans les 7 langues. Les informations de l'éditeur (forme juridique, adresse,
+  SIREN, hébergeur, service d'e-mail, tribunal…) se renseignent par variables
+  d'environnement (`COMPANY_LEGAL`, `COMPANY_ADDRESS`, `COMPANY_SIREN`, `SUPPORT_EMAIL`,
+  `HOSTING_PROVIDER`, `EMAIL_PROVIDER`, `DATA_TRANSFERS`, `COMPANY_COURT`, `APP_STORE_URL`) :
+  tant qu'elles manquent, la mention apparaît surlignée sur la page.
+- `npm run screenshots` produit les captures 1600 × 900 de la fiche (`docs/app-store/`)
+  et l'image du site, à partir du mode démo (nécessite Playwright et `pdftoppm`).
+- `docs/fiche-app-store.md` : textes de la fiche en français et en anglais, champs à
+  remplir, instructions pour les vérificateurs de Shopify, liste de contrôle.
+- Demande d'avis : fenêtre officielle de Shopify (Reviews API d'App Bridge), affichée
+  automatiquement une fois que 5 factures ont été envoyées, jamais sur un clic et sans
+  contrepartie (règle de l'App Store).
+
 ## Architecture
 
 ```
