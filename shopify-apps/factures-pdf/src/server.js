@@ -16,7 +16,11 @@ import {
   adminGraphql,
   isValidShop,
   SHOP_INFO_QUERY,
+  SUBSCRIPTION_CREATE,
+  SUBSCRIPTION_CANCEL,
+  ACTIVE_SUBSCRIPTIONS,
 } from './shopify.js';
+import { PLANS, BILLING_CURRENCY, subscriptionName, planFromSubscriptionName } from './plans.js';
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 const ADMIN_HTML = readFileSync(here('../public/admin.html'), 'utf8');
@@ -24,6 +28,20 @@ const SAMPLE_ORDER = JSON.parse(readFileSync(here('./sample-order.json'), 'utf8'
 
 export function createApp({ config, store, service, fetchImpl = fetch, logger = console }) {
   const app = express();
+  const graphql = (shop, query, variables) => {
+    const { access_token: token } = store.getShop(shop) ?? {};
+    if (!token) throw new Error("Appli non initialisée : rechargez la page de l'appli");
+    return adminGraphql(shop, token, config.apiVersion, query, variables, fetchImpl);
+  };
+
+  /** Aligne la formule enregistrée sur l'abonnement actif côté Shopify. */
+  async function syncSubscription(shop) {
+    const data = await graphql(shop, ACTIVE_SUBSCRIPTIONS);
+    const active = (data.currentAppInstallation?.activeSubscriptions ?? []).find((sub) => sub.status === 'ACTIVE');
+    const plan = active && planFromSubscriptionName(active.name);
+    store.setPlan(shop, plan ? plan.key : 'free', plan ? active.id : null);
+  }
+
   app.disable('x-powered-by');
 
   app.get('/health', (req, res) => res.json({ ok: true }));
@@ -52,6 +70,14 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
         case 'app/uninstalled':
           store.markUninstalled(shop);
           break;
+        case 'app_subscriptions/update': {
+          const sub = payload.app_subscription ?? {};
+          const plan = planFromSubscriptionName(sub.name);
+          const current = store.ensureShop(shop);
+          if (sub.status === 'ACTIVE' && plan) store.setPlan(shop, plan.key, sub.admin_graphql_api_id);
+          else if (sub.admin_graphql_api_id === current.subscription_id) store.setPlan(shop, 'free');
+          break;
+        }
         case 'customers/data_request':
           // Les données détenues sont les factures des commandes listées : le marchand
           // peut les télécharger depuis l'appli. Rien à faire automatiquement.
@@ -144,6 +170,12 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
         logger.error(`${req.shop} : initialisation impossible : ${error.message}`);
       }
     }
+    // Au retour de la page de confirmation d'abonnement, la formule est mise à jour ici.
+    try {
+      if (store.getShop(req.shop).access_token) await syncSubscription(req.shop);
+    } catch (error) {
+      logger.warn(`${req.shop} : abonnement non synchronisé : ${error.message}`);
+    }
     res.json({ shop: req.shop, mailConfigured: Boolean(service.transport && service.mailFrom) });
   });
 
@@ -185,6 +217,68 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
+  });
+
+  // ---------- Abonnement ----------
+  api.get('/billing', (req, res) => {
+    const usage = service.usage(req.shop);
+    res.json({
+      current: usage.plan.key,
+      used: usage.used,
+      limit: usage.limit,
+      remaining: usage.remaining,
+      pending: usage.pending,
+      currency: BILLING_CURRENCY,
+      plans: Object.values(PLANS),
+    });
+  });
+
+  api.post('/billing/subscribe', async (req, res) => {
+    const plan = PLANS[req.body.plan];
+    if (!plan || plan.price === 0) return res.status(400).json({ error: 'Formule inconnue' });
+    try {
+      const data = await graphql(req.shop, SUBSCRIPTION_CREATE, {
+        name: subscriptionName(plan),
+        returnUrl: `https://${req.shop}/admin/apps/${config.apiKey}`,
+        trialDays: plan.trialDays ?? 0,
+        test: config.billingTest,
+        lineItems: [
+          {
+            plan: {
+              appRecurringPricingDetails: {
+                price: { amount: plan.price, currencyCode: BILLING_CURRENCY },
+                interval: 'EVERY_30_DAYS',
+              },
+            },
+          },
+        ],
+      });
+      const result = data.appSubscriptionCreate;
+      if (result.userErrors.length) throw new Error(result.userErrors.map((e) => e.message).join(', '));
+      // Le marchand valide le paiement sur une page Shopify, puis revient dans l'appli.
+      res.json({ confirmationUrl: result.confirmationUrl });
+    } catch (error) {
+      logger.error(`${req.shop} : abonnement impossible : ${error.message}`);
+      res.status(502).json({ error: `Abonnement impossible : ${error.message}` });
+    }
+  });
+
+  api.post('/billing/cancel', async (req, res) => {
+    const { subscription_id: id } = store.ensureShop(req.shop);
+    try {
+      if (id) {
+        const { appSubscriptionCancel: result } = await graphql(req.shop, SUBSCRIPTION_CANCEL, { id });
+        if (result.userErrors.length) throw new Error(result.userErrors.map((e) => e.message).join(', '));
+      }
+      store.setPlan(req.shop, 'free');
+      res.json({ current: 'free' });
+    } catch (error) {
+      res.status(502).json({ error: `Résiliation impossible : ${error.message}` });
+    }
+  });
+
+  api.post('/pending/generate', async (req, res) => {
+    res.json(await service.generatePending(req.shop));
   });
 
   // Aperçu avec une commande fictive et les réglages en cours d'édition (non enregistrés).

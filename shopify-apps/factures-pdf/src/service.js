@@ -3,6 +3,7 @@
 import { buildInvoice, formatInvoiceNumber } from './invoice.js';
 import { renderInvoicePdf } from './pdf.js';
 import { buildInvoiceEmail } from './mailer.js';
+import { getPlan, monthKey, monthStart } from './plans.js';
 
 export class InvoiceService {
   constructor({ store, transport, mailFrom, fetchImpl = fetch, logger = console }) {
@@ -51,13 +52,68 @@ export class InvoiceService {
       // L'e-mail part après la réponse au webhook ; un échec reste visible dans l'admin.
       this.sendInvoice(shop, result.invoice.id).catch(() => {});
     }
+    if (result.pending) this.notifyQuotaReached(shop).catch(() => {});
     return result;
+  }
+
+  /** Formule de la boutique et consommation du mois civil en cours. */
+  usage(shop, now = new Date()) {
+    const row = this.store.ensureShop(shop);
+    const plan = getPlan(row.plan);
+    const used = this.store.countInvoicesSince(shop, monthStart(now));
+    return {
+      plan,
+      used,
+      limit: plan.monthlyLimit,
+      remaining: plan.monthlyLimit === null ? null : Math.max(0, plan.monthlyLimit - used),
+      pending: this.store.listPendingOrders(shop).length,
+    };
+  }
+
+  /** Factures des commandes mises en attente faute de quota, dans la limite disponible. */
+  async generatePending(shop) {
+    const { remaining } = this.usage(shop);
+    const orders = this.store.getPendingPayloads(shop, remaining ?? 10_000);
+    const { settings } = this.store.getShop(shop);
+    let created = 0;
+    for (const order of orders) {
+      const result = await this.createInvoice(shop, order);
+      if (!result.created) continue;
+      created += 1;
+      if (settings.autoSend) await this.sendInvoice(shop, result.invoice.id).catch(() => {});
+    }
+    return { created, pending: this.store.listPendingOrders(shop).length };
+  }
+
+  /** Prévient le marchand (une fois par mois) que le quota gratuit est atteint. */
+  async notifyQuotaReached(shop) {
+    const { settings } = this.store.getShop(shop);
+    if (!this.transport || !this.mailFrom || !settings.email) return;
+    if (!this.store.markQuotaNotified(shop, monthKey())) return;
+    const { plan } = this.usage(shop);
+    await this.transport.sendMail({
+      from: { name: 'Factures PDF', address: this.mailFrom },
+      to: settings.email,
+      subject: `Limite de ${plan.monthlyLimit} factures atteinte ce mois-ci`,
+      text:
+        `Bonjour,\n\nVotre boutique a atteint la limite de ${plan.monthlyLimit} factures par mois de la formule ${plan.name}.\n` +
+        "Les nouvelles commandes sont mises en attente : leurs factures ne sont ni créées ni envoyées.\n\n" +
+        "Pour les générer et continuer à facturer automatiquement, choisissez une formule supérieure dans " +
+        "Shopify > Applis > Factures PDF > Abonnement.\n\nL'équipe Factures PDF",
+    });
   }
 
   createInvoice(shop, order) {
     const run = async () => {
       const existing = this.store.findInvoiceByOrder(shop, order.id);
       if (existing) return { invoice: existing, created: false };
+
+      // Quota de la formule atteint : la commande est gardée pour être facturée plus tard.
+      if (this.usage(shop).remaining === 0) {
+        this.store.addPendingOrder(shop, order);
+        this.logger.info(`${shop} : quota atteint, ${order.name ?? order.id} mise en attente`);
+        return { invoice: null, created: false, pending: true };
+      }
 
       const { settings, next_number: seq } = this.store.ensureShop(shop);
       const shopName = settings.companyName || shop.replace('.myshopify.com', '');
@@ -82,6 +138,7 @@ export class InvoiceService {
         currency: invoice.currency,
         pdf,
       });
+      this.store.deletePendingOrder(shop, order.id);
       this.logger.info(`${shop} : facture ${number} créée pour ${invoice.orderName}`);
       return { invoice: saved, created: true };
     };

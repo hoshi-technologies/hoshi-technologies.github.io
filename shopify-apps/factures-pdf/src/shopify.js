@@ -90,3 +90,35 @@ export const SHOP_INFO_QUERY = `#graphql
       billingAddress { company address1 address2 zip city country phone }
     }
   }`;
+
+// ---------- Facturation de l'appli (Billing API) ----------
+
+export const SUBSCRIPTION_CREATE = `#graphql
+  mutation AppSubscriptionCreate(
+    $name: String!
+    $returnUrl: URL!
+    $lineItems: [AppSubscriptionLineItemInput!]!
+    $trialDays: Int
+    $test: Boolean
+  ) {
+    appSubscriptionCreate(name: $name, returnUrl: $returnUrl, lineItems: $lineItems, trialDays: $trialDays, test: $test) {
+      confirmationUrl
+      appSubscription { id status }
+      userErrors { field message }
+    }
+  }`;
+
+export const SUBSCRIPTION_CANCEL = `#graphql
+  mutation AppSubscriptionCancel($id: ID!) {
+    appSubscriptionCancel(id: $id) {
+      appSubscription { id status }
+      userErrors { field message }
+    }
+  }`;
+
+export const ACTIVE_SUBSCRIPTIONS = `#graphql
+  query ActiveSubscriptions {
+    currentAppInstallation {
+      activeSubscriptions { id name status test }
+    }
+  }`;

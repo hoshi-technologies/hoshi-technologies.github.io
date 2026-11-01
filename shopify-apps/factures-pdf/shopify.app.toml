@@ -18,7 +18,7 @@ redirect_urls = ["https://factures.exemple.fr/auth/callback"]
 api_version = "2026-10"
 
   [[webhooks.subscriptions]]
-  topics = ["orders/create", "orders/paid", "app/uninstalled"]
+  topics = ["orders/create", "orders/paid", "app/uninstalled", "app_subscriptions/update"]
   uri = "/webhooks"
 
   # Webhooks RGPD obligatoires pour publier sur l'App Store Shopify.

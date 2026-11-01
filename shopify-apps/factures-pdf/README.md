@@ -26,6 +26,42 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
 - **RGPD** : webhooks obligatoires de Shopify (`customers/data_request`, `customers/redact`,
   `shop/redact`) gérés.
 
+## Formules et abonnement
+
+| Formule | Prix | Factures | Essai |
+|---|---|---|---|
+| Gratuit | 0 $ | 10 par mois | – |
+| Essentiel | 7,90 $ / mois | 200 par mois | 7 jours |
+| Illimité | 12,90 $ / mois | illimitées | 7 jours |
+
+- Le paiement passe par la **Billing API de Shopify** (obligatoire sur l'App Store) : le
+  marchand valide l'abonnement sur une page Shopify et le retrouve sur sa facture Shopify.
+  Prix en dollars US, la devise des applis de l'App Store.
+- Le quota se compte par **mois civil** (factures émises depuis le 1er du mois, UTC).
+- Quota atteint : les nouvelles commandes sont **mises en attente** (pas de facture ni
+  d'e-mail) et le marchand est prévenu par e-mail une fois par mois. Après être passé à une
+  formule supérieure, ou le mois suivant, le bouton « Générer leurs factures » les facture.
+- La formule est synchronisée à l'ouverture de l'appli et par le webhook
+  `app_subscriptions/update` ; Shopify annule l'abonnement à la désinstallation.
+- `BILLING_TEST=true` crée des abonnements de test (aucun prélèvement), obligatoire sur les
+  boutiques de développement : **à passer à `false` en production**.
+- Prix et quotas se modifient dans `src/plans.js`.
+
+Positionnement face à la concurrence (fiches App Store, fin 2026) :
+
+| Appli | Gratuit | Payant |
+|---|---|---|
+| Sufio | – | 7 $ / 15 factures, 19 $ / 50, 49 $ / 5 000 |
+| ZenFisc Factures France | – | 9,99 $ / 50 |
+| MiniFacture | 10 / mois | 14 $ / 200 (Factur-X) |
+| Facturio | 10 / mois | 14,90 $ illimité (Factur-X) |
+| FF Factures Client en France | 20 / mois | 19 $ illimité (Factur-X) |
+| Order Printer Pro | 50 / mois | 10 $ / 500 |
+
+Les concurrents français proposent presque tous **Factur-X** (PDF + XML, utile pour la
+facturation électronique B2B) : c'est la prochaine fonctionnalité à ajouter pour justifier
+un prix au niveau du marché.
+
 Aperçu d'une facture : `npm run preview` génère `apercu-facture.pdf`.
 
 ## Pourquoi un e-mail séparé ?
@@ -44,7 +80,8 @@ src/
   invoice.js    commande Shopify → lignes HT, remises, TVA par taux, totaux (centimes)
   pdf.js        mise en page A4 (pdfkit), multi-pages, pied de page légal
   mailer.js     e-mail HTML + texte, PDF en pièce jointe (nodemailer)
-  shopify.js    signature des webhooks, jetons de session App Bridge, échange de jeton
+  plans.js      formules d'abonnement (prix, quotas, essai)
+  shopify.js    signature des webhooks, jetons de session, échange de jeton, Billing API
   db.js         SQLite intégré à Node (aucune dépendance native)
   settings.js   réglages par boutique et valeurs par défaut
 public/admin.html  interface intégrée à l'admin Shopify (App Bridge)
@@ -109,5 +146,5 @@ Développement local : `npm install`, `npm test`, `npm run dev` (avec un tunnel 
 - Export ZIP / CSV des factures par période (pour le comptable) et archivage externe.
 - Bouton « Télécharger la facture » dans le compte client (extension Customer Account).
 - Factures en plusieurs langues selon la langue de la commande.
-- Facturation de l'appli (Shopify Billing API) et fiche App Store (politique de
-  confidentialité, captures d'écran).
+- Format Factur-X (PDF/A-3 avec XML EN 16931) pour les clients professionnels.
+- Fiche App Store (politique de confidentialité, captures d'écran).

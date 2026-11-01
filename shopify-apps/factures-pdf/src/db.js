@@ -18,7 +18,19 @@ export function openDatabase(path) {
       settings TEXT NOT NULL DEFAULT '{}',
       next_number INTEGER NOT NULL DEFAULT 1,
       installed_at TEXT NOT NULL DEFAULT (datetime('now')),
-      uninstalled_at TEXT
+      uninstalled_at TEXT,
+      plan TEXT NOT NULL DEFAULT 'free',
+      subscription_id TEXT,
+      quota_notified_month TEXT
+    );
+    -- Commandes reçues alors que le quota mensuel était atteint : facturables plus tard.
+    CREATE TABLE IF NOT EXISTS pending_orders (
+      shop TEXT NOT NULL,
+      order_id TEXT NOT NULL,
+      order_name TEXT,
+      payload TEXT NOT NULL,
+      received_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (shop, order_id)
     );
     CREATE TABLE IF NOT EXISTS invoices (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,9 +96,52 @@ export class Store {
   }
 
   markUninstalled(shop) {
+    // Shopify annule lui-même l'abonnement à la désinstallation.
     this.db
-      .prepare("UPDATE shops SET access_token = NULL, uninstalled_at = datetime('now') WHERE shop = ?")
+      .prepare(
+        "UPDATE shops SET access_token = NULL, plan = 'free', subscription_id = NULL, uninstalled_at = datetime('now') WHERE shop = ?",
+      )
       .run(shop);
+  }
+
+  setPlan(shop, plan, subscriptionId = null) {
+    this.ensureShop(shop);
+    this.db.prepare('UPDATE shops SET plan = ?, subscription_id = ? WHERE shop = ?').run(plan, subscriptionId, shop);
+  }
+
+  /** Marque le quota du mois comme signalé ; renvoie false s'il l'était déjà. */
+  markQuotaNotified(shop, month) {
+    const { changes } = this.db
+      .prepare('UPDATE shops SET quota_notified_month = ? WHERE shop = ? AND quota_notified_month IS NOT ?')
+      .run(month, shop, month);
+    return changes > 0;
+  }
+
+  countInvoicesSince(shop, sinceIso) {
+    return this.db.prepare('SELECT COUNT(*) AS n FROM invoices WHERE shop = ? AND issued_at >= ?').get(shop, sinceIso).n;
+  }
+
+  addPendingOrder(shop, order) {
+    this.db
+      .prepare('INSERT OR IGNORE INTO pending_orders (shop, order_id, order_name, payload) VALUES (?, ?, ?, ?)')
+      .run(shop, String(order.id), order.name ?? null, JSON.stringify(order));
+  }
+
+  listPendingOrders(shop) {
+    return this.db
+      .prepare('SELECT order_id, order_name, received_at FROM pending_orders WHERE shop = ? ORDER BY received_at, order_id')
+      .all(shop);
+  }
+
+  getPendingPayloads(shop, limit) {
+    return this.db
+      .prepare('SELECT payload FROM pending_orders WHERE shop = ? ORDER BY received_at, order_id LIMIT ?')
+      .all(shop, limit)
+      .map((row) => JSON.parse(row.payload));
+  }
+
+  deletePendingOrder(shop, orderId) {
+    this.db.prepare('DELETE FROM pending_orders WHERE shop = ? AND order_id = ?').run(shop, String(orderId));
   }
 
   findInvoiceByOrder(shop, orderId) {
@@ -164,12 +219,16 @@ export class Store {
   /** RGPD (customers/redact) : supprime les factures des commandes concernées. */
   deleteInvoicesForOrders(shop, orderIds) {
     const stmt = this.db.prepare('DELETE FROM invoices WHERE shop = ? AND order_id = ?');
-    for (const id of orderIds) stmt.run(shop, String(id));
+    for (const id of orderIds) {
+      stmt.run(shop, String(id));
+      this.deletePendingOrder(shop, id);
+    }
   }
 
   /** RGPD (shop/redact) : supprime toutes les données de la boutique. */
   deleteShop(shop) {
     this.db.prepare('DELETE FROM invoices WHERE shop = ?').run(shop);
+    this.db.prepare('DELETE FROM pending_orders WHERE shop = ?').run(shop);
     this.db.prepare('DELETE FROM shops WHERE shop = ?').run(shop);
   }
 }

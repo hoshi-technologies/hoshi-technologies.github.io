@@ -14,6 +14,8 @@ export function loadConfig(env = process.env) {
     apiKey: env.SHOPIFY_API_KEY ?? required('SHOPIFY_API_KEY'),
     apiSecret: env.SHOPIFY_API_SECRET ?? required('SHOPIFY_API_SECRET'),
     apiVersion: get('SHOPIFY_API_VERSION', '2026-10'),
+    // Abonnements de test (aucun prélèvement) : obligatoire sur les boutiques de développement.
+    billingTest: get('BILLING_TEST', 'true') !== 'false',
     databasePath: get('DATABASE_PATH', './data/factures.sqlite'),
     mail: {
       // smtp://user:pass@smtp.exemple.fr:587 ; "json" pour les tests (aucun envoi réel).

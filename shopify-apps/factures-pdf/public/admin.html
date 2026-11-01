@@ -40,6 +40,16 @@
     pre { background:#f7f7f7; border:1px solid var(--border); border-radius:8px; padding:10px; white-space:pre-wrap; word-break:break-all; margin:0 0 8px; }
     .scroll { overflow-x:auto; }
     .empty { color:var(--muted); text-align:center; padding:20px; }
+    .usage { height:8px; background:#ebebeb; border-radius:4px; overflow:hidden; margin:6px 0 4px; }
+    .usage > span { display:block; height:100%; background:var(--accent); }
+    .usage.full > span { background:#c70a24; }
+    .plans { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:14px; }
+    .plan { border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:6px; }
+    .plan.current { border:2px solid var(--accent); }
+    .plan .price { font-size:20px; font-weight:700; }
+    .plan .price small { font-size:13px; font-weight:400; color:var(--muted); }
+    .plan button { margin-top:auto; }
+    .banner.info { background:#eaf4ff; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
   </style>
 </head>
 <body>
@@ -49,6 +59,17 @@
     L'envoi d'e-mails n'est pas encore configuré sur le serveur de l'appli (SMTP_URL, MAIL_FROM) :
     les factures sont créées mais pas envoyées.
   </div>
+
+  <section class="card" id="billing">
+    <h2>Abonnement</h2>
+    <p class="help" id="usage-text">Chargement…</p>
+    <div class="usage" id="usage-bar"><span style="width:0"></span></div>
+    <div class="banner info" id="pending-banner" hidden style="margin:12px 0 0">
+      <span id="pending-text"></span>
+      <button type="button" class="primary" id="generate-pending">Générer leurs factures</button>
+    </div>
+    <div class="plans" id="plans"></div>
+  </section>
 
   <form id="settings">
     <section class="card">
@@ -262,9 +283,80 @@
     toast('Code copié');
   });
 
+  const usd = (n) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(n);
+
+  async function loadBilling() {
+    const b = await api('/billing');
+    const current = b.plans.find((p) => p.key === b.current);
+    const bar = document.getElementById('usage-bar');
+    if (b.limit === null) {
+      document.getElementById('usage-text').textContent = `Formule ${current.name} : ${b.used} facture(s) ce mois-ci, sans limite.`;
+      bar.hidden = true;
+    } else {
+      document.getElementById('usage-text').textContent =
+        `Formule ${current.name} : ${b.used} / ${b.limit} factures utilisées ce mois-ci.`;
+      bar.hidden = false;
+      bar.classList.toggle('full', b.remaining === 0);
+      bar.firstElementChild.style.width = `${Math.min(100, (100 * b.used) / b.limit)}%`;
+    }
+    const banner = document.getElementById('pending-banner');
+    banner.hidden = !b.pending;
+    document.getElementById('pending-text').textContent =
+      `${b.pending} commande(s) en attente de facture : la limite mensuelle a été atteinte.` +
+      (b.remaining === 0 ? ' Passez à une formule supérieure pour les facturer.' : '');
+    document.getElementById('generate-pending').disabled = b.remaining === 0;
+
+    document.getElementById('plans').innerHTML = b.plans.map((p) => {
+      const isCurrent = p.key === b.current;
+      const limit = p.monthlyLimit === null ? 'Factures illimitées' : `${p.monthlyLimit} factures par mois`;
+      const price = `${usd(p.price)} <small>/ mois</small>`;
+      const trial = p.trialDays ? `<small>${p.trialDays} jours d'essai gratuit</small>` : '<small>&nbsp;</small>';
+      let action;
+      if (isCurrent) action = p.price ? '<button type="button" data-cancel>Résilier</button>' : '<button type="button" disabled>Formule actuelle</button>';
+      else if (p.price) action = `<button type="button" class="primary" data-plan="${escape(p.key)}">Choisir</button>`;
+      else action = '<button type="button" disabled>Disponible après résiliation</button>';
+      return `<div class="plan${isCurrent ? ' current' : ''}"><b>${escape(p.name)}</b><span class="price">${price}</span><span>${limit}</span>${trial}${action}</div>`;
+    }).join('');
+  }
+
+  document.getElementById('plans').addEventListener('click', async (event) => {
+    const button = event.target.closest('button');
+    if (!button || button.disabled) return;
+    button.disabled = true;
+    try {
+      if (button.dataset.plan) {
+        const { confirmationUrl } = await api('/billing/subscribe', { method: 'POST', body: JSON.stringify({ plan: button.dataset.plan }) });
+        window.open(confirmationUrl, '_top'); // page de validation de Shopify, puis retour ici
+        return;
+      }
+      if ('cancel' in button.dataset) {
+        if (!confirm("Résilier l'abonnement et revenir à la formule gratuite (10 factures par mois) ?")) return;
+        await api('/billing/cancel', { method: 'POST' });
+        toast('Abonnement résilié');
+        await loadBilling();
+      }
+    } catch (error) {
+      toast(error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('generate-pending').addEventListener('click', async (event) => {
+    event.target.disabled = true;
+    try {
+      const { created } = await api('/pending/generate', { method: 'POST' });
+      toast(`${created} facture(s) générée(s)`);
+      await Promise.all([loadBilling(), loadInvoices()]);
+    } catch (error) {
+      toast(error.message, true);
+    }
+  });
+
   (async () => {
     try {
       const session = await api('/session', { method: 'POST' });
+      await loadBilling();
       document.getElementById('mail-warning').hidden = session.mailConfigured;
       fillForm(await api('/settings'));
       await loadInvoices();
