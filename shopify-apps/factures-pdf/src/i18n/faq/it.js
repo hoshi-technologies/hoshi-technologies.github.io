@@ -7,6 +7,10 @@ export default [
         'Apri la scheda Impostazioni, inserisci i dati della tua azienda (nome, indirizzo, numeri di registrazione e partita IVA) e salva. Fatto: dal prossimo ordine la fattura viene creata e inviata automaticamente al cliente. Puoi controllare il risultato con il pulsante «Anteprima PDF».',
       ],
       [
+        'Posso compilare automaticamente i dati della mia azienda?',
+        'Sì. All\'installazione, l\'app riprende da Shopify nome, indirizzo legale, email e telefono del negozio. Shopify non conosce il numero di registrazione né la partita IVA: per le aziende francesi, in Impostazioni › Compilazione automatica, digita il SIRET o il nome dell\'azienda per completare il resto dal registro ufficiale. Controlla e salva.',
+      ],
+      [
         'Quando viene creata la fattura?',
         "Per impostazione predefinita, appena l'ordine è pagato (con carta: subito). Puoi scegliere di crearla appena l'ordine viene effettuato, ma un ordine annullato in seguito richiederà una nota di credito.",
       ],

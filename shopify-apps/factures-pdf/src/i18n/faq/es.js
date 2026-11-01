@@ -7,6 +7,10 @@ export default [
         'Abra la pestaña Ajustes, complete los datos de su empresa (nombre, dirección, números de registro y de IVA) y guarde. Eso es todo: a partir del próximo pedido, la factura se crea y se envía al cliente automáticamente. Puede comprobar el resultado con el botón «Vista previa del PDF».',
       ],
       [
+        '¿Puedo rellenar los datos de mi empresa automáticamente?',
+        'Sí. Al instalarla, la aplicación toma de Shopify el nombre, la dirección legal, el correo y el teléfono de su tienda. Shopify no conoce el número de registro ni el de IVA: para empresas francesas, en Ajustes › Relleno automático, escriba su SIRET o el nombre de la empresa para completar el resto desde el registro oficial. Revise y guarde.',
+      ],
+      [
         '¿Cuándo se crea la factura?',
         'Por defecto, en cuanto se paga el pedido (con tarjeta, al instante). Puede elegir crearla en cuanto se realiza el pedido, pero un pedido cancelado después necesitará una factura rectificativa.',
       ],

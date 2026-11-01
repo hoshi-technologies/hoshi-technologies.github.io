@@ -19,6 +19,7 @@ export default [
     intro: 'Ces informations apparaissent sur chaque facture. Elles sont obligatoires pour une facture valable.',
     steps: [
       'Ouvrez l’onglet Réglages, carte « Votre entreprise ».',
+      'Le plus rapide : dans « Remplissage automatique », tapez votre SIRET (ou le nom de l\'entreprise et la ville), cliquez sur « Rechercher » puis « Utiliser ». Raison sociale, adresse du siège, SIRET, forme juridique et n° de TVA sont repris du registre officiel. Vous pouvez aussi cliquer sur « Reprendre les infos de Shopify ».',
       "Vérifiez la raison sociale et l'e-mail : c'est à cette adresse que vos clients répondent et que vous recevez la copie des factures.",
       "Saisissez l'adresse sur plusieurs lignes, avec le code postal et la ville sur la même ligne (par exemple « 69002 Lyon »), puis choisissez le pays.",
       'Renseignez le SIRET et le n° de TVA intracommunautaire.',

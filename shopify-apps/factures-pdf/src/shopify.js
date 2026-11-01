@@ -92,6 +92,15 @@ export const SHOP_INFO_QUERY = `#graphql
     }
   }`;
 
+/** Entité légale principale de la boutique (raison sociale et adresse légale). */
+export const BUSINESS_ENTITY_QUERY = `#graphql
+  query PrimaryBusinessEntity {
+    businessEntity {
+      companyName
+      address { address1 address2 zip city countryCode }
+    }
+  }`;
+
 // ---------- Facturation de l'appli (Billing API) ----------
 
 export const SUBSCRIPTION_CREATE = `#graphql

@@ -7,6 +7,10 @@ export default [
         'Abra a aba Configurações, preencha os dados da sua empresa (nome, endereço, números de registro e de IVA) e salve. Pronto: a partir do próximo pedido, a fatura é criada e enviada ao cliente automaticamente. Use o botão "Prévia do PDF" para conferir o resultado.',
       ],
       [
+        'Posso preencher os dados da empresa automaticamente?',
+        'Sim. Na instalação, o app pega da Shopify o nome, o endereço legal, o e-mail e o telefone da loja. A Shopify não conhece o número de registro nem o de IVA: para empresas francesas, em Configurações › Preenchimento automático, digite seu SIRET ou o nome da empresa para completar o resto a partir do registro oficial. Confira e salve.',
+      ],
+      [
         'Quando a fatura é criada?',
         'Por padrão, assim que o pedido é pago (no cartão, na hora). Você pode escolher criá-la assim que o pedido é feito, mas um pedido cancelado depois exigirá uma nota de crédito.',
       ],

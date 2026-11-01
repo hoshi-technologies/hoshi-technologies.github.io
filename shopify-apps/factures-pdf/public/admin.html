@@ -85,6 +85,10 @@
     details.faq { border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
     details.faq summary { cursor:pointer; padding:10px 12px; font-weight:600; }
     details.faq p { margin:0; padding:0 12px 12px; }
+    .autofill { background:#f7f7f7; border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:14px; }
+    .autofill-row { display:flex; gap:8px; flex-wrap:wrap; } .autofill-row input { flex:1 1 240px; }
+    .results { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; }
+    .results li { display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 10px; }
     #faq-link, #guide-link { color:#005bd3; font-size:13px; }
     .subtabs { display:inline-flex; margin-bottom:12px; }
     details.guide summary { display:flex; align-items:center; gap:10px; }
@@ -149,6 +153,16 @@
     <section class="card" id="company-card">
       <h2 data-i18n="company.title"></h2>
       <p class="help" data-i18n="company.help"></p>
+      <div class="autofill">
+        <b data-i18n="autofill.title"></b>
+        <p class="help" data-i18n="autofill.help" style="margin:4px 0 8px"></p>
+        <div class="autofill-row">
+          <input type="search" id="lookup-q" autocomplete="off">
+          <button type="button" class="primary" id="lookup" data-i18n="autofill.search"></button>
+          <button type="button" id="from-shopify" data-i18n="autofill.shopify"></button>
+        </div>
+        <ul id="lookup-results" class="results" hidden></ul>
+      </div>
       <div class="grid">
         <div><label for="companyName" data-i18n="company.name"></label><input type="text" id="companyName" name="companyName"></div>
         <div><label for="email" data-i18n="company.email"></label><input type="email" id="email" name="email"></div>
@@ -405,6 +419,58 @@
     }
   });
 
+  // ---------- Remplissage automatique (registre SIRENE ou Shopify) ----------
+  const lookupQ = $('lookup-q');
+  lookupQ.placeholder = t('autofill.placeholder');
+  // Les champs « lookup » ne font pas partie des réglages enregistrés.
+  lookupQ.removeAttribute('name');
+  function applyCompany(company) {
+    for (const [key, value] of Object.entries(company)) {
+      const field = form.elements[key];
+      if (field && value) field.value = value;
+    }
+    $('lookup-results').hidden = true;
+    markDirty();
+    toast(t('autofill.filled'));
+  }
+  let lookupResults = [];
+  async function runLookup() {
+    const q = lookupQ.value.trim();
+    if (q.length < 3) return;
+    const list = $('lookup-results');
+    $('lookup').disabled = true;
+    try {
+      ({ results: lookupResults } = await api(`/company/lookup?q=${encodeURIComponent(q)}`));
+      list.hidden = false;
+      list.innerHTML = lookupResults.length
+        ? lookupResults.map((r, i) => `<li><div><b>${escape(r.name)}</b>${r.active ? '' : ` <span class="badge failed">${escape(t('autofill.closed'))}</span>`}<br>
+            <small>${escape([r.legalForm, r.siret ? `SIRET ${r.siret}` : '', r.address.replace(/\n/g, ', ')].filter(Boolean).join(' · '))}</small></div>
+            <button type="button" class="small" data-use="${i}">${escape(t('autofill.use'))}</button></li>`).join('')
+        : `<li class="empty">${escape(t('autofill.none'))}</li>`;
+    } catch (error) {
+      toast(error.message, true);
+    } finally {
+      $('lookup').disabled = false;
+    }
+  }
+  $('lookup').addEventListener('click', runLookup);
+  lookupQ.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); runLookup(); } });
+  $('lookup-results').addEventListener('click', (event) => {
+    const b = event.target.closest('[data-use]');
+    if (!b) return;
+    const { name, siret, legalForm, address, countryCode, vatNumber } = lookupResults[Number(b.dataset.use)];
+    applyCompany({ companyName: name, siret, legalForm, address, countryCode, vatNumber });
+  });
+  $('from-shopify').addEventListener('click', async () => {
+    try {
+      const { company } = await api('/company/shopify');
+      delete company.timezone;
+      applyCompany(company);
+    } catch (error) {
+      toast(error.message, true);
+    }
+  });
+
   // ---------- Réglages ----------
   const syncFallback = () => { $('fallback-field').hidden = form.elements.invoiceLanguage.value !== 'auto'; };
   form.elements.invoiceLanguage.addEventListener('change', syncFallback);
@@ -450,8 +516,9 @@
   }
 
   function markDirty() { $('savebar').hidden = false; }
-  form.addEventListener('input', markDirty);
-  form.addEventListener('change', markDirty);
+  const onEdit = (event) => { if (event.target.name) markDirty(); };
+  form.addEventListener('input', onEdit);
+  form.addEventListener('change', onEdit);
   $('discard').addEventListener('click', async () => fillForm(await api('/settings')));
 
   form.addEventListener('submit', async (event) => {

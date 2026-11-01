@@ -7,6 +7,10 @@ export default [
         'Open the Settings tab, fill in your business details (name, address, registration and VAT numbers) and save. That’s it: from the next order on, the invoice is created and emailed to the customer automatically. Use the “Preview PDF” button to check how it looks.',
       ],
       [
+        'Can my business details be filled in automatically?',
+        'Yes. When installed, the app takes your store name, legal address, email and phone from Shopify. Shopify doesn’t know your registration or VAT number: for French companies, in Settings › Auto-fill, type your SIRET or company name to complete the rest from the official business register. Check, then save.',
+      ],
+      [
         'When is the invoice created?',
         'By default, as soon as the order is paid (immediately for card payments). You can choose to create it as soon as the order is placed, but an order cancelled afterwards will then need a credit note.',
       ],

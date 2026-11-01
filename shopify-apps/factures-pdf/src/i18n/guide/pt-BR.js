@@ -17,6 +17,7 @@ export default [
     intro: 'Estes dados aparecem em todas as faturas. São obrigatórios para uma fatura válida.',
     steps: [
       'Abra a aba Configurações, cartão "Sua empresa".',
+      'O mais rápido (empresas francesas): em "Preenchimento automático", digite seu SIRET (ou o nome da empresa e a cidade), clique em "Buscar" e depois em "Usar". Razão social, endereço da sede, SIRET, forma jurídica e número de IVA vêm do registro oficial. Você também pode clicar em "Usar os dados da Shopify".',
       'Confira a razão social e o e-mail: seus clientes respondem para esse endereço e é lá que você recebe as cópias das faturas.',
       'Digite o endereço em várias linhas, com o CEP e a cidade na mesma linha (ex.: "01310-100 São Paulo"), e escolha o país.',
       'Informe o número de registro (SIRET na França) e o número de IVA.',

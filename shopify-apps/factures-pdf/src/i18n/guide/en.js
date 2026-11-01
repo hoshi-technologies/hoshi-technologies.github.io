@@ -17,6 +17,7 @@ export default [
     intro: 'These details appear on every invoice. They are required for a valid invoice.',
     steps: [
       'Open the Settings tab, “Your business” card.',
+      'Quickest way (French companies): in “Auto-fill”, type your SIRET (or company name and city), click “Search” then “Use”. Company name, head office address, SIRET, legal form and VAT number are taken from the official register. You can also click “Use Shopify details”.',
       'Check the company name and email: customers reply to this address and you receive invoice copies there.',
       'Enter the address on several lines, with the postcode and city on the same line (e.g. “69002 Lyon”), then choose the country.',
       'Enter your company registration number (SIRET in France) and VAT number.',

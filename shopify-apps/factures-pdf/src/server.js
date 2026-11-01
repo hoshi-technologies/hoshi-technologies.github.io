@@ -16,11 +16,13 @@ import {
   adminGraphql,
   isValidShop,
   SHOP_INFO_QUERY,
+  BUSINESS_ENTITY_QUERY,
   SUBSCRIPTION_CREATE,
   SUBSCRIPTION_CANCEL,
   ACTIVE_SUBSCRIPTIONS,
 } from './shopify.js';
 import { facturxIssues } from './facturx.js';
+import { lookupFrenchCompany } from './company-lookup.js';
 import { LANGUAGES, dictionary, resolveLanguage, matchLanguage, invoiceLanguage, faqFor, guideFor } from './i18n/index.js';
 import { renderFaqPage, renderGuidePage } from './docs-page.js';
 import { PLANS, BILLING_CURRENCY, subscriptionName, planFromSubscriptionName } from './plans.js';
@@ -56,6 +58,35 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     if (!token) throw new Error("Appli non initialisée : rechargez la page de l'appli");
     return adminGraphql(shop, token, config.apiVersion, query, variables, fetchImpl);
   };
+
+  /**
+   * Informations d'entreprise connues de Shopify : entité légale principale (raison sociale,
+   * adresse légale) si disponible, sinon les coordonnées de la boutique. Shopify ne fournit
+   * ni SIRET ni n° de TVA.
+   */
+  async function shopifyCompanyInfo(shop) {
+    const { shop: info } = await graphql(shop, SHOP_INFO_QUERY);
+    let entity = null;
+    try {
+      entity = (await graphql(shop, BUSINESS_ENTITY_QUERY)).businessEntity;
+    } catch (error) {
+      logger.warn(`${shop} : entité légale Shopify non lue (${error.message})`);
+    }
+    const billing = info.billingAddress ?? {};
+    const legal = entity?.address;
+    const addr = legal?.address1
+      ? { address1: legal.address1, address2: legal.address2, zip: legal.zip, city: legal.city, countryCode: legal.countryCode }
+      : { address1: billing.address1, address2: billing.address2, zip: billing.zip, city: billing.city, countryCode: billing.countryCodeV2 };
+    return {
+      companyName: entity?.companyName || billing.company || info.name || '',
+      address: [addr.address1, addr.address2, [addr.zip, addr.city].filter(Boolean).join(' ')].filter(Boolean).join('\n'),
+      countryCode: addr.countryCode || '',
+      email: info.contactEmail || info.email || '',
+      phone: billing.phone || '',
+      website: info.url || '',
+      timezone: info.ianaTimezone || '',
+    };
+  }
 
   /** Aligne la formule enregistrée sur l'abonnement actif côté Shopify. */
   async function syncSubscription(shop) {
@@ -200,21 +231,15 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
       try {
         const { access_token, scope } = await exchangeToken(req.shop, req.sessionToken, config, fetchImpl);
         store.saveToken(req.shop, access_token, scope);
-        const { shop: info } = await adminGraphql(req.shop, access_token, config.apiVersion, SHOP_INFO_QUERY, {}, fetchImpl);
         const s = shopRow.settings;
-        const a = info.billingAddress ?? {};
+        const info = await shopifyCompanyInfo(req.shop);
+        // Pré-remplissage : on ne remplace jamais une valeur déjà saisie.
+        const filled = Object.fromEntries(Object.entries(info).map(([k, v]) => [k, s[k] || v]));
         store.saveSettings(req.shop, {
           ...s,
+          ...filled,
+          countryCode: info.countryCode || s.countryCode,
           fallbackLanguage: matchLanguage(req.body?.locale) ?? s.fallbackLanguage,
-          timezone: s.timezone || info.ianaTimezone || '',
-          countryCode: a.countryCodeV2 || s.countryCode,
-          companyName: s.companyName || a.company || info.name,
-          email: s.email || info.contactEmail || info.email,
-          phone: s.phone || a.phone || '',
-          website: s.website || info.url || '',
-          address:
-            s.address ||
-            [a.address1, a.address2, [a.zip, a.city].filter(Boolean).join(' '), a.country].filter(Boolean).join('\n'),
         });
       } catch (error) {
         logger.error(`${req.shop} : initialisation impossible : ${error.message}`);
@@ -271,6 +296,25 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
       res.json(await service.sendInvoice(req.shop, Number(req.params.id)));
     } catch (error) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  // ---------- Remplissage automatique des informations d'entreprise ----------
+  // Rien n'est enregistré ici : l'admin remplit le formulaire, le marchand vérifie et enregistre.
+  api.get('/company/shopify', async (req, res) => {
+    try {
+      res.json({ company: await shopifyCompanyInfo(req.shop) });
+    } catch (error) {
+      res.status(502).json({ error: error.message });
+    }
+  });
+
+  api.get('/company/lookup', async (req, res) => {
+    try {
+      res.json({ results: await lookupFrenchCompany(req.query.q, fetchImpl) });
+    } catch (error) {
+      logger.warn(`${req.shop} : recherche d'entreprise impossible : ${error.message}`);
+      res.status(502).json({ error: error.message });
     }
   });
 

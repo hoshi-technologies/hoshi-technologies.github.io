@@ -17,6 +17,7 @@ export default [
     intro: 'Deze gegevens staan op elke factuur. Ze zijn verplicht voor een geldige factuur.',
     steps: [
       'Open het tabblad Instellingen, kaart „Je bedrijf”.',
+      'Het snelst (Franse bedrijven): typ bij „Automatisch invullen” je SIRET (of bedrijfsnaam en plaats), klik op „Zoeken” en dan op „Gebruiken”. Bedrijfsnaam, adres van de hoofdvestiging, SIRET, rechtsvorm en btw-nummer komen uit het officiële register. Je kunt ook op „Shopify-gegevens overnemen” klikken.',
       'Controleer bedrijfsnaam en e-mail: klanten antwoorden naar dit adres en hier ontvang je de factuurkopieën.',
       'Vul het adres in op meerdere regels, met postcode en plaats op dezelfde regel (bijv. „1012 AB Amsterdam”), en kies het land.',
       'Vul het registratienummer (SIRET in Frankrijk) en het btw-nummer in.',

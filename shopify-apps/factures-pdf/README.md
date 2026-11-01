@@ -31,6 +31,23 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
 - **RGPD** : webhooks obligatoires de Shopify (`customers/data_request`, `customers/redact`,
   `shop/redact`) gérés.
 
+## Informations d'entreprise remplies automatiquement
+
+- **Depuis Shopify** (à l'installation, et bouton « Reprendre les infos de Shopify ») :
+  raison sociale et adresse légale de l'entité principale (`businessEntity`), sinon nom
+  et adresse de la boutique ; e-mail de contact, téléphone, site, pays, fuseau horaire.
+  Une valeur déjà saisie n'est jamais écrasée à l'installation.
+- **Shopify ne fournit ni SIRET ni n° de TVA.** Pour les entreprises françaises, la
+  recherche « Remplissage automatique » interroge le registre officiel SIRENE via l'API
+  publique et gratuite [Recherche d'entreprises](https://recherche-entreprises.api.gouv.fr)
+  (sans clé) : par SIRET, SIREN ou nom + ville. Elle remplit raison sociale, adresse du
+  siège, SIRET, forme juridique et n° de TVA intracommunautaire (calculé depuis le SIREN).
+  Le capital social et la ville du RCS ne sont pas fournis par l'API : à compléter à la main.
+- Rien n'est enregistré automatiquement : le marchand vérifie puis clique sur Enregistrer.
+- Le serveur de l'appli doit pouvoir joindre `recherche-entreprises.api.gouv.fr`. Le format
+  de réponse a été codé d'après la documentation de l'API et testé avec des réponses
+  simulées : à vérifier sur l'API réelle avant la mise en production.
+
 ## Interface et aide
 
 - **4 onglets** : Accueil (checklist de démarrage en 3 étapes, état de l'appli, dernières
@@ -44,7 +61,7 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
   - dans l'onglet Aide de l'appli (et lien depuis la checklist de démarrage) ;
   - en page publique `/guide?lang=fr`, avec sommaire, imprimable ou enregistrable en PDF.
   Textes dans `src/i18n/guide/` ; les libellés cités correspondent exactement à l'interface.
-- **FAQ complète** (21 questions en 6 thèmes : démarrer, obligations légales, Factur-X,
+- **FAQ complète** (22 questions en 6 thèmes : démarrer, obligations légales, Factur-X,
   langues, abonnement, problèmes) dans les 7 langues, avec recherche :
   - dans l'onglet Aide de l'appli ;
   - en page publique `/faq?lang=fr` (langue du navigateur par défaut), à indiquer comme
@@ -145,6 +162,7 @@ src/
   pdf.js        mise en page A4 PDF/A-3 (pdfkit), multi-pages, Factur-X embarqué
   facturx.js    XML Factur-X EN 16931 (CII) et métadonnées XMP
   docs-page.js  pages publiques du guide et de la FAQ
+  company-lookup.js  recherche d'entreprise dans le registre SIRENE
   i18n/         traductions (fr, en, de, es, it, nl, pt-BR)
   mailer.js     e-mail HTML + texte, PDF en pièce jointe (nodemailer)
   plans.js      formules d'abonnement (prix, quotas, essai)

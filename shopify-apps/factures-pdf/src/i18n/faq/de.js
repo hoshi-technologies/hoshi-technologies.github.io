@@ -7,6 +7,10 @@ export default [
         'Öffnen Sie den Tab „Einstellungen“, geben Sie Ihre Unternehmensdaten ein (Name, Adresse, Register- und USt-IdNr.) und speichern Sie. Das ist alles: Ab der nächsten Bestellung wird die Rechnung automatisch erstellt und an den Kunden gesendet. Mit „PDF-Vorschau“ können Sie das Ergebnis prüfen.',
       ],
       [
+        'Können meine Unternehmensdaten automatisch ausgefüllt werden?',
+        'Ja. Bei der Installation übernimmt die App Name, rechtliche Adresse, E-Mail und Telefon Ihres Shops aus Shopify. Shopify kennt weder Registernummer noch USt-IdNr.: Bei französischen Unternehmen geben Sie unter Einstellungen › Automatisch ausfüllen Ihre SIRET oder den Firmennamen ein, um den Rest aus dem amtlichen Register zu ergänzen. Prüfen und speichern.',
+      ],
+      [
         'Wann wird die Rechnung erstellt?',
         'Standardmäßig, sobald die Bestellung bezahlt ist (bei Kartenzahlung sofort). Sie können sie auch schon bei Bestelleingang erstellen lassen; eine später stornierte Bestellung erfordert dann eine Gutschrift.',
       ],

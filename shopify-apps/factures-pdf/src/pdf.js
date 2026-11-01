@@ -47,10 +47,22 @@ export function formatDate(value, intl = 'fr-FR', timeZone = 'Europe/Paris') {
   }
 }
 
-function sellerLines(s, t, colon) {
+function countryName(code, intl) {
+  try {
+    return code ? new Intl.DisplayNames([intl], { type: 'region' }).of(code) : '';
+  } catch {
+    return '';
+  }
+}
+
+function sellerLines(s, t, colon, intl) {
+  const address = String(s.address || '');
+  const country = countryName(s.countryCode, intl);
   return [
     s.legalForm,
-    ...String(s.address || '').split('\n'),
+    ...address.split('\n'),
+    // Pays ajouté s'il n'est pas déjà écrit dans l'adresse.
+    country && !address.toLowerCase().includes(country.toLowerCase()) ? country : '',
     s.siret && `${t.siret}${colon}${s.siret}`,
     s.rcs,
     !s.vatExempt && s.vatNumber && `${t.vatNumber}${colon}${s.vatNumber}`,
@@ -144,7 +156,7 @@ export function renderInvoicePdf(invoice, { number, issuedAt, settings, shopName
   doc.font('Bold').fontSize(8).fillColor(MUTED).text(t.seller, PAGE.margin, y);
   doc.font('Bold').fontSize(10).fillColor('#111827').text(clean(sellerName), PAGE.margin, y + 12, { width: 240 });
   doc.font('Regular').fontSize(9).fillColor('#374151');
-  for (const line of sellerLines(settings, t, lang === 'fr' ? ' : ' : ': ')) doc.text(clean(line), { width: 240 });
+  for (const line of sellerLines(settings, t, lang === 'fr' ? ' : ' : ': ', intl)) doc.text(clean(line), { width: 240 });
   const sellerBottom = doc.y;
 
   const addressBlock = (title, address, x, startY) => {

@@ -9,6 +9,10 @@ export default [
         "Ouvrez l'onglet Réglages, renseignez votre entreprise (nom, adresse, SIRET, n° de TVA) et enregistrez. C'est tout : dès la prochaine commande, la facture est créée et envoyée automatiquement au client. Vous pouvez vérifier le rendu avec le bouton « Aperçu du PDF ».",
       ],
       [
+        'Puis-je remplir les informations de mon entreprise automatiquement ?',
+        'Oui. À l\'installation, l\'appli reprend de Shopify le nom, l\'adresse légale, l\'e-mail et le téléphone de votre boutique. Shopify ne connaît pas le SIRET ni le n° de TVA : dans Réglages › Remplissage automatique, saisissez votre SIRET ou le nom de votre entreprise pour compléter le reste depuis le registre officiel des entreprises. Vérifiez puis enregistrez.',
+      ],
+      [
         'Quand la facture est-elle créée ?',
         "Par défaut, dès que la commande est payée (paiement par carte : immédiatement). Vous pouvez choisir de la créer dès que la commande est passée, mais une commande annulée ensuite devra alors faire l'objet d'un avoir.",
       ],

@@ -17,6 +17,7 @@ export default [
     intro: 'Questi dati compaiono su ogni fattura. Sono obbligatori per una fattura valida.',
     steps: [
       'Apri la scheda Impostazioni, riquadro «La tua azienda».',
+      'Il modo più rapido (aziende francesi): in «Compilazione automatica», digita il SIRET (o nome dell\'azienda e città), clicca su «Cerca» e poi su «Usa». Ragione sociale, sede legale, SIRET, forma giuridica e partita IVA vengono presi dal registro ufficiale. Puoi anche cliccare su «Usa i dati di Shopify».',
       "Controlla ragione sociale ed email: i clienti rispondono a questo indirizzo e lì ricevi le copie delle fatture.",
       "Inserisci l'indirizzo su più righe, con CAP e città sulla stessa riga (es. «20121 Milano»), poi scegli il paese.",
       'Indica il numero di registrazione (SIRET in Francia) e la partita IVA.',

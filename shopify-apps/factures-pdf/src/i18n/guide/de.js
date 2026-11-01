@@ -17,6 +17,7 @@ export default [
     intro: 'Diese Angaben stehen auf jeder Rechnung. Sie sind für eine gültige Rechnung erforderlich.',
     steps: [
       'Öffnen Sie den Tab „Einstellungen“, Karte „Ihr Unternehmen“.',
+      'Am schnellsten (französische Unternehmen): Geben Sie unter „Automatisch ausfüllen“ Ihre SIRET (oder Firmenname und Ort) ein, klicken Sie auf „Suchen“ und dann auf „Übernehmen“. Firmenname, Sitzadresse, SIRET, Rechtsform und USt-IdNr. kommen aus dem amtlichen Register. Sie können auch auf „Shopify-Daten übernehmen“ klicken.',
       'Prüfen Sie Firmenname und E-Mail: An diese Adresse antworten Kunden und dorthin gehen die Rechnungskopien.',
       'Geben Sie die Adresse auf mehreren Zeilen ein, mit PLZ und Ort in derselben Zeile (z. B. „10115 Berlin“), und wählen Sie das Land.',
       'Tragen Sie Registernummer (in Frankreich SIRET) und USt-IdNr. ein.',

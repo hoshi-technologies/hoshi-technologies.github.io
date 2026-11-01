@@ -175,7 +175,7 @@ test('API admin : authentification, réglages, numérotation croissante, RGPD', 
 
     const { settings, nextNumber } = await (await fetch(`${ctx.base}/api/settings`, { headers: auth })).json();
     assert.equal(settings.companyName, 'Atelier');
-    assert.equal(settings.address, '1 rue A\n75001 Paris\nFrance');
+    assert.equal(settings.address, '1 rue A\n75001 Paris');
     assert.equal(nextNumber, 1);
 
     let res = await fetch(`${ctx.base}/api/settings`, { method: 'PUT', headers: auth, body: JSON.stringify({ settings: { siret: '123' }, nextNumber: 100 }) });

@@ -7,6 +7,10 @@ export default [
         'Open het tabblad Instellingen, vul je bedrijfsgegevens in (naam, adres, registratie- en btw-nummer) en sla op. Dat is alles: vanaf de volgende bestelling wordt de factuur automatisch aangemaakt en naar de klant gestuurd. Met de knop „PDF-voorbeeld” controleer je het resultaat.',
       ],
       [
+        'Kan ik mijn bedrijfsgegevens automatisch laten invullen?',
+        'Ja. Bij de installatie neemt de app naam, juridisch adres, e-mail en telefoon van je winkel over uit Shopify. Shopify kent je registratie- en btw-nummer niet: voor Franse bedrijven typ je bij Instellingen › Automatisch invullen je SIRET of bedrijfsnaam om de rest uit het officiële register aan te vullen. Controleer en sla op.',
+      ],
+      [
         'Wanneer wordt de factuur aangemaakt?',
         'Standaard zodra de bestelling is betaald (bij kaartbetaling meteen). Je kunt de factuur ook al bij het plaatsen van de bestelling laten maken, maar een later geannuleerde bestelling vraagt dan om een creditnota.',
       ],
