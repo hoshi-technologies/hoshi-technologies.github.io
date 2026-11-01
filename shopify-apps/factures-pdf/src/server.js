@@ -21,8 +21,8 @@ import {
   ACTIVE_SUBSCRIPTIONS,
 } from './shopify.js';
 import { facturxIssues } from './facturx.js';
-import { LANGUAGES, dictionary, resolveLanguage, matchLanguage, invoiceLanguage, faqFor } from './i18n/index.js';
-import { renderFaqPage } from './faq-page.js';
+import { LANGUAGES, dictionary, resolveLanguage, matchLanguage, invoiceLanguage, faqFor, guideFor } from './i18n/index.js';
+import { renderFaqPage, renderGuidePage } from './docs-page.js';
 import { PLANS, BILLING_CURRENCY, subscriptionName, planFromSubscriptionName } from './plans.js';
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
@@ -32,18 +32,22 @@ const SAMPLE_ORDER = JSON.parse(readFileSync(here('./sample-order.json'), 'utf8'
 export function createApp({ config, store, service, fetchImpl = fetch, logger = console }) {
   const app = express();
 
-  /** FAQ traduite, avec les prix et quotas réels ; sans adresse de support, la question est retirée. */
-  const faq = (lang) => {
-    const intl = dictionary(lang).intl;
-    const usd = (n) => new Intl.NumberFormat(intl, { style: 'currency', currency: BILLING_CURRENCY }).format(n);
-    const sections = faqFor(lang, {
+  /** Prix et quotas réels, insérés dans le guide et la FAQ. */
+  const docVars = (lang) => {
+    const usd = (n) => new Intl.NumberFormat(dictionary(lang).intl, { style: 'currency', currency: BILLING_CURRENCY }).format(n);
+    return {
       freeLimit: PLANS.free.monthlyLimit,
       essentielPrice: usd(PLANS.essentiel.price),
       essentielLimit: PLANS.essentiel.monthlyLimit,
       illimitePrice: usd(PLANS.illimite.price),
       trialDays: PLANS.essentiel.trialDays,
       ...(config.supportEmail ? { support: config.supportEmail } : {}),
-    });
+    };
+  };
+  const guide = (lang) => guideFor(lang, docVars(lang));
+  /** FAQ traduite ; sans adresse de support, la question correspondante est retirée. */
+  const faq = (lang) => {
+    const sections = faqFor(lang, docVars(lang));
     if (config.supportEmail) return sections;
     return sections.map((sec) => ({ ...sec, items: sec.items.filter((item) => !item.a.includes('{support}')) }));
   };
@@ -140,11 +144,19 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     res.send(Buffer.from(invoice.pdf));
   });
 
-  // ---------- FAQ publique (lien de la fiche App Store) : /faq?lang=de ----------
-  app.get('/faq', (req, res) => {
-    const lang = matchLanguage(req.query.lang) ?? resolveLanguage(req.acceptsLanguages(...LANGUAGES.map((l) => l.code), 'pt') || 'en');
+  // ---------- Guide et FAQ publics (liens de la fiche App Store) : /guide?lang=de, /faq ----------
+  const docsLanguage = (req) =>
+    matchLanguage(req.query.lang) ?? resolveLanguage(req.acceptsLanguages(...LANGUAGES.map((l) => l.code), 'pt') || 'en');
+  const docsContext = (lang) => ({ lang, languages: LANGUAGES, t: dictionary(lang).admin, support: config.supportEmail });
+  app.get('/guide', (req, res) => {
+    const lang = docsLanguage(req);
     res.set('Cache-Control', 'public, max-age=3600');
-    res.type('html').send(renderFaqPage({ lang, faq: faq(lang), languages: LANGUAGES, t: dictionary(lang).admin, support: config.supportEmail }));
+    res.type('html').send(renderGuidePage({ ...docsContext(lang), guide: guide(lang) }));
+  });
+  app.get('/faq', (req, res) => {
+    const lang = docsLanguage(req);
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.type('html').send(renderFaqPage({ ...docsContext(lang), faq: faq(lang) }));
   });
 
   // ---------- Page d'administration intégrée à Shopify ----------
@@ -156,7 +168,7 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     );
     // Shopify passe la langue de l'administrateur dans ?locale= (fr, en, pt-BR…).
     const lang = resolveLanguage(req.query.locale, 'en');
-    const i18n = { lang, t: dictionary(lang).admin, languages: LANGUAGES, faq: faq(lang), support: config.supportEmail };
+    const i18n = { lang, t: dictionary(lang).admin, languages: LANGUAGES, faq: faq(lang), guide: guide(lang), support: config.supportEmail };
     res.type('html').send(
       ADMIN_HTML.replaceAll('%SHOPIFY_API_KEY%', config.apiKey)
         .replaceAll('%APP_URL%', config.appUrl)

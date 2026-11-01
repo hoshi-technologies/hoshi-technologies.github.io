@@ -85,7 +85,14 @@
     details.faq { border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
     details.faq summary { cursor:pointer; padding:10px 12px; font-weight:600; }
     details.faq p { margin:0; padding:0 12px 12px; }
-    #faq-link { color:#005bd3; font-size:13px; }
+    #faq-link, #guide-link { color:#005bd3; font-size:13px; }
+    .subtabs { display:inline-flex; margin-bottom:12px; }
+    details.guide summary { display:flex; align-items:center; gap:10px; }
+    details.guide .dot { width:24px; height:24px; flex:none; border-radius:50%; display:grid; place-items:center; font-size:12px; background:var(--accent); color:#fff; }
+    .guide-body { padding:0 12px 12px 46px; }
+    .guide-body p { margin:0 0 6px; color:var(--muted); }
+    .guide-body ol { margin:0; padding-left:18px; } .guide-body li { margin-bottom:4px; }
+    .banner.tip { margin:10px 0 0; display:block; }
   </style>
 </head>
 <body>
@@ -104,7 +111,7 @@
   <!-- ==================== Accueil ==================== -->
   <div class="panel" data-panel="home">
     <section class="card" id="setup" hidden>
-      <div class="row"><h2 data-i18n="setup.title"></h2><small id="setup-progress"></small></div>
+      <div class="row"><h2 data-i18n="setup.title"></h2><span><small id="setup-progress"></small> · <button type="button" class="link" data-goto="help" data-i18n="guide.title"></button></span></div>
       <ol class="steps" id="steps"></ol>
     </section>
 
@@ -248,7 +255,16 @@
 
   <!-- ==================== Aide ==================== -->
   <div class="panel" data-panel="help" hidden>
-    <section class="card">
+    <nav class="tabs subtabs" role="tablist">
+      <button type="button" role="tab" data-help="guide" data-i18n="guide.title"></button>
+      <button type="button" role="tab" data-help="faq" data-i18n="help.title"></button>
+    </nav>
+    <section class="card" data-help-panel="guide">
+      <div class="row"><h2 data-i18n="guide.title"></h2><a id="guide-link" target="_blank" rel="noopener" data-i18n="guide.online"></a></div>
+      <p class="help" data-i18n="guide.intro" style="margin-top:6px"></p>
+      <div id="guide"></div>
+    </section>
+    <section class="card" data-help-panel="faq" hidden>
       <div class="row"><h2 data-i18n="help.title"></h2><a id="faq-link" target="_blank" rel="noopener" data-i18n="help.online"></a></div>
       <input type="search" id="faq-search" class="search">
       <div id="faq"></div>
@@ -540,7 +556,22 @@
     }
   });
 
-  // ---------- Aide ----------
+  // ---------- Aide : guide et FAQ ----------
+  const { guide } = window.I18N;
+  const colonFr = lang === 'fr' ? ' :' : ':';
+  $('guide').innerHTML = guide.map((c, i) => `<details class="faq guide"${i === 0 ? ' open' : ''}>
+      <summary><span class="dot">${i + 1}</span> ${escape(c.title)}</summary>
+      <div class="guide-body"><p>${escape(c.intro)}</p><ol>${c.steps.map((x) => `<li>${escape(x)}</li>`).join('')}</ol>
+      ${c.tips.map((tip) => `<div class="banner info tip"><span><b>${escape(t('guide.tip'))}${colonFr}</b> ${escape(tip)}</span></div>`).join('')}</div>
+    </details>`).join('');
+  $('guide-link').href = `/guide?lang=${encodeURIComponent(lang)}`;
+  function showHelp(name) {
+    for (const b of document.querySelectorAll('[data-help]')) b.setAttribute('aria-selected', String(b.dataset.help === name));
+    for (const p of document.querySelectorAll('[data-help-panel]')) p.hidden = p.dataset.helpPanel !== name;
+  }
+  document.querySelectorAll('[data-help]').forEach((b) => b.addEventListener('click', () => showHelp(b.dataset.help)));
+  showHelp('guide');
+
   $('faq').innerHTML = faq.map((section) => `<div class="faq-section"><h3>${escape(section.title)}</h3>${section.items
     .map((item) => `<details class="faq"><summary>${escape(item.q)}</summary><p>${escape(item.a)}</p></details>`).join('')}</div>`).join('');
   $('faq-search').placeholder = t('help.search');

@@ -16,6 +16,13 @@ import faqEs from './faq/es.js';
 import faqIt from './faq/it.js';
 import faqNl from './faq/nl.js';
 import faqPtBR from './faq/pt-BR.js';
+import guideFr from './guide/fr.js';
+import guideEn from './guide/en.js';
+import guideDe from './guide/de.js';
+import guideEs from './guide/es.js';
+import guideIt from './guide/it.js';
+import guideNl from './guide/nl.js';
+import guidePtBR from './guide/pt-BR.js';
 
 export const DICTIONARIES = { fr, en, de, es, it, nl, 'pt-BR': ptBR };
 export const LANGUAGES = Object.entries(DICTIONARIES).map(([code, d]) => ({ code, name: d.name }));
@@ -56,4 +63,14 @@ export function faqFor(code, vars) {
     title: section.title,
     items: section.items.map(([q, a]) => ({ q: format(q, vars), a: format(a, vars) })),
   }));
+}
+
+// ---------- Guide utilisateur ----------
+export const GUIDES = { fr: guideFr, en: guideEn, de: guideDe, es: guideEs, it: guideIt, nl: guideNl, 'pt-BR': guidePtBR };
+
+/** Guide d'une langue, avec prix et quotas à jour. */
+export function guideFor(code, vars) {
+  const chapters = GUIDES[code] ?? GUIDES[DEFAULT_LANGUAGE];
+  const f = (text) => format(text, vars);
+  return chapters.map((c) => ({ id: c.id, title: f(c.title), intro: f(c.intro), steps: c.steps.map(f), tips: c.tips.map(f) }));
 }

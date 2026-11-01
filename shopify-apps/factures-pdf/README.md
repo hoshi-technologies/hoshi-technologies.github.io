@@ -38,6 +38,12 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
 - **Réglages en deux niveaux** : l'essentiel visible (entreprise, envoi), le reste replié
   (informations complémentaires, numérotation et langue, Factur-X, apparence, e-mail,
   lien Shopify). Barre « Modifications non enregistrées » avec Enregistrer / Annuler.
+- **Guide utilisateur** en 10 chapitres (installation, entreprise, apparence, envoi, lien
+  Shopify, suivi au quotidien, numérotation et langues, Factur-X, abonnement, bonnes
+  pratiques), avec étapes numérotées et conseils, dans les 7 langues :
+  - dans l'onglet Aide de l'appli (et lien depuis la checklist de démarrage) ;
+  - en page publique `/guide?lang=fr`, avec sommaire, imprimable ou enregistrable en PDF.
+  Textes dans `src/i18n/guide/` ; les libellés cités correspondent exactement à l'interface.
 - **FAQ complète** (21 questions en 6 thèmes : démarrer, obligations légales, Factur-X,
   langues, abonnement, problèmes) dans les 7 langues, avec recherche :
   - dans l'onglet Aide de l'appli ;
@@ -138,7 +144,7 @@ src/
   invoice.js    commande Shopify → lignes HT, remises, TVA par taux, totaux (centimes)
   pdf.js        mise en page A4 PDF/A-3 (pdfkit), multi-pages, Factur-X embarqué
   facturx.js    XML Factur-X EN 16931 (CII) et métadonnées XMP
-  faq-page.js   page publique de la FAQ
+  docs-page.js  pages publiques du guide et de la FAQ
   i18n/         traductions (fr, en, de, es, it, nl, pt-BR)
   mailer.js     e-mail HTML + texte, PDF en pièce jointe (nodemailer)
   plans.js      formules d'abonnement (prix, quotas, essai)

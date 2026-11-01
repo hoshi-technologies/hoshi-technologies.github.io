@@ -244,3 +244,22 @@ test('FAQ publique : langue, prix réels, question support masquée sans adresse
     ctx.close();
   }
 });
+
+test('guide public : chapitres, sommaire, impression, liens entre guide et FAQ', async () => {
+  const ctx = await setup();
+  try {
+    const fr = await (await fetch(`${ctx.base}/guide?lang=fr`)).text();
+    assert.match(fr, /<h1>Guide d(&#39;|')utilisation<\/h1>/);
+    assert.equal((fr.match(/<section class="card" id="/g) || []).length, 10);
+    assert.match(fr, /href="#facturx"/);
+    assert.match(fr, /Formule Gratuite : 10 factures par mois/);
+    assert.match(fr, /onclick="print\(\)"/);
+    assert.match(fr, /href="\/faq\?lang=fr"/);
+    const faq = await (await fetch(`${ctx.base}/faq?lang=nl`)).text();
+    assert.match(faq, /href="\/guide\?lang=nl">Gebruikershandleiding/);
+    const admin = await (await fetch(`${ctx.base}/?locale=es`)).text();
+    assert.match(admin, /"guide":\[\{"id":"install","title":"Instalar la aplicación"/);
+  } finally {
+    ctx.close();
+  }
+});

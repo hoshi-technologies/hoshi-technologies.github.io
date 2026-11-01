@@ -130,3 +130,16 @@ test('FAQ : même structure dans les 7 langues, variables remplies', async () =>
   }
   assert.ok(FAQS.fr.flatMap((s) => s.items).length >= 20);
 });
+
+test('guide utilisateur : mêmes chapitres, étapes et conseils dans les 7 langues', async () => {
+  const { GUIDES, guideFor } = await import('../src/i18n/index.js');
+  const shape = (g) => g.map((c) => `${c.id}:${c.steps.length}:${c.tips.length}`);
+  for (const { code } of LANGUAGES) {
+    assert.deepEqual(shape(GUIDES[code]), shape(GUIDES.fr), `guide différent en ${code}`);
+    for (const c of guideFor(code, { freeLimit: 10, essentielPrice: '7,90 $', essentielLimit: 200, illimitePrice: '12,90 $', trialDays: 7 })) {
+      // Les {{variables}} d'e-mail sont du contenu ; seules les {variables} simples doivent être remplies.
+      assert.doesNotMatch([c.title, c.intro, ...c.steps, ...c.tips].join(' ').replace(/\{\{\w+\}\}/g, ''), /\{\w+\}/, `${code} / ${c.id}`);
+    }
+  }
+  assert.equal(GUIDES.fr.length, 10);
+});
