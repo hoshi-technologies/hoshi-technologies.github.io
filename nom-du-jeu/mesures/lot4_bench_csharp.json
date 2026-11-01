@@ -1,0 +1,50 @@
+{
+  "machine": "4 c\u0153urs, Ubuntu 24.04.5 LTS",
+  ".net": "8.0.33",
+  "grille_20km_10000": {
+    "trajets_ms": 1077,
+    "pas_trafic_ms": 0.273,
+    "trajets_impossibles": 0,
+    "arcs_par_trajet": 59.6,
+    "charge_max": 4,
+    "memoire_mo": 35
+  },
+  "grille_20km_50000": {
+    "trajets_ms": 3688,
+    "pas_trafic_ms": 1.42,
+    "trajets_impossibles": 0,
+    "arcs_par_trajet": 60.4,
+    "charge_max": 8,
+    "memoire_mo": 36
+  },
+  "grille_20km_100000": {
+    "trajets_ms": 6922,
+    "pas_trafic_ms": 2.151,
+    "trajets_impossibles": 0,
+    "arcs_par_trajet": 60.2,
+    "charge_max": 37,
+    "memoire_mo": 77
+  },
+  "paquet": {
+    "ville": "Annecy",
+    "chargement_ms": 312,
+    "noeuds": 10647,
+    "arcs": 17832
+  },
+  "annecy_reel_10000": {
+    "trajets_ms": 620,
+    "pas_trafic_ms": 0.094,
+    "trajets_impossibles": 0,
+    "arcs_par_trajet": 74.2,
+    "charge_max": 48,
+    "memoire_mo": 90
+  },
+  "annecy_reel_50000": {
+    "trajets_ms": 2876,
+    "pas_trafic_ms": 1.13,
+    "trajets_impossibles": 0,
+    "arcs_par_trajet": 74.4,
+    "charge_max": 108,
+    "memoire_mo": 49
+  }
+}

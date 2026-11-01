@@ -235,4 +235,5 @@ Les seuils de population se règlent dans un fichier de données. En mode Ville 
 | 2026-11-01 | Données : Overture Maps et Copernicus partout ; IGN et INSEE (France) ; Census et USGS (États-Unis). Liste de villes vérifiées au lancement. | Recommandation acceptée avec l'étape 0 |
 | 2026-11-01 | Dossier de conception accepté (« je te fais confiance ») : mode Fondation et Annecy pour le prototype. | Propriétaire |
 | 2026-11-01 | Lot 3 : outil de préparation de ville (extraire hors moteur, construire déterministe), format de paquet v1, paquet Annecy Quartier produit. | Lot 3 |
+| 2026-11-01 | Lot 4 : simulation C# (net8.0) séparée du moteur, projet Godot 4.7.2 .NET, banc d'affichage Annecy 3D + 10 000 véhicules ; export Windows produit. FPS réels à mesurer sur le PC du propriétaire. | Lot 4 |
 | 2026-11-01 | Accès Anticipé recommandé, prix visé de 24,99 $ puis 29,99 $ à la 1.0. | Recommandation, **à confirmer à l'étape 7** |

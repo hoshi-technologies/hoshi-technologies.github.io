@@ -3,13 +3,18 @@
 Jeu solo de simulation de ville pour PC Windows, destiné à Steam.
 Promesse : « Prends les commandes de ta vraie ville, partout dans le monde. »
 
-## État actuel : lot 3 terminé (préparation des données d'une ville)
+## État actuel : lot 4 terminé (test de performance dans Godot)
 
 | Dossier | Contenu |
 |---|---|
 | `conception/DOSSIER_CONCEPTION.md` | Le dossier de conception (référence pour tout le projet) |
 | `outils/preparation_ville/` | L'outil qui prépare une vraie ville (voir son LISEZMOI) |
 | `donnees/villes/fr-annecy_quartier_v1/` | Le paquet d'Annecy (4 × 4 km), avec `apercu.png` |
+| `simulation/` | Le cœur du jeu en C#, indépendant du moteur |
+| `tests/` | Tests automatiques de la simulation (`dotnet test jeu/Jeu.sln`) |
+| `bench/` | Banc d'essai de la simulation en C# |
+| `jeu/` | Le projet Godot (ouvrir `jeu/project.godot` avec Godot 4.7 .NET) |
+| `mesures/LOT4_PERFORMANCE.md` | Résultats du test de performance |
 
 Étape 0 :
 

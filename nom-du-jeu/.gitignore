@@ -4,3 +4,8 @@ paquets*/
 __pycache__/
 .godot/
 .pytest_cache/
+build/
+bin/
+obj/
+*.user
+TestResults/
