@@ -48,6 +48,13 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
   de réponse a été codé d'après la documentation de l'API et testé avec des réponses
   simulées : à vérifier sur l'API réelle avant la mise en production.
 
+## Espace client
+
+L'extension `extensions/invoice-download` ajoute un bouton « Télécharger ma facture » sur les
+commandes de l'espace client Shopify. Elle s'installe automatiquement avec l'appli, sans code
+à coller. Le serveur vérifie que la commande appartient au client connecté. Mise en ligne :
+`docs/espace-client.md`.
+
 ## Hébergement
 
 - **Cloudflare Workers** (production) : `src/worker.js`, `wrangler.toml`, un Durable Object

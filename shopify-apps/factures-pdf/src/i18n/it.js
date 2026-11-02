@@ -112,6 +112,7 @@ export default {
     'delivery.email': 'Un’email separata con la fattura PDF allegata',
     'delivery.emailHelp': 'Funziona senza configurazione. Il cliente riceve 2 email: la conferma di Shopify e la fattura.',
     'delivery.setup': 'In Shopify: Impostazioni › Notifiche › Notifiche ai clienti › Conferma ordine › Modifica codice. Incolla questo codice subito dopo il riepilogo dell’ordine e salva.',
+    'delivery.accountButton': 'Inoltre, i clienti che accedono al proprio account trovano automaticamente un pulsante «Scarica fattura» su ciascun ordine. Nessuna configurazione necessaria.',
     'company.title': 'La tua azienda',
     'company.help': 'Queste informazioni compaiono sulle fatture. Verifica le diciture obbligatorie con il tuo commercialista.',
     'company.name': 'Ragione sociale',

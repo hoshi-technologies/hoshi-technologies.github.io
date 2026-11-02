@@ -16,7 +16,7 @@ export default [
       ],
       [
         'Meu cliente recebe a fatura automaticamente?',
-        'Sim: ele recebe um e-mail com a fatura em PDF anexada. O e-mail é enviado em nome da sua loja e as respostas chegam ao e-mail da sua empresa. Você pode desativar o envio automático nas configurações.',
+        'Sim: ele recebe um e-mail com a fatura em PDF anexada. O e-mail é enviado em nome da sua loja e as respostas chegam ao e-mail da sua empresa. Você pode desativar o envio automático nas configurações. Se ele tiver uma conta de cliente, também encontra um botão “Baixar fatura” em cada pedido, sem nenhuma configuração da sua parte.',
       ],
       [
         'Por que a fatura não está no e-mail de confirmação da Shopify?',

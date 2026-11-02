@@ -8,8 +8,10 @@ application_url = "https://hoshi-factures.hoshi-technologies.workers.dev"
 embedded = true
 
 [access_scopes]
-# Lecture des commandes (les webhooks de commande l'exigent) ; installation gérée par Shopify.
-scopes = "read_orders"
+# Lecture des commandes (les webhooks de commande l'exigent) ; lecture des clients : Shopify
+# n'identifie le client connecté (bouton « Télécharger ma facture ») qu'avec ce droit.
+# Installation gérée par Shopify.
+scopes = "read_orders,read_customers"
 use_legacy_install_flow = false
 
 [auth]

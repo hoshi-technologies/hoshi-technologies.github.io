@@ -5,6 +5,9 @@
   "description": "Appli Shopify : facture PDF générée à chaque commande et envoyée par e-mail au client.",
   "type": "module",
   "main": "src/index.js",
+  "workspaces": [
+    "extensions/*"
+  ],
   "engines": {
     "node": ">=22.5"
   },

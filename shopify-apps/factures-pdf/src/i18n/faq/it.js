@@ -16,7 +16,7 @@ export default [
       ],
       [
         'Il mio cliente riceve la fattura automaticamente?',
-        "Sì: riceve un'email con la fattura in PDF allegata. Viene inviata a nome del tuo negozio e le risposte arrivano all'email della tua azienda. Puoi disattivare l'invio automatico nelle impostazioni.",
+        "Sì: riceve un'email con la fattura in PDF allegata. Viene inviata a nome del tuo negozio e le risposte arrivano all'email della tua azienda. Puoi disattivare l'invio automatico nelle impostazioni. Se ha un account cliente, trova anche un pulsante «Scarica fattura» su ciascun ordine, senza alcuna configurazione da parte tua.",
       ],
       [
         "Perché la fattura non è nell'email di conferma di Shopify?",

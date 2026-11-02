@@ -56,6 +56,14 @@ try {
   const pub = await fetch(`${base}/f/${ORDER.token}`);
   check(pub.status === 200 && pub.headers.get('content-type') === 'application/pdf', 'lien public de la facture (annuaire)');
   check((await fetch(`${base}/f/inconnu0000000000000`)).status === 404, 'lien inconnu : page « pas encore disponible »');
+  // Espace client : bouton « Télécharger ma facture » (jeton de session de l'extension).
+  const customer = (sub) => ({ Authorization: `Bearer ${signSessionToken({ dest: SHOP, aud: API_KEY, sub, exp: now + 300, nbf: now - 5 }, SECRET)}` });
+  const mine = await (await fetch(`${base}/customer-api/invoice?order=gid://shopify/Order/${ORDER.id}`, { headers: customer(`gid://shopify/Customer/${ORDER.customer.id}`) })).json();
+  check(mine.ready && mine.url.endsWith(`/f/${ORDER.token}.pdf`), 'espace client : lien de la facture pour le client de la commande');
+  const other = await (await fetch(`${base}/customer-api/invoice?order=gid://shopify/Order/${ORDER.id}`, { headers: customer('gid://shopify/Customer/1') })).json();
+  check(other.ready === false, 'espace client : refusé à un autre client');
+  const preflight = await fetch(`${base}/customer-api/invoice`, { method: 'OPTIONS' });
+  check(preflight.status === 204 && preflight.headers.get('access-control-allow-origin') === '*', 'espace client : CORS');
 
   // Entreprise complète → facture Factur-X.
   await fetch(`${base}/api/settings`, { method: 'PUT', headers: auth, body: JSON.stringify({ settings: { companyName: 'Atelier', address: '8 place Bellecour\n69002 Lyon', siret: '40483304800022', vatNumber: 'FR83404833048' } }) });

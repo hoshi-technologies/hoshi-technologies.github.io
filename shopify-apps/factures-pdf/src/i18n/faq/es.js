@@ -16,7 +16,7 @@ export default [
       ],
       [
         '¿Mi cliente recibe la factura automáticamente?',
-        'Sí: recibe un correo con la factura en PDF adjunta. Se envía en nombre de su tienda y las respuestas llegan al correo de su empresa. Puede desactivar el envío automático en los ajustes.',
+        'Sí: recibe un correo con la factura en PDF adjunta. Se envía en nombre de su tienda y las respuestas llegan al correo de su empresa. Puede desactivar el envío automático en los ajustes. Si tiene una cuenta de cliente, también encuentra un botón «Descargar factura» en cada uno de sus pedidos, sin que usted tenga que configurar nada.',
       ],
       [
         '¿Por qué la factura no está en el correo de confirmación de Shopify?',

@@ -68,6 +68,10 @@ export function createStore(sql, key) {
     );
     CREATE INDEX IF NOT EXISTS access_log_shop ON access_log (shop, id DESC);
   `);
+  // Évolutions du schéma sur une base existante (sans effet sur une base neuve).
+  const invoiceColumns = new Set(sql.all('PRAGMA table_info(invoices)').map((col) => col.name));
+  // Client Shopify de la commande : bouton « Télécharger ma facture » de l'espace client.
+  if (!invoiceColumns.has('customer_id')) sql.exec('ALTER TABLE invoices ADD COLUMN customer_id TEXT');
   return new Store(sql, createCipher(key ?? randomBytes(32)));
 }
 
@@ -176,6 +180,15 @@ export class Store {
     return this.readInvoice(this.sql.get('SELECT * FROM invoices WHERE shop = ? AND order_id = ?', shop, String(orderId)));
   }
 
+  /** Facture d'une commande, sans le PDF (bouton de l'espace client). */
+  findInvoiceSummaryByOrder(shop, orderId) {
+    return this.sql.get(
+      'SELECT id, order_id, order_name, order_token, customer_id, number, language FROM invoices WHERE shop = ? AND order_id = ?',
+      shop,
+      String(orderId),
+    );
+  }
+
   findInvoiceByToken(token) {
     return this.readInvoice(this.sql.get('SELECT * FROM invoices WHERE order_token = ?', token));
   }
@@ -205,14 +218,15 @@ export class Store {
       if (current !== seq) throw new Error(`Compteur de factures modifié (${current} au lieu de ${seq}).`);
       this.sql.run('UPDATE shops SET next_number = ? WHERE shop = ?', seq + 1, shop);
       return this.sql.run(
-        `INSERT INTO invoices (shop, order_id, order_name, order_token, number, issued_at,
+        `INSERT INTO invoices (shop, order_id, order_name, order_token, customer_id, number, issued_at,
                                customer_email, customer_name, customer_first_name, total_cents, currency,
                                language, facturx, pdf)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         shop,
         String(record.orderId),
         record.orderName,
         record.orderToken,
+        record.customerId ?? null,
         record.number,
         record.issuedAt,
         this.cipher.encrypt(record.customerEmail),

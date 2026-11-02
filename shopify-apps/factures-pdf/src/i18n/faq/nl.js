@@ -16,7 +16,7 @@ export default [
       ],
       [
         'Krijgt mijn klant de factuur automatisch?',
-        'Ja: hij ontvangt een e-mail met de factuur als pdf-bijlage. Die wordt verstuurd namens je winkel en antwoorden komen binnen op het e-mailadres van je bedrijf. Je kunt automatisch verzenden uitschakelen in de instellingen.',
+        'Ja: hij ontvangt een e-mail met de factuur als pdf-bijlage. Die wordt verstuurd namens je winkel en antwoorden komen binnen op het e-mailadres van je bedrijf. Je kunt automatisch verzenden uitschakelen in de instellingen. Heeft hij een klantaccount, dan ziet hij bij elke bestelling ook een knop ‘Factuur downloaden’, zonder dat je iets hoeft in te stellen.',
       ],
       [
         'Waarom zit de factuur niet in de orderbevestiging van Shopify?',

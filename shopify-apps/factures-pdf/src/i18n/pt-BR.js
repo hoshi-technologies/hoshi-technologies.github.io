@@ -112,6 +112,7 @@ export default {
     'delivery.email': 'Um e-mail separado com a fatura em PDF anexada',
     'delivery.emailHelp': 'Funciona sem configuração. O cliente recebe 2 e-mails: a confirmação da Shopify e a fatura.',
     'delivery.setup': 'Na Shopify: Configurações › Notificações › Notificações ao cliente › Confirmação do pedido › Editar código. Cole este código logo após o resumo do pedido e salve.',
+    'delivery.accountButton': 'Além disso, os clientes conectados à conta veem automaticamente um botão “Baixar fatura” em cada um dos pedidos. Nada a configurar.',
     'company.title': 'Sua empresa',
     'company.help': 'Estas informações aparecem nas faturas. Confirme os dados obrigatórios com seu contador.',
     'company.name': 'Razão social',

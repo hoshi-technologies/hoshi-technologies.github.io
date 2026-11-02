@@ -16,7 +16,7 @@ export default [
       ],
       [
         'Does my customer receive the invoice automatically?',
-        'Yes: they get an email with the PDF invoice attached. It is sent on behalf of your store, and replies go to your business email address. You can turn automatic sending off in the settings.',
+        'Yes: they get an email with the PDF invoice attached. It is sent on behalf of your store, and replies go to your business email address. You can turn automatic sending off in the settings. If they have a customer account, they also find a “Download invoice” button on each of their orders, with no setup on your side.',
       ],
       [
         'Why isn’t the invoice in the Shopify order confirmation email?',

@@ -8,6 +8,9 @@ import { buildInvoice } from './invoice.js';
 import {
   verifyWebhook,
   verifySessionToken,
+  verifyCustomerToken,
+  numericOrderId,
+  ORDER_CUSTOMER_QUERY,
   exchangeToken,
   adminGraphql,
   isValidShop,
@@ -194,6 +197,53 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
     c.header('Cache-Control', 'private, no-store');
     c.header('X-Robots-Tag', 'noindex');
     return pdfResponse(c, invoice.pdf, `inline; filename="${dictionary(invoice.language).email.filename}-${invoice.number}.pdf"`);
+  });
+
+  // ---------- Espace client : bouton « Télécharger ma facture » (extension Shopify) ----------
+  // Appelé depuis l'extension avec le jeton de session du client connecté. La facture n'est
+  // renvoyée que si la commande appartient bien à ce client (sinon : 404, sans rien révéler).
+  const customerCors = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+    'Access-Control-Max-Age': '86400',
+    'Cache-Control': 'private, no-store',
+  };
+  app.options('/customer-api/*', (c) => c.body(null, 204, customerCors));
+  app.get('/customer-api/invoice', async (c) => {
+    const reply = (body, status = 200) => c.json(body, status, customerCors);
+    let auth;
+    try {
+      auth = verifyCustomerToken(/^Bearer (.+)$/.exec(c.req.header('authorization') || '')?.[1], config);
+    } catch {
+      return reply({ error: 'unauthorized' }, 401);
+    }
+    const orderId = numericOrderId(c.req.query('order'));
+    if (!orderId) return reply({ error: 'order' }, 400);
+    if (!auth.customerId) {
+      // Client non connecté, ou droit read_customers pas encore accordé par le marchand.
+      logger.warn(`${auth.shop} : jeton client sans identifiant (droit read_customers accordé ?)`);
+      return reply({ ready: false });
+    }
+    const invoice = store?.findInvoiceSummaryByOrder(auth.shop, orderId);
+    if (!invoice || !invoice.order_token) return reply({ ready: false });
+
+    let owner = invoice.customer_id;
+    if (!owner) {
+      // Facture émise avant l'enregistrement du client : vérification auprès de Shopify.
+      try {
+        const data = await graphql(auth.shop, ORDER_CUSTOMER_QUERY, { id: `gid://shopify/Order/${orderId}` });
+        owner = /\/Customer\/(\d+)$/.exec(data.order?.customer?.id || '')?.[1] ?? null;
+      } catch (error) {
+        logger.warn(`${auth.shop} : propriétaire de la commande ${orderId} non vérifié (${error.message})`);
+        owner = null;
+      }
+    }
+    if (owner !== auth.customerId) return reply({ ready: false });
+
+    store.logAccess(auth.shop, { actor: 'customer', action: 'invoice.account_link', target: invoice.number, ip: clientIp(c) });
+    const base = String(config.appUrl || new URL(c.req.url).origin).replace(/\/+$/, '');
+    return reply({ ready: true, number: invoice.number, url: `${base}/f/${invoice.order_token}.pdf` });
   });
 
   // ---------- Guide et FAQ publics (liens de la fiche App Store) : /guide?lang=de, /faq ----------

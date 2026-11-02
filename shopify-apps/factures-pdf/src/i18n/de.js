@@ -112,6 +112,7 @@ export default {
     'delivery.email': 'Eine separate E-Mail mit der Rechnung als PDF im Anhang',
     'delivery.emailHelp': 'Funktioniert ohne Einrichtung. Der Kunde erhält 2 E-Mails: die Shopify-Bestätigung und seine Rechnung.',
     'delivery.setup': 'In Shopify: Einstellungen › Benachrichtigungen › Kundenbenachrichtigungen › Bestellbestätigung › Code bearbeiten. Fügen Sie diesen Code direkt nach der Bestellübersicht ein und speichern Sie.',
+    'delivery.accountButton': 'Zusätzlich finden in ihrem Kundenkonto angemeldete Kunden bei jeder Bestellung automatisch eine Schaltfläche „Rechnung herunterladen“. Keine Einrichtung nötig.',
     'company.title': 'Ihr Unternehmen',
     'company.help': 'Diese Angaben erscheinen auf den Rechnungen. Prüfen Sie die Pflichtangaben mit Ihrem Steuerberater.',
     'company.name': 'Firmenname',

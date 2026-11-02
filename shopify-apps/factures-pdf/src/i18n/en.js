@@ -112,6 +112,7 @@ export default {
     'delivery.email': 'A separate email with the PDF invoice attached',
     'delivery.emailHelp': 'Works with no setup. The customer gets 2 emails: the Shopify confirmation and their invoice.',
     'delivery.setup': 'In Shopify: Settings › Notifications › Customer notifications › Order confirmation › Edit code. Paste this code right after the order summary, then save.',
+    'delivery.accountButton': 'In addition, customers signed in to their account automatically get a “Download invoice” button on each of their orders. Nothing to set up.',
     'company.title': 'Your business',
     'company.help': 'This information appears on your invoices. Check the mandatory details with your accountant.',
     'company.name': 'Company name',

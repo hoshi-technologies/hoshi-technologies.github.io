@@ -18,7 +18,7 @@ export default [
       ],
       [
         'Mon client reçoit-il sa facture automatiquement ?',
-        "Oui : un e-mail lui est envoyé avec la facture en PDF en pièce jointe. Il est envoyé au nom de votre boutique, et si le client y répond, la réponse arrive à l'adresse e-mail de votre entreprise. Vous pouvez désactiver l'envoi automatique dans les réglages.",
+        "Oui : un e-mail lui est envoyé avec la facture en PDF en pièce jointe. Il est envoyé au nom de votre boutique, et si le client y répond, la réponse arrive à l'adresse e-mail de votre entreprise. Vous pouvez désactiver l'envoi automatique dans les réglages. S'il a un compte client, il trouve aussi un bouton « Télécharger ma facture » sur chacune de ses commandes, sans aucun réglage de votre part.",
       ],
       [
         'Pourquoi la facture ne figure-t-elle pas dans l’e-mail de confirmation de Shopify ?',

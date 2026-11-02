@@ -161,6 +161,7 @@ export class InvoiceService {
         orderId: invoice.orderId,
         orderName: invoice.orderName,
         orderToken: invoice.orderToken,
+        customerId: invoice.customerId,
         number,
         issuedAt,
         customerEmail: invoice.customer.email,

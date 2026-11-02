@@ -112,6 +112,7 @@ export default {
     'delivery.email': 'Een aparte e-mail met de factuur als pdf-bijlage',
     'delivery.emailHelp': 'Werkt zonder instellingen. De klant krijgt 2 e-mails: de bevestiging van Shopify en zijn factuur.',
     'delivery.setup': 'In Shopify: Instellingen › Meldingen › Klantmeldingen › Orderbevestiging › Code bewerken. Plak deze code direct na het besteloverzicht en sla op.',
+    'delivery.accountButton': 'Daarnaast zien klanten die zijn ingelogd op hun klantaccount automatisch een knop ‘Factuur downloaden’ bij elke bestelling. Niets in te stellen.',
     'company.title': 'Je bedrijf',
     'company.help': 'Deze gegevens staan op de facturen. Controleer de verplichte vermeldingen met je boekhouder.',
     'company.name': 'Bedrijfsnaam',

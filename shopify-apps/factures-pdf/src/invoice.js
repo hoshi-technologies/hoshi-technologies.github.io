@@ -146,6 +146,7 @@ export function buildInvoice(order) {
     orderId: String(order.id),
     orderName: order.name || `#${order.order_number ?? order.id}`,
     orderToken: orderStatusToken(order),
+    customerId: order.customer?.id ? String(order.customer.id) : null,
     orderDate: order.processed_at || order.created_at,
     currency: order.currency || order.presentment_currency || 'EUR',
     taxesIncluded,

@@ -16,7 +16,7 @@ export default [
       ],
       [
         'Erhält mein Kunde die Rechnung automatisch?',
-        'Ja: Er bekommt eine E-Mail mit der Rechnung als PDF im Anhang. Sie wird im Namen Ihres Shops versendet, Antworten gehen an Ihre geschäftliche E-Mail-Adresse. Den automatischen Versand können Sie in den Einstellungen abschalten.',
+        'Ja: Er bekommt eine E-Mail mit der Rechnung als PDF im Anhang. Sie wird im Namen Ihres Shops versendet, Antworten gehen an Ihre geschäftliche E-Mail-Adresse. Den automatischen Versand können Sie in den Einstellungen abschalten. Hat er ein Kundenkonto, findet er dort außerdem bei jeder Bestellung eine Schaltfläche „Rechnung herunterladen“, ganz ohne Einrichtung.',
       ],
       [
         'Warum ist die Rechnung nicht in der Shopify-Bestellbestätigung?',
