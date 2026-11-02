@@ -9,7 +9,8 @@ public partial class FenetreMairie : PanelContainer
 {
     private Partie? _p;
     private TabContainer _onglets = null!;
-    private VBoxContainer _quartiers = null!, _politiques = null!, _objectifs = null!;
+    private VBoxContainer _quartiers = null!, _politiques = null!, _objectifs = null!, _conseil = null!;
+    public Action<string, bool>? Toast;
     private int _moisAffiche = -1;
 
     public override void _Ready()
@@ -31,6 +32,7 @@ public partial class FenetreMairie : PanelContainer
         _quartiers = Onglet("Quartiers");
         _politiques = Onglet("Politiques publiques");
         _objectifs = Onglet("Objectifs");
+        _conseil = Onglet("Conseil et élections");
     }
 
     private VBoxContainer Onglet(string nom)
@@ -62,12 +64,55 @@ public partial class FenetreMairie : PanelContainer
 
     private static void Vider(Container c) { foreach (var n in c.GetChildren()) { c.RemoveChild(n); n.QueueFree(); } }
 
+    private void RemplirConseil()
+    {
+        var el = _p!.Module<Elections>();
+        if (el == null)
+        {
+            _conseil.AddChild(new Label { Text = "Les élections ne sont pas activées dans cette partie (option à cocher au lancement).", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+            return;
+        }
+        var e = el.E;
+        _conseil.AddChild(new Label
+        {
+            Text = el.EnOpposition
+                ? $"Vous êtes dans l'opposition : élection anticipée dans {e.MoisOppositionRestants} mois."
+                : $"Mandat n° {e.Mandat} — élections dans {Math.Max(0, el.MoisRestants(_p) / 12)} an(s) et {Math.Max(0, el.MoisRestants(_p) % 12)} mois.",
+        });
+        var pop = new Label { Text = $"Popularité : {e.Popularite:F0} %   (il faut 50 % pour être réélu)" };
+        pop.AddThemeColorOverride("font_color", Rendu.RenduVille.EchelleCouleur((e.Popularite - 35) / 30));
+        _conseil.AddChild(pop);
+        _conseil.AddChild(new Label { Text = $"Conseil municipal : {el.TotalSieges} sièges — {(el.MajoritePropre ? "vous avez la majorité" : "PAS de majorité : il faudra des alliances")}" });
+        var noms = el.Groupes().ToDictionary(g => g.id, g => g);
+        foreach (var (id, n) in e.Sieges)
+        {
+            string nom = id == "maire" ? "Votre liste" : noms[id].nom;
+            string prio = id == "maire" ? "" : "  — soutient : " + string.Join(", ", noms[id].priorites.Select(x => _p.Module<VraieGestion>()?.CataloguePolitiques().FirstOrDefault(c => c.id == x).nom ?? x));
+            _conseil.AddChild(new Label { Text = $"   {nom} : {n} siège{(n > 1 ? "s" : "")}{prio}", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        }
+        _conseil.AddChild(new Label { Text = "Les politiques publiques sont votées par le conseil : sans majorité, il faut le soutien d'un groupe ou un compromis.", AutowrapMode = TextServer.AutowrapMode.WordSmart });
+        bool modifiable = el.PromessesModifiables(_p);
+        _conseil.AddChild(new Label { Text = modifiable ? "Vos promesses (3 au maximum, à choisir dans les 6 premiers mois du mandat) :" : "Vos promesses de campagne :" });
+        foreach (var (id, nom) in el.CataloguePromesses())
+        {
+            bool promis = e.Promesses.Contains(id);
+            if (!modifiable && !promis) continue;
+            var c = new CheckBox { Text = $"{nom}   {(promis ? (el.PromesseTenue(_p, id) ? "(tenue pour l'instant)" : "(pas encore tenue)") : "")}", ButtonPressed = promis, Disabled = !modifiable };
+            string ident = id;
+            c.Toggled += on => { el.PromettreOuRetirer(_p!, ident, on); CallDeferred(MethodName.Rafraichir); };
+            _conseil.AddChild(c);
+        }
+        if (e.Historique.Count > 0) _conseil.AddChild(new Label { Text = "Résultats passés : " + string.Join(" ; ", e.Historique) });
+        _conseil.AddChild(new Label { Text = "Toutes les listes et personnes sont fictives.", Modulate = new Color(1, 1, 1, 0.6f) });
+    }
+
     private void Rafraichir()
     {
         if (_p == null) return;
         _moisAffiche = _p.Mois;
         var g = _p.Module<VraieGestion>();
-        Vider(_quartiers); Vider(_politiques); Vider(_objectifs);
+        Vider(_quartiers); Vider(_politiques); Vider(_objectifs); Vider(_conseil);
+        RemplirConseil();
         if (g == null)
         {
             foreach (var c in new[] { _quartiers, _politiques, _objectifs })
@@ -106,7 +151,16 @@ public partial class FenetreMairie : PanelContainer
                 ButtonPressed = g.Active(id),
             };
             string ident = id;
-            c.Toggled += on => { g.ActiverPolitique(_p!, ident, on); };
+            c.Toggled += on =>
+            {
+                if (_p!.Module<Elections>() is { } el)
+                {
+                    var r = el.VoterPolitique(_p, ident, on);
+                    Toast?.Invoke(r.Message, r.Ok);
+                    CallDeferred(MethodName.Rafraichir);
+                }
+                else g.ActiverPolitique(_p, ident, on);
+            };
             _politiques.AddChild(c);
             var e = new Label { Text = "      " + effet, AutowrapMode = TextServer.AutowrapMode.WordSmart };
             e.AddThemeColorOverride("font_color", new Color(0.75f, 0.8f, 0.88f));

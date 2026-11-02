@@ -42,6 +42,7 @@ public partial class JeuPrincipal : Node3D
     private string _optionAuto = "";
     private readonly List<Node3D> _decor = new();
     private bool _vraieGestion = true;
+    private bool _elections = true;
     private string _difficulte = "realiste";
     private int _vitesseAvantDecision = 1;
     private MeshInstance3D _territoire = null!;
@@ -209,6 +210,9 @@ public partial class JeuPrincipal : Node3D
         var gestion = new CheckBox { Text = "Vraie gestion (usure, dotations, événements)", ButtonPressed = _vraieGestion };
         gestion.Toggled += on => _vraieGestion = on;
         options.AddChild(gestion);
+        var elections = new CheckBox { Text = "Élections", ButtonPressed = _elections, TooltipText = "Mandats, promesses, conseil municipal (listes fictives)" };
+        elections.Toggled += on => _elections = on;
+        options.AddChild(elections);
         var diff = new OptionButton();
         foreach (var (id, nom) in new[] { ("decouverte", "Découverte"), ("realiste", "Réaliste"), ("crise", "Crise") }) diff.AddItem(nom);
         diff.Selected = Array.IndexOf(new[] { "decouverte", "realiste", "crise" }, _difficulte);
@@ -277,6 +281,12 @@ public partial class JeuPrincipal : Node3D
                 ulong graine = (ulong)DateTime.Now.Ticks;
                 _partie = bacASable ? Partie.NouveauBacASable(_reglages, _paquet, graine) : Partie.Nouvelle(_reglages, _paquet, mode, graine);
                 if (_vraieGestion && !bacASable) _partie.Modules.Add(new Ville.Gestion.VraieGestion(_reglages, _difficulte));
+                if (_elections && !bacASable)
+                {
+                    var el = new Ville.Gestion.Elections(_reglages);
+                    _partie.Modules.Add(el);
+                    el.Initialiser(_partie);
+                }
             }
         }
         catch (Exception ex)
@@ -396,6 +406,7 @@ public partial class JeuPrincipal : Node3D
             _vitesseAvantDecision = Math.Max(1, _vitesse);
             _vitesse = 0;
             var d = _partie.Decisions[0];
+            _hud.FermerFenetres();
             _hud.AfficherDecision(d, c => { _partie?.Repondre(d.Id, c); _vitesse = _vitesseAvantDecision; });
         }
         if (_tutoriel != null) SuivreTutoriel();
@@ -789,7 +800,7 @@ public partial class JeuPrincipal : Node3D
             GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_{nom}.png"));
         }
         _meteo.MoisForce = null; _meteo.TempsForce = null;
-        for (int o = 0; o < 3; o++)
+        for (int o = 0; o < 4; o++)
         {
             _hud.OuvrirMairie(o);
             for (int i = 0; i < 10; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);

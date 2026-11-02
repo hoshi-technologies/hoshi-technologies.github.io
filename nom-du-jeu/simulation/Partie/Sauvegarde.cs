@@ -36,6 +36,7 @@ public sealed class SauvegardeDto
     /// <summary>Taille de la carte (quartier, ville…) : choisit le bon paquet au chargement.</summary>
     public string Taille { get; set; } = "quartier";
     public Dictionary<string, JsonElement> Modules { get; set; } = new();
+    public string? Verrou { get; set; }
     public List<Decision> Decisions { get; set; } = new();
     public int ProchaineDecision { get; set; }
 }
@@ -72,6 +73,7 @@ public sealed partial class Partie
         Depart = Depart,
         Taille = Paquet.Manifest.Ville.Taille,
         Modules = Modules.ToDictionary(m => m.Id, m => m.Sauvegarder()),
+        Verrou = Verrou,
         Decisions = Decisions.ToList(),
         ProchaineDecision = _prochaineDecision,
     };
@@ -111,7 +113,7 @@ public sealed partial class Partie
         var p = new Partie(r, paquet, 1)
         {
             Jour = dto.Jour, Argent = dto.Argent, ImpotHabitat = dto.ImpotHabitat, ImpotCommerce = dto.ImpotCommerce,
-            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable, ModeVilleReelle = dto.ModeVilleReelle, Depart = dto.Depart,
+            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable, ModeVilleReelle = dto.ModeVilleReelle, Depart = dto.Depart, Verrou = dto.Verrou,
         };
         p._alea.Etat = dto.Alea;
         foreach (var n in dto.Noeuds) p.Reseau.RestaurerNoeud(new NoeudRoute { Id = n.Id, Pos = new V2(n.X, n.Y), Entree = n.Entree });

@@ -65,7 +65,7 @@ public partial class Hud : Control
         ConstruireObjectifs();
         ConstruireBudget();
         ConstruireAide();
-        _mairie = new FenetreMairie { Visible = false };
+        _mairie = new FenetreMairie { Visible = false, Toast = (m, ok) => Toast(m, ok) };
         AddChild(_mairie);
         _info = new Label { Position = new Vector2(12, 0), AutowrapMode = TextServer.AutowrapMode.Off };
         _info.SetAnchorsPreset(LayoutPreset.BottomLeft);

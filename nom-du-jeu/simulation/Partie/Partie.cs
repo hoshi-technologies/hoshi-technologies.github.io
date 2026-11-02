@@ -121,6 +121,8 @@ public sealed partial class Partie
     /// <summary>Mode Ville réelle : la vraie ville existe au départ, eau et énergie viennent du réseau régional.</summary>
     public bool ModeVilleReelle { get; set; }
     public ModeDepart Depart { get; set; } = ModeDepart.GrandsAxes;
+    /// <summary>Si non nul, les commandes du maire sont bloquées avec ce message (ex. : période d'opposition).</summary>
+    public string? Verrou { get; set; }
 
     /// <summary>Rayon (m) autour du centre où l'on peut construire. Les petites cartes sont entièrement ouvertes.</summary>
     public double RayonConstructible
@@ -322,6 +324,7 @@ public sealed partial class Partie
 
     public Resultat ConstruireRoute(V2 a, V2 b, string gabarit)
     {
+        if (Verrou != null) return Resultat.Non(Verrou);
         var ap = PrevoirRoute(a, b, gabarit);
         if (!ap.Ok) return Resultat.Non(ap.Raison);
         var decoupes = new List<ReseauVille.Decoupe>();
@@ -517,6 +520,7 @@ public sealed partial class Partie
     // ================================================================== commandes du maire
     public Resultat Zoner(V2 centre, double rayon, Zone zone)
     {
+        if (Verrou != null) return Resultat.Non(Verrou);
         int n = 0;
         if (!Constructible(centre)) return Resultat.Non(MessageTerritoire());
         foreach (var p in ParcellesProches(centre, rayon))
@@ -535,6 +539,7 @@ public sealed partial class Partie
 
     public Resultat PlacerService(string type, V2 p)
     {
+        if (Verrou != null) return Resultat.Non(Verrou);
         if (!R.Services.TryGetValue(type, out var s)) return Resultat.Non("Service inconnu.");
         if (!ServiceDisponible(type)) return Resultat.Non($"Disponible au palier « {R.Paliers[s.Palier].Nom} ».");
         if (!Constructible(p)) return Resultat.Non(MessageTerritoire());
@@ -576,6 +581,7 @@ public sealed partial class Partie
 
     public Resultat Demolir(V2 p)
     {
+        if (Verrou != null) return Resultat.Non(Verrou);
         var arr = Arrets.Values.FirstOrDefault(a => V2.Distance(a.Pos, p) < 15);
         if (arr != null) { Arrets.Remove(arr.Id); _servicesAJour = false; VersionServices++; return new Resultat(true, "Arrêt supprimé."); }
         var par = ParcelleSous(p);
@@ -602,6 +608,7 @@ public sealed partial class Partie
 
     public void ReglerImpot(Zone z, double taux)
     {
+        if (Verrou != null) return;
         taux = Math.Clamp(taux, R.Impots.TauxMin, R.Impots.TauxMax);
         if (z == Zone.Habitat) ImpotHabitat = taux;
         else if (z == Zone.Commerce) ImpotCommerce = taux;

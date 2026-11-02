@@ -380,5 +380,83 @@
     },
     "quartier_taille_m": 600,
     "effet_satisfaction_sur_attrait": 0.2
+  },
+  "elections": {
+    "_note": "Module optionnel. Groupes et personnes entièrement fictifs : aucun parti ni élu réel.",
+    "duree_mandat_mois": 72,
+    "mois_campagne": 3,
+    "promesses_max": 3,
+    "mois_pour_choisir_promesses": 6,
+    "sieges_min": 15,
+    "sieges_par_habitant": 0.0005,
+    "sieges_max": 59,
+    "bonus_promesse_tenue": 6,
+    "malus_promesse_rompue": 8,
+    "bruit_vote": 6,
+    "mois_opposition": 12,
+    "groupes": [
+      {
+        "id": "lac",
+        "nom": "Liste du Lac",
+        "priorites": [
+          "vegetalisation",
+          "plan_velo",
+          "zones_pietonnes",
+          "transports_gratuits"
+        ]
+      },
+      {
+        "id": "commerces",
+        "nom": "Liste des Commerçants",
+        "priorites": [
+          "aide_commerces",
+          "zones_pietonnes",
+          "eclairage_reduit"
+        ]
+      },
+      {
+        "id": "quartiers",
+        "nom": "Liste des Quartiers",
+        "priorites": [
+          "logement_social",
+          "encadrement_loyers",
+          "transports_gratuits"
+        ]
+      }
+    ],
+    "promesses": [
+      {
+        "id": "impots",
+        "nom": "Taxe des habitants à 9 % ou moins"
+      },
+      {
+        "id": "ecole",
+        "nom": "Une place à l'école pour chaque enfant (80 % couverts)"
+      },
+      {
+        "id": "bus",
+        "nom": "Une ligne de bus d'au moins 4 arrêts"
+      },
+      {
+        "id": "chomage",
+        "nom": "Chômage sous 8 %"
+      },
+      {
+        "id": "satisfaction",
+        "nom": "Satisfaction moyenne d'au moins 60"
+      },
+      {
+        "id": "routes",
+        "nom": "Aucune rue en mauvais état"
+      },
+      {
+        "id": "croissance",
+        "nom": "+20 % d'habitants pendant le mandat"
+      },
+      {
+        "id": "dette",
+        "nom": "Aucun emprunt en fin de mandat"
+      }
+    ]
   }
 }

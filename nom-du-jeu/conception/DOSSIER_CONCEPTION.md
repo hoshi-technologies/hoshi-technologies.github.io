@@ -245,4 +245,5 @@ Les seuils de population se règlent dans un fichier de données. En mode Ville 
 | 2026-11-02 | Ambiance (lot 8, 1re partie) : fenêtres et nuit par shaders, saisons, météo à particules, sons d'ambiance par synthèse (aucun fichier, aucune licence). Sons non vérifiés à l'oreille (pas de carte son sur le serveur). | Lot 8 |
 | 2026-11-02 | Lot 8 (suite) : tutoriel par la pratique (10 étapes), menu pause, sauvegardes nommées avec fiche d'information, options persistantes (volume, qualité, texte, daltonisme), manette pour la caméra. | Lot 8 |
 | 2026-11-02 | Lot 12 (suite) : satisfaction par quartier et par profil (familles, jeunes actifs, seniors), 8 politiques publiques, 4 objectifs facultatifs, fenêtre Mairie, vue Satisfaction. Nouveaux points d'accroche des modules : ModifierDemande, FacteurVoitures. Test 25 h : stable, argent borné. | Lot 12 |
+| 2026-11-02 | Lot 13 : élections et conseil municipal (module désactivable, listes fictives), verrou de commandes pendant l'opposition, 3 suites possibles après une défaite. | Lot 13 |
 | 2026-11-01 | Accès Anticipé recommandé, prix visé de 24,99 $ puis 29,99 $ à la 1.0. | Recommandation, **à confirmer à l'étape 7** |
