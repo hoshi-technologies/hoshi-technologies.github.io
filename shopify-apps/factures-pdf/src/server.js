@@ -220,13 +220,12 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
     }
     const orderId = numericOrderId(c.req.query('order'));
     if (!orderId) return reply({ error: 'order' }, 400);
-    if (!auth.customerId) {
-      // Client non connecté, ou droit read_customers pas encore accordé par le marchand.
-      logger.warn(`${auth.shop} : jeton client sans identifiant (droit read_customers accordé ?)`);
-      return reply({ ready: false });
-    }
     const invoice = store?.findInvoiceSummaryByOrder(auth.shop, orderId);
     if (!invoice || !invoice.order_token) return reply({ ready: false });
+    // Client non identifié : page de commande ouverte depuis l'e-mail de Shopify (« Voir ma
+    // commande »), sans connexion. Le bouton est affiché, mais le lien n'est donné qu'après la
+    // connexion du client (code reçu par e-mail).
+    if (!auth.customerId) return reply({ ready: true, login: true });
 
     let owner = invoice.customer_id;
     if (!owner) {

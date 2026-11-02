@@ -50,6 +50,7 @@ test('espace client : lien de la facture pour le seul client de la commande', as
     const gid = `gid://shopify/Order/${ORDER.id}`;
     // Avant la facture : pas de bouton.
     assert.deepEqual(await (await ask(gid)).json(), { ready: false });
+    assert.deepEqual(await (await ask(gid, customerToken({ sub: undefined }))).json(), { ready: false });
 
     const { invoice } = await service.createInvoice(SHOP, ORDER);
     assert.equal(store.findInvoiceSummaryByOrder(SHOP, ORDER.id).customer_id, '7001');
@@ -61,7 +62,8 @@ test('espace client : lien de la facture pour le seul client de la commande', as
 
     // Un autre client, un client non connecté, un jeton absent : rien n'est révélé.
     assert.deepEqual(await (await ask(gid, customerToken({ sub: 'gid://shopify/Customer/8888' }))).json(), { ready: false });
-    assert.deepEqual(await (await ask(gid, customerToken({ sub: undefined }))).json(), { ready: false });
+    // Page ouverte depuis l'e-mail, sans connexion : bouton affiché, lien donné après connexion.
+    assert.deepEqual(await (await ask(gid, customerToken({ sub: undefined }))).json(), { ready: true, login: true });
     assert.equal((await fetch(`${base}/customer-api/invoice?order=${gid}`)).status, 401);
     assert.equal((await ask('pas-un-id')).status, 400);
     // Une autre boutique ne voit pas les factures de celle-ci.

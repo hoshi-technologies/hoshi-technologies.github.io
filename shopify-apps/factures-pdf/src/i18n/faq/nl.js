@@ -20,7 +20,7 @@ export default [
       ],
       [
         'Waarom zit de factuur niet in de orderbevestiging van Shopify?',
-        "Shopify staat apps niet toe bijlagen aan zijn eigen e-mails toe te voegen. Kies ‘Geen extra e-mail’ om een tweede e-mail te vermijden: de klant downloadt de factuur met de knop ‘Factuur downloaden’ in zijn klantaccount, zonder instellingen. Optioneel kan dezelfde knop aan de orderbevestiging van Shopify worden toegevoegd (onderdeel ‘geavanceerd’ van de instellingen).",
+        "Shopify staat apps niet toe bijlagen aan zijn eigen e-mails toe te voegen. Kies ‘Geen extra e-mail’ om een tweede e-mail te vermijden: in de orderbevestiging van Shopify klikt de klant op ‘Je bestelling bekijken’, daarna op ‘Factuur downloaden’, en bevestigt zijn e-mailadres met een code. Geen account, geen wachtwoord, niets in te stellen. Gebruikt je winkel nog de ‘klassieke accounts’ van Shopify, kies dan de aparte e-mail.",
       ],
       [
         'Hoe krijg ik een kopie van mijn facturen?',

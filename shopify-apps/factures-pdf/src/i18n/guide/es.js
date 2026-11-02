@@ -49,7 +49,7 @@ export default [
     intro: 'Por defecto, la factura se crea al pagarse el pedido y se envía al cliente por correo al instante.',
     steps: [
       'En Ajustes › Funcionamiento, elija cuándo crear la factura: cuando el pedido está pagado (recomendado) o en cuanto se realiza.',
-      "En «Cómo reciben la factura sus clientes», elija: sin correo adicional (botón «Descargar factura» en la cuenta de cliente) o un correo aparte con el PDF adjunto. Sin configuración en ambos casos.",
+      "En «Cómo reciben la factura sus clientes», elija: sin correo adicional (el cliente hace clic en «Ver pedido» en el correo de confirmación de Shopify y luego en «Descargar factura») o un correo aparte con el PDF adjunto. Sin configuración en ambos casos.",
       'Marque «Enviarme una copia de cada factura» para recibir cada factura y crear su archivo.',
       'Para personalizar el correo, abra «Correo al cliente»: el asunto y el mensaje aceptan las variables {{first_name}}, {{name}}, {{invoice_number}}, {{order}} y {{shop}}.',
     ],

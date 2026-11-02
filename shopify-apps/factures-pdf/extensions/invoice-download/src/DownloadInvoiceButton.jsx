@@ -2,6 +2,7 @@
 // Bouton du menu d'actions d'une commande (espace client) : ouvre la facture PDF.
 // Le serveur vérifie le jeton de session du client et ne renvoie le lien que si la commande lui
 // appartient. Sans facture (pas encore émise, quota atteint…), aucun bouton n'est affiché.
+// Fonctionne aussi sans compte client créé : depuis le lien « Voir ma commande » de l'e-mail.
 import '@shopify/ui-extensions/preact';
 import { render } from 'preact';
 import { APP_URL } from './config.js';
@@ -28,9 +29,16 @@ async function findInvoice() {
 
 function DownloadInvoiceButton({ invoice }) {
   if (!invoice) return null;
-  return (
-    <s-button href={invoice.url} target="_blank">
-      {shopify.i18n.translate('download')}
-    </s-button>
-  );
+  const label = shopify.i18n.translate('download');
+  if (invoice.url) {
+    return (
+      <s-button href={invoice.url} target="_blank">
+        {label}
+      </s-button>
+    );
+  }
+  // Page ouverte depuis l'e-mail de confirmation, sans connexion : Shopify demande au client un
+  // code reçu par e-mail (pas de mot de passe), puis le ramène sur sa commande avec le lien.
+  if (shopify.authenticationState?.value !== 'pre_authenticated') return null;
+  return <s-button onClick={() => shopify.requireLogin()}>{label}</s-button>;
 }

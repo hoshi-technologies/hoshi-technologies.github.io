@@ -8,6 +8,15 @@ Le client connecté à son compte client Shopify voit un bouton **Télécharger 
 Rien à faire pour le marchand : le bouton arrive avec l'appli, sur toutes les boutiques.
 Il n'apparaît que si la facture de la commande existe déjà.
 
+**Sans compte client.** L'e-mail de confirmation de Shopify contient un lien « Voir ma commande ».
+Ce lien ouvre la page de la commande sans connexion, et le bouton y est affiché. Au clic, Shopify
+demande au client un code reçu par e-mail : aucun compte ni mot de passe à créer. Il le ramène
+ensuite sur sa commande, où le bouton ouvre la facture. Le lien n'est jamais donné avant cette
+confirmation.
+
+Il faut les comptes clients actuels de Shopify (par défaut). Les anciens « comptes classiques »
+n'affichent pas les extensions : ces boutiques choisissent l'e-mail séparé.
+
 ## Fonctionnement
 
 1. L'extension `extensions/invoice-download` (cible `customer-account.order.action.menu-item.render`)
