@@ -22,6 +22,9 @@ public sealed class Batiment
     public double Sante { get; set; }
     public bool Police { get; set; }
     public bool Pompiers { get; set; }
+    /// <summary>Bâtiment réel importé (mode Ville réelle) : capacité calculée depuis sa vraie surface.</summary>
+    public bool Reel { get; set; }
+    public int? CapaciteFixe { get; set; }
     public bool EnChantier => JoursChantier > 0;
 }
 
@@ -38,6 +41,9 @@ public sealed class Parcelle
     public Batiment? Batiment { get; set; }
     public string? Service { get; set; }
     public double Attrait { get; set; } = 50;
+    /// <summary>Contour réel (mode Ville réelle) ; null pour une parcelle de lotissement.</summary>
+    public List<V2>? Contour { get; init; }
+    public double HauteurReelle { get; set; }
     public int Variante { get; init; }
     public bool Libre => Batiment == null && Service == null;
 }
@@ -99,6 +105,8 @@ public sealed partial class Partie
     public int Palier { get; private set; }
     /// <summary>Mode bac à sable : argent illimité, tout est débloqué.</summary>
     public bool BacASable { get; set; }
+    /// <summary>Mode Ville réelle : la vraie ville existe au départ, eau et énergie viennent du réseau régional.</summary>
+    public bool ModeVilleReelle { get; set; }
 
     // indicateurs (recalculés chaque jour)
     public int Population { get; private set; }
@@ -283,6 +291,49 @@ public sealed partial class Partie
         Argent -= ap.Cout;
         _servicesAJour = false;
         return new Resultat(true, ap.Pont ? $"Pont construit ({ap.Longueur:F0} m)." : $"Route construite ({ap.Longueur:F0} m).", ap.Cout);
+    }
+
+    /// <summary>Points d'une courbe (Bézier quadratique) découpée en tronçons d'environ 30 m.</summary>
+    public static List<V2> PointsCourbe(V2 a, V2 controle, V2 b)
+    {
+        double l = V2.Distance(a, controle) + V2.Distance(controle, b);
+        int n = Math.Max(2, (int)Math.Ceiling(l / 30));
+        var pts = new List<V2>();
+        for (int i = 0; i <= n; i++)
+        {
+            double t = i / (double)n, u = 1 - t;
+            pts.Add(a * (u * u) + controle * (2 * u * t) + b * (t * t));
+        }
+        return pts;
+    }
+
+    public ApercuRoute PrevoirCourbe(V2 a, V2 controle, V2 b, string gabarit)
+    {
+        var pts = PointsCourbe(a, controle, b);
+        double cout = 0, longueur = 0; bool pont = false;
+        for (int i = 0; i + 1 < pts.Count; i++)
+        {
+            var ap = PrevoirRoute(pts[i], pts[i + 1], gabarit);
+            if (!ap.Ok && !ap.Raison.Contains("argent")) return ap with { A = pts[0], B = pts[^1] };
+            cout += ap.Cout; longueur += ap.Longueur; pont |= ap.Pont;
+        }
+        bool ok = BacASable || cout <= Argent;
+        return new ApercuRoute(ok, ok ? "" : "Pas assez d'argent.", cout, pts[0], pts[^1], longueur, pont);
+    }
+
+    public Resultat ConstruireCourbe(V2 a, V2 controle, V2 b, string gabarit)
+    {
+        var ap = PrevoirCourbe(a, controle, b, gabarit);
+        if (!ap.Ok) return Resultat.Non(ap.Raison);
+        var pts = PointsCourbe(a, controle, b);
+        double total = 0;
+        for (int i = 0; i + 1 < pts.Count; i++)
+        {
+            var r = ConstruireRoute(pts[i], pts[i + 1], gabarit);
+            if (!r.Ok) return new Resultat(i > 0, $"Courbe interrompue : {r.Message}", total);
+            total += r.Cout;
+        }
+        return new Resultat(true, $"Route courbe construite ({ap.Longueur:F0} m).", total);
     }
 
     private NoeudRoute NoeudPour(V2 p, List<ReseauVille.Decoupe> decoupes)

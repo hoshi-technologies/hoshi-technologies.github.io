@@ -47,6 +47,52 @@ public class TestsPartie
     }
 
     [Fact]
+    public void VilleReelleDemarreAvecLaVraieVille()
+    {
+        var p = Partie.NouvelleVilleReelle(Fixtures.Reglages(), Fixtures.Annecy.Value, 1);
+        Assert.True(p.ModeVilleReelle);
+        Assert.InRange(p.Population, 20000, 200000);
+        Assert.True(p.Palier >= 2);
+        Assert.True(p.Parcelles.Values.Count(x => x.Contour != null) > 9000, "les vrais bâtiments sont importés");
+        Assert.Contains(p.Parcelles.Values, x => x.Service == "ecole");
+        Assert.All(p.Parcelles.Values.Where(x => x.Batiment != null && x.Arete >= 0 && p.ParcelleReliee(x)), x => Assert.True(x.Batiment!.Eau && x.Batiment.Elec));
+        int depart = p.Population;
+        for (int j = 0; j < 90; j++) p.AvancerJour();
+        Assert.InRange(p.Population, depart * 0.85, depart * 1.2);
+        Assert.True(p.RecettesMois > 0 && p.DepensesMois > 0);
+        var q = Partie.Charger(p.Sauvegarder(), Fixtures.Reglages(), Fixtures.Annecy.Value);
+        Assert.Equal(p.Population, q.Population);
+        Assert.True(q.ModeVilleReelle);
+        Assert.Equal(p.Parcelles.Values.Count(x => x.Contour != null), q.Parcelles.Values.Count(x => x.Contour != null));
+    }
+
+    [Fact]
+    public void RouteCourbe()
+    {
+        var p = Nouvelle();
+        var c = new V2(-711, 388);
+        var r = p.ConstruireCourbe(c + new V2(-150, 0), c + new V2(0, 150), c + new V2(150, 0), "rue");
+        Assert.True(r.Ok, r.Message);
+        var nouvelles = p.Reseau.Aretes.Values.Where(e => !e.Departemental).ToList();
+        Assert.True(nouvelles.Count >= 5, "une courbe = plusieurs tronçons");
+        // le milieu de la courbe passe au-dessus de la ligne droite
+        Assert.Contains(p.Reseau.Noeuds.Values, n => n.Pos.Y > c.Y + 60);
+    }
+
+    [Fact]
+    public void SauvegardeCompresseeSurDisque()
+    {
+        var p = Nouvelle();
+        new Robot(p).Demarrer();
+        var f = Path.GetTempFileName();
+        p.SauvegarderFichier(f);
+        var octets = File.ReadAllBytes(f);
+        Assert.Equal(0x1f, octets[0]);
+        var q = Partie.Charger(Partie.LireFichier(f), Fixtures.Reglages(), Fixtures.Annecy.Value);
+        Assert.Equal(p.Sauvegarder(), q.Sauvegarder());
+    }
+
+    [Fact]
     public void PontSurLaRiviereCouteDavantage()
     {
         var p = Nouvelle();

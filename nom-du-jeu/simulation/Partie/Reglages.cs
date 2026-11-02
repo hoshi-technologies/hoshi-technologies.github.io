@@ -26,6 +26,7 @@ public sealed class Reglages
     public int MoisSansServiceAvantDepart { get; set; }
     public List<ReglagesPalier> Paliers { get; set; } = new();
     public ReglagesRisques Risques { get; set; } = new();
+    public ReglagesVilleReelle VilleReelle { get; set; } = new();
 
     public static readonly JsonSerializerOptions Json = new()
     {
@@ -56,6 +57,24 @@ public sealed class ReglagesRoutes
     public ReglagesPont Pont { get; set; } = new();
     public Dictionary<string, double> CapaciteVehicules { get; set; } = new();
     public double PartTrajetsVoiture { get; set; } = 0.65;
+    public double PartHeureDePointe { get; set; } = 0.35;
+}
+
+public sealed class ReglagesVilleReelle
+{
+    public double M2ParLogement { get; set; } = 70;
+    public double M2ParEmploiCommerce { get; set; } = 40;
+    public double M2ParEmploiActivites { get; set; } = 60;
+    public double PartSurfaceUtile { get; set; } = 0.8;
+    public double OccupationInitiale { get; set; } = 0.92;
+    public double PrixEauRegionale { get; set; }
+    public double PrixElecRegionale { get; set; }
+    public double PrixDechetsRegionaux { get; set; }
+    public double PartActifsTravaillantDehors { get; set; }
+    public double ArgentDepartParHabitant { get; set; }
+    public double ArgentDepartMin { get; set; }
+    public double CoutSecoursPoliceParHabitant { get; set; }
+    public double CoutServicesExistantsParHabitant { get; set; }
 }
 
 public sealed class ReglagesPont

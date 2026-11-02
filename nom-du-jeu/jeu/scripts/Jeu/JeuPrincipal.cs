@@ -29,6 +29,7 @@ public partial class JeuPrincipal : Node3D
 
     private string _outil = "";
     private V2? _debutRoute;
+    private V2? _controleCourbe;
     private bool _peinture;
     private int _vitesse = 1;
     private double _accumulateur;
@@ -120,6 +121,9 @@ public partial class JeuPrincipal : Node3D
         var nouvelle = new Button { Text = "Nouvelle partie", CustomMinimumSize = new Vector2(0, 44) };
         nouvelle.Pressed += () => Commencer(null);
         v.AddChild(nouvelle);
+        var reelle = new Button { Text = $"Ville réelle : {_paquet.Manifest.Ville.Nom} telle qu'elle est (population estimée)", CustomMinimumSize = new Vector2(0, 44) };
+        reelle.Pressed += () => Commencer(null, villeReelle: true);
+        v.AddChild(reelle);
         var sable = new Button { Text = "Bac à sable (argent illimité, tout débloqué)", CustomMinimumSize = new Vector2(0, 36) };
         sable.Pressed += () => Commencer(null, bacASable: true);
         v.AddChild(sable);
@@ -143,13 +147,13 @@ public partial class JeuPrincipal : Node3D
         return fond;
     }
 
-    private void Commencer(string? sauvegarde, bool bacASable = false)
+    private void Commencer(string? sauvegarde, bool bacASable = false, bool villeReelle = false)
     {
         try
         {
             _partie = sauvegarde == null
-                ? (bacASable ? Partie.NouveauBacASable(_reglages, _paquet, (ulong)DateTime.Now.Ticks) : Partie.NouvelleFondation(_reglages, _paquet, (ulong)DateTime.Now.Ticks))
-                : Partie.Charger(System.IO.File.ReadAllText(sauvegarde), _reglages, _paquet);
+                ? villeReelle ? Partie.NouvelleVilleReelle(_reglages, _paquet, (ulong)DateTime.Now.Ticks) : (bacASable ? Partie.NouveauBacASable(_reglages, _paquet, (ulong)DateTime.Now.Ticks) : Partie.NouvelleFondation(_reglages, _paquet, (ulong)DateTime.Now.Ticks))
+                : Partie.Charger(Partie.LireFichier(sauvegarde), _reglages, _paquet);
         }
         catch (Exception ex)
         {
@@ -219,6 +223,7 @@ public partial class JeuPrincipal : Node3D
     {
         _outil = outil;
         _debutRoute = null;
+        _controleCourbe = null;
         _rendu.ParcellesVides = outil is "habitat" or "commerce" or "activites" or "dezoner";
         if (outil != "" && _vitesse == 0) { }
     }
@@ -253,7 +258,7 @@ public partial class JeuPrincipal : Node3D
         if (_partie == null) return;
         if (e is InputEventMouseButton mb)
         {
-            if (mb.ButtonIndex == MouseButton.Right && mb.Pressed && _debutRoute != null) { _debutRoute = null; return; }
+            if (mb.ButtonIndex == MouseButton.Right && mb.Pressed && _debutRoute != null) { _debutRoute = null; _controleCourbe = null; return; }
             if (mb.ButtonIndex != MouseButton.Left) return;
             _peinture = mb.Pressed && _outil is "habitat" or "commerce" or "activites" or "dezoner";
             if (!mb.Pressed) return;
@@ -287,6 +292,17 @@ public partial class JeuPrincipal : Node3D
             case "dezoner":
                 Peindre(p);
                 return;
+            case "rue_courbe":
+            case "avenue_courbe":
+            {
+                string g = _outil.Replace("_courbe", "");
+                if (_debutRoute == null) { _debutRoute = partie.Reseau.Accrocher(p, partie.R.Routes.AccrochageM).point; return; }
+                if (_controleCourbe == null) { _controleCourbe = p; return; }
+                var rc = partie.ConstruireCourbe(_debutRoute.Value, _controleCourbe.Value, p, g);
+                _hud.Toast(rc.Ok ? $"{rc.Message} Coût : {rc.Cout:N0} €" : rc.Message, rc.Ok);
+                if (rc.Ok) { _debutRoute = partie.Reseau.Accrocher(p, partie.R.Routes.AccrochageM).point; _controleCourbe = null; }
+                return;
+            }
             case "demolir":
                 _hud.Toast(partie.Demolir(p));
                 return;
@@ -310,6 +326,17 @@ public partial class JeuPrincipal : Node3D
         _apercuMesh.ClearSurfaces();
         var p = PointSouris();
         if (p == null) { _hud.Info(""); return; }
+        if ((_outil is "rue_courbe" or "avenue_courbe") && _debutRoute != null)
+        {
+            string g = _outil.Replace("_courbe", "");
+            var ctrl = _controleCourbe ?? p.Value;
+            var pts = Partie.PointsCourbe(_debutRoute.Value, ctrl, _controleCourbe == null ? p.Value : p.Value);
+            var apc = _controleCourbe == null ? partie.PrevoirRoute(_debutRoute.Value, p.Value, g) : partie.PrevoirCourbe(_debutRoute.Value, ctrl, p.Value, g);
+            var colc = apc.Ok ? new Color(0.3f, 0.9f, 0.4f, 0.8f) : new Color(1f, 0.3f, 0.25f, 0.8f);
+            for (int i = 0; i + 1 < pts.Count; i++) Ligne(pts[i], pts[i + 1], (float)partie.R.Route(g).LargeurM / 2, colc);
+            _hud.Info(_controleCourbe == null ? "Cliquez le point de courbure" : apc.Ok ? $"{apc.Longueur:F0} m — {apc.Cout:N0} € — cliquez l'arrivée" : apc.Raison);
+            return;
+        }
         if ((_outil is "rue" or "avenue") && _debutRoute != null)
         {
             var ap = partie.PrevoirRoute(_debutRoute.Value, p.Value, _outil);
@@ -324,7 +351,7 @@ public partial class JeuPrincipal : Node3D
             _hud.Info("Maintenez le clic gauche pour peindre les parcelles le long des rues");
             return;
         }
-        if (_outil is "rue" or "avenue") { Cercle(p.Value, 4, new Color(0.3f, 0.9f, 0.4f, 0.8f)); _hud.Info("Cliquez le point de départ de la route"); return; }
+        if (_outil is "rue" or "avenue" or "rue_courbe" or "avenue_courbe") { Cercle(p.Value, 4, new Color(0.3f, 0.9f, 0.4f, 0.8f)); _hud.Info("Cliquez le point de départ de la route"); return; }
         var par = partie.ParcelleSous(p.Value);
         if (_outil != "" && _outil != "demolir" && partie.R.Services.TryGetValue(_outil, out var s))
         {
@@ -421,16 +448,26 @@ public partial class JeuPrincipal : Node3D
     private async void ModeAuto()
     {
         // --auto=capture : le robot joue N mois, puis on prend des images de contrôle
-        Commencer(null);
-        var robot = new Robot(_partie!);
-        robot.Demarrer();
-        int mois = 24;
-        for (int m = 0; m < mois; m++)
+        // --auto=reelle : la vraie ville, 2 mois de simulation
+        V2 c;
+        if (_optionAuto == "reelle")
         {
-            robot.Decider();
-            for (int j = 0; j < _reglages.JoursParMois; j++) _partie!.AvancerJour();
+            Commencer(null, villeReelle: true);
+            for (int j = 0; j < 60; j++) _partie!.AvancerJour();
+            c = new V2(-350, 150);
         }
-        var c = robot.Centre;
+        else
+        {
+            Commencer(null);
+            var robot = new Robot(_partie!);
+            robot.Demarrer();
+            for (int m = 0; m < 24; m++)
+            {
+                robot.Decider();
+                for (int j = 0; j < _reglages.JoursParMois; j++) _partie!.AvancerJour();
+            }
+            c = robot.Centre;
+        }
         var vues = new (string nom, float dist, float tangage, float lacet)[] { ("ensemble", 900, 0.75f, 0.6f), ("quartier", 260, 0.55f, 2.2f), ("rue", 7, 0.3f, 0.9f), ("trafic", 700, 1.1f, 0.6f), ("attrait", 700, 1.1f, 0.6f) };
         var dossier = ProjectSettings.GlobalizePath("user://");
         foreach (var (nom, dist, tangage, lacet) in vues)
@@ -440,7 +477,7 @@ public partial class JeuPrincipal : Node3D
             _rendu.Vue = nom == "trafic" ? RenduVille.Vues.Trafic : nom == "attrait" ? RenduVille.Vues.Attrait : RenduVille.Vues.Normale;
             _camera.Appliquer();
             for (int i = 0; i < 30; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-            GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"proto_{nom}.png"));
+            GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_{nom}.png"));
         }
         GD.Print($"AUTO population={_partie!.Population} argent={_partie.Argent:F0} palier={_partie.Palier} batiments={_partie.Parcelles.Values.Count(p => p.Batiment != null)}");
         GetTree().Quit();

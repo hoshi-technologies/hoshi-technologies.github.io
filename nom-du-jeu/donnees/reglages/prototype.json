@@ -37,11 +37,12 @@
       "longueur_eau_max_m": 450
     },
     "capacite_vehicules": {
-      "rue": 350,
-      "avenue": 900,
-      "voie_rapide": 2500
+      "rue": 600,
+      "avenue": 1800,
+      "voie_rapide": 4000
     },
-    "part_trajets_voiture": 0.65
+    "part_trajets_voiture": 0.65,
+    "part_heure_de_pointe": 0.35
   },
   "parcelles": {
     "largeur_m": 16,
@@ -205,6 +206,12 @@
       "rayon_m": 1000,
       "emplois": 20,
       "palier": 3
+    },
+    "existant": {
+      "nom": "Bâtiment existant (public, culte, annexe)",
+      "cout": 0,
+      "entretien": 0,
+      "palier": 99
     }
   },
   "bus": {
@@ -248,5 +255,22 @@
     "incendie_proba_avec_pompiers": 0.0004,
     "population_sans_police_max": 3000,
     "population_sans_sante_max": 1500
+  },
+  "ville_reelle": {
+    "m2_par_logement": 110,
+    "m2_par_emploi_commerce": 40,
+    "m2_par_emploi_activites": 60,
+    "part_surface_utile": 0.75,
+    "occupation_initiale": 0.92,
+    "prix_eau_regionale": 0.6,
+    "prix_elec_regionale": 0.9,
+    "prix_dechets_regionaux": 0.5,
+    "part_actifs_travaillant_dehors": 0.3,
+    "argent_depart_par_habitant": 12,
+    "argent_depart_min": 500000,
+    "note": "Réseaux régionaux : la commune achète eau, électricité et traitement des déchets ; ses propres équipements réduisent la facture.",
+    "cout_secours_police_par_habitant": 0.8,
+    "note_estimation": "Population estimée depuis la surface des bâtiments (110 m² de plancher brut par logement). À remplacer par les données carroyées de l'INSEE.",
+    "cout_services_existants_par_habitant": 5.5
   }
 }

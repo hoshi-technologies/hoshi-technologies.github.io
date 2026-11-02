@@ -8,6 +8,7 @@
 En bref :
 - Routes > Rue : cliquez sur un grand axe gris, puis plus loin. Clic droit pour arrêter. On peut franchir l'eau (pont, plus cher).
 - Zones > Habitat : maintenez le clic gauche le long de vos rues.
+- Menu « Ville réelle » : la vraie Annecy déjà construite, à gérer et transformer.
 - Eau & énergie : un château d'eau et une centrale solaire le long d'une rue.
 - Puis commerces et activités (emplois), école, santé, pompiers, police, déchets, parcs, bus...
 - V : vues d'information (réseaux, attrait, trafic, services). G : vraie ville d'Annecy en transparence.

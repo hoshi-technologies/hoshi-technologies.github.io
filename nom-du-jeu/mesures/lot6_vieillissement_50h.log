@@ -1,0 +1,15 @@
+mois     1 (  0.0 h de jeu) pop     58 argent       72,453 bât    60 msg   2 histo     1 mémoire     43 Mo  4.85 ms/jour
+mois   250 (  4.2 h de jeu) pop  18916 argent   16,940,682 bât   615 msg 145 histo   250 mémoire    155 Mo  1.54 ms/jour
+mois   500 (  8.3 h de jeu) pop  18916 argent   46,023,480 bât   615 msg 200 histo   500 mémoire     52 Mo  1.56 ms/jour
+mois   750 ( 12.5 h de jeu) pop  18916 argent   75,106,277 bât   615 msg 200 histo   750 mémoire     78 Mo  1.52 ms/jour
+mois  1000 ( 16.7 h de jeu) pop  18916 argent  104,189,075 bât   615 msg 200 histo  1000 mémoire    101 Mo  1.19 ms/jour
+mois  1250 ( 20.8 h de jeu) pop  18916 argent  133,271,872 bât   615 msg 200 histo  1250 mémoire    128 Mo  1.52 ms/jour
+mois  1500 ( 25.0 h de jeu) pop  18916 argent  162,354,670 bât   615 msg 200 histo  1500 mémoire    156 Mo  1.55 ms/jour
+mois  1750 ( 29.2 h de jeu) pop  18916 argent  191,437,468 bât   615 msg 200 histo  1750 mémoire     54 Mo  1.41 ms/jour
+mois  2000 ( 33.3 h de jeu) pop  18916 argent  220,520,265 bât   615 msg 200 histo  2000 mémoire     82 Mo  1.11 ms/jour
+mois  2250 ( 37.5 h de jeu) pop  18916 argent  249,603,063 bât   615 msg 200 histo  2250 mémoire    110 Mo  1.10 ms/jour
+mois  2500 ( 41.7 h de jeu) pop  18916 argent  278,685,860 bât   615 msg 200 histo  2500 mémoire    139 Mo  1.08 ms/jour
+mois  2750 ( 45.8 h de jeu) pop  18916 argent  307,768,658 bât   615 msg 200 histo  2750 mémoire     37 Mo  1.10 ms/jour
+mois  3000 ( 50.0 h de jeu) pop  18916 argent  336,851,455 bât   615 msg 200 histo  3000 mémoire     64 Mo  1.12 ms/jour
+Fin : 119 s de calcul. Pire moyenne : 4.85 ms par jour de jeu (budget à vitesse ×4 : 500 ms).
+Sauvegarde : 0.27 Mo en 118 ms ; rechargement en 145 ms ; identique : True

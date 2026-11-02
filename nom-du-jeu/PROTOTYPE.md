@@ -15,7 +15,8 @@
 | Croissance | Bâtiments en chantier puis construits, 3 niveaux (maison, petit collectif, immeuble), emménagements progressifs. |
 | Réseaux | Eau (château d'eau, pompage dans le lac) et électricité (solaire, gaz), distribuées par les rues reliées. |
 | Services | École et centre de santé (places limitées, rayon d'action), pompiers (incendies réels à partir du palier Village), police (insécurité au-delà de 3 000 hab.), centre de tri des déchets, parc, ligne de bus avec bus animés. |
-| Ponts | Les routes peuvent franchir l'eau (jusqu'à 450 m, 5 fois plus cher). |
+| Ponts et courbes | Les routes peuvent franchir l'eau (jusqu'à 450 m, 5 fois plus cher) et être courbes (départ, point de courbure, arrivée). |
+| Ville réelle | Nouveau mode : la vraie Annecy existe au départ (9 615 bâtiments réels, rues, écoles), population et emplois estimés depuis la surface des bâtiments ; eau, électricité et déchets achetés au réseau régional. |
 | Trafic | Heure de pointe calculée chaque mois : les rues saturées font baisser l'attrait de l'habitat (et aident les commerces). Le bus réduit le nombre de voitures. |
 | Vues (V) | Réseaux, attrait, trafic, services. |
 | Bac à sable | Argent illimité, tout débloqué. |
@@ -29,13 +30,13 @@
 | Sauvegarde | Automatique tous les 3 mois de jeu, F5, bouton « Continuer ». |
 
 ## Ce qui a été testé
-- **32 tests automatiques réussis (24 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
+- **35 tests automatiques réussis (27 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
 - **Une partie complète de 20 mois jouée par le « robot maire »** (`bench/Ville.Bench -- --robot`) :
   - la ville passe de 0 à environ 3 500 habitants ;
   - 3 paliers sont franchis ;
   - le budget reste positif ;
   - la croissance est freinée par le chômage (le robot crée peu d'emplois), comme prévu.
-- **200 mois de jeu (environ 3 h 20) sans instabilité,** puis sauvegarde et rechargement identiques.
+- **50 heures de jeu simulées (3 000 mois) sans instabilité**, puis sauvegarde et rechargement identiques (voir `mesures/LOT6_MESURES.md`).
 - **Une sauvegarde de la version 1 est conservée** (`tests/sauvegardes/`) : elle doit toujours se charger.
 - **Images du jeu** prises en rendu logiciel sur le serveur : `mesures/lot5_prototype_*.png`.
 

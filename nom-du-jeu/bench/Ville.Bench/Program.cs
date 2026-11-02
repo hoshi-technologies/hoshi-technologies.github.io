@@ -6,6 +6,68 @@ using Ville.Donnees;
 using Ville.Reseau;
 using Ville.Trafic;
 
+if (args.Length > 0 && args[0] == "--vieillir")
+{
+    // Vieillissement artificiel : 3 000 mois de jeu = 50 heures à vitesse normale (1 mois = 1 minute)
+    var reglages = Ville.Coeur.Reglages.Charger(args[2]);
+    var paquet = PaquetVille.Charger(args[1]);
+    int mois = args.Length > 3 ? int.Parse(args[3]) : 3000;
+    var partie = Ville.Coeur.Partie.NouvelleFondation(reglages, paquet, 7);
+    var robot = new Ville.Coeur.Robot(partie);
+    robot.Demarrer();
+    var total = Stopwatch.StartNew();
+    var tranche = Stopwatch.StartNew();
+    double pireMsParJour = 0;
+    for (int m = 1; m <= mois; m++)
+    {
+        robot.Jouer(1);
+        if (m % 250 == 0 || m == 1)
+        {
+            double msJour = tranche.Elapsed.TotalMilliseconds / ((m == 1 ? 1 : 250) * 30);
+            pireMsParJour = Math.Max(pireMsParJour, msJour);
+            Console.WriteLine($"mois {m,5} ({m / 60.0,5:F1} h de jeu) pop {partie.Population,6} argent {partie.Argent,12:N0} bât {partie.Parcelles.Values.Count(x => x.Batiment != null),5} " +
+                $"msg {partie.Messages.Count,3} histo {partie.Historique.Count,5} mémoire {GC.GetTotalMemory(false) / 1048576.0,6:F0} Mo  {msJour:F2} ms/jour");
+            if (double.IsNaN(partie.Argent) || partie.Population < 0) { Console.WriteLine("ERREUR : valeur absurde"); return; }
+            tranche.Restart();
+        }
+    }
+    var sw = Stopwatch.StartNew();
+    var chemin = Path.GetTempFileName();
+    partie.SauvegarderFichier(chemin);
+    double sauveMs = sw.Elapsed.TotalMilliseconds;
+    sw.Restart();
+    var relue = Ville.Coeur.Partie.Charger(Ville.Coeur.Partie.LireFichier(chemin), reglages, paquet);
+    double chargeMs = sw.Elapsed.TotalMilliseconds;
+    bool identique = relue.Sauvegarder() == partie.Sauvegarder();
+    Console.WriteLine($"Fin : {total.Elapsed.TotalSeconds:F0} s de calcul. Pire moyenne : {pireMsParJour:F2} ms par jour de jeu (budget à vitesse ×4 : 500 ms).");
+    Console.WriteLine($"Sauvegarde : {new FileInfo(chemin).Length / 1e6:F2} Mo en {sauveMs:F0} ms ; rechargement en {chargeMs:F0} ms ; identique : {identique}");
+    return;
+}
+
+if (args.Length > 0 && args[0] == "--reelle")
+{
+    var reglages = Ville.Coeur.Reglages.Charger(args[2]);
+    var paquet = PaquetVille.Charger(args[1]);
+    var sw = Stopwatch.StartNew();
+    var partie = Ville.Coeur.Partie.NouvelleVilleReelle(reglages, paquet, 1);
+    Console.WriteLine($"Ville réelle créée en {sw.ElapsedMilliseconds} ms : {partie.Population:N0} hab, {partie.Parcelles.Count} parcelles, {partie.Reseau.Aretes.Count} tronçons, palier {partie.Palier}, argent {partie.Argent:N0}");
+    int mois = args.Length > 3 ? int.Parse(args[3]) : 12;
+    for (int m = 0; m < mois; m++)
+    {
+        sw.Restart();
+        for (int j = 0; j < 30; j++) partie.AvancerJour();
+        var p = partie;
+        Console.WriteLine($"mois {p.Mois,3} pop {p.Population,7} emplois {p.EmploisLocaux,6} chômeurs {p.Chomeurs,5} argent {p.Argent,12:N0} rec {p.RecettesMois,9:N0} dep {p.DepensesMois,9:N0} " +
+            $"D {p.DemandeHabitat,4:F0}/{p.DemandeCommerce,4:F0}/{p.DemandeActivites,4:F0} bouchon {(p.Congestion.Count > 0 ? p.Congestion.Values.Max() : 0):F2} feux {p.Incendies} ({sw.ElapsedMilliseconds} ms)");
+    }
+    sw.Restart();
+    var texte = partie.Sauvegarder();
+    Console.WriteLine($"Sauvegarde : {texte.Length / 1e6:F1} Mo en {sw.ElapsedMilliseconds} ms");
+    foreach (var (k, v) in partie.DetailDepenses) Console.WriteLine($"  - {k}: {v:N0}");
+    foreach (var (k, v) in partie.DetailRecettes) Console.WriteLine($"  + {k}: {v:N0}");
+    return;
+}
+
 if (args.Length > 0 && args[0] == "--robot")
 {
     // partie automatique : python-like sortie mois par mois pour régler l'équilibre

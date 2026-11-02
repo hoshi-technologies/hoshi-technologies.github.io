@@ -48,6 +48,13 @@ public sealed class GrilleOccupation
         _distanceEau = null;
     }
 
+    public List<(int i, int j)> CellulesPolygone(IReadOnlyList<V2> poly)
+    {
+        var l = new List<(int, int)>();
+        CellulesPolygone(poly, l);
+        return l;
+    }
+
     private void CellulesPolygone(IReadOnlyList<V2> poly, List<(int, int)> sortie)
     {
         double minY = poly.Min(p => p.Y), maxY = poly.Max(p => p.Y);

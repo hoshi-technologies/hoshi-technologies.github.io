@@ -253,6 +253,7 @@ public partial class RenduVille : Node3D
 
     private void Parcelle(Parcelle p, Maillage sol, Maillage bat)
     {
+        if (p.Contour != null) { ParcelleReelle(p, sol, bat); return; }
         var r = _p.R.Parcelles;
         float w = (float)r.LargeurM / 2 - 0.6f, prof = (float)r.ProfondeurM / 2 - 0.6f;
         var u = new Vector3((float)p.Dir.X, 0, (float)-p.Dir.Y);
@@ -333,6 +334,74 @@ public partial class RenduVille : Node3D
                 break;
             }
         }
+    }
+
+    /// <summary>Bâtiment réel (mode Ville réelle) : sa vraie forme au sol, extrudée à sa hauteur.</summary>
+    private void ParcelleReelle(Parcelle p, Maillage sol, Maillage bat)
+    {
+        var poly = p.Contour!.Select(c => new Vector2((float)c.X, (float)c.Y)).ToArray();
+        var tri = Geometry2D.TriangulatePolygon(poly);
+        if (tri.Length == 0) return;
+        float y0 = p.Contour!.Min(c => _p.Paquet.Altitude(c.X, c.Y)) - 0.5f;
+        var b = p.Batiment;
+        if (b == null && p.Service == null)
+        {
+            if (p.Zone == Zone.Aucune && !_parcellesVides) return;
+            var cz = p.Zone == Zone.Aucune ? new Color(1, 1, 1) : CouleurZone(p.Zone);
+            int i0 = sol.Sommets.Count;
+            foreach (var q in poly) { sol.Sommets.Add(new Vector3(q.X, y0 + 0.75f, -q.Y)); sol.Normales.Add(Vector3.Up); sol.Couleurs.Add(cz); }
+            for (int k = 0; k < tri.Length; k += 3) { sol.Indices.Add(i0 + tri[k]); sol.Indices.Add(i0 + tri[k + 2]); sol.Indices.Add(i0 + tri[k + 1]); }
+            return;
+        }
+        var rnd = new Random(p.Variante);
+        float h = b != null && !b.Reel ? (float)_p.Hauteur(b) : (float)Math.Max(3, p.HauteurReelle);
+        Color murs = p.Service switch
+        {
+            "ecole" => new Color(0.96f, 0.88f, 0.70f),
+            "centre_sante" => new Color(0.95f, 0.96f, 0.97f),
+            "existant" => new Color(0.86f, 0.82f, 0.74f),
+            _ => b?.Type switch
+            {
+                Zone.Habitat => FacadesHabitat[rnd.Next(FacadesHabitat.Length)],
+                Zone.Commerce => new Color(0.93f, 0.90f, 0.86f).Lerp(new Color(0.8f, 0.85f, 0.95f), (float)rnd.NextDouble() * 0.6f),
+                _ => new Color(0.78f, 0.76f, 0.72f),
+            },
+        };
+        Color toit = b?.Type == Zone.Habitat && h < 14 ? Tuiles[rnd.Next(Tuiles.Length)] : murs.Darkened(0.35f);
+        if (b != null && b.EnChantier && b.Niveau == 1)
+        {
+            h *= Math.Max(0.05f, 1 - b.JoursChantier / (float)_p.R.JoursConstruction);
+            murs = new Color(0.80f, 0.70f, 0.52f); toit = new Color(0.95f, 0.55f, 0.15f);
+        }
+        if (CouleurVue(p) is { } cv) { murs = cv; toit = cv.Lightened(0.2f); }
+        float y1 = y0 + 0.5f + h;
+        // murs : un quadrilatère par côté, normale vers l'extérieur
+        bool horaire = Aire(poly) < 0;
+        for (int i = 0; i < poly.Length; i++)
+        {
+            var a = poly[i]; var c = poly[(i + 1) % poly.Length];
+            var d = c - a;
+            var n = horaire ? new Vector3(-d.Y, 0, -d.X) : new Vector3(d.Y, 0, d.X);
+            if (n.LengthSquared() < 1e-6) continue;
+            bat.Quad(new Vector3(a.X, y0, -a.Y), new Vector3(c.X, y0, -c.Y), new Vector3(c.X, y1, -c.Y), new Vector3(a.X, y1, -a.Y), n.Normalized(), murs);
+        }
+        int j0 = bat.Sommets.Count;
+        foreach (var q in poly) { bat.Sommets.Add(new Vector3(q.X, y1, -q.Y)); bat.Normales.Add(Vector3.Up); bat.Couleurs.Add(toit); }
+        for (int k = 0; k < tri.Length; k += 3)
+        {
+            var a = bat.Sommets[j0 + tri[k]]; var bb = bat.Sommets[j0 + tri[k + 1]]; var cc = bat.Sommets[j0 + tri[k + 2]];
+            bool inv = (bb - a).Cross(cc - a).Dot(Vector3.Up) > 0;
+            bat.Indices.Add(j0 + tri[k]);
+            bat.Indices.Add(j0 + tri[inv ? k + 2 : k + 1]);
+            bat.Indices.Add(j0 + tri[inv ? k + 1 : k + 2]);
+        }
+    }
+
+    private static float Aire(Vector2[] poly)
+    {
+        float a = 0;
+        for (int i = 0; i < poly.Length; i++) { var p = poly[i]; var q = poly[(i + 1) % poly.Length]; a += p.X * q.Y - q.X * p.Y; }
+        return a / 2;
     }
 
     private float Alt(Parcelle p, float dx, float dy)

@@ -118,7 +118,7 @@ public partial class Hud : Control
 
     private static readonly (string cat, string nom, (string id, string texte)[] outils)[] Categories =
     {
-        ("routes", "Routes", new[] { ("rue", "Rue"), ("avenue", "Avenue") }),
+        ("routes", "Routes", new[] { ("rue", "Rue"), ("avenue", "Avenue"), ("rue_courbe", "Rue courbe"), ("avenue_courbe", "Avenue courbe") }),
         ("zones", "Zones", new[] { ("habitat", "Habitat"), ("commerce", "Commerce"), ("activites", "Activités"), ("dezoner", "Dézoner") }),
         ("reseaux", "Eau & énergie", new[] { ("chateau_eau", "Château d'eau"), ("pompage_lac", "Pompage (lac)"), ("centrale_solaire", "Centrale solaire"), ("centrale_gaz", "Centrale au gaz") }),
         ("services", "Services", new[] { ("ecole", "École"), ("centre_sante", "Santé"), ("caserne_pompiers", "Pompiers"), ("commissariat", "Police"), ("centre_tri", "Déchets"), ("parc", "Parc"), ("arret_bus", "Arrêt de bus") }),
@@ -185,7 +185,7 @@ public partial class Hud : Control
     {
         if (_p == null) return "";
         if (_p.R.Services.TryGetValue(id, out var s)) return $"\n{s.Cout:N0} €";
-        if (id is "rue" or "avenue") return $"\n{_p.R.Route(id).CoutParM:N0} €/m";
+        if (id is "rue" or "avenue" or "rue_courbe" or "avenue_courbe") return $"\n{_p.R.Route(id.Replace("_courbe", "")).CoutParM:N0} €/m";
         return "";
     }
 
@@ -257,6 +257,7 @@ public partial class Hud : Control
                    "Incliner : R / F        Zoom : molette (zoomez au maximum pour la vue à hauteur d'habitant)\n" +
                    "Glisser la carte : clic molette maintenu\n\n" +
                    "Routes : cliquez le point de départ, puis le point d'arrivée. Clic droit ou Échap pour arrêter.\n" +
+                   "Routes courbes : départ, puis point de courbure, puis arrivée.\n" +
                    "Zones : maintenez le clic gauche et peignez le long des rues.\n" +
                    "Services : cliquez sur un terrain libre le long d'une rue.\n\n" +
                    "Temps : Espace = pause, 1 / 2 / 3 = vitesses        G : vraie ville en transparence\n" +
@@ -378,7 +379,7 @@ public partial class Hud : Control
         bool emplois = p.Parcelles.Values.Any(x => x.Zone is Zone.Commerce or Zone.Activites);
         var suivant = p.Palier + 1 < p.R.Paliers.Count ? p.R.Paliers[p.Palier + 1] : null;
         string c(bool ok) => ok ? "[x]" : "[  ]";
-        _objectifs.Text = !(rue && hab && eau && elec && emplois)
+        _objectifs.Text = !p.ModeVilleReelle && !(rue && hab && eau && elec && emplois)
             ? "PREMIERS PAS\n" +
               $"{c(rue)} Tracer une rue reliée à un grand axe (gris clair)\n" +
               $"{c(hab)} Zoner de l'habitat le long de la rue\n" +

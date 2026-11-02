@@ -84,7 +84,7 @@ public sealed class ConstructeurVille
             indices.AddRange(tri.Select(t => baseIdx + t));
         }
         var n = Enumerable.Repeat(Vector3.Up, sommets.Count).ToArray();
-        var col = Enumerable.Repeat(new Color(0.30f, 0.52f, 0.68f), sommets.Count).ToArray();
+        var col = Enumerable.Repeat(new Color(0.42f, 0.64f, 0.80f), sommets.Count).ToArray();
         var mat = Materiau(rugosite: 0.08f);
         mat.Metallic = 0.1f;
         if (sommets.Count == 0) return new Node3D { Name = "Eau" };

@@ -31,13 +31,14 @@ public sealed class SauvegardeDto
     public Dictionary<string, int> DernierMessage { get; set; } = new();
     // ajoutés après la v1 (champs facultatifs : les anciennes sauvegardes restent lisibles)
     public bool BacASable { get; set; }
+    public bool ModeVilleReelle { get; set; }
 }
 
 public sealed record NoeudDto(int Id, double X, double Y, bool Entree);
 public sealed record AreteDto(int Id, int A, int B, double[] Trace, string Gabarit, bool Departemental, string? Nom, bool Pont = false);
 public sealed record ArretDto(int Id, int Arete, double X, double Y);
-public sealed record BatimentDto(Zone Type, int Niveau, double Occupants, int JoursChantier, int MoisDepuisNiveau, int MoisSansService);
-public sealed record ParcelleDto(int Id, int Arete, double[] Geo, Zone Zone, string? Service, double Attrait, int Variante, BatimentDto? Batiment);
+public sealed record BatimentDto(Zone Type, int Niveau, double Occupants, int JoursChantier, int MoisDepuisNiveau, int MoisSansService, bool Reel = false, int? CapaciteFixe = null);
+public sealed record ParcelleDto(int Id, int Arete, double[] Geo, Zone Zone, string? Service, double Attrait, int Variante, BatimentDto? Batiment, double[]? Contour = null, double HauteurReelle = 0);
 
 public sealed partial class Partie
 {
@@ -53,22 +54,41 @@ public sealed partial class Partie
         Aretes = Reseau.Aretes.Values.Select(e => new AreteDto(e.Id, e.A, e.B, e.Trace.SelectMany(p => new[] { p.X, p.Y }).ToArray(), e.Gabarit, e.Departemental, e.Nom, e.Pont)).ToList(),
         Parcelles = Parcelles.Values.Select(p => new ParcelleDto(p.Id, p.Arete,
             new[] { p.Centre.X, p.Centre.Y, p.Dir.X, p.Dir.Y, p.Normale.X, p.Normale.Y }, p.Zone, p.Service, p.Attrait, p.Variante,
-            p.Batiment == null ? null : new BatimentDto(p.Batiment.Type, p.Batiment.Niveau, p.Batiment.Occupants, p.Batiment.JoursChantier, p.Batiment.MoisDepuisNiveau, p.Batiment.MoisSansService))).ToList(),
+            p.Batiment == null ? null : new BatimentDto(p.Batiment.Type, p.Batiment.Niveau, p.Batiment.Occupants, p.Batiment.JoursChantier, p.Batiment.MoisDepuisNiveau, p.Batiment.MoisSansService, p.Batiment.Reel, p.Batiment.CapaciteFixe),
+            p.Contour?.SelectMany(c => new[] { c.X, c.Y }).ToArray(), p.HauteurReelle)).ToList(),
         Arrets = Arrets.Values.Select(a => new ArretDto(a.Id, a.Arete, a.Pos.X, a.Pos.Y)).ToList(),
         Emprunts = Emprunts.ToList(),
         Messages = Messages.TakeLast(50).ToList(),
         Historique = Historique.ToList(),
         DernierMessage = new Dictionary<string, int>(_dernierMessage),
         BacASable = BacASable,
+        ModeVilleReelle = ModeVilleReelle,
     };
 
     public string Sauvegarder() => JsonSerializer.Serialize(VersDto(), Reglages.Json);
 
+    /// <summary>Écrit la sauvegarde compressée (gzip), de façon atomique : jamais de fichier à moitié écrit.</summary>
     public void SauvegarderFichier(string chemin)
     {
         var tmp = chemin + ".tmp";
-        File.WriteAllText(tmp, Sauvegarder());
-        File.Move(tmp, chemin, overwrite: true); // écriture atomique : jamais de fichier à moitié écrit
+        using (var f = File.Create(tmp))
+        using (var gz = new System.IO.Compression.GZipStream(f, System.IO.Compression.CompressionLevel.Fastest))
+        using (var w = new StreamWriter(gz))
+            w.Write(Sauvegarder());
+        File.Move(tmp, chemin, overwrite: true);
+    }
+
+    /// <summary>Lit un fichier de sauvegarde, compressé ou non.</summary>
+    public static string LireFichier(string chemin)
+    {
+        var octets = File.ReadAllBytes(chemin);
+        if (octets.Length > 2 && octets[0] == 0x1f && octets[1] == 0x8b)
+        {
+            using var gz = new System.IO.Compression.GZipStream(new MemoryStream(octets), System.IO.Compression.CompressionMode.Decompress);
+            using var r = new StreamReader(gz);
+            return r.ReadToEnd();
+        }
+        return System.Text.Encoding.UTF8.GetString(octets);
     }
 
     public static Partie Charger(string json, Reglages r, PaquetVille paquet)
@@ -79,7 +99,7 @@ public sealed partial class Partie
         var p = new Partie(r, paquet, 1)
         {
             Jour = dto.Jour, Argent = dto.Argent, ImpotHabitat = dto.ImpotHabitat, ImpotCommerce = dto.ImpotCommerce,
-            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable,
+            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable, ModeVilleReelle = dto.ModeVilleReelle,
         };
         p._alea.Etat = dto.Alea;
         foreach (var n in dto.Noeuds) p.Reseau.RestaurerNoeud(new NoeudRoute { Id = n.Id, Pos = new V2(n.X, n.Y), Entree = n.Entree });
@@ -98,15 +118,17 @@ public sealed partial class Partie
             var par = new Parcelle
             {
                 Id = d.Id, Arete = d.Arete, Centre = new V2(d.Geo[0], d.Geo[1]), Dir = new V2(d.Geo[2], d.Geo[3]), Normale = new V2(d.Geo[4], d.Geo[5]),
-                Zone = d.Zone, Service = d.Service, Attrait = d.Attrait, Variante = d.Variante,
+                Zone = d.Zone, Service = d.Service, Attrait = d.Attrait, Variante = d.Variante, HauteurReelle = d.HauteurReelle,
+                Contour = d.Contour == null ? null : Enumerable.Range(0, d.Contour.Length / 2).Select(i => new V2(d.Contour[2 * i], d.Contour[2 * i + 1])).ToList(),
             };
             if (d.Batiment is { } b)
-                par.Batiment = new Batiment { Type = b.Type, Niveau = b.Niveau, Occupants = b.Occupants, JoursChantier = b.JoursChantier, MoisDepuisNiveau = b.MoisDepuisNiveau, MoisSansService = b.MoisSansService };
+                par.Batiment = new Batiment { Type = b.Type, Niveau = b.Niveau, Occupants = b.Occupants, JoursChantier = b.JoursChantier, MoisDepuisNiveau = b.MoisDepuisNiveau, MoisSansService = b.MoisSansService, Reel = b.Reel, CapaciteFixe = b.CapaciteFixe };
             p.Parcelles[par.Id] = par;
-            var cellules = p.Grille.CellulesRectangle(par.Centre, par.Dir, r.Parcelles.LargeurM / 2 - 0.6, r.Parcelles.ProfondeurM / 2 - 0.6);
+            var cellules = par.Contour != null ? p.Grille.CellulesPolygone(par.Contour)
+                : p.Grille.CellulesRectangle(par.Centre, par.Dir, r.Parcelles.LargeurM / 2 - 0.6, r.Parcelles.ProfondeurM / 2 - 0.6);
             p.Grille.MarquerParcelle(cellules, par.Id);
             p._cellulesParcelle[par.Id] = cellules;
-            Ajouter(p._parcellesParArete, par.Arete, par.Id);
+            if (par.Arete >= 0) Ajouter(p._parcellesParArete, par.Arete, par.Id);
         }
         foreach (var a in dto.Arrets) p.Arrets[a.Id] = new ArretBus { Id = a.Id, Arete = a.Arete, Pos = new V2(a.X, a.Y) };
         p._prochaineParcelle = dto.ProchaineParcelle;
@@ -116,7 +138,10 @@ public sealed partial class Partie
         p.Historique.AddRange(dto.Historique);
         foreach (var (k, v) in dto.DernierMessage) p._dernierMessage[k] = v;
         p.MettreAJourServices();
+        // recalcule les couvertures (école, santé…) sans toucher à l'attrait sauvegardé
+        var attraits = p.Parcelles.Values.ToDictionary(x => x.Id, x => x.Attrait);
         p.CalculerAttraitPublic();
+        foreach (var x in p.Parcelles.Values) x.Attrait = attraits[x.Id];
         return p;
     }
 
