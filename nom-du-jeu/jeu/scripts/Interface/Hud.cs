@@ -13,12 +13,15 @@ public partial class Hud : Control
     public Action? VueSuivante;
 
     /// <summary>Taille du texte (accessibilité) : Ctrl + / Ctrl -.</summary>
-    public void TailleTexte(int delta)
+    public int TailleTexte(int delta)
     {
         int t = Math.Clamp(Theme.DefaultFontSize + delta, 12, 26);
         Theme.DefaultFontSize = t;
         Toast($"Taille du texte : {t}");
+        return t;
     }
+
+    public void DefinirTailleTexte(int t) => Theme.DefaultFontSize = Math.Clamp(t, 12, 26);
 
     private Partie? _p;
     private Label _date = null!, _pop = null!, _argent = null!, _palier = null!, _emplois = null!, _info = null!, _toast = null!, _objectifs = null!;
@@ -36,6 +39,12 @@ public partial class Hud : Control
     private string _categorie = "";
     public string OutilActif { get; set; } = "";
     public string MeteoTexte { get; set; } = "";
+    /// <summary>Texte du tutoriel (remplace les objectifs tant qu'il est actif).</summary>
+    public string TexteTutoriel { get; set; } = "";
+    public Action? PasserTutoriel;
+    public bool BudgetVisible => _budget.Visible;
+    public void OuvrirBudget() => _budget.Visible = true;
+    private Button _passer = null!;
 
     public static readonly Color Fond = new(0.10f, 0.12f, 0.15f, 0.88f);
 
@@ -208,8 +217,13 @@ public partial class Hud : Control
         var pc = Panneau();
         pc.Position = new Vector2(10, 56);
         pc.MouseFilter = MouseFilterEnum.Ignore;
+        var vo = new VBoxContainer();
         _objectifs = new Label { CustomMinimumSize = new Vector2(330, 0), AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        pc.AddChild(_objectifs);
+        vo.AddChild(_objectifs);
+        _passer = new Button { Text = "Passer le tutoriel", Visible = false };
+        _passer.Pressed += () => PasserTutoriel?.Invoke();
+        vo.AddChild(_passer);
+        pc.AddChild(vo);
         AddChild(pc);
     }
 
@@ -422,6 +436,8 @@ public partial class Hud : Control
     private void MettreAJourObjectifs()
     {
         var p = _p!;
+        _passer.Visible = TexteTutoriel != "";
+        if (TexteTutoriel != "") { _objectifs.Text = TexteTutoriel; return; }
         bool rue = p.Reseau.Aretes.Values.Any(e => !e.Departemental);
         bool hab = p.Parcelles.Values.Any(x => x.Zone == Zone.Habitat);
         bool eau = p.EauProduite > 0, elec = p.ElecProduite > 0;

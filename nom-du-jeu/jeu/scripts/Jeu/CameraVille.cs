@@ -40,6 +40,19 @@ public partial class CameraVille : Camera3D
             var droite = new Vector3(Mathf.Cos(Lacet), 0, -Mathf.Sin(Lacet));
             Cible += droite * dir.X - avant * dir.Y;
         }
+        // manette : stick gauche = déplacer, stick droit = tourner / incliner, gâchettes = zoom
+        float Axe(JoyAxis a) { float v = Input.GetJoyAxis(0, a); return Mathf.Abs(v) < 0.2f ? 0 : v; }
+        var stick = new Vector2(Axe(JoyAxis.LeftX), Axe(JoyAxis.LeftY));
+        if (stick != Vector2.Zero)
+        {
+            var av = new Vector3(-Mathf.Sin(Lacet), 0, -Mathf.Cos(Lacet));
+            var dr = new Vector3(Mathf.Cos(Lacet), 0, -Mathf.Sin(Lacet));
+            Cible += (dr * stick.X - av * stick.Y) * (Distance * 0.9f + 40) * dt;
+        }
+        Lacet -= Axe(JoyAxis.RightX) * 1.6f * dt;
+        Tangage = Mathf.Clamp(Tangage + Axe(JoyAxis.RightY) * 1.0f * dt, 0.05f, 1.45f);
+        float zoom = Axe(JoyAxis.TriggerRight) - Axe(JoyAxis.TriggerLeft);
+        if (zoom != 0) Distance = Mathf.Clamp(Distance * (1 - zoom * 1.5f * dt), DistanceMin, DistanceMax);
         if (Touche(Key.Q)) Lacet += 1.4f * dt;
         if (Touche(Key.E)) Lacet -= 1.4f * dt;
         if (Touche(Key.R)) Tangage = Mathf.Clamp(Tangage + dt, 0.05f, 1.45f);

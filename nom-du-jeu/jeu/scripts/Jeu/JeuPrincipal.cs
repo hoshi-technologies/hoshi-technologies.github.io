@@ -143,6 +143,16 @@ public partial class JeuPrincipal : Node3D
         _hud.CalqueBascule = BasculerFantome;
         _hud.Sauvegarder = () => Sauvegarder("rapide", true);
         _hud.VueSuivante = VueSuivante;
+        _hud.PasserTutoriel = () => { _tutoriel = null; _hud.TexteTutoriel = ""; _options.TutorielTermine = true; _options.Enregistrer(); };
+        _options = Options.Charger();
+        AppliquerOptions();
+        _pause = new MenuPause { Visible = false, Options = _options, DossierSauvegardes = _dossierSauvegardes };
+        _pause.Reprendre = FermerPause;
+        _pause.Sauvegarder = nom => { Sauvegarder(nom, true); };
+        _pause.Charger = f => { FermerPause(); Commencer(f); };
+        _pause.MenuPrincipal = () => { FermerPause(); RetourMenu(); };
+        _pause.OptionsModifiees = AppliquerOptions;
+        calque.AddChild(_pause);
         _calque = calque;
         _menu = Menu();
         calque.AddChild(_menu);
@@ -159,7 +169,8 @@ public partial class JeuPrincipal : Node3D
     private Control Menu()
     {
         var fond = new ColorRect { Color = new Color(0.05f, 0.07f, 0.10f, 0.72f) };
-        fond.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        fond.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        fond.Ready += () => fond.CallDeferred(Control.MethodName.SetSize, fond.GetViewportRect().Size, false);
         var centre = new CenterContainer();
         centre.SetAnchorsPreset(Control.LayoutPreset.FullRect);
         fond.AddChild(centre);
@@ -218,12 +229,14 @@ public partial class JeuPrincipal : Node3D
             b.Pressed += () => Commencer(null, mode);
             v.AddChild(b);
         }
+        var tuto = new Button { Text = _options.TutorielTermine ? "Tutoriel (5 minutes)" : "Tutoriel (5 minutes) — conseillé pour commencer", CustomMinimumSize = new Vector2(0, 40) };
+        tuto.Pressed += DemarrerTutoriel;
+        v.AddChild(tuto);
         var sable = new Button { Text = "Bac à sable (argent illimité, tout débloqué)", CustomMinimumSize = new Vector2(0, 34) };
         sable.Pressed += () => Commencer(null, ModeDepart.GrandsAxes, bacASable: true);
         v.AddChild(sable);
-        var auto = System.IO.Path.Combine(_dossierSauvegardes, "auto.json");
-        var rapide = System.IO.Path.Combine(_dossierSauvegardes, "rapide.json");
-        var derniere = new[] { auto, rapide }.Where(System.IO.File.Exists).OrderByDescending(System.IO.File.GetLastWriteTimeUtc).FirstOrDefault();
+        var derniere = System.IO.Directory.EnumerateFiles(_dossierSauvegardes, "*.json").Where(f => !f.EndsWith(".info.json"))
+            .OrderByDescending(System.IO.File.GetLastWriteTimeUtc).FirstOrDefault();
         if (derniere != null)
         {
             var cont = new Button { Text = "Continuer la dernière partie", CustomMinimumSize = new Vector2(0, 44) };
@@ -279,6 +292,7 @@ public partial class JeuPrincipal : Node3D
         _trafic.Initialiser(_partie);
         _nature.Initialiser(_partie);
         _hud.Attacher(_partie);
+        _rendu.Visible = _trafic.Visible = _nature.Visible = true;
         _hud.Visible = true;
         _menu.Visible = false;
         _dernierMoisSauve = _partie.Mois;
@@ -384,6 +398,7 @@ public partial class JeuPrincipal : Node3D
             var d = _partie.Decisions[0];
             _hud.AfficherDecision(d, c => { _partie?.Repondre(d.Id, c); _vitesse = _vitesseAvantDecision; });
         }
+        if (_tutoriel != null) SuivreTutoriel();
         _hud.MettreAJour(delta, _vitesse);
         DessinerTerritoire();
         Survol();
@@ -413,6 +428,7 @@ public partial class JeuPrincipal : Node3D
             {
                 case Key.Escape:
                     if (_outil != "") ChoisirOutil("");
+                    else if (_partie != null && _menu.Visible == false) { if (_pause.Visible) FermerPause(); else OuvrirPause(); }
                     break;
                 case Key.Space: _vitesse = _vitesse == 0 ? 1 : 0; break;
                 case Key.Key1: case Key.Kp1: _vitesse = 1; break;
@@ -423,8 +439,8 @@ public partial class JeuPrincipal : Node3D
                 case Key.G: BasculerFantome(); break;
                 case Key.M: _son.Muet = !_son.Muet; _hud.Toast(_son.Muet ? "Son coupé (M)" : "Son rétabli (M)"); break;
                 case Key.V: VueSuivante(); break;
-                case Key.Equal: case Key.Plus: case Key.KpAdd: if (k.CtrlPressed) _hud.TailleTexte(+2); break;
-                case Key.Minus: case Key.KpSubtract: if (k.CtrlPressed) _hud.TailleTexte(-2); break;
+                case Key.Equal: case Key.Plus: case Key.KpAdd: if (k.CtrlPressed) { _options.TailleTexte = _hud.TailleTexte(+2); _options.Enregistrer(); } break;
+                case Key.Minus: case Key.KpSubtract: if (k.CtrlPressed) { _options.TailleTexte = _hud.TailleTexte(-2); _options.Enregistrer(); } break;
             }
         }
         if (_partie == null) return;
@@ -583,6 +599,76 @@ public partial class JeuPrincipal : Node3D
         _apercuMesh.SurfaceEnd();
     }
 
+    private Options _options = null!;
+    private MenuPause _pause = null!;
+    private Interface.Tutoriel? _tutoriel;
+    private Interface.Tutoriel.Etat? _etatTuto;
+    private Vector3 _dernierePositionCamera;
+    private float _derniereDistance;
+    private int _vitesseAvantPause = 1;
+
+    private void AppliquerOptions()
+    {
+        _son.Volume = _options.Volume;
+        _son.Muet = _options.Muet;
+        _hud.DefinirTailleTexte(_options.TailleTexte);
+        _options.AppliquerQualite(_env, _soleil, GetViewport());
+        if (RenduVille.Daltonisme != _options.Daltonisme)
+        {
+            RenduVille.Daltonisme = _options.Daltonisme;
+            if (_partie != null) foreach (var par in _partie.Parcelles.Values) _partie.CarresModifies.Add(Partie.Carre(par.Centre));
+        }
+        _rendu?.ForcerRoutes();
+    }
+
+    private void OuvrirPause() { _vitesseAvantPause = Math.Max(1, _vitesse); _vitesse = 0; _pause.Visible = true; _pause.Principal(); }
+    private void FermerPause() { _pause.Visible = false; _vitesse = _vitesseAvantPause; }
+
+    private void RetourMenu()
+    {
+        Sauvegarder("auto", false);
+        _partie = null;
+        _tutoriel = null;
+        _hud.TexteTutoriel = "";
+        _hud.Visible = false;
+        _rendu.Visible = _trafic.Visible = _nature.Visible = false;
+        ReconstruireMenu();
+        _menu.Visible = true;
+    }
+
+    private void DemarrerTutoriel()
+    {
+        ChargerCarte("quartier");
+        Commencer(null, ModeDepart.GrandsAxes);
+        _tutoriel = new Interface.Tutoriel();
+        _etatTuto = new Interface.Tutoriel.Etat { P = _partie! };
+        _camera.Cible = new Vector3(-711, 0, -388);
+        _camera.Distance = 700;
+        _dernierePositionCamera = _camera.Cible;
+        _derniereDistance = _camera.Distance;
+        _vitesse = 0;
+    }
+
+    private void SuivreTutoriel()
+    {
+        var e = _etatTuto!;
+        e.P = _partie!;
+        var dep = _camera.Cible - _dernierePositionCamera;
+        e.DeplacementCamera += new Vector2(dep.X, dep.Z).Length() + Math.Abs(_camera.Distance - _derniereDistance) * 0.5f;
+        _derniereDistance = _camera.Distance;
+        _dernierePositionCamera = _camera.Cible;
+        e.BudgetOuvert |= _hud.BudgetVisible;
+        e.VueChangee |= _rendu.Vue != RenduVille.Vues.Normale;
+        if (_tutoriel!.Avancer(e)) _hud.Toast(_tutoriel.Termine ? "Tutoriel terminé ! Bonne partie, Madame ou Monsieur le Maire." : "Étape réussie !");
+        _hud.TexteTutoriel = _tutoriel.Texte();
+        if (_tutoriel.Termine)
+        {
+            _tutoriel = null;
+            _options.TutorielTermine = true;
+            _options.Enregistrer();
+        }
+    }
+
     private void VueSuivante()
     {
         if (_partie == null) return;
@@ -616,14 +702,47 @@ public partial class JeuPrincipal : Node3D
         try
         {
             _partie.SauvegarderFichier(System.IO.Path.Combine(_dossierSauvegardes, nom + ".json"));
+            string[] moisNoms = { "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre" };
+            var info = new MenuPause.InfoSauvegarde(nom, _paquet.Manifest.Ville.Nom, _paquet.Manifest.Ville.Taille, _partie.Depart.ToString(),
+                $"{moisNoms[_partie.Mois % 12]} {2027 + _partie.Mois / 12}", _partie.Population, Math.Round(_partie.Argent), DateTime.Now);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(_dossierSauvegardes, nom + ".info.json"), System.Text.Json.JsonSerializer.Serialize(info));
             if (afficher) _hud.Toast("Partie sauvegardée.");
         }
         catch (Exception ex) { _hud.Toast("Échec de la sauvegarde : " + ex.Message, false); }
     }
 
     // ------------------------------------------------------------------ mode automatique (tests et captures)
+    /// <summary>Joue le tutoriel de bout en bout comme le ferait un joueur, et vérifie chaque étape.</summary>
+    private async System.Threading.Tasks.Task TesterTutoriel()
+    {
+        DemarrerTutoriel();
+        async System.Threading.Tasks.Task Images(int n) { for (int i = 0; i < n; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame); }
+        await Images(10);
+        GetViewport().GetTexture().GetImage().SavePng(ProjectSettings.GlobalizePath("user://tutoriel_etape1.png"));
+        var etapes = new List<string>();
+        void Note() => etapes.Add($"{_tutoriel?.Index ?? Interface.Tutoriel.Etapes.Length}");
+        _camera.Cible += new Vector3(300, 0, 0); await Images(5); Note();          // 1. caméra
+        var robot = new Robot(_partie!); robot.Demarrer(); await Images(5); Note(); // 2-5. rue, zones, eau, électricité
+        _vitesse = 3;
+        for (int i = 0; i < 400 && (_tutoriel?.Index ?? 99) <= 5; i++) await Images(1);
+        Note();                                                                      // 6. premières maisons (+7 : le robot a zoné commerces et activités)
+        _hud.OuvrirBudget(); await Images(5); Note();                                // 8. budget
+        VueSuivante(); await Images(5); Note();                                      // 9. vues
+        for (int m = 0; m < 6; m++) for (int j = 0; j < 30; j++) _partie!.AvancerJour();
+        await Images(5); Note();                                                     // 10. 300 habitants
+        Sauvegarder("Ma ville de test", false);
+        OuvrirPause();
+        await Images(5);
+        GetViewport().GetTexture().GetImage().SavePng(ProjectSettings.GlobalizePath("user://pause.png"));
+        bool info = System.IO.File.Exists(System.IO.Path.Combine(_dossierSauvegardes, "Ma ville de test.info.json"));
+        GD.Print($"PAUSE vitesse={_vitesse} info_sauvegarde={info}");
+        GD.Print($"TUTORIEL étapes franchies après chaque action : {string.Join(" → ", etapes)} ; terminé = {_tutoriel == null}");
+        GetTree().Quit();
+    }
+
     private async void ModeAuto()
     {
+        if (_optionAuto == "tutoriel") { await TesterTutoriel(); return; }
         // --auto=capture : le robot joue N mois, puis on prend des images de contrôle
         // --auto=reelle : la vraie ville, 2 mois de simulation
         V2 c;

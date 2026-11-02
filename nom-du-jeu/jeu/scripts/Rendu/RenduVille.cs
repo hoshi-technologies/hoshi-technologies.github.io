@@ -18,6 +18,7 @@ public partial class RenduVille : Node3D
     private readonly StandardMaterial3D _matSol = Maillage.Materiau(1f, doubleFace: true);
     private bool _parcellesVides;
     public RenduNature? Nature { get; set; }
+    public void ForcerRoutes() => _versionReseau = -1;
     private int _moisVue = -1;
 
     public enum Vues { Normale, Reseaux, Attrait, Trafic, Securite, Usure }
@@ -40,7 +41,7 @@ public partial class RenduVille : Node3D
     private Color? CouleurVue(Parcelle p)
     {
         var b = p.Batiment;
-        Color Echelle(double t) => new Color(0.85f, 0.25f, 0.20f).Lerp(new Color(0.25f, 0.80f, 0.35f), (float)Math.Clamp(t, 0, 1));
+        Color Echelle(double t) => EchelleCouleur(t);
         switch (_vue)
         {
             case Vues.Reseaux:
@@ -135,14 +136,12 @@ public partial class RenduVille : Node3D
             if (_vue == Vues.Usure && !e.Departemental && _p.Module<Ville.Gestion.VraieGestion>() is { } g)
             {
                 double u = g.UsureRoute(e.Id);
-                col = new Color(0.20f, 0.75f, 0.30f).Lerp(new Color(0.95f, 0.75f, 0.10f), (float)Math.Clamp(u / g.Seuil, 0, 1))
-                      .Lerp(new Color(0.90f, 0.15f, 0.10f), (float)Math.Clamp((u - g.Seuil) / (1 - g.Seuil), 0, 1));
+                col = EchelleCouleur(1 - u);
             }
             if (_vue == Vues.Trafic)
             {
                 double c = _p.Congestion.GetValueOrDefault(e.Id);
-                col = c < 0.01 ? new Color(0.35f, 0.35f, 0.38f) : new Color(0.20f, 0.75f, 0.30f).Lerp(new Color(0.95f, 0.75f, 0.10f), (float)Math.Clamp(c, 0, 1))
-                      .Lerp(new Color(0.90f, 0.15f, 0.10f), (float)Math.Clamp(c - 1, 0, 1));
+                col = c < 0.01 ? new Color(0.35f, 0.35f, 0.38f) : EchelleCouleur(1 - c / 2);
             }
             if (e.Pont)
                 for (int i = 0; i + 1 < e.Trace.Count; i++)
@@ -229,7 +228,25 @@ public partial class RenduVille : Node3D
     }
 
     // ------------------------------------------------------------------ parcelles et bâtiments
-    public static Color CouleurZone(Zone z) => z switch
+    /// <summary>Palette adaptée aux daltoniens (Okabe-Ito) pour les zones et les vues d'information.</summary>
+    public static bool Daltonisme { get; set; }
+
+    /// <summary>Mauvais (0) → bon (1). Rouge → vert, ou orange → bleu en mode daltonisme.</summary>
+    public static Color EchelleCouleur(double t)
+    {
+        float x = (float)Math.Clamp(t, 0, 1);
+        return Daltonisme
+            ? new Color(0.90f, 0.62f, 0.0f).Lerp(new Color(0.94f, 0.94f, 0.90f), Math.Min(1, x * 2)).Lerp(new Color(0.0f, 0.45f, 0.70f), Math.Max(0, x * 2 - 1))
+            : new Color(0.85f, 0.25f, 0.20f).Lerp(new Color(0.95f, 0.80f, 0.20f), Math.Min(1, x * 2)).Lerp(new Color(0.25f, 0.80f, 0.35f), Math.Max(0, x * 2 - 1));
+    }
+
+    public static Color CouleurZone(Zone z) => Daltonisme ? z switch
+    {
+        Zone.Habitat => new Color(0.0f, 0.62f, 0.45f),
+        Zone.Commerce => new Color(0.34f, 0.71f, 0.91f),
+        Zone.Activites => new Color(0.90f, 0.62f, 0.0f),
+        _ => new Color(0.85f, 0.85f, 0.85f),
+    } : z switch
     {
         Zone.Habitat => new Color(0.45f, 0.78f, 0.42f),
         Zone.Commerce => new Color(0.38f, 0.60f, 0.92f),
