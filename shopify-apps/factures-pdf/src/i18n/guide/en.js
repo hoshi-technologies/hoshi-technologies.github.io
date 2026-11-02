@@ -49,7 +49,7 @@ export default [
     intro: 'By default, the invoice is created when the order is paid and emailed to the customer right away.',
     steps: [
       'In Settings › How it works, choose when to create the invoice: when the order is paid (recommended) or as soon as it is placed.',
-      'Keep “Email the invoice to the customer” ticked for automatic sending, with the PDF attached.',
+      'Under “How your customers get their invoice”, choose: a “Download my invoice” button in the Shopify order confirmation email (a single email for the customer, after pasting the code shown once), or a separate email with the PDF attached (no setup).',
       'Tick “Send me a copy of every invoice” to receive each invoice and build your archive.',
       'To customise the email, open “Email to the customer”: subject and message accept the variables {{first_name}}, {{name}}, {{invoice_number}}, {{order}} and {{shop}}.',
     ],

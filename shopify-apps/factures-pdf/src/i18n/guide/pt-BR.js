@@ -49,7 +49,7 @@ export default [
     intro: 'Por padrão, a fatura é criada quando o pedido é pago e enviada ao cliente por e-mail na hora.',
     steps: [
       'Em Configurações › Funcionamento, escolha quando criar a fatura: quando o pedido for pago (recomendado) ou assim que for feito.',
-      'Mantenha "Enviar a fatura ao cliente por e-mail" marcado para o envio automático, com o PDF em anexo.',
+      'Em "Como seus clientes recebem a fatura", escolha: um botão "Baixar minha fatura" no e-mail de confirmação da Shopify (um único e-mail para o cliente, depois de colar uma vez o código exibido) ou um e-mail separado com o PDF anexado (sem configuração).',
       'Marque "Enviar-me uma cópia de cada fatura" para receber cada fatura e montar seu arquivo.',
       'Para personalizar o e-mail, abra "E-mail ao cliente": assunto e mensagem aceitam as variáveis {{first_name}}, {{name}}, {{invoice_number}}, {{order}} e {{shop}}.',
     ],

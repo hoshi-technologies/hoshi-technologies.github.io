@@ -81,6 +81,12 @@
     button.link { border:0; background:none; color:#005bd3; padding:0; font-weight:500; }
     .color { display:flex; gap:8px; } .color input[type=color] { width:44px; height:36px; padding:2px; border:1px solid #8a8a8a; border-radius:8px; background:#fff; }
     .search { margin:12px 0 4px; }
+    .choices { display:grid; gap:8px; margin:6px 0 10px; }
+    .choice { display:flex; gap:10px; align-items:flex-start; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-weight:400; cursor:pointer; }
+    .choice:has(input:checked) { border:2px solid var(--accent); padding:9px 11px; }
+    .choice input { margin-top:3px; }
+    .banner.setup { display:block; margin:0 0 10px; }
+    .banner.setup p { margin:0 0 8px; }
     .faq-section h3 { font-size:14px; margin:18px 0 6px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
     details.faq { border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
     details.faq summary { cursor:pointer; padding:10px 12px; font-weight:600; }
@@ -186,8 +192,19 @@
           </select>
         </div>
         <div class="full">
-          <label class="check"><input type="checkbox" name="autoSend"> <span data-i18n="general.autoSend"></span></label>
-          <label class="check"><input type="checkbox" name="bccMerchant"> <span data-i18n="general.bcc"></span></label>
+          <label data-i18n="delivery.title"></label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="delivery" value="link">
+              <span><b data-i18n="delivery.link"></b><br><small data-i18n="delivery.linkHelp"></small></span></label>
+            <label class="choice"><input type="radio" name="delivery" value="email">
+              <span><b data-i18n="delivery.email"></b><br><small data-i18n="delivery.emailHelp"></small></span></label>
+          </div>
+          <div id="delivery-link-setup" class="banner info setup" hidden>
+            <p data-i18n="delivery.setup"></p>
+            <pre class="liquid-code"></pre>
+            <div class="actions" style="margin:0"><button type="button" class="copy-liquid primary" data-i18n="liquid.copy"></button></div>
+          </div>
+          <label class="check" id="bcc-field"><input type="checkbox" name="bccMerchant"> <span data-i18n="general.bcc"></span></label>
         </div>
       </div>
     </section>
@@ -244,8 +261,8 @@
     <details class="card">
       <summary><h2><span data-i18n="liquid.title"></span> <small data-i18n="liquid.optional"></small></h2></summary>
       <p class="help" data-i18n="liquid.help"></p>
-      <pre id="liquid"></pre>
-      <div class="actions"><button type="button" id="copy-liquid" data-i18n="liquid.copy"></button></div>
+      <pre class="liquid-code"></pre>
+      <div class="actions"><button type="button" class="copy-liquid" data-i18n="liquid.copy"></button></div>
     </details>
 
     <details class="card" id="log-card">
@@ -524,6 +541,8 @@
       else field.value = value;
     }
     form.elements.nextNumber.value = nextNumber;
+    form.elements.delivery.value = settings.autoSend ? 'email' : 'link';
+    syncDelivery();
     if (/^#[0-9a-f]{6}$/i.test(settings.accentColor)) $('accentPicker').value = settings.accentColor;
     syncFallback();
     showFacturx(facturxIssues);
@@ -534,9 +553,10 @@
   function readForm() {
     const settings = {};
     for (const field of form.elements) {
-      if (!field.name || field.name === 'nextNumber') continue;
+      if (!field.name || field.name === 'nextNumber' || field.type === 'radio') continue;
       settings[field.name] = field.type === 'checkbox' ? field.checked : field.value;
     }
+    settings.autoSend = form.elements.delivery.value === 'email';
     return { settings, nextNumber: Number(form.elements.nextNumber.value), locale: lang };
   }
 
@@ -573,11 +593,21 @@
   const liquid =
     '{% assign facture_jeton = order_status_url | split: "/orders/" | last | split: "/" | first %}\n' +
     `<p><a href="${APP_URL}/f/{{ facture_jeton }}" style="color:#ffffff;background:#1f2937;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block">${t('liquid.button')}</a></p>`;
-  $('liquid').textContent = liquid;
-  $('copy-liquid').addEventListener('click', async () => {
-    await navigator.clipboard.writeText(liquid);
-    toast(t('liquid.copied'));
-  });
+  for (const pre of document.querySelectorAll('.liquid-code')) pre.textContent = liquid;
+  for (const button of document.querySelectorAll('.copy-liquid')) {
+    button.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(liquid);
+      toast(t('liquid.copied'));
+    });
+  }
+
+  // Mode de remise de la facture : lien dans la confirmation Shopify, ou e-mail séparé.
+  const syncDelivery = () => {
+    const link = form.elements.delivery.value === 'link';
+    $('delivery-link-setup').hidden = !link;
+    $('bcc-field').hidden = link; // la copie accompagne l'e-mail séparé
+  };
+  for (const radio of form.querySelectorAll('input[name="delivery"]')) radio.addEventListener('change', syncDelivery);
 
   // ---------- Journal des accès (chargé à l'ouverture de la section) ----------
   $('log-card').addEventListener('toggle', async (event) => {
