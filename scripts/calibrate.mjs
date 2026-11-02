@@ -59,7 +59,9 @@ async function buildDataset() {
     .sort();
   const jockeys = {},
     entraineurs = {},
-    lastSeen = {};
+    lastSeen = {},
+    ratings = {}; // Elo : nom → [note, nombre de courses]
+  const oddsSource = { T: 0, ref: 0, final: 0 };
   const add = (map, k, pos) => {
     if (!k) return;
     const s = (map[k] ||= [0, 0, 0]);
@@ -87,6 +89,13 @@ async function buildDataset() {
             const last = lastSeen[p.nom];
             r.repos = last && last < day.date ? daysBetween(last, day.date) : '';
           }
+          // Cote au moment de parier (≈ 20 min avant), sinon cote du matin, sinon cote finale.
+          r.coteFinal = p.cote;
+          if (p.coteT) (r.cote = p.coteT), oddsSource.T++;
+          else if (p.coteRef) (r.cote = p.coteRef), oddsSource.ref++;
+          else if (p.cote) oddsSource.final++;
+          const el = ratings[p.nom];
+          if (el) (r.rating = el[0]), (r.ratingN = el[1]);
           r._pos = p.arrivee || rankOf[p.num] || 99;
           return r;
         });
@@ -100,6 +109,7 @@ async function buildDataset() {
           date: day.date,
           heure: c.heure || 0,
           group: Turf.disciplineGroup(c.discipline),
+          groupKeys: Turf.raceGroupKeys({ discipline: c.discipline, categorie: c.categorie }).slice(0, 2),
           prep,
           winner,
           nPlaces,
@@ -109,15 +119,44 @@ async function buildDataset() {
         pending.push(prep.runners);
       }
     // Les statistiques n'intègrent la journée qu'après l'avoir rejouée.
-    for (const runners of pending)
+    for (const runners of pending) {
+      eloUpdate(ratings, runners);
       for (const r of runners) {
         add(jockeys, r.jockeyNom, r._pos);
         add(entraineurs, r.entraineurNom, r._pos);
         lastSeen[r.nom] = day.date;
       }
+    }
   }
   items.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.heure - b.heure));
-  return { items, days: days.length };
+  return { items, days: days.length, ratings, oddsSource };
+}
+
+/**
+ * Elo multi-chevaux : chaque course est une série de duels (le mieux classé gagne le duel).
+ * K = 24, réparti sur les duels ; les non-classés sont derrière tous les classés.
+ */
+function eloUpdate(ratings, runners) {
+  const rs = runners.filter((r) => r.nom);
+  const n = rs.length;
+  if (n < 2) return;
+  const R = rs.map((r) => (ratings[r.nom] ? ratings[r.nom][0] : 1500));
+  const d = new Array(n).fill(0);
+  const K = 24 / (n - 1);
+  for (let i = 0; i < n; i++)
+    for (let j = i + 1; j < n; j++) {
+      const pi = rs[i]._pos,
+        pj = rs[j]._pos;
+      if (pi === pj) continue;
+      const S = pi < pj ? 1 : 0;
+      const E = 1 / (1 + Math.pow(10, (R[j] - R[i]) / 400));
+      d[i] += K * (S - E);
+      d[j] -= K * (S - E);
+    }
+  rs.forEach((r, i) => {
+    const o = ratings[r.nom] || [1500, 0];
+    ratings[r.nom] = [R[i] + d[i], o[1] + 1];
+  });
 }
 
 // ------------------------------------------------------------------ mesures
@@ -176,6 +215,7 @@ function params(s) {
   const list = [
     { get: () => s.temperature, set: (v) => (s.temperature = clamp(v, 2, 40)), step: 2 },
     { get: () => s.marketWeight, set: (v) => (s.marketWeight = clamp(v, 0, 1)), step: 0.1 },
+    { get: () => s.marketPower || 1, set: (v) => (s.marketPower = clamp(v, 0.7, 1.8)), step: 0.1 },
     { get: () => s.placeDiscount, set: (v) => (s.placeDiscount = clamp(v, 0.4, 1.2)), step: 0.05 },
   ];
   for (const c of Turf.CRITERIA)
@@ -214,6 +254,7 @@ function fitWeighted(items, start) {
   }
   s.temperature = +s.temperature.toFixed(2);
   s.marketWeight = +s.marketWeight.toFixed(3);
+  s.marketPower = +(s.marketPower || 1).toFixed(3);
   s.placeDiscount = +s.placeDiscount.toFixed(3);
   for (const k of Object.keys(s.weights)) s.weights[k] = +s.weights[k].toFixed(1);
   return s;
@@ -284,8 +325,18 @@ function fitLearned(items, base) {
 /** Référence « cotes du marché seules », avec seulement le correctif des places ajusté. */
 function fitMarket(items, base) {
   const s = Object.assign(JSON.parse(JSON.stringify(base)), { marketWeight: 1 });
+  delete s.learned;
+  // 1) correctif favori-outsider (k) sur le gagnant, 2) correctif des places.
   let best = Infinity,
-    bestL = s.placeDiscount;
+    bestK = 1;
+  for (let k = 0.8; k <= 1.61; k += 0.05) {
+    s.marketPower = k;
+    const o = evaluate(items, s).winLogLoss;
+    if (o < best) (best = o), (bestK = k);
+  }
+  s.marketPower = +bestK.toFixed(2);
+  best = Infinity;
+  let bestL = s.placeDiscount;
   for (let l = 0.5; l <= 1.15; l += 0.05) {
     s.placeDiscount = l;
     const o = evaluate(items, s).objective;
@@ -412,10 +463,10 @@ function backtest(items, settingsOf, coefs) {
       curve: curve.filter((_, k) => k % step === 0 || k === curve.length - 1),
     });
   }
-  // Rentable « de façon fiable » : ROI positif même en retirant deux erreurs-types.
-  res.forEach((r) => (r.validated = r.bets >= 50 && r.roi - 2 * r.roiSE > 0));
-  const candidates = res.filter((r) => r.id.startsWith('val_') && r.bets >= 30).sort((a, b) => b.roi - a.roi);
-  return { courses: withR.length, strategies: res, best: candidates[0] ? candidates[0].id : null };
+  // Significatif : ROI positif même en retirant deux erreurs-types (marge de hasard).
+  res.forEach((r) => (r.significant = r.bets >= 50 && r.roi - 2 * r.roiSE > 0));
+  const candidates = res.filter((r) => r.id.startsWith('val_') && r.bets >= 30 && r.roi > 0).sort((a, b) => b.roi - a.roi);
+  return { courses: withR.length, from: withR[0] ? withR[0].date : null, strategies: res, best: candidates[0] ? candidates[0].id : null };
 }
 
 function reliability(items, settingsOf) {
@@ -451,20 +502,86 @@ const publicSettings = (s) => ({
   weights: s.weights,
   temperature: s.temperature,
   marketWeight: s.marketWeight,
+  marketPower: s.marketPower || 1,
   placeDiscount: s.placeDiscount,
 });
 
+/** Mesure combinée : chaque course avec les réglages de son groupe. */
+function evaluateBy(items, settingsOf) {
+  const acc = {};
+  let n = 0;
+  const buckets = new Map();
+  for (const it of items) {
+    const st = settingsOf(it);
+    if (!buckets.has(st)) buckets.set(st, []);
+    buckets.get(st).push(it);
+  }
+  for (const [st, list] of buckets) {
+    const m = evaluate(list, st);
+    for (const k of Object.keys(m)) acc[k] = (acc[k] || 0) + m[k] * list.length;
+    n += list.length;
+  }
+  for (const k of Object.keys(acc)) acc[k] /= n || 1;
+  acc.courses = n;
+  return acc;
+}
+
+/**
+ * Ajuste les modèles candidats pour chaque groupe assez fourni et garde, pour chaque groupe,
+ * celui qui prévoit le mieux le jeu de contrôle. Renvoie { key → { model, settings } }.
+ */
+function chooseModels(train, control, defaults, globalS, log) {
+  const keys = new Map();
+  for (const it of train) for (const k of it.groupKeys) keys.set(k, (keys.get(k) || 0) + 1);
+  const groups = {};
+  const seen = new Map(); // ensemble de courses identique → même groupe (inutile de réajuster)
+  for (const [key, count] of [...keys].sort((a, b) => b[1] - a[1] || a[0].length - b[0].length)) {
+    if (count < MIN_GROUP) continue;
+    const tr = train.filter((it) => it.groupKeys.includes(key));
+    const sig = count + ':' + tr[0].date + tr[0].heure + ':' + tr[tr.length - 1].date + tr[tr.length - 1].heure;
+    if (seen.has(sig)) {
+      groups[key] = Object.assign({ sameAs: seen.get(sig) }, groups[seen.get(sig)]);
+      continue;
+    }
+    seen.set(sig, key);
+    const ct = control.filter((it) => it.groupKeys.includes(key));
+    log && log(`  groupe ${key} : ${tr.length} courses d'entraînement, ${ct.length} de contrôle`);
+    const cand = { global: globalS, market: fitMarket(tr, defaults) };
+    const f = fitGroup(tr, globalS, log);
+    cand.weighted = f.weighted;
+    if (f.learned) cand.learned = f.learned;
+    const test = {};
+    let best = 'global';
+    if (ct.length) {
+      for (const [k, st] of Object.entries(cand)) test[k] = round(evaluate(ct, st));
+      for (const k of Object.keys(cand)) if (test[k].objective < test[best].objective) best = k;
+    }
+    groups[key] = { model: best, settings: cand[best], trainCourses: tr.length, testCourses: ct.length, test };
+  }
+  return groups;
+}
+const resolver = (groups, globalS) => (it) => {
+  for (const k of it.groupKeys) if (groups[k]) return groups[k].settings;
+  return globalS;
+};
+
 async function main() {
   const prev = await readJson(OUT, null);
-  if (!FORCE && prev && prev.status === 'ok' && prev.version === 2 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
+  if (!FORCE && prev && prev.status === 'ok' && prev.version === 3 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
     console.log('Calibrage récent (' + prev.updated + '), rien à faire.');
     return;
   }
   const t0 = Date.now();
-  const { items, days } = await buildDataset();
+  const { items, days, ratings, oddsSource } = await buildDataset();
   console.log(`${items.length} courses terminées sur ${days} journées`);
+  console.log(`cotes utilisées : ${oddsSource.T} au moment du pari, ${oddsSource.ref} du matin, ${oddsSource.final} finales`);
   const defaults = Turf.mergeSettings({});
-  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 2 };
+  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 3, oddsSource };
+
+  // Notes Elo à jour pour la page et les alertes.
+  const rt = {};
+  for (const [k, v] of Object.entries(ratings)) rt[k] = [Math.round(v[0]), v[1]];
+  await writeFile(path.join(DATA, 'ratings.json'), JSON.stringify({ updated: out.updated, ratings: rt }));
 
   if (items.length < MIN_COURSES) {
     out.status = 'insufficient';
@@ -473,101 +590,92 @@ async function main() {
     return;
   }
 
-  // 1) Validation : ajustement sur le passé, mesure sur les courses récentes.
-  const cut = Math.floor(items.length * 0.75);
-  const train = items.slice(0, cut),
-    test = items.slice(cut);
+  // Trois périodes chronologiques, jamais mélangées :
+  //  - entraînement (60 %) : ajustement des modèles ;
+  //  - sélection (20 %)    : choix du modèle de chaque groupe et de la meilleure stratégie ;
+  //  - confirmation (20 %) : vérification finale, sur des courses qui n'ont servi à aucun choix.
+  const c1 = Math.floor(items.length * 0.6),
+    c2 = Math.floor(items.length * 0.8);
+  const train = items.slice(0, c1),
+    sel = items.slice(c1, c2),
+    conf = items.slice(c2);
   const globalTrain = fitWeighted(train, defaults);
-  const chosen = {}; // réglages retenus par groupe (version entraînement)
-  const groupsOut = {};
-  for (const g of ['trot', 'galop']) {
-    const tr = train.filter((it) => it.group === g),
-      te = test.filter((it) => it.group === g);
-    const info = { trainCourses: tr.length, testCourses: te.length };
-    let cand = { global: globalTrain, market: fitMarket(tr.length >= 50 ? tr : train, defaults) };
-    if (tr.length >= MIN_GROUP) {
-      console.log(`  groupe ${g} : ${tr.length} courses d'entraînement`);
-      const f = fitGroup(tr, globalTrain, console.log);
-      cand.weighted = f.weighted;
-      if (f.learned) cand.learned = f.learned;
-    }
-    if (te.length) {
-      info.test = {};
-      for (const [k, s] of Object.entries(cand)) info.test[k] = round(evaluate(te, s));
-      info.test.defaults = round(evaluate(te, defaults));
-      info.test.marketOnly = round(evaluate(te, Object.assign({}, defaults, { marketWeight: 1 })));
-    }
-    // Meilleur candidat sur les courses de test du groupe.
-    let bestK = 'global';
-    if (info.test) for (const k of Object.keys(cand)) if (info.test[k].objective < info.test[bestK].objective) bestK = k;
-    info.model = bestK;
-    chosen[g] = cand[bestK];
-    groupsOut[g] = info;
-  }
-  const settingsOf = (it) => chosen[it.group];
+  const groupsTrain = chooseModels(train, sel, defaults, globalTrain, console.log);
+  const settingsOf = resolver(groupsTrain, globalTrain);
+  const marketS = Object.assign({}, defaults, { marketWeight: 1 });
   const placeOdds = fitPlaceOdds(train);
+
   out.validation = {
     trainCourses: train.length,
-    testCourses: test.length,
-    testFrom: test[0].date,
-    defaults: round(evaluate(test, defaults)),
-    marketOnly: round(evaluate(test, Object.assign({}, defaults, { marketWeight: 1 }))),
-    calibrated: round(
-      (() => {
-        // Mesure combinée avec, pour chaque course, le modèle retenu de son groupe.
-        const parts = ['trot', 'galop'].map((g) => [test.filter((it) => it.group === g), chosen[g]]);
-        const tot = { n: 0 };
-        const acc = {};
-        for (const [te, s] of parts) {
-          if (!te.length) continue;
-          const m = evaluate(te, s);
-          for (const k of Object.keys(m)) acc[k] = (acc[k] || 0) + m[k] * te.length;
-          tot.n += te.length;
-        }
-        for (const k of Object.keys(acc)) acc[k] /= tot.n;
-        acc.courses = tot.n;
-        return acc;
-      })(),
-    ),
+    selectionCourses: sel.length,
+    testCourses: conf.length,
+    testFrom: conf[0].date,
+    defaults: round(evaluate(conf, defaults)),
+    marketOnly: round(evaluate(conf, marketS)),
+    calibrated: round(evaluateBy(conf, settingsOf)),
   };
-  out.reliability = reliability(test, settingsOf);
-  out.backtest = backtest(test, settingsOf, placeOdds);
-  out.backtest.from = test[0].date;
-  console.log('Simulation de paris (courses récentes) :');
-  for (const s of out.backtest.strategies)
+  out.reliability = reliability(conf, settingsOf);
+
+  // Stratégies : choisie sur la période de sélection, confirmée (ou non) sur la dernière.
+  const btSel = backtest(sel, settingsOf, placeOdds);
+  const btConf = backtest(conf, settingsOf, placeOdds);
+  const chosen = btSel.best;
+  const strategies = btConf.strategies.map((st) => {
+    const s1 = btSel.strategies.find((x) => x.id === st.id);
+    return Object.assign({}, st, {
+      roiSelection: s1 ? s1.roi : null,
+      betsSelection: s1 ? s1.bets : 0,
+      chosen: st.id === chosen,
+      validated: st.id === chosen && st.significant,
+    });
+  });
+  out.backtest = {
+    courses: btConf.courses,
+    from: btConf.from,
+    selectionCourses: btSel.courses,
+    selectionFrom: btSel.from,
+    best: chosen,
+    validated: strategies.some((x) => x.validated),
+    strategies,
+  };
+  console.log(`Simulation de paris (sélection depuis ${btSel.from}, confirmation depuis ${btConf.from}) :`);
+  for (const st of strategies)
     console.log(
-      `  ${s.label.padEnd(36)} ${String(s.bets).padStart(5)} paris  ROI ${(s.roi * 100).toFixed(1)} % ± ${((s.roiSE || 0) * 200).toFixed(1)}${s.validated ? '  ✔' : ''}`,
+      `  ${st.label.padEnd(36)} sélection ${String(st.betsSelection).padStart(4)} paris ${((st.roiSelection || 0) * 100).toFixed(1).padStart(6)} %` +
+        ` | confirmation ${String(st.bets).padStart(4)} paris ${(st.roi * 100).toFixed(1).padStart(6)} % ± ${((st.roiSE || 0) * 200).toFixed(1)}` +
+        `${st.chosen ? '  ← choisie' : ''}${st.validated ? ' ✔ VALIDÉE' : ''}`,
     );
 
-  // 2) Réglages publiés : réajustés sur toutes les courses, avec le type de modèle retenu.
+  // Réglages publiés : réajustés sur toutes les courses, avec le type de modèle retenu par groupe.
   out.placeOdds = fitPlaceOdds(items);
   const globalAll = fitWeighted(items, globalTrain);
   out.settings = publicSettings(globalAll);
   out.groups = {};
-  for (const g of ['trot', 'galop']) {
-    const all = items.filter((it) => it.group === g);
-    const info = groupsOut[g];
-    const o = { courses: all.length, model: info.model, test: info.test || null };
-    if (info.model === 'market') {
-      o.settings = publicSettings(fitMarket(all, defaults));
-    } else if (info.model === 'global' || all.length < MIN_GROUP) {
-      o.settings = out.settings;
-    } else {
-      const f = fitGroup(all, chosen[g].learned ? publicSettings(chosen[g]) : chosen[g], null, info.model === 'learned');
+  for (const [key, g] of Object.entries(groupsTrain)) {
+    if (g.sameAs && out.groups[g.sameAs]) {
+      out.groups[key] = out.groups[g.sameAs];
+      continue;
+    }
+    const all = items.filter((it) => it.groupKeys.includes(key));
+    const o = { courses: all.length, model: g.model, test: g.test };
+    if (g.model === 'market') o.settings = publicSettings(fitMarket(all, defaults));
+    else if (g.model === 'global') o.settings = out.settings;
+    else {
+      const f = fitGroup(all, publicSettings(g.settings), null, g.model === 'learned');
       o.settings = publicSettings(f.weighted);
-      if (info.model === 'learned' && f.learned) {
+      if (g.model === 'learned' && f.learned) {
         o.useLearned = true;
         o.learned = f.learned.learned;
         o.settings.placeDiscount = f.learned.placeDiscount;
       }
     }
-    out.groups[g] = o;
+    out.groups[key] = o;
   }
   out.status = 'ok';
   out.seconds = Math.round((Date.now() - t0) / 1000);
   await writeFile(OUT, JSON.stringify(out));
   const v = out.validation;
-  console.log('Test (courses récentes) :');
+  console.log('Confirmation (courses les plus récentes) :');
   for (const k of ['defaults', 'marketOnly', 'calibrated'])
     console.log(
       `  ${k.padEnd(11)} log-loss gagnant ${v[k].winLogLoss}  placé ${v[k].placeLogLoss}  favori gagnant ${(v[k].topWinRate * 100).toFixed(1)} %  base placée ${(v[k].topPlaceRate * 100).toFixed(1)} %`,

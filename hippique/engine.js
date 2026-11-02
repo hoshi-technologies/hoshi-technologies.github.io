@@ -155,6 +155,7 @@
     { key: 'niveau', label: 'Niveau des courses récentes', weight: 5 },
     { key: 'mouvement', label: 'Mouvement des cotes', weight: 6 },
     { key: 'avis', label: "Avis de l'entraîneur", weight: 3 },
+    { key: 'elo', label: 'Note de valeur (Elo)', weight: 6 },
   ];
 
   var DEFAULT_SETTINGS = {
@@ -163,6 +164,7 @@
       return o;
     }, {}),
     marketWeight: 0.5, // part du marché (cotes) dans la probabilité finale
+    marketPower: 1, // correctif favori-outsider : probabilités du marché ∝ (1/cote)^k
     temperature: 11, // dispersion : plus petit = favoris plus marqués
     placeDiscount: 0.8, // correctif Henery/Lo pour les places 2 et 3
     simulations: 20000, // simulations de l'arrivée (trios)
@@ -188,6 +190,12 @@
     var rkMean = mean(rkKnown),
       rkStd = std(rkKnown) || 1;
     var allocRace = num(race.allocation);
+
+    // Note Elo : comparée aux autres chevaux notés du champ.
+    var elo = runners.map((r) => (num(r.ratingN) >= 1 ? num(r.rating) : null));
+    var eloKnown = elo.filter((x) => x !== null);
+    var eloMean = mean(eloKnown),
+      eloStd = std(eloKnown) || 60;
 
     var classeRaw = runners.map(function (r) {
       var g = num(r.gains),
@@ -265,6 +273,12 @@
       var av = r.avis;
       s.avis = av === 'POSITIF' ? 75 : av === 'NEGATIF' ? 25 : av === 'NEUTRE' ? 50 : null;
 
+      // Elo : au moins 2 chevaux notés pour comparer ; confiance croissante avec le nombre de courses.
+      if (elo[i] !== null && eloKnown.length >= 2) {
+        var conf = Math.min(1, num(r.ratingN) / 4);
+        s.elo = clamp(50 + (zToScore((elo[i] - eloMean) / eloStd) - 50) * conf, 0, 100);
+      } else s.elo = null;
+
       var h = null;
       if (isTrot) {
         if (reculs[i] !== null) h = 55 - (reculs[i] / 25) * 12; // chaque 25 m de recul pénalise
@@ -298,6 +312,19 @@
     return /trot/i.test(discipline || '') ? 'trot' : 'galop';
   }
 
+  /**
+   * Groupes de réglages d'une course, du plus précis au plus général :
+   * discipline + type (handicap ou non), discipline, galop/trot.
+   */
+  function raceGroupKeys(race) {
+    if (typeof race === 'string') race = { discipline: race };
+    race = race || {};
+    var d = race.discipline || '';
+    var disc = /trot/i.test(d) ? 'trot' : /obstacle|haie|steeple|cross/i.test(d) ? 'obstacle' : 'plat';
+    var type = /HANDICAP/i.test(race.categorie || '') ? 'hcp' : 'cond';
+    return [disc + '-' + type, disc, disciplineGroup(d)];
+  }
+
   /** Probabilités du marché à partir des cotes (marge du bookmaker retirée). */
   function marketProbs(runners) {
     var inv = runners.map(function (r) {
@@ -310,7 +337,21 @@
     var minInv = Math.min.apply(null, known);
     var filled = inv.map((x) => (x === null ? minInv : x));
     var total = filled.reduce((a, b) => a + b, 0);
-    return { probs: filled.map((x) => x / total), overround: known.reduce((a, b) => a + b, 0) };
+    return { probs: filled.map((x) => x / total), inv: filled, overround: known.reduce((a, b) => a + b, 0) };
+  }
+
+  /**
+   * Correctif du biais favori-outsider : le public surjoue les outsiders, donc
+   * p ∝ (1/cote)^k avec k > 1 (k appris sur les résultats ; k = 1 : proportionnel).
+   */
+  function powerProbs(inv, k) {
+    if (!k || k === 1) {
+      var t = inv.reduce((a, b) => a + b, 0);
+      return inv.map((x) => x / t);
+    }
+    var w = inv.map((x) => Math.pow(x, k));
+    var tw = w.reduce((a, b) => a + b, 0);
+    return w.map((x) => x / tw);
   }
 
   /**
@@ -446,7 +487,8 @@
     // Combinaison log-linéaire avec le marché.
     var mk = prep.market;
     var alpha = mk ? clamp(settings.marketWeight, 0, 1) : 0;
-    var comb = pModel.map((p, j) => (mk ? Math.pow(p, 1 - alpha) * Math.pow(mk.probs[j], alpha) : p));
+    var mp = mk ? (mk.inv ? powerProbs(mk.inv, settings.marketPower || 1) : mk.probs) : null;
+    var comb = pModel.map((p, j) => (mk ? Math.pow(p, 1 - alpha) * Math.pow(mp[j], alpha) : p));
     var cSum = comb.reduce((a, b) => a + b, 0);
     var out = { scores: scores, confidence: conf, pModel: pModel, pWin: comb.map((p) => p / cSum) };
     if (settings.learned) {
@@ -606,9 +648,11 @@
   }
 
   /** Choisit les réglages calibrés adaptés à la discipline. */
-  function settingsFor(calibration, discipline) {
+  function settingsFor(calibration, race) {
     if (!calibration || calibration.status !== 'ok') return null;
-    var g = calibration.groups && calibration.groups[disciplineGroup(discipline)];
+    var keys = raceGroupKeys(race),
+      g = null;
+    for (var i = 0; i < keys.length && !g; i++) g = calibration.groups && calibration.groups[keys[i]];
     var s = (g && g.settings) || calibration.settings;
     if (!s) return null;
     var out = mergeSettings(s);
@@ -665,6 +709,8 @@
     featureVector: featureVector,
     learnedProbs: learnedProbs,
     disciplineGroup: disciplineGroup,
+    raceGroupKeys: raceGroupKeys,
+    powerProbs: powerProbs,
     estimatePlaceOdds: estimatePlaceOdds,
     kelly: kelly,
     settingsFor: settingsFor,
