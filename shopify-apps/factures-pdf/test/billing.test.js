@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
-import { openDatabase } from '../src/db.js';
+import { openDatabase } from '../src/db-node.js';
 import { InvoiceService } from '../src/service.js';
-import { createApp } from '../src/server.js';
+import { createApp } from '../src/node-app.js';
 import { signSessionToken } from '../src/shopify.js';
 import { sanitizeSettings } from '../src/settings.js';
 import { monthStart, planFromSubscriptionName, PLANS } from '../src/plans.js';

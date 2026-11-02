@@ -146,6 +146,7 @@ export default {
     'facturx.issue.countryCode': 'Land',
     'facturx.issue.vatNumber': 'USt-IdNr.',
     'facturx.issue.siret': 'SIRET',
+    'facturx.issue.email': 'E-Mail',
     'facturx.badge': 'Factur-X',
     'log.title': 'Zugriffsprotokoll',
     'log.help': 'Jeder Zugriff auf Rechnungen und Kundendaten wird protokolliert und 12 Monate aufbewahrt.',

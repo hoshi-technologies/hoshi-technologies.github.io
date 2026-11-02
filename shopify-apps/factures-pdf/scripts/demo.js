@@ -6,11 +6,12 @@
 // Shopify est simulé : boutique fictive, commandes d'exemple, abonnement de test. Les e-mails
 // ne partent pas : ils sont affichés dans le terminal. Tout est effacé à l'arrêt (Ctrl+C).
 
-import express from 'express';
+import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
 import { readFileSync } from 'node:fs';
-import { openDatabase } from '../src/db.js';
+import { openDatabase } from '../src/db-node.js';
 import { InvoiceService } from '../src/service.js';
-import { createApp } from '../src/server.js';
+import { createApp } from '../src/node-app.js';
 import { signSessionToken } from '../src/shopify.js';
 import { sanitizeSettings } from '../src/settings.js';
 import { matchLanguage } from '../src/i18n/index.js';
@@ -72,13 +73,13 @@ const service = new InvoiceService({ store, transport, mailFrom: 'factures@exemp
 const inner = createApp({ config, store, service, fetchImpl: fakeShopify, logger: quiet });
 
 // ---------- Serveur de démo ----------
-const app = express();
+const app = new Hono();
 const token = () => {
   const now = Math.floor(Date.now() / 1000);
   return signSessionToken({ iss: `https://${SHOP}/admin`, dest: `https://${SHOP}`, aud: config.apiKey, sub: '1', exp: now + 300, nbf: now - 5 }, config.apiSecret);
 };
-app.get('/demo/token', (req, res) => res.type('text').send(token()));
-app.get('/demo/subscribed', (req, res) => res.redirect('/')); // retour de la « page de paiement Shopify »
+app.get('/demo/token', (c) => c.text(token()));
+app.get('/demo/subscribed', (c) => c.redirect('/')); // retour de la « page de paiement Shopify »
 
 // Nouvelle commande d'exemple, pour voir une facture arriver en direct.
 const ORDER = JSON.parse(readFileSync(new URL('../src/sample-order.json', import.meta.url)));
@@ -116,15 +117,15 @@ async function newOrder() {
   await service.handleOrder(SHOP, order, 'orders/paid');
   return order;
 }
-app.post('/demo/order', async (req, res) => {
+app.post('/demo/order', async (c) => {
   const order = await newOrder();
-  res.json({ name: order.name });
+  return c.json({ name: order.name });
 });
 
 // Page d'admin : App Bridge remplacé par une version simulée + bandeau « mode démo ».
-app.get('/', async (req, res, next) => {
-  if (!req.query.shop) return res.redirect(`/?shop=${SHOP}&locale=${lang}`);
-  const html = await (await fetch(`${config.appUrl}/_inner/?${new URLSearchParams(req.query)}`)).text();
+app.get('/', async (c) => {
+  if (!c.req.query('shop')) return c.redirect(`/?shop=${SHOP}&locale=${lang}`);
+  const html = await (await inner.request(`/?${new URLSearchParams(c.req.query())}`)).text();
   const stub = `<script>
     window.shopify = {
       idToken: async () => (await fetch('/demo/token')).text(),
@@ -141,14 +142,11 @@ app.get('/', async (req, res, next) => {
       style="font:600 14px sans-serif;padding:6px 12px;border-radius:8px;border:0;background:#303030;color:#fff;cursor:pointer">+ Simuler une commande payée</button>
     <a href="/guide?lang=${lang}" target="_blank">Guide</a> · <a href="/faq?lang=${lang}" target="_blank">FAQ</a>
   </div>`;
-  res
-    .type('html')
-    .send(html.replace('<script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>', stub).replace('<body>', `<body>${banner}`));
+  return c.html(html.replace('<script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>', stub).replace('<body>', `<body>${banner}`));
 });
-app.use('/_inner', inner);
-app.use(inner);
+app.route('/', inner);
 
-app.listen(PORT, async () => {
+serve({ fetch: app.fetch, port: PORT }, async () => {
   // Installation simulée (infos reprises de « Shopify »), puis deux commandes d'exemple.
   // DEMO_COMPLETE=1 : entreprise déjà complète (SIRET, TVA), utile pour les captures d'écran.
   const complete = process.env.DEMO_COMPLETE === '1' ? { siret: '404 833 048 00022', vatNumber: 'FR83404833048', legalForm: 'SAS au capital de 10 000 €' } : {};

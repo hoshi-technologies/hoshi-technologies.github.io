@@ -1,10 +1,11 @@
 // Point d'entrée du serveur : `npm start` (production) ou `npm run dev` (Shopify CLI).
 
 import { loadConfig } from './config.js';
-import { openDatabase } from './db.js';
-import { createTransport } from './mailer.js';
+import { openDatabase } from './db-node.js';
+import { createTransport } from './mail-smtp.js';
+import { createBrevoTransport } from './mailer.js';
 import { InvoiceService } from './service.js';
-import { createApp } from './server.js';
+import { createApp } from './node-app.js';
 import { resolveKey } from './crypto.js';
 import { createBackup } from './backup.js';
 
@@ -29,10 +30,10 @@ const dataKey = resolveKey({ key: config.dataEncryptionKey, fallbackSecret: conf
 const store = openDatabase(config.databasePath, { key: dataKey });
 const service = new InvoiceService({
   store,
-  transport: createTransport(config.mail.transport),
+  transport: config.mail.brevoApiKey ? createBrevoTransport(config.mail.brevoApiKey) : createTransport(config.mail.transport),
   mailFrom: config.mail.from,
 });
-if (!service.transport) console.warn('SMTP_URL absent : les factures seront créées mais pas envoyées par e-mail.');
+if (!service.transport) console.warn('E-mail non configuré (BREVO_API_KEY ou SMTP_HOST) : les factures seront créées mais pas envoyées.');
 
 createApp({ config, store, service }).listen(config.port, () => {
   console.log(`Hoshi Factures à l'écoute sur le port ${config.port} (${config.appUrl})`);
@@ -47,7 +48,7 @@ if (config.backup.dir) {
   const backupKey = resolveKey({ key: config.backup.key || config.dataEncryptionKey, fallbackSecret: config.apiSecret });
   const backup = () => {
     try {
-      const file = createBackup(store.db, { dir: config.backup.dir, key: backupKey, retentionDays: config.backup.retentionDays });
+      const file = createBackup(store.sql.raw, { dir: config.backup.dir, key: backupKey, retentionDays: config.backup.retentionDays });
       console.log(`Sauvegarde chiffrée : ${file}`);
     } catch (error) {
       console.error(`Sauvegarde impossible : ${error.message}`);

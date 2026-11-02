@@ -69,9 +69,10 @@ test('TVA par taux : base × taux arrondi (EN 16931 BR-CO-17), TTC client inchan
 });
 
 test('Factur-X : informations manquantes signalées', () => {
-  assert.deepEqual(facturxIssues(DEFAULT_SETTINGS), ['companyName', 'address', 'vatNumber']);
+  assert.deepEqual(facturxIssues(DEFAULT_SETTINGS), ['companyName', 'address', 'vatNumber', 'email']);
   assert.deepEqual(facturxIssues({ ...SELLER, vatNumber: '', vatExempt: true }), []);
-  assert.deepEqual(facturxIssues({ ...SELLER, vatNumber: '', siret: '', vatExempt: true }), ['siret']);
+  assert.deepEqual(facturxIssues({ ...SELLER, vatNumber: '', siret: '', vatExempt: true }), ['siret', 'email']);
+  assert.deepEqual(facturxIssues({ ...SELLER, email: 'a@b.fr', siret: '', vatExempt: false }), []);
   assert.deepEqual(facturxIssues(SELLER), []);
 });
 

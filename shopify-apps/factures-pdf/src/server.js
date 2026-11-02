@@ -1,8 +1,8 @@
-// Serveur de l'appli : page d'administration intégrée, API, webhooks et lien public de facture.
+// Application web (Hono) : page d'administration intégrée, API, webhooks, lien public de facture,
+// guide et FAQ. Le même code tourne sur Node (src/node-app.js) et sur Cloudflare Workers
+// (src/worker.js) : il ne lit aucun fichier, tout lui est fourni (stockage, service, ressources).
 
-import express from 'express';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { Hono } from 'hono';
 import { sanitizeSettings } from './settings.js';
 import { buildInvoice } from './invoice.js';
 import {
@@ -24,12 +24,35 @@ import { guideContent, faqContent } from './docs.js';
 import { renderFaqPage, renderGuidePage } from './docs-page.js';
 import { PLANS, BILLING_CURRENCY, subscriptionName, planFromSubscriptionName } from './plans.js';
 
-const here = (path) => fileURLToPath(new URL(path, import.meta.url));
-const ADMIN_HTML = readFileSync(here('../public/admin.html'), 'utf8');
-const SAMPLE_ORDER = JSON.parse(readFileSync(here('./sample-order.json'), 'utf8'));
+/** Adresse IP du client, derrière Cloudflare, un tunnel ou un hébergeur. */
+export function clientIp(c) {
+  const forwarded = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0]?.trim();
+  return forwarded || c.env?.incoming?.socket?.remoteAddress || null;
+}
 
-export function createApp({ config, store, service, fetchImpl = fetch, logger = console }) {
-  const app = express();
+/** Première langue prise en charge de l'en-tête Accept-Language (par ordre de préférence). */
+export function preferredLanguage(header, fallback = 'en') {
+  const candidates = String(header || '')
+    .split(',')
+    .map((part) => {
+      const [tag, q] = part.trim().split(';q=');
+      return { tag, q: q === undefined ? 1 : Number(q) };
+    })
+    .filter((x) => x.tag && x.q > 0)
+    .sort((a, b) => b.q - a.q);
+  for (const { tag } of candidates) {
+    const lang = matchLanguage(tag);
+    if (lang) return lang;
+  }
+  return fallback;
+}
+
+/**
+ * @param assets  { adminHtml: string, sampleOrder: object } : page d'admin et commande d'exemple
+ * @param hooks   { onShopDeleted(shop) } : actions propres à l'hébergement (index Cloudflare…)
+ */
+export function createApp({ config, store, service, assets, fetchImpl = fetch, logger = console, hooks = {} }) {
+  const app = new Hono();
 
   const guide = (lang) => guideContent(lang, config.supportEmail);
   const faq = (lang) => faqContent(lang, config.supportEmail);
@@ -77,24 +100,30 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     store.setPlan(shop, plan ? plan.key : 'free', plan ? active.id : null);
   }
 
-  app.disable('x-powered-by');
-  app.set('trust proxy', true); // derrière le tunnel ou l'hébergeur : vraie adresse IP du client
+  const pdfResponse = (c, pdf, disposition) =>
+    c.body(new Uint8Array(pdf), 200, { 'Content-Type': 'application/pdf', 'Content-Disposition': disposition });
 
-  app.get('/health', (req, res) => res.json({ ok: true }));
+  app.onError((error, c) => {
+    logger.error(`${c.req.method} ${c.req.path} : ${error.stack || error.message}`);
+    return c.json({ error: error.message }, 500);
+  });
+
+  app.get('/health', (c) => c.json({ ok: true }));
 
   // ---------- Webhooks (corps brut obligatoire pour vérifier la signature) ----------
-  app.post('/webhooks', express.raw({ type: '*/*', limit: '5mb' }), async (req, res) => {
-    if (!verifyWebhook(req.body, req.get('x-shopify-hmac-sha256'), config.apiSecret)) {
-      return res.status(401).send('Signature invalide');
+  app.post('/webhooks', async (c) => {
+    const raw = new Uint8Array(await c.req.arrayBuffer());
+    if (!verifyWebhook(raw, c.req.header('x-shopify-hmac-sha256'), config.apiSecret)) {
+      return c.text('Signature invalide', 401);
     }
-    const topic = req.get('x-shopify-topic');
-    const shop = req.get('x-shopify-shop-domain');
-    if (!isValidShop(shop)) return res.status(400).send('Boutique invalide');
+    const topic = c.req.header('x-shopify-topic');
+    const shop = c.req.header('x-shopify-shop-domain');
+    if (!isValidShop(shop)) return c.text('Boutique invalide', 400);
     let payload;
     try {
-      payload = JSON.parse(req.body.toString('utf8'));
+      payload = JSON.parse(new TextDecoder().decode(raw));
     } catch {
-      return res.status(400).send('JSON invalide');
+      return c.text('JSON invalide', 400);
     }
 
     try {
@@ -126,67 +155,61 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
           break;
         case 'shop/redact':
           store.deleteShop(shop);
+          await hooks.onShopDeleted?.(shop);
           break;
         default:
           logger.warn(`Webhook ignoré : ${topic}`);
       }
-      res.status(200).send('OK');
+      return c.text('OK');
     } catch (error) {
       logger.error(`Webhook ${topic} (${shop}) en échec : ${error.stack || error.message}`);
-      res.status(500).send('Erreur'); // Shopify renverra le webhook plus tard
+      return c.text('Erreur', 500); // Shopify renverra le webhook plus tard
     }
   });
 
   // ---------- Lien public : /f/<jeton de la commande> ----------
-  app.get('/f/:token', (req, res) => {
-    const token = String(req.params.token).replace(/\.pdf$/, '');
-    const invoice = /^[A-Za-z0-9_-]{16,}$/.test(token) ? store.findInvoiceByToken(token) : null;
+  app.get('/f/:token', (c) => {
+    const token = String(c.req.param('token')).replace(/\.pdf$/, '');
+    const invoice = /^[A-Za-z0-9_-]{16,}$/.test(token) ? store?.findInvoiceByToken(token) : null;
     if (!invoice) {
-      const lang = resolveLanguage(req.acceptsLanguages(...LANGUAGES.map((l) => l.code), 'pt') || 'en');
+      const lang = preferredLanguage(c.req.header('accept-language'));
       const dict = dictionary(lang);
-      return res
-        .status(404)
-        .type('html')
-        .send(
-          `<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width">` +
-            `<title>${dict.email.filename}</title><body style="font-family:sans-serif;padding:2rem"><p>${dict.notReady}</p>`,
-        );
+      return c.html(
+        `<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width">` +
+          `<title>${dict.email.filename}</title><body style="font-family:sans-serif;padding:2rem"><p>${dict.notReady}</p>`,
+        404,
+      );
     }
-    store.logAccess(invoice.shop, { actor: 'customer', action: 'invoice.public_download', target: invoice.number, ip: req.ip });
-    res.set('Cache-Control', 'private, no-store');
-    res.set('X-Robots-Tag', 'noindex');
-    res.type('application/pdf');
-    res.set('Content-Disposition', `inline; filename="${dictionary(invoice.language).email.filename}-${invoice.number}.pdf"`);
-    res.send(Buffer.from(invoice.pdf));
+    store.logAccess(invoice.shop, { actor: 'customer', action: 'invoice.public_download', target: invoice.number, ip: clientIp(c) });
+    c.header('Cache-Control', 'private, no-store');
+    c.header('X-Robots-Tag', 'noindex');
+    return pdfResponse(c, invoice.pdf, `inline; filename="${dictionary(invoice.language).email.filename}-${invoice.number}.pdf"`);
   });
 
   // ---------- Guide et FAQ publics (liens de la fiche App Store) : /guide?lang=de, /faq ----------
-  const docsLanguage = (req) =>
-    matchLanguage(req.query.lang) ?? resolveLanguage(req.acceptsLanguages(...LANGUAGES.map((l) => l.code), 'pt') || 'en');
+  const docsLanguage = (c) => matchLanguage(c.req.query('lang')) ?? preferredLanguage(c.req.header('accept-language'));
   const docsContext = (lang) => ({ lang, languages: LANGUAGES, t: dictionary(lang).admin, support: config.supportEmail });
-  app.get('/guide', (req, res) => {
-    const lang = docsLanguage(req);
-    res.set('Cache-Control', 'public, max-age=3600');
-    res.type('html').send(renderGuidePage({ ...docsContext(lang), guide: guide(lang) }));
+  app.get('/guide', (c) => {
+    const lang = docsLanguage(c);
+    c.header('Cache-Control', 'public, max-age=3600');
+    return c.html(renderGuidePage({ ...docsContext(lang), guide: guide(lang) }));
   });
-  app.get('/faq', (req, res) => {
-    const lang = docsLanguage(req);
-    res.set('Cache-Control', 'public, max-age=3600');
-    res.type('html').send(renderFaqPage({ ...docsContext(lang), faq: faq(lang) }));
+  app.get('/faq', (c) => {
+    const lang = docsLanguage(c);
+    c.header('Cache-Control', 'public, max-age=3600');
+    return c.html(renderFaqPage({ ...docsContext(lang), faq: faq(lang) }));
   });
 
   // ---------- Page d'administration intégrée à Shopify ----------
-  app.get('/', (req, res) => {
-    const shop = isValidShop(req.query.shop) ? req.query.shop : null;
-    res.set(
-      'Content-Security-Policy',
-      `frame-ancestors ${shop ? `https://${shop} ` : ''}https://admin.shopify.com;`,
-    );
+  app.get('/', (c) => {
+    const shop = isValidShop(c.req.query('shop')) ? c.req.query('shop') : null;
+    c.header('Content-Security-Policy', `frame-ancestors ${shop ? `https://${shop} ` : ''}https://admin.shopify.com;`);
     // Shopify passe la langue de l'administrateur dans ?locale= (fr, en, pt-BR…).
-    const lang = resolveLanguage(req.query.locale, 'en');
+    const lang = resolveLanguage(c.req.query('locale'), 'en');
     const i18n = { lang, t: dictionary(lang).admin, languages: LANGUAGES, faq: faq(lang), guide: guide(lang), support: config.supportEmail };
-    res.type('html').send(
-      ADMIN_HTML.replaceAll('%SHOPIFY_API_KEY%', config.apiKey)
+    return c.html(
+      assets.adminHtml
+        .replaceAll('%SHOPIFY_API_KEY%', config.apiKey)
         .replaceAll('%APP_URL%', config.appUrl)
         .replaceAll('%LANG%', lang)
         .replace('/*%I18N%*/', () => `window.I18N = ${JSON.stringify(i18n).replace(/</g, '\\u003c')};`),
@@ -194,51 +217,53 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
   });
 
   // ---------- API de l'admin, authentifiée par le jeton de session App Bridge ----------
-  const api = express.Router();
-  api.use(express.json({ limit: '200kb' }));
-  api.use((req, res, next) => {
-    const match = /^Bearer (.+)$/.exec(req.get('authorization') || '');
+  const api = new Hono();
+  api.use('*', async (c, next) => {
+    const match = /^Bearer (.+)$/.exec(c.req.header('authorization') || '');
     try {
       if (!match) throw new Error('Jeton manquant');
-      req.sessionToken = match[1];
       const { shop, claims } = verifySessionToken(match[1], config);
-      req.shop = shop;
-      req.actor = `user:${claims.sub ?? 'inconnu'}`; // utilisateur de l'admin Shopify
-      next();
+      c.set('sessionToken', match[1]);
+      c.set('shop', shop);
+      c.set('actor', `user:${claims.sub ?? 'inconnu'}`); // utilisateur de l'admin Shopify
     } catch (error) {
-      res.status(401).json({ error: error.message });
+      return c.json({ error: error.message }, 401);
     }
+    await next();
   });
+  const body = (c) => c.req.json().catch(() => ({}));
 
   // Appelé au chargement de l'admin : obtient le jeton d'accès hors ligne si besoin et
   // pré-remplit les réglages avec les informations de la boutique.
-  api.post('/session', async (req, res) => {
-    const shopRow = store.ensureShop(req.shop);
+  api.post('/session', async (c) => {
+    const shop = c.get('shop');
+    const input = await body(c);
+    const shopRow = store.ensureShop(shop);
     if (!shopRow.access_token) {
       try {
-        const { access_token, scope } = await exchangeToken(req.shop, req.sessionToken, config, fetchImpl);
-        store.saveToken(req.shop, access_token, scope);
+        const { access_token, scope } = await exchangeToken(shop, c.get('sessionToken'), config, fetchImpl);
+        store.saveToken(shop, access_token, scope);
         const s = shopRow.settings;
-        const info = await shopifyCompanyInfo(req.shop);
+        const info = await shopifyCompanyInfo(shop);
         // Pré-remplissage : on ne remplace jamais une valeur déjà saisie.
         const filled = Object.fromEntries(Object.entries(info).map(([k, v]) => [k, s[k] || v]));
-        store.saveSettings(req.shop, {
+        store.saveSettings(shop, {
           ...s,
           ...filled,
           countryCode: info.countryCode || s.countryCode,
-          fallbackLanguage: matchLanguage(req.body?.locale) ?? s.fallbackLanguage,
+          fallbackLanguage: matchLanguage(input.locale) ?? s.fallbackLanguage,
         });
       } catch (error) {
-        logger.error(`${req.shop} : initialisation impossible : ${error.message}`);
+        logger.error(`${shop} : initialisation impossible : ${error.message}`);
       }
     }
     // Au retour de la page de confirmation d'abonnement, la formule est mise à jour ici.
     try {
-      if (store.getShop(req.shop).access_token) await syncSubscription(req.shop);
+      if (store.getShop(shop).access_token) await syncSubscription(shop);
     } catch (error) {
-      logger.warn(`${req.shop} : abonnement non synchronisé : ${error.message}`);
+      logger.warn(`${shop} : abonnement non synchronisé : ${error.message}`);
     }
-    res.json({ shop: req.shop, mailConfigured: Boolean(service.transport && service.mailFrom) });
+    return c.json({ shop, mailConfigured: Boolean(service.transport && service.mailFrom) });
   });
 
   const settingsResponse = (row) => ({
@@ -247,79 +272,78 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     facturxIssues: facturxIssues(row.settings),
   });
 
-  api.get('/settings', (req, res) => {
-    res.json(settingsResponse(store.ensureShop(req.shop)));
-  });
+  api.get('/settings', (c) => c.json(settingsResponse(store.ensureShop(c.get('shop')))));
 
-  api.put('/settings', (req, res) => {
-    const row = store.ensureShop(req.shop);
-    const settings = sanitizeSettings(req.body.settings ?? {}, row.settings);
+  api.put('/settings', async (c) => {
+    const shop = c.get('shop');
+    const input = await body(c);
+    const row = store.ensureShop(shop);
+    const settings = sanitizeSettings(input.settings ?? {}, row.settings);
     try {
-      if (req.body.nextNumber !== undefined && Number(req.body.nextNumber) !== row.next_number) {
-        store.setNextNumber(req.shop, Number(req.body.nextNumber));
+      if (input.nextNumber !== undefined && Number(input.nextNumber) !== row.next_number) {
+        store.setNextNumber(shop, Number(input.nextNumber));
       }
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      return c.json({ error: error.message }, 400);
     }
-    store.saveSettings(req.shop, settings);
+    store.saveSettings(shop, settings);
     service.logos.delete(settings.logoUrl); // le logo a pu changer à la même adresse
-    res.json(settingsResponse(store.getShop(req.shop)));
+    return c.json(settingsResponse(store.getShop(shop)));
   });
 
   // Chaque consultation de données personnelles est journalisée (voir /api/access-log).
-  const audit = (req, action, target = null) => store.logAccess(req.shop, { actor: req.actor, action, target, ip: req.ip });
+  const audit = (c, action, target = null) =>
+    store.logAccess(c.get('shop'), { actor: c.get('actor'), action, target, ip: clientIp(c) });
 
-  api.get('/invoices', (req, res) => {
-    audit(req, 'invoice.list');
-    res.json({ invoices: store.listInvoices(req.shop, 100) });
+  api.get('/invoices', (c) => {
+    audit(c, 'invoice.list');
+    return c.json({ invoices: store.listInvoices(c.get('shop'), 100) });
   });
 
-  api.get('/access-log', (req, res) => {
-    res.json({ entries: store.listAccessLog(req.shop, 200) });
+  api.get('/access-log', (c) => c.json({ entries: store.listAccessLog(c.get('shop'), 200) }));
+
+  api.get('/invoices/:id/pdf', (c) => {
+    const invoice = store.getInvoice(c.get('shop'), Number(c.req.param('id')));
+    if (!invoice) return c.json({ error: 'Facture introuvable' }, 404);
+    audit(c, 'invoice.download', invoice.number);
+    return pdfResponse(c, invoice.pdf, `attachment; filename="Facture-${invoice.number}.pdf"`);
   });
 
-  api.get('/invoices/:id/pdf', (req, res) => {
-    const invoice = store.getInvoice(req.shop, Number(req.params.id));
-    if (!invoice) return res.status(404).json({ error: 'Facture introuvable' });
-    audit(req, 'invoice.download', invoice.number);
-    res.type('application/pdf');
-    res.set('Content-Disposition', `attachment; filename="Facture-${invoice.number}.pdf"`);
-    res.send(Buffer.from(invoice.pdf));
-  });
-
-  api.post('/invoices/:id/send', async (req, res) => {
+  api.post('/invoices/:id/send', async (c) => {
+    const shop = c.get('shop');
+    const id = Number(c.req.param('id'));
     try {
-      const invoice = store.getInvoice(req.shop, Number(req.params.id));
-      if (invoice) audit(req, 'invoice.send', invoice.number);
-      res.json(await service.sendInvoice(req.shop, Number(req.params.id)));
+      const invoice = store.getInvoice(shop, id);
+      if (invoice) audit(c, 'invoice.send', invoice.number);
+      return c.json(await service.sendInvoice(shop, id));
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      return c.json({ error: error.message }, 400);
     }
   });
 
   // ---------- Remplissage automatique des informations d'entreprise ----------
   // Rien n'est enregistré ici : l'admin remplit le formulaire, le marchand vérifie et enregistre.
-  api.get('/company/shopify', async (req, res) => {
+  api.get('/company/shopify', async (c) => {
     try {
-      res.json({ company: await shopifyCompanyInfo(req.shop) });
+      return c.json({ company: await shopifyCompanyInfo(c.get('shop')) });
     } catch (error) {
-      res.status(502).json({ error: error.message });
+      return c.json({ error: error.message }, 502);
     }
   });
 
-  api.get('/company/lookup', async (req, res) => {
+  api.get('/company/lookup', async (c) => {
     try {
-      res.json({ results: await lookupFrenchCompany(req.query.q, fetchImpl) });
+      return c.json({ results: await lookupFrenchCompany(c.req.query('q'), fetchImpl) });
     } catch (error) {
-      logger.warn(`${req.shop} : recherche d'entreprise impossible : ${error.message}`);
-      res.status(502).json({ error: error.message });
+      logger.warn(`${c.get('shop')} : recherche d'entreprise impossible : ${error.message}`);
+      return c.json({ error: error.message }, 502);
     }
   });
 
   // ---------- Abonnement ----------
-  api.get('/billing', (req, res) => {
-    const usage = service.usage(req.shop);
-    res.json({
+  api.get('/billing', (c) => {
+    const usage = service.usage(c.get('shop'));
+    return c.json({
       current: usage.plan.key,
       used: usage.used,
       limit: usage.limit,
@@ -330,13 +354,14 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     });
   });
 
-  api.post('/billing/subscribe', async (req, res) => {
-    const plan = PLANS[req.body.plan];
-    if (!plan || plan.price === 0) return res.status(400).json({ error: 'Formule inconnue' });
+  api.post('/billing/subscribe', async (c) => {
+    const shop = c.get('shop');
+    const plan = PLANS[(await body(c)).plan];
+    if (!plan || plan.price === 0) return c.json({ error: 'Formule inconnue' }, 400);
     try {
-      const data = await graphql(req.shop, SUBSCRIPTION_CREATE, {
+      const data = await graphql(shop, SUBSCRIPTION_CREATE, {
         name: subscriptionName(plan),
-        returnUrl: `https://${req.shop}/admin/apps/${config.apiKey}`,
+        returnUrl: `https://${shop}/admin/apps/${config.apiKey}`,
         trialDays: plan.trialDays ?? 0,
         test: config.billingTest,
         lineItems: [
@@ -353,47 +378,50 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
       const result = data.appSubscriptionCreate;
       if (result.userErrors.length) throw new Error(result.userErrors.map((e) => e.message).join(', '));
       // Le marchand valide le paiement sur une page Shopify, puis revient dans l'appli.
-      res.json({ confirmationUrl: result.confirmationUrl });
+      return c.json({ confirmationUrl: result.confirmationUrl });
     } catch (error) {
-      logger.error(`${req.shop} : abonnement impossible : ${error.message}`);
-      res.status(502).json({ error: `Abonnement impossible : ${error.message}` });
+      logger.error(`${shop} : abonnement impossible : ${error.message}`);
+      return c.json({ error: `Abonnement impossible : ${error.message}` }, 502);
     }
   });
 
-  api.post('/billing/cancel', async (req, res) => {
-    const { subscription_id: id } = store.ensureShop(req.shop);
+  api.post('/billing/cancel', async (c) => {
+    const shop = c.get('shop');
+    const { subscription_id: id } = store.ensureShop(shop);
     try {
       if (id) {
-        const { appSubscriptionCancel: result } = await graphql(req.shop, SUBSCRIPTION_CANCEL, { id });
+        const { appSubscriptionCancel: result } = await graphql(shop, SUBSCRIPTION_CANCEL, { id });
         if (result.userErrors.length) throw new Error(result.userErrors.map((e) => e.message).join(', '));
       }
-      store.setPlan(req.shop, 'free');
-      res.json({ current: 'free' });
+      store.setPlan(shop, 'free');
+      return c.json({ current: 'free' });
     } catch (error) {
-      res.status(502).json({ error: `Résiliation impossible : ${error.message}` });
+      return c.json({ error: `Résiliation impossible : ${error.message}` }, 502);
     }
   });
 
-  api.post('/pending/generate', async (req, res) => {
-    audit(req, 'pending.generate');
-    res.json(await service.generatePending(req.shop));
+  api.post('/pending/generate', async (c) => {
+    audit(c, 'pending.generate');
+    return c.json(await service.generatePending(c.get('shop')));
   });
 
   // Aperçu avec une commande fictive et les réglages en cours d'édition (non enregistrés).
-  api.post('/preview', async (req, res) => {
-    const row = store.ensureShop(req.shop);
-    const settings = sanitizeSettings(req.body.settings ?? {}, row.settings);
-    const lang = invoiceLanguage(settings, req.body.locale);
-    const { pdf } = await service.renderPdf(buildInvoice(SAMPLE_ORDER), {
+  api.post('/preview', async (c) => {
+    const shop = c.get('shop');
+    const input = await body(c);
+    const row = store.ensureShop(shop);
+    const settings = sanitizeSettings(input.settings ?? {}, row.settings);
+    const lang = invoiceLanguage(settings, input.locale);
+    const { pdf } = await service.renderPdf(buildInvoice(assets.sampleOrder), {
       number: `${settings.numberPrefix}${new Date().getFullYear()}-${dictionary(lang).invoice.preview}`,
       issuedAt: new Date().toISOString(),
       settings,
-      shopName: req.shop.replace('.myshopify.com', ''),
+      shopName: shop.replace('.myshopify.com', ''),
       lang,
     });
-    res.type('application/pdf').send(pdf);
+    return c.body(new Uint8Array(pdf), 200, { 'Content-Type': 'application/pdf' });
   });
 
-  app.use('/api', api);
+  app.route('/api', api);
   return app;
 }

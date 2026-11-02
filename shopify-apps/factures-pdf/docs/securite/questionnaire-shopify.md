@@ -14,7 +14,7 @@ place dans le code ou dans les documents de ce dossier.
 | Décisions automatisées avec effets juridiques ? | Non applicable | Aucune. |
 | Durées de rétention limitées ? | Oui | Effacement 48 h après désinstallation, effacements RGPD automatiques, journal 12 mois, sauvegardes 30 jours. |
 | Chiffrement au repos et en transit ? | Oui | AES-256-GCM dans la base (`src/crypto.js`) ; HTTPS pour toutes les connexions. |
-| Sauvegardes chiffrées ? | Oui | Sauvegardes automatiques chiffrées AES-256-GCM (`src/backup.js`, `sauvegardes.md`). |
+| Sauvegardes chiffrées ? | Oui | Cloudflare : historique de 30 jours avec restauration à un instant donné, données chiffrées par l'appli et par Cloudflare. Serveur Node : sauvegardes chiffrées AES-256-GCM (`src/backup.js`). Voir `sauvegardes.md`. |
 | Séparation test / production ? | Oui | Boutique de développement et bases de test ; aucune donnée de production en test. |
 | Stratégie de prévention de la perte de données ? | Oui | Sauvegardes quotidiennes externalisées, test mensuel de restauration (`sauvegardes.md`). |
 | Accès des employés limité ? | Oui | Accès nominatif et limité (`acces-et-mots-de-passe.md`). |
@@ -24,5 +24,5 @@ place dans le code ou dans les documents de ce dossier.
 | Audits et certifications | (laisser vide) | Aucun audit externe à ce jour : ne rien déclarer. |
 
 **Avant la soumission**, vérifier que ces engagements sont bien appliqués en production :
-`DATA_ENCRYPTION_KEY` et `BACKUP_DIR` renseignés, copie externe des sauvegardes, double
+`DATA_ENCRYPTION_KEY` enregistré comme secret Cloudflare (et copié hors ligne), double
 authentification activée partout, tableau des accès rempli, politique d'incident approuvée.

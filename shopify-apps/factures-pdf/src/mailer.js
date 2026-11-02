@@ -3,15 +3,36 @@
 // son propre e-mail, et propose en plus un lien de téléchargement à placer dans la
 // confirmation de commande Shopify (voir README).
 
-import nodemailer from 'nodemailer';
 import { fillTemplate } from './settings.js';
 import { dictionary } from './i18n/index.js';
 
-/** `url` : adresse smtp://…, objet de réglages nodemailer, ou "json" (tests, aucun envoi). */
-export function createTransport(url) {
-  if (!url) return null;
-  if (url === 'json') return nodemailer.createTransport({ jsonTransport: true });
-  return nodemailer.createTransport(url);
+/**
+ * Envoi par l'API web de Brevo (fonctionne sur Node et sur Cloudflare, qui n'autorise pas le
+ * SMTP classique). Même interface que nodemailer : sendMail(message).
+ */
+export function createBrevoTransport(apiKey, fetchImpl = fetch) {
+  const toBase64 = (content) => (typeof content === 'string' ? Buffer.from(content) : Buffer.from(content)).toString('base64');
+  const contact = (value) => (typeof value === 'string' ? { email: value } : { email: value.address, name: value.name });
+  return {
+    async sendMail(message) {
+      const response = await fetchImpl('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          sender: contact(message.from),
+          to: [contact(message.to)],
+          ...(message.bcc ? { bcc: [contact(message.bcc)] } : {}),
+          ...(message.replyTo ? { replyTo: contact(message.replyTo) } : {}),
+          subject: message.subject,
+          textContent: message.text,
+          htmlContent: message.html,
+          attachment: (message.attachments ?? []).map((a) => ({ name: a.filename, content: toBase64(a.content) })),
+        }),
+      });
+      if (!response.ok) throw new Error(`Brevo : ${response.status} ${(await response.text()).slice(0, 200)}`);
+      return response.json();
+    },
+  };
 }
 
 const escapeHtml = (text) =>

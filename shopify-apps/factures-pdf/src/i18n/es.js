@@ -146,6 +146,7 @@ export default {
     'facturx.issue.countryCode': 'el país',
     'facturx.issue.vatNumber': 'el n.º de IVA',
     'facturx.issue.siret': 'el SIRET',
+    'facturx.issue.email': 'el correo electrónico',
     'facturx.badge': 'Factur-X',
     'log.title': 'Registro de accesos',
     'log.help': 'Cada consulta de facturas y datos de clientes se registra y se conserva 12 meses.',

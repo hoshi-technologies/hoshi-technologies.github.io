@@ -4,3 +4,5 @@ data/
 *.pdf
 !test/fixtures/*.pdf
 .shopify/
+.dev.vars
+.wrangler/

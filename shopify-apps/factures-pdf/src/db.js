@@ -3,23 +3,13 @@
 // Les données personnelles (PDF, nom et e-mail du client, commandes en attente, jeton d'accès
 // Shopify) sont chiffrées au repos en AES-256-GCM (voir crypto.js).
 
-import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { DEFAULT_SETTINGS } from './settings.js';
 import { createCipher } from './crypto.js';
 
-/**
- * @param path  fichier SQLite, ou ':memory:'
- * @param key   clé de chiffrement de 32 octets (Buffer) ; obligatoire pour un fichier,
- *              aléatoire pour une base en mémoire (tests, démo)
- */
-export function openDatabase(path, { key } = {}) {
-  if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
-  if (!key && path !== ':memory:') throw new Error('Clé de chiffrement manquante pour la base de données.');
-  const db = new DatabaseSync(path);
-  db.exec(`
+/** Stockage sur n'importe quel adaptateur SQL (voir sql.js) ; crée les tables au besoin. */
+export function createStore(sql, key) {
+  sql.exec(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS shops (
       shop TEXT PRIMARY KEY,
@@ -78,7 +68,7 @@ export function openDatabase(path, { key } = {}) {
     );
     CREATE INDEX IF NOT EXISTS access_log_shop ON access_log (shop, id DESC);
   `);
-  return new Store(db, createCipher(key ?? randomBytes(32)));
+  return new Store(sql, createCipher(key ?? randomBytes(32)));
 }
 
 /** Adresse IP tronquée (dernier octet / derniers groupes masqués) : suffisante, moins identifiante. */
@@ -90,8 +80,8 @@ export function truncateIp(ip) {
 }
 
 export class Store {
-  constructor(db, cipher) {
-    this.db = db;
+  constructor(sql, cipher) {
+    this.sql = sql;
     this.cipher = cipher;
   }
 
@@ -110,7 +100,7 @@ export class Store {
   }
 
   getShop(shop) {
-    const row = this.db.prepare('SELECT * FROM shops WHERE shop = ?').get(shop);
+    const row = this.sql.get('SELECT * FROM shops WHERE shop = ?', shop);
     if (!row) return null;
     return {
       ...row,
@@ -120,20 +110,18 @@ export class Store {
   }
 
   ensureShop(shop) {
-    this.db.prepare('INSERT OR IGNORE INTO shops (shop) VALUES (?)').run(shop);
+    this.sql.run('INSERT OR IGNORE INTO shops (shop) VALUES (?)', shop);
     return this.getShop(shop);
   }
 
   saveToken(shop, accessToken, scope) {
     this.ensureShop(shop);
-    this.db
-      .prepare('UPDATE shops SET access_token = ?, scope = ?, uninstalled_at = NULL WHERE shop = ?')
-      .run(this.cipher.encrypt(accessToken), scope, shop);
+    this.sql.run('UPDATE shops SET access_token = ?, scope = ?, uninstalled_at = NULL WHERE shop = ?', this.cipher.encrypt(accessToken), scope, shop);
   }
 
   saveSettings(shop, settings) {
     this.ensureShop(shop);
-    this.db.prepare('UPDATE shops SET settings = ? WHERE shop = ?').run(JSON.stringify(settings), shop);
+    this.sql.run('UPDATE shops SET settings = ? WHERE shop = ?', JSON.stringify(settings), shop);
   }
 
   /** Le compteur ne peut qu'avancer : la numérotation doit rester continue et chronologique. */
@@ -142,78 +130,66 @@ export class Store {
     if (!Number.isInteger(next) || next < current.next_number) {
       throw new Error(`Le prochain numéro ne peut pas être inférieur à ${current.next_number}.`);
     }
-    this.db.prepare('UPDATE shops SET next_number = ? WHERE shop = ?').run(next, shop);
+    this.sql.run('UPDATE shops SET next_number = ? WHERE shop = ?', next, shop);
   }
 
   markUninstalled(shop) {
     // Shopify annule lui-même l'abonnement à la désinstallation.
-    this.db
-      .prepare(
+    this.sql.run(
         "UPDATE shops SET access_token = NULL, plan = 'free', subscription_id = NULL, uninstalled_at = datetime('now') WHERE shop = ?",
-      )
-      .run(shop);
+      shop);
   }
 
   setPlan(shop, plan, subscriptionId = null) {
     this.ensureShop(shop);
-    this.db.prepare('UPDATE shops SET plan = ?, subscription_id = ? WHERE shop = ?').run(plan, subscriptionId, shop);
+    this.sql.run('UPDATE shops SET plan = ?, subscription_id = ? WHERE shop = ?', plan, subscriptionId, shop);
   }
 
   /** Marque le quota du mois comme signalé ; renvoie false s'il l'était déjà. */
   markQuotaNotified(shop, month) {
-    const { changes } = this.db
-      .prepare('UPDATE shops SET quota_notified_month = ? WHERE shop = ? AND quota_notified_month IS NOT ?')
-      .run(month, shop, month);
+    const { changes } = this.sql.run('UPDATE shops SET quota_notified_month = ? WHERE shop = ? AND quota_notified_month IS NOT ?', month, shop, month);
     return changes > 0;
   }
 
   countInvoicesSince(shop, sinceIso) {
-    return this.db.prepare('SELECT COUNT(*) AS n FROM invoices WHERE shop = ? AND issued_at >= ?').get(shop, sinceIso).n;
+    return this.sql.get('SELECT COUNT(*) AS n FROM invoices WHERE shop = ? AND issued_at >= ?', shop, sinceIso).n;
   }
 
   addPendingOrder(shop, order) {
-    this.db
-      .prepare('INSERT OR IGNORE INTO pending_orders (shop, order_id, order_name, payload) VALUES (?, ?, ?, ?)')
-      .run(shop, String(order.id), order.name ?? null, this.cipher.encrypt(JSON.stringify(order)));
+    this.sql.run('INSERT OR IGNORE INTO pending_orders (shop, order_id, order_name, payload) VALUES (?, ?, ?, ?)', shop, String(order.id), order.name ?? null, this.cipher.encrypt(JSON.stringify(order)));
   }
 
   listPendingOrders(shop) {
-    return this.db
-      .prepare('SELECT order_id, order_name, received_at FROM pending_orders WHERE shop = ? ORDER BY received_at, order_id')
-      .all(shop);
+    return this.sql.all('SELECT order_id, order_name, received_at FROM pending_orders WHERE shop = ? ORDER BY received_at, order_id', shop);
   }
 
   getPendingPayloads(shop, limit) {
-    return this.db
-      .prepare('SELECT payload FROM pending_orders WHERE shop = ? ORDER BY received_at, order_id LIMIT ?')
-      .all(shop, limit)
+    return this.sql.all('SELECT payload FROM pending_orders WHERE shop = ? ORDER BY received_at, order_id LIMIT ?', shop, limit)
       .map((row) => JSON.parse(this.cipher.decryptText(row.payload)));
   }
 
   deletePendingOrder(shop, orderId) {
-    this.db.prepare('DELETE FROM pending_orders WHERE shop = ? AND order_id = ?').run(shop, String(orderId));
+    this.sql.run('DELETE FROM pending_orders WHERE shop = ? AND order_id = ?', shop, String(orderId));
   }
 
   findInvoiceByOrder(shop, orderId) {
-    return this.readInvoice(this.db.prepare('SELECT * FROM invoices WHERE shop = ? AND order_id = ?').get(shop, String(orderId)));
+    return this.readInvoice(this.sql.get('SELECT * FROM invoices WHERE shop = ? AND order_id = ?', shop, String(orderId)));
   }
 
   findInvoiceByToken(token) {
-    return this.readInvoice(this.db.prepare('SELECT * FROM invoices WHERE order_token = ?').get(token));
+    return this.readInvoice(this.sql.get('SELECT * FROM invoices WHERE order_token = ?', token));
   }
 
   getInvoice(shop, id) {
-    return this.readInvoice(this.db.prepare('SELECT * FROM invoices WHERE shop = ? AND id = ?').get(shop, id));
+    return this.readInvoice(this.sql.get('SELECT * FROM invoices WHERE shop = ? AND id = ?', shop, id));
   }
 
   listInvoices(shop, limit = 50) {
-    return this.db
-      .prepare(
+    return this.sql.all(
         `SELECT id, order_id, order_name, number, issued_at, customer_email, customer_name,
                 total_cents, currency, language, facturx, email_status, email_error, email_sent_at
            FROM invoices WHERE shop = ? ORDER BY id DESC LIMIT ?`,
-      )
-      .all(shop, limit)
+      shop, limit)
       .map((row) => this.readInvoice(row));
   }
 
@@ -224,87 +200,73 @@ export class Store {
    * protège en plus contre toute course.
    */
   insertInvoice(shop, seq, record) {
-    this.db.exec('BEGIN IMMEDIATE');
-    try {
+    const id = this.sql.transaction(() => {
       const { next_number: current } = this.ensureShop(shop);
       if (current !== seq) throw new Error(`Compteur de factures modifié (${current} au lieu de ${seq}).`);
-      this.db.prepare('UPDATE shops SET next_number = ? WHERE shop = ?').run(seq + 1, shop);
-      const { lastInsertRowid } = this.db
-        .prepare(
-          `INSERT INTO invoices (shop, order_id, order_name, order_token, number, issued_at,
-                                 customer_email, customer_name, customer_first_name, total_cents, currency,
-                                 language, facturx, pdf)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        )
-        .run(
-          shop,
-          String(record.orderId),
-          record.orderName,
-          record.orderToken,
-          record.number,
-          record.issuedAt,
-          this.cipher.encrypt(record.customerEmail),
-          this.cipher.encrypt(record.customerName),
-          this.cipher.encrypt(record.customerFirstName),
-          record.totalCents,
-          record.currency,
-          record.language,
-          record.facturx ? 1 : 0,
-          this.cipher.encrypt(record.pdf),
-        );
-      this.db.exec('COMMIT');
-      return this.getInvoice(shop, Number(lastInsertRowid));
-    } catch (error) {
-      this.db.exec('ROLLBACK');
-      throw error;
-    }
+      this.sql.run('UPDATE shops SET next_number = ? WHERE shop = ?', seq + 1, shop);
+      return this.sql.run(
+        `INSERT INTO invoices (shop, order_id, order_name, order_token, number, issued_at,
+                               customer_email, customer_name, customer_first_name, total_cents, currency,
+                               language, facturx, pdf)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        shop,
+        String(record.orderId),
+        record.orderName,
+        record.orderToken,
+        record.number,
+        record.issuedAt,
+        this.cipher.encrypt(record.customerEmail),
+        this.cipher.encrypt(record.customerName),
+        this.cipher.encrypt(record.customerFirstName),
+        record.totalCents,
+        record.currency,
+        record.language,
+        record.facturx ? 1 : 0,
+        this.cipher.encrypt(record.pdf),
+      ).lastInsertRowid;
+    });
+    return this.getInvoice(shop, id);
   }
 
   setEmailStatus(id, status, error = null) {
-    this.db
-      .prepare(
+    this.sql.run(
         `UPDATE invoices SET email_status = ?, email_error = ?,
                 email_sent_at = CASE WHEN ? = 'sent' THEN datetime('now') ELSE email_sent_at END
           WHERE id = ?`,
-      )
-      .run(status, error, status, id);
+      status, error, status, id);
   }
 
   /** RGPD (customers/redact) : supprime les factures des commandes concernées. */
   deleteInvoicesForOrders(shop, orderIds) {
-    const stmt = this.db.prepare('DELETE FROM invoices WHERE shop = ? AND order_id = ?');
+    const remove = (id) => this.sql.run('DELETE FROM invoices WHERE shop = ? AND order_id = ?', shop, String(id));
     for (const id of orderIds) {
-      stmt.run(shop, String(id));
+      remove(id);
       this.deletePendingOrder(shop, id);
     }
   }
 
   /** RGPD (shop/redact) : supprime toutes les données de la boutique. */
   deleteShop(shop) {
-    this.db.prepare('DELETE FROM invoices WHERE shop = ?').run(shop);
-    this.db.prepare('DELETE FROM pending_orders WHERE shop = ?').run(shop);
-    this.db.prepare('DELETE FROM access_log WHERE shop = ?').run(shop);
-    this.db.prepare('DELETE FROM shops WHERE shop = ?').run(shop);
+    this.sql.run('DELETE FROM invoices WHERE shop = ?', shop);
+    this.sql.run('DELETE FROM pending_orders WHERE shop = ?', shop);
+    this.sql.run('DELETE FROM access_log WHERE shop = ?', shop);
+    this.sql.run('DELETE FROM shops WHERE shop = ?', shop);
   }
 
   // ---------- Journal des accès aux données personnelles ----------
 
   /** actor : "user:<id Shopify>", "customer" (lien public) ou "shopify" (webhooks RGPD). */
   logAccess(shop, { actor, action, target = null, ip = null }) {
-    this.db
-      .prepare('INSERT INTO access_log (shop, actor, action, target, ip) VALUES (?, ?, ?, ?, ?)')
-      .run(shop, actor, action, target === null ? null : String(target), truncateIp(ip));
+    this.sql.run('INSERT INTO access_log (shop, actor, action, target, ip) VALUES (?, ?, ?, ?, ?)', shop, actor, action, target === null ? null : String(target), truncateIp(ip));
   }
 
   listAccessLog(shop, limit = 100) {
-    return this.db
-      .prepare('SELECT at, actor, action, target, ip FROM access_log WHERE shop = ? ORDER BY id DESC LIMIT ?')
-      .all(shop, limit);
+    return this.sql.all('SELECT at, actor, action, target, ip FROM access_log WHERE shop = ? ORDER BY id DESC LIMIT ?', shop, limit);
   }
 
   /** Purge des entrées plus anciennes que `days` jours (12 mois par défaut). */
   purgeAccessLog(days = 365) {
     const cutoff = new Date(Date.now() - days * 864e5).toISOString();
-    return Number(this.db.prepare('DELETE FROM access_log WHERE at < ?').run(cutoff).changes);
+    return Number(this.sql.run('DELETE FROM access_log WHERE at < ?', cutoff).changes);
   }
 }

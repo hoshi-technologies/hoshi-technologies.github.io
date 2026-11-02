@@ -48,6 +48,16 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
   de réponse a été codé d'après la documentation de l'API et testé avec des réponses
   simulées : à vérifier sur l'API réelle avant la mise en production.
 
+## Hébergement
+
+- **Cloudflare Workers** (production) : `src/worker.js`, `wrangler.toml`, un Durable Object
+  SQLite par boutique. Guide : `docs/cloudflare.md`. Offre Workers Paid (5 $/mois) requise en
+  production : une facture PDF demande ~100–200 ms de calcul, l'offre gratuite en autorise 10.
+- **Node** (tests, mode démo, `shopify app dev`, ou serveur classique) : `src/index.js`.
+- Le même code d'application (`src/server.js`, Hono) tourne dans les deux cas ; seuls
+  l'ouverture de la base (`db-node.js` / Durable Object) et l'envoi d'e-mails (SMTP ou API
+  Brevo) changent.
+
 ## Sécurité et protection des données
 
 - **Chiffrement au repos** (AES-256-GCM, `src/crypto.js`) des données personnelles : PDF,

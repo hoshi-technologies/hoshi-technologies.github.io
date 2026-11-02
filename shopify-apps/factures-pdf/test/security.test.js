@@ -6,9 +6,9 @@ import { join } from 'node:path';
 import { createHmac } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 
-import { openDatabase, truncateIp } from '../src/db.js';
+import { openDatabase, truncateIp } from '../src/db-node.js';
 import { InvoiceService } from '../src/service.js';
-import { createApp } from '../src/server.js';
+import { createApp } from '../src/node-app.js';
 import { createCipher, resolveKey, generateKey } from '../src/crypto.js';
 import { createBackup, restoreBackup, listBackups, pruneBackups } from '../src/backup.js';
 import { signSessionToken } from '../src/shopify.js';
@@ -58,7 +58,7 @@ test('sauvegarde chiffrée : restaurable, intègre, illisible sans la clé, purg
   const store = openDatabase(join(dir, 'base.sqlite'), { key });
   const service = new InvoiceService({ store, transport: null, mailFrom: null, logger: quiet });
   await service.createInvoice(SHOP, ORDER);
-  const file = createBackup(store.db, { dir: join(dir, 'backups'), key });
+  const file = createBackup(store.sql.raw, { dir: join(dir, 'backups'), key });
   assert.match(file, /factures-\d{8}-\d{6}\.sqlite\.gz\.enc$/);
   const bytes = readFileSync(file).toString('latin1');
   assert.ok(!bytes.includes('SQLite format') && !bytes.includes('marie'), 'sauvegarde chiffrée');
@@ -106,7 +106,7 @@ test('journal des accès : admin, lien public (IP tronquée), RGPD ; purge à 12
     ]);
     assert.equal(summary[2][3], '198.51.100.0', 'IP du client tronquée');
 
-    store.db.prepare("UPDATE access_log SET at = '2020-01-01T00:00:00.000Z' WHERE action = 'invoice.list'").run();
+    store.sql.run("UPDATE access_log SET at = '2020-01-01T00:00:00.000Z' WHERE action = 'invoice.list'");
     assert.equal(store.purgeAccessLog(365), 1);
   } finally {
     server.close();

@@ -1,9 +1,7 @@
 // Configuration lue dans les variables d'environnement (voir .env.example).
 
 function required(name) {
-  const value = process.env[name];
-  if (!value) throw new Error(`Variable d'environnement manquante : ${name}`);
-  return value;
+  throw new Error(`Variable d'environnement manquante : ${name}`);
 }
 
 const withHttps = (url) => (/^https?:\/\//.test(url) ? url : `https://${url}`).replace(/\/$/, '');
@@ -20,7 +18,7 @@ function smtpFromParts(env) {
   };
 }
 
-export function loadConfig(env = process.env) {
+export function loadConfig(env = globalThis.process?.env ?? {}) {
   const get = (name, fallback) => env[name] ?? fallback;
   return {
     // Shopify CLI (`shopify app dev`) fournit le port et l'URL du tunnel sous plusieurs noms.
@@ -46,6 +44,8 @@ export function loadConfig(env = process.env) {
     mail: {
       // smtp://user:pass@smtp.exemple.fr:587 ; "json" pour les tests (aucun envoi réel).
       transport: get('SMTP_URL', '') || smtpFromParts(env),
+      // API web de Brevo : prioritaire sur le SMTP, seule possibilité sur Cloudflare.
+      brevoApiKey: get('BREVO_API_KEY', ''),
       from: get('MAIL_FROM', ''),
     },
   };

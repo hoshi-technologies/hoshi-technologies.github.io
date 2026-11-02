@@ -8,7 +8,13 @@ import { buildFacturxXml, facturxIssues } from './facturx.js';
 import { dictionary, format, invoiceLanguage } from './i18n/index.js';
 
 export class InvoiceService {
-  constructor({ store, transport, mailFrom, fetchImpl = fetch, logger = console }) {
+  /**
+   * @param defer            garde une tâche de fond en vie après la réponse (Cloudflare : waitUntil)
+   * @param onInvoiceCreated appelé après l'enregistrement d'une facture (Cloudflare : index des liens)
+   */
+  constructor({ store, transport, mailFrom, fetchImpl = fetch, logger = console, defer = () => {}, onInvoiceCreated = null }) {
+    this.defer = defer;
+    this.onInvoiceCreated = onInvoiceCreated;
     this.store = store;
     this.transport = transport;
     this.mailFrom = mailFrom;
@@ -77,9 +83,9 @@ export class InvoiceService {
     // Sans service d'e-mail configuré, on n'essaie pas : la facture reste « Non envoyé ».
     if (result.created && settings.autoSend && this.transport && this.mailFrom) {
       // L'e-mail part après la réponse au webhook ; un échec reste visible dans l'admin.
-      this.sendInvoice(shop, result.invoice.id).catch(() => {});
+      this.defer(this.sendInvoice(shop, result.invoice.id).catch(() => {}));
     }
-    if (result.pending) this.notifyQuotaReached(shop).catch(() => {});
+    if (result.pending) this.defer(this.notifyQuotaReached(shop).catch(() => {}));
     return result;
   }
 
@@ -167,6 +173,7 @@ export class InvoiceService {
         pdf,
       });
       this.store.deletePendingOrder(shop, order.id);
+      await this.onInvoiceCreated?.(saved);
       this.logger.info(`${shop} : facture ${number} créée pour ${invoice.orderName}`);
       return { invoice: saved, created: true };
     };

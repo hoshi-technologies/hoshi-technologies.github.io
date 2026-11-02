@@ -146,6 +146,7 @@ export default {
     'facturx.issue.countryCode': 'country',
     'facturx.issue.vatNumber': 'VAT number',
     'facturx.issue.siret': 'SIRET',
+    'facturx.issue.email': 'email',
     'facturx.badge': 'Factur-X',
     'log.title': 'Access log',
     'log.help': 'Every access to invoices and customer data is recorded and kept for 12 months.',

@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { frenchVatNumber, lookupFrenchCompany } from '../src/company-lookup.js';
-import { openDatabase } from '../src/db.js';
+import { openDatabase } from '../src/db-node.js';
 import { InvoiceService } from '../src/service.js';
-import { createApp } from '../src/server.js';
+import { createApp } from '../src/node-app.js';
 import { signSessionToken } from '../src/shopify.js';
 
 const SHOP = 'boutique-exemple.myshopify.com';

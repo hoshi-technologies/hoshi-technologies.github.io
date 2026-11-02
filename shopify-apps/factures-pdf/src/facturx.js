@@ -40,6 +40,7 @@ export function facturxIssues(settings, invoice = null) {
   if (!/^[A-Z]{2}$/.test(settings.countryCode || '')) issues.push('countryCode');
   if (!settings.vatExempt && !settings.vatNumber) issues.push('vatNumber');
   if (settings.vatExempt && !settings.vatNumber && !settings.siret) issues.push('siret');
+  if (!settings.email && String(settings.siret ?? '').replace(/\D/g, '').length < 9) issues.push('email');
   if (invoice && settings.vatExempt && invoice.totalTaxCents > 0) issues.push('vatCharged');
   return issues;
 }
@@ -140,7 +141,13 @@ export function buildFacturxXml(invoice, { number, issuedAt, settings, shopName,
 <rsm:SupplyChainTradeTransaction>
 ${lines}
 <ram:ApplicableHeaderTradeAgreement><ram:SellerTradeParty><ram:Name>${esc(sellerName)}</ram:Name>${legalId}${addressXml({ ...seller, country: settings.countryCode || 'FR' })}${
-    settings.email ? `<ram:URIUniversalCommunication><ram:URIID schemeID="EM">${esc(settings.email)}</ram:URIID></ram:URIUniversalCommunication>` : ''
+    // Adresse électronique du vendeur (BT-34, obligatoire dans la réforme française) : e-mail,
+    // sinon SIREN au format d'adressage de la réforme (schéma 0225).
+    settings.email
+      ? `<ram:URIUniversalCommunication><ram:URIID schemeID="EM">${esc(settings.email)}</ram:URIID></ram:URIUniversalCommunication>`
+      : siren
+        ? `<ram:URIUniversalCommunication><ram:URIID schemeID="0225">${siren}</ram:URIID></ram:URIUniversalCommunication>`
+        : ''
   }${taxRegistration}</ram:SellerTradeParty><ram:BuyerTradeParty><ram:Name>${esc(buyerName)}</ram:Name>${addressXml({
     postcode: buyer.zip,
     line1: buyer.address1,

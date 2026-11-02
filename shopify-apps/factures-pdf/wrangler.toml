@@ -1,0 +1,40 @@
+# Déploiement sur Cloudflare Workers : `npx wrangler deploy` (voir docs/cloudflare.md).
+name = "hoshi-factures"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Polices (PDF) et page d'administration intégrées au Worker.
+rules = [
+  { type = "Data", globs = ["**/*.ttf"], fallthrough = true },
+  { type = "Text", globs = ["**/*.html"], fallthrough = true },
+]
+
+# La bibliothèque PDF résout un fichier interne à partir de import.meta.url.
+[define]
+"import.meta.url" = "\"file:///worker.js\""
+
+[[durable_objects.bindings]]
+name = "SHOPS"
+class_name = "ShopStore"
+
+[[durable_objects.bindings]]
+name = "DIRECTORY"
+class_name = "Directory"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ShopStore", "Directory"]
+
+[observability]
+enabled = true
+
+# Valeurs publiques. Les secrets se définissent avec `npx wrangler secret put NOM` :
+# SHOPIFY_API_SECRET, DATA_ENCRYPTION_KEY, BREVO_API_KEY.
+[vars]
+SHOPIFY_API_KEY = "29382e5537f3d51df592997c1947800a"
+SHOPIFY_API_VERSION = "2026-10"
+SHOPIFY_APP_URL = "https://hoshi-factures.example.workers.dev"
+BILLING_TEST = "true"
+MAIL_FROM = ""
+SUPPORT_EMAIL = ""

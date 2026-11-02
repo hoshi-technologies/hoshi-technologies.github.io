@@ -7,10 +7,10 @@ import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { openDatabase } from '../src/db.js';
+import { openDatabase } from '../src/db-node.js';
 import { InvoiceService } from '../src/service.js';
-import { createApp } from '../src/server.js';
-import { createTransport } from '../src/mailer.js';
+import { createApp } from '../src/node-app.js';
+import { createTransport } from '../src/mail-smtp.js';
 import { buildInvoice, formatInvoiceNumber } from '../src/invoice.js';
 import { signSessionToken, verifySessionToken, verifyWebhook } from '../src/shopify.js';
 import { sanitizeSettings } from '../src/settings.js';

@@ -146,6 +146,7 @@ export default {
     'facturx.issue.countryCode': 'land',
     'facturx.issue.vatNumber': 'btw-nummer',
     'facturx.issue.siret': 'SIRET',
+    'facturx.issue.email': 'e-mail',
     'facturx.badge': 'Factur-X',
     'log.title': 'Toegangslogboek',
     'log.help': 'Elke raadpleging van facturen en klantgegevens wordt vastgelegd en 12 maanden bewaard.',

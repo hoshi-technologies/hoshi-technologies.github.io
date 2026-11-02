@@ -2,7 +2,6 @@
 // Si un XML Factur-X est fourni, il est embarqué : le PDF devient une facture Factur-X.
 
 import PDFDocument from 'pdfkit';
-import { fileURLToPath } from 'node:url';
 import { dictionary, format } from './i18n/index.js';
 import { FACTURX_FILENAME, FACTURX_XMP } from './facturx.js';
 
@@ -21,12 +20,20 @@ const COLUMNS = [
 ];
 
 // Polices embarquées (obligatoire en PDF/A) : Liberation Sans, licence SIL OFL.
-const FONT_DIR = fileURLToPath(new URL('../assets/fonts/', import.meta.url));
-const FONTS = {
-  regular: `${FONT_DIR}LiberationSans-Regular.ttf`,
-  bold: `${FONT_DIR}LiberationSans-Bold.ttf`,
-  italic: `${FONT_DIR}LiberationSans-Italic.ttf`,
-};
+// Sur Cloudflare, worker.js les fournit avec useFonts() ; sur Node, elles sont lues sur le disque.
+let FONTS = null;
+export function useFonts(fonts) {
+  FONTS = fonts;
+}
+async function loadFonts() {
+  if (FONTS) return FONTS;
+  const { readFileSync } = await import('node:fs');
+  const { fileURLToPath } = await import('node:url');
+  const dir = fileURLToPath(new URL('../assets/fonts/', import.meta.url));
+  const read = (name) => readFileSync(`${dir}LiberationSans-${name}.ttf`);
+  FONTS = { regular: read('Regular'), bold: read('Bold'), italic: read('Italic') };
+  return FONTS;
+}
 
 // Espaces fines insécables (fr-FR) remplacées par des insécables classiques, plus sûres.
 const clean = (text) => String(text ?? '').replace(/[\u202f\u2009]/g, '\u00a0');
@@ -78,7 +85,11 @@ function sellerLines(s, t, colon, intl) {
  *                            lang (code de langue), facturxXml (chaîne XML ou null) }
  * @returns {Promise<Buffer>}
  */
-export function renderInvoicePdf(invoice, { number, issuedAt, settings, shopName, logo, lang = 'fr', facturxXml = null }) {
+export async function renderInvoicePdf(invoice, meta) {
+  return drawInvoicePdf(invoice, { ...meta, fonts: await loadFonts() });
+}
+
+function drawInvoicePdf(invoice, { number, issuedAt, settings, shopName, logo, lang = 'fr', facturxXml = null, fonts: FONTS }) {
   const dict = dictionary(lang);
   const t = dict.invoice;
   const intl = dict.intl;

@@ -1,5 +1,17 @@
 # Sauvegardes et prévention de la perte de données – Hoshi Factures
 
+## Hébergement Cloudflare (production)
+- Chaque boutique est stockée dans son propre Durable Object SQLite. Cloudflare conserve
+  l'historique des **30 derniers jours** et permet de **restaurer à un instant donné**
+  (point-in-time recovery), dans une infrastructure chiffrée au repos.
+- Les données personnelles y sont en plus chiffrées par l'appli (AES-256-GCM,
+  `DATA_ENCRYPTION_KEY`), y compris dans cet historique.
+- Restauration : via l'API Durable Objects (signet de l'instant voulu), sur demande du gérant,
+  après avoir consigné l'incident (voir `politique-incidents.md`).
+- Test de restauration : une fois par trimestre, sur la boutique de développement.
+
+## Hébergement sur serveur Node (alternative)
+
 ## Ce qui est en place dans l'appli
 - **Chiffrement au repos** : les données personnelles (PDF des factures, nom et e-mail des
   clients, commandes en attente, jetons d'accès Shopify) sont chiffrées en AES-256-GCM dans
