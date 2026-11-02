@@ -1846,6 +1846,18 @@
             loadDay(parisIso(0)).then(go);
           } else go();
         };
+        window.addEventListener('hashchange', function () {
+          var hm = /^#(\d{4}-\d{2}-\d{2})\/R(\d+)C(\d+)$/.exec(location.hash || '');
+          if (!hm) return;
+          var go = function () {
+            selectCourse(hm[2], hm[3]);
+          };
+          if (!prog.day || prog.day.date !== hm[1]) {
+            if (![].some.call($('progDate').options, (o) => o.value === hm[1])) $('progDate').insertAdjacentHTML('beforeend', '<option value="' + hm[1] + '">' + esc(fmtDay(hm[1])) + '</option>');
+            $('progDate').value = hm[1];
+            loadDay(hm[1]).then(go);
+          } else go();
+        });
         function initProgram() {
           var days = [parisIso(-1), parisIso(0), parisIso(1)];
           var statsP = getJson('data/stats.json')
@@ -1876,6 +1888,12 @@
               renderProgram();
             });
           Promise.all([statsP, idxP, calP]).then(function () {
+            // Lien direct depuis une notification : #AAAA-MM-JJ/R1C2.
+            var hm = /^#(\d{4}-\d{2}-\d{2})\/R(\d+)C(\d+)$/.exec(location.hash || '');
+            if (hm) {
+              prog.sel = { date: hm[1], r: hm[2], c: hm[3] };
+              if (days.indexOf(hm[1]) < 0) days.push(hm[1]);
+            }
             days.sort().reverse();
             $('progDate').innerHTML = days
               .map(function (d) {
@@ -1884,7 +1902,7 @@
               .join('');
             // Reprend la dernière course consultée si elle est récente, sinon la prochaine course du jour.
             var sel = prog.sel;
-            var start = sel && days.indexOf(sel.date) >= 0 && sel.date >= parisIso(-1) ? sel.date : parisIso(0);
+            var start = sel && days.indexOf(sel.date) >= 0 && (hm || sel.date >= parisIso(-1)) ? sel.date : parisIso(0);
             $('progDate').value = start;
             loadDay(start).then(function () {
               if (!prog.day) return;
@@ -2547,11 +2565,11 @@
           else html += '<button id="btnNotif" class="primary">Activer les notifications sur cet appareil</button>';
           html += '</div><p class="hint">Les notifications du navigateur n\'arrivent que lorsque cette page est ouverte.</p>';
           html +=
-            '<details style="margin-top:6px"><summary>Recevoir les alertes sur votre téléphone, même appli fermée</summary><ol class="hint" style="padding-left:18px">' +
-            '<li>Installez l\'application gratuite <b>ntfy</b> (Android ou iPhone).</li>' +
-            '<li>Touchez « + » et abonnez-vous à un nom de sujet secret de votre choix, par exemple <code>hoshi-turf-7k2p9</code> (évitez un nom facile à deviner).</li>' +
-            '<li>Sur GitHub, dans le dépôt : <i>Settings → Secrets and variables → Actions → New repository secret</i>, nom <code>NTFY_TOPIC</code>, valeur = ce nom de sujet.</li>' +
-            '<li>Pour tester : <i>Actions → Programme PMU → Run workflow</i> en cochant « Envoyer une notification de test ».</li></ol></details>';
+            '<details style="margin-top:6px" open><summary>Recevoir les notifications sur votre téléphone, sans ouvrir l\'application</summary><ol class="hint" style="padding-left:18px">' +
+            '<li>Installez l\'application gratuite <b>ntfy</b> (Google Play ou App Store).</li>' +
+            '<li>Touchez « + » (s\'abonner à un sujet) et entrez exactement : <code>hoshi-turf-b12tj5jfgndm</code></li>' +
+            '<li>C\'est tout. Vous recevrez : 📋 la sélection du jour vers 9 h, ⏰ un rappel 10 à 40 min avant chaque course sélectionnée (avec la cote), et 🔔 une alerte prioritaire si un pari validé apparaît. Touchez une notification pour ouvrir la course.</li>' +
+            '</ol></details>';
           $('sAlerts').innerHTML = html;
         }
         $('sAlerts').addEventListener('click', function (e) {

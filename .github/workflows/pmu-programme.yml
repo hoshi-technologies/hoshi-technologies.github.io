@@ -53,7 +53,8 @@ jobs:
       - name: Alertes (paris validés)
         if: ${{ !inputs.probe }}
         env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          # Sujet ntfy : le secret NTFY_TOPIC s'il existe, sinon le sujet par défaut de Hoshi Turf.
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'hoshi-turf-b12tj5jfgndm' }}
           ALERT_TEST: ${{ inputs.test_alert }}
         run: node scripts/pmu-alerts.mjs
       - name: Publier les données
