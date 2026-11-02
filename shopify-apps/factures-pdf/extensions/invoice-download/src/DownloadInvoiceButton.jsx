@@ -18,7 +18,10 @@ async function findInvoice() {
     const response = await fetch(`${APP_URL}/customer-api/invoice?order=${encodeURIComponent(shopify.orderId)}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.warn(`Hoshi Factures : réponse ${response.status}`);
+      return null;
+    }
     const data = await response.json();
     return data.ready ? data : null;
   } catch (error) {
@@ -37,8 +40,8 @@ function DownloadInvoiceButton({ invoice }) {
       </s-button>
     );
   }
-  // Page ouverte depuis l'e-mail de confirmation, sans connexion : Shopify demande au client un
-  // code reçu par e-mail (pas de mot de passe), puis le ramène sur sa commande avec le lien.
-  if (shopify.authenticationState?.value !== 'pre_authenticated') return null;
-  return <s-button onClick={() => shopify.requireLogin()}>{label}</s-button>;
+  // Page ouverte depuis l'e-mail de confirmation, sans connexion : au clic, Shopify demande au
+  // client un code reçu par e-mail (pas de mot de passe), puis le ramène sur sa commande, où le
+  // bouton ouvre la facture.
+  return <s-button onClick={() => shopify.requireLogin?.()}>{label}</s-button>;
 }
