@@ -4,7 +4,7 @@
 
 client_id = "29382e5537f3d51df592997c1947800a"
 name = "Hoshi Factures"
-application_url = "https://factures.exemple.fr"
+application_url = "https://hoshi-factures.hoshi-technologies.workers.dev"
 embedded = true
 
 [access_scopes]
@@ -13,7 +13,7 @@ scopes = "read_orders"
 use_legacy_install_flow = false
 
 [auth]
-redirect_urls = ["https://factures.exemple.fr/auth/callback"]
+redirect_urls = ["https://hoshi-factures.hoshi-technologies.workers.dev/auth/callback"]
 
 [webhooks]
 api_version = "2026-10"

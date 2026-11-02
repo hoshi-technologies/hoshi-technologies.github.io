@@ -34,7 +34,7 @@ enabled = true
 [vars]
 SHOPIFY_API_KEY = "29382e5537f3d51df592997c1947800a"
 SHOPIFY_API_VERSION = "2026-10"
-SHOPIFY_APP_URL = "https://hoshi-factures.example.workers.dev"
+SHOPIFY_APP_URL = "https://hoshi-factures.hoshi-technologies.workers.dev"
 BILLING_TEST = "true"
 MAIL_FROM = ""
 SUPPORT_EMAIL = ""
