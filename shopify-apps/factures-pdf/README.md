@@ -185,7 +185,7 @@ Autres commandes : `npm test` (tests automatiques), `npm run preview` (facture d
 5. Optionnel, pour recevoir vraiment les e-mails : `export SMTP_URL=smtp://…` et
    `export MAIL_FROM=…` (par exemple un compte gratuit Brevo). Sans cela, les factures
    sont créées mais pas envoyées.
-6. Lancez `shopify app dev` : la CLI crée un tunnel HTTPS, déclare les webhooks et
+6. Lancez `shopify app dev` (sous Windows : double-cliquez sur `demarrer-windows.bat`) : la CLI crée un tunnel HTTPS, déclare les webhooks et
    propose d'installer l'appli sur la boutique de test (touche `p` pour l'ouvrir).
 7. Dans la boutique : Paramètres › Paiements › activez la **passerelle de test (Bogus)**,
    puis passez une commande avec la carte « 1 ». La facture apparaît dans l'appli.
