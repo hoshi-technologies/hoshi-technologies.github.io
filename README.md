@@ -53,3 +53,7 @@ Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PM
   Les alertes sont écrites dans `hippique/data/alerts.json` (affichées et notifiées par la page) et envoyées sur le
   téléphone via [ntfy](https://ntfy.sh) si le secret de dépôt `NTFY_TOPIC` est défini.
 - Test : *Actions* → *Programme PMU* → *Run workflow*, case « Envoyer une notification de test ».
+- Notifications sans ouvrir la page (ntfy, sujet par défaut `hoshi-turf-b12tj5jfgndm`, remplaçable par le secret
+  `NTFY_TOPIC`) : 📋 sélection du jour vers 9 h (favori placé ≥ 60 %, 10 courses maximum, en France),
+  ⏰ rappel 10 à 40 min avant chaque course sélectionnée avec la cote à jour, 🔔 pari validé (prioritaire).
+  Une notification ouvre la course concernée (`#AAAA-MM-JJ/R1C2`).
