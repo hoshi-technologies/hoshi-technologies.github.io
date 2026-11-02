@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Affiche la structure brute de quelques réponses de l'API PMU (diagnostic).
+// Diagnostic : affiche la structure brute de quelques réponses de l'API PMU.
 const API = 'https://online.turfinfo.api.pmu.fr/rest/client/1/programme/';
-const d = new Date(Date.now() - 86400000);
-const iso = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(d);
+const API7 = 'https://online.turfinfo.api.pmu.fr/rest/client/7/programme/';
+const iso = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date());
 const ds = iso.slice(8, 10) + iso.slice(5, 7) + iso.slice(0, 4);
 function shape(v, depth = 0) {
   if (Array.isArray(v)) return v.length ? [shape(v[0], depth + 1), `…${v.length}`] : [];
@@ -14,18 +14,32 @@ function shape(v, depth = 0) {
   }
   return v;
 }
-for (const path of ['/R1/C1/rapports-definitifs', '/R1/C1/performances-detaillees/pretty', '/R1/C1/participants', '/R1/C2/rapports-definitifs']) {
-  const url = API + ds + path;
+async function show(label, url, full) {
   try {
     const r = await fetch(url, { headers: { accept: 'application/json' } });
     const t = await r.text();
-    console.log('=====', path, r.status, t.length);
+    console.log('=====', label, r.status, t.length);
     try {
-      console.log(JSON.stringify(shape(JSON.parse(t))).slice(0, 6000));
+      const j = JSON.parse(t);
+      console.log(JSON.stringify(full ? j : shape(j)).slice(0, full ? 3000 : 4000));
     } catch {
-      console.log(t.slice(0, 500));
+      console.log(t.slice(0, 300));
     }
   } catch (e) {
-    console.log('=====', path, 'ERREUR', e.message);
+    console.log('=====', label, 'ERREUR', e.message);
   }
 }
+// Course de la journée (champs complets de la 1re course)
+const prog = await (await fetch(API + ds)).json();
+const c0 = prog.programme.reunions[0].courses[0];
+console.log('===== champs course', JSON.stringify(c0).slice(0, 3000));
+const R = prog.programme.reunions[0].numOfficiel;
+const paths = [
+  `/R${R}/C1/combinaisons?specialisation=INTERNET`,
+  `/R${R}/C1/combinaisons?specialisation=OFFLINE`,
+  `/R${R}/C1/rapports-probables`,
+  `/R${R}/C1/rapports/SIMPLE_PLACE?specialisation=INTERNET`,
+  `/R${R}/C1/rapports/E_SIMPLE_PLACE`,
+];
+for (const p of paths) await show(p, API + ds + p);
+for (const p of paths.slice(0, 2)) await show('v7 ' + p, API7 + ds + p);
