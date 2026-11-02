@@ -78,6 +78,7 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
   }
 
   app.disable('x-powered-by');
+  app.set('trust proxy', true); // derrière le tunnel ou l'hébergeur : vraie adresse IP du client
 
   app.get('/health', (req, res) => res.json({ ok: true }));
 
@@ -117,9 +118,11 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
           // Les données détenues sont les factures des commandes listées : le marchand
           // peut les télécharger depuis l'appli. Rien à faire automatiquement.
           logger.info(`${shop} : demande d'accès aux données client ${payload.customer?.id}`);
+          store.logAccess(shop, { actor: 'shopify', action: 'customer.data_request', target: payload.customer?.id ?? null });
           break;
         case 'customers/redact':
           store.deleteInvoicesForOrders(shop, payload.orders_to_redact ?? []);
+          store.logAccess(shop, { actor: 'shopify', action: 'customer.redact', target: (payload.orders_to_redact ?? []).length });
           break;
         case 'shop/redact':
           store.deleteShop(shop);
@@ -149,6 +152,7 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
             `<title>${dict.email.filename}</title><body style="font-family:sans-serif;padding:2rem"><p>${dict.notReady}</p>`,
         );
     }
+    store.logAccess(invoice.shop, { actor: 'customer', action: 'invoice.public_download', target: invoice.number, ip: req.ip });
     res.set('Cache-Control', 'private, no-store');
     res.set('X-Robots-Tag', 'noindex');
     res.type('application/pdf');
@@ -197,7 +201,9 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     try {
       if (!match) throw new Error('Jeton manquant');
       req.sessionToken = match[1];
-      req.shop = verifySessionToken(match[1], config).shop;
+      const { shop, claims } = verifySessionToken(match[1], config);
+      req.shop = shop;
+      req.actor = `user:${claims.sub ?? 'inconnu'}`; // utilisateur de l'admin Shopify
       next();
     } catch (error) {
       res.status(401).json({ error: error.message });
@@ -260,13 +266,22 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
     res.json(settingsResponse(store.getShop(req.shop)));
   });
 
+  // Chaque consultation de données personnelles est journalisée (voir /api/access-log).
+  const audit = (req, action, target = null) => store.logAccess(req.shop, { actor: req.actor, action, target, ip: req.ip });
+
   api.get('/invoices', (req, res) => {
+    audit(req, 'invoice.list');
     res.json({ invoices: store.listInvoices(req.shop, 100) });
+  });
+
+  api.get('/access-log', (req, res) => {
+    res.json({ entries: store.listAccessLog(req.shop, 200) });
   });
 
   api.get('/invoices/:id/pdf', (req, res) => {
     const invoice = store.getInvoice(req.shop, Number(req.params.id));
     if (!invoice) return res.status(404).json({ error: 'Facture introuvable' });
+    audit(req, 'invoice.download', invoice.number);
     res.type('application/pdf');
     res.set('Content-Disposition', `attachment; filename="Facture-${invoice.number}.pdf"`);
     res.send(Buffer.from(invoice.pdf));
@@ -274,6 +289,8 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
 
   api.post('/invoices/:id/send', async (req, res) => {
     try {
+      const invoice = store.getInvoice(req.shop, Number(req.params.id));
+      if (invoice) audit(req, 'invoice.send', invoice.number);
       res.json(await service.sendInvoice(req.shop, Number(req.params.id)));
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -358,6 +375,7 @@ export function createApp({ config, store, service, fetchImpl = fetch, logger = 
   });
 
   api.post('/pending/generate', async (req, res) => {
+    audit(req, 'pending.generate');
     res.json(await service.generatePending(req.shop));
   });
 

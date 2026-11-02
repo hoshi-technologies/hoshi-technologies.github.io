@@ -115,7 +115,7 @@ export const PRIVACY = {
       ['Durées de conservation', [[
         'Données de la boutique, commandes et factures : tant que l’appli est installée. À la désinstallation, Shopify nous demande d’effacer vos données : elles le sont automatiquement 48 heures plus tard.',
         'Demandes d’effacement d’un acheteur transmises par Shopify : traitées automatiquement.',
-        'Journaux techniques : 12 mois. Échanges avec le support : 3 ans après le dernier contact.',
+        'Journaux techniques et journal des accès : 12 mois. Sauvegardes : 30 jours. Échanges avec le support : 3 ans après le dernier contact.',
         'Les factures devant être conservées 10 ans par le vendeur, vous recevez une copie de chacune et pouvez les télécharger à tout moment.',
       ]]],
       ['Destinataires et sous-traitants', [[
@@ -126,7 +126,7 @@ export const PRIVACY = {
         'Les données ne sont ni vendues, ni louées, ni utilisées à des fins publicitaires.',
       ], '{transfers}']],
       ['Sécurité', [
-        'Échanges chiffrés (HTTPS), vérification de l’authenticité de chaque message de Shopify, accès aux commandes en lecture seule, accès aux serveurs limité aux personnes habilitées.',
+        'Échanges chiffrés (HTTPS) ; données personnelles chiffrées au repos (AES-256) ; sauvegardes automatiques chiffrées, conservées 30 jours ; journal des accès aux données, consultable par le marchand et conservé 12 mois ; vérification de l’authenticité de chaque message de Shopify ; accès aux commandes en lecture seule ; accès aux serveurs limité aux personnes habilitées, avec double authentification ; procédure de réponse aux incidents de sécurité.',
       ]],
       ['Vos droits', [
         'Vous disposez d’un droit d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité de vos données. Écrivez-nous à {email}. Les acheteurs exercent leurs droits auprès du marchand, qui peut nous transmettre la demande.',
@@ -166,7 +166,7 @@ export const PRIVACY = {
       ['Retention', [[
         'Store data, orders and invoices: as long as the app is installed. When you uninstall, Shopify asks us to delete your data: it is deleted automatically 48 hours later.',
         'Buyer deletion requests sent by Shopify: handled automatically.',
-        'Technical logs: 12 months. Support conversations: 3 years after the last contact.',
+        'Technical logs and access log: 12 months. Backups: 30 days. Support conversations: 3 years after the last contact.',
         'Sellers must keep invoices for 10 years: you receive a copy of each one and can download them at any time.',
       ]]],
       ['Recipients and processors', [[
@@ -177,7 +177,7 @@ export const PRIVACY = {
         'Data is never sold, rented or used for advertising.',
       ], '{transfers}']],
       ['Security', [
-        'Encrypted connections (HTTPS), verification of every message from Shopify, read-only access to orders, server access restricted to authorised staff.',
+        'Encrypted connections (HTTPS); personal data encrypted at rest (AES-256); automatic encrypted backups kept for 30 days; access log for personal data, visible to the merchant and kept for 12 months; verification of every message from Shopify; read-only access to orders; server access restricted to authorised staff with two-factor authentication; security incident response procedure.',
       ]],
       ['Your rights', [
         'You have the right to access, rectify, erase, restrict, object to and port your data. Email us at {email}. Buyers exercise their rights with the merchant, who can forward the request to us.',

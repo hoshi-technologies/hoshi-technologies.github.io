@@ -1,13 +1,23 @@
 // Stockage SQLite (module node:sqlite intégré à Node 22, aucune dépendance native).
 // Les PDF sont conservés tels qu'émis : une facture ne doit plus changer après émission.
+// Les données personnelles (PDF, nom et e-mail du client, commandes en attente, jeton d'accès
+// Shopify) sont chiffrées au repos en AES-256-GCM (voir crypto.js).
 
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { randomBytes } from 'node:crypto';
 import { DEFAULT_SETTINGS } from './settings.js';
+import { createCipher } from './crypto.js';
 
-export function openDatabase(path) {
+/**
+ * @param path  fichier SQLite, ou ':memory:'
+ * @param key   clé de chiffrement de 32 octets (Buffer) ; obligatoire pour un fichier,
+ *              aléatoire pour une base en mémoire (tests, démo)
+ */
+export function openDatabase(path, { key } = {}) {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
+  if (!key && path !== ':memory:') throw new Error('Clé de chiffrement manquante pour la base de données.');
   const db = new DatabaseSync(path);
   db.exec(`
     PRAGMA journal_mode = WAL;
@@ -56,19 +66,57 @@ export function openDatabase(path) {
     );
     CREATE INDEX IF NOT EXISTS invoices_token ON invoices (order_token);
     CREATE INDEX IF NOT EXISTS invoices_shop ON invoices (shop, id DESC);
+    -- Journal des accès aux données personnelles (conservé 12 mois).
+    CREATE TABLE IF NOT EXISTS access_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+      shop TEXT NOT NULL,
+      actor TEXT NOT NULL,
+      action TEXT NOT NULL,
+      target TEXT,
+      ip TEXT
+    );
+    CREATE INDEX IF NOT EXISTS access_log_shop ON access_log (shop, id DESC);
   `);
-  return new Store(db);
+  return new Store(db, createCipher(key ?? randomBytes(32)));
+}
+
+/** Adresse IP tronquée (dernier octet / derniers groupes masqués) : suffisante, moins identifiante. */
+export function truncateIp(ip) {
+  if (!ip) return null;
+  const v4 = /(\d+\.\d+\.\d+)\.\d+$/.exec(ip);
+  if (v4) return `${v4[1]}.0`;
+  return ip.includes(':') ? `${ip.split(':').slice(0, 3).join(':')}::` : null;
 }
 
 export class Store {
-  constructor(db) {
+  constructor(db, cipher) {
     this.db = db;
+    this.cipher = cipher;
+  }
+
+  /** Déchiffre les colonnes personnelles d'une ligne de facture. */
+  readInvoice(row) {
+    if (!row) return row;
+    const c = this.cipher;
+    const out = {
+      ...row,
+      customer_email: c.decryptText(row.customer_email),
+      customer_name: c.decryptText(row.customer_name),
+      customer_first_name: c.decryptText(row.customer_first_name),
+    };
+    if ('pdf' in row) out.pdf = c.decryptBytes(row.pdf);
+    return out;
   }
 
   getShop(shop) {
     const row = this.db.prepare('SELECT * FROM shops WHERE shop = ?').get(shop);
     if (!row) return null;
-    return { ...row, settings: { ...DEFAULT_SETTINGS, ...JSON.parse(row.settings) } };
+    return {
+      ...row,
+      access_token: this.cipher.decryptText(row.access_token),
+      settings: { ...DEFAULT_SETTINGS, ...JSON.parse(row.settings) },
+    };
   }
 
   ensureShop(shop) {
@@ -80,7 +128,7 @@ export class Store {
     this.ensureShop(shop);
     this.db
       .prepare('UPDATE shops SET access_token = ?, scope = ?, uninstalled_at = NULL WHERE shop = ?')
-      .run(accessToken, scope, shop);
+      .run(this.cipher.encrypt(accessToken), scope, shop);
   }
 
   saveSettings(shop, settings) {
@@ -126,7 +174,7 @@ export class Store {
   addPendingOrder(shop, order) {
     this.db
       .prepare('INSERT OR IGNORE INTO pending_orders (shop, order_id, order_name, payload) VALUES (?, ?, ?, ?)')
-      .run(shop, String(order.id), order.name ?? null, JSON.stringify(order));
+      .run(shop, String(order.id), order.name ?? null, this.cipher.encrypt(JSON.stringify(order)));
   }
 
   listPendingOrders(shop) {
@@ -139,7 +187,7 @@ export class Store {
     return this.db
       .prepare('SELECT payload FROM pending_orders WHERE shop = ? ORDER BY received_at, order_id LIMIT ?')
       .all(shop, limit)
-      .map((row) => JSON.parse(row.payload));
+      .map((row) => JSON.parse(this.cipher.decryptText(row.payload)));
   }
 
   deletePendingOrder(shop, orderId) {
@@ -147,15 +195,15 @@ export class Store {
   }
 
   findInvoiceByOrder(shop, orderId) {
-    return this.db.prepare('SELECT * FROM invoices WHERE shop = ? AND order_id = ?').get(shop, String(orderId));
+    return this.readInvoice(this.db.prepare('SELECT * FROM invoices WHERE shop = ? AND order_id = ?').get(shop, String(orderId)));
   }
 
   findInvoiceByToken(token) {
-    return this.db.prepare('SELECT * FROM invoices WHERE order_token = ?').get(token);
+    return this.readInvoice(this.db.prepare('SELECT * FROM invoices WHERE order_token = ?').get(token));
   }
 
   getInvoice(shop, id) {
-    return this.db.prepare('SELECT * FROM invoices WHERE shop = ? AND id = ?').get(shop, id);
+    return this.readInvoice(this.db.prepare('SELECT * FROM invoices WHERE shop = ? AND id = ?').get(shop, id));
   }
 
   listInvoices(shop, limit = 50) {
@@ -165,7 +213,8 @@ export class Store {
                 total_cents, currency, language, facturx, email_status, email_error, email_sent_at
            FROM invoices WHERE shop = ? ORDER BY id DESC LIMIT ?`,
       )
-      .all(shop, limit);
+      .all(shop, limit)
+      .map((row) => this.readInvoice(row));
   }
 
   /**
@@ -194,14 +243,14 @@ export class Store {
           record.orderToken,
           record.number,
           record.issuedAt,
-          record.customerEmail,
-          record.customerName,
-          record.customerFirstName,
+          this.cipher.encrypt(record.customerEmail),
+          this.cipher.encrypt(record.customerName),
+          this.cipher.encrypt(record.customerFirstName),
           record.totalCents,
           record.currency,
           record.language,
           record.facturx ? 1 : 0,
-          record.pdf,
+          this.cipher.encrypt(record.pdf),
         );
       this.db.exec('COMMIT');
       return this.getInvoice(shop, Number(lastInsertRowid));
@@ -234,6 +283,28 @@ export class Store {
   deleteShop(shop) {
     this.db.prepare('DELETE FROM invoices WHERE shop = ?').run(shop);
     this.db.prepare('DELETE FROM pending_orders WHERE shop = ?').run(shop);
+    this.db.prepare('DELETE FROM access_log WHERE shop = ?').run(shop);
     this.db.prepare('DELETE FROM shops WHERE shop = ?').run(shop);
+  }
+
+  // ---------- Journal des accès aux données personnelles ----------
+
+  /** actor : "user:<id Shopify>", "customer" (lien public) ou "shopify" (webhooks RGPD). */
+  logAccess(shop, { actor, action, target = null, ip = null }) {
+    this.db
+      .prepare('INSERT INTO access_log (shop, actor, action, target, ip) VALUES (?, ?, ?, ?, ?)')
+      .run(shop, actor, action, target === null ? null : String(target), truncateIp(ip));
+  }
+
+  listAccessLog(shop, limit = 100) {
+    return this.db
+      .prepare('SELECT at, actor, action, target, ip FROM access_log WHERE shop = ? ORDER BY id DESC LIMIT ?')
+      .all(shop, limit);
+  }
+
+  /** Purge des entrées plus anciennes que `days` jours (12 mois par défaut). */
+  purgeAccessLog(days = 365) {
+    const cutoff = new Date(Date.now() - days * 864e5).toISOString();
+    return Number(this.db.prepare('DELETE FROM access_log WHERE at < ?').run(cutoff).changes);
   }
 }

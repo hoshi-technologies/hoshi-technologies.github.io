@@ -248,6 +248,15 @@
       <div class="actions"><button type="button" id="copy-liquid" data-i18n="liquid.copy"></button></div>
     </details>
 
+    <details class="card" id="log-card">
+      <summary><h2 data-i18n="log.title"></h2></summary>
+      <p class="help" data-i18n="log.help"></p>
+      <div class="scroll"><table>
+        <thead><tr><th data-i18n="log.when"></th><th data-i18n="log.who"></th><th data-i18n="log.what"></th><th data-i18n="log.item"></th></tr></thead>
+        <tbody id="access-log"></tbody>
+      </table></div>
+    </details>
+
     <div class="savebar" id="savebar" hidden>
       <span data-i18n="save.unsaved"></span>
       <div class="actions" style="margin:0">
@@ -568,6 +577,24 @@
   $('copy-liquid').addEventListener('click', async () => {
     await navigator.clipboard.writeText(liquid);
     toast(t('liquid.copied'));
+  });
+
+  // ---------- Journal des accès (chargé à l'ouverture de la section) ----------
+  $('log-card').addEventListener('toggle', async (event) => {
+    if (!event.target.open) return;
+    try {
+      const { entries } = await api('/access-log');
+      const who = (actor) => {
+        const [kind, id] = actor.split(':');
+        return t(`log.actor.${kind}`, { id: id ?? '' });
+      };
+      $('access-log').innerHTML = entries.length
+        ? entries.map((e) => `<tr><td>${escape(new Date(e.at).toLocaleString(INTL))}</td><td>${escape(who(e.actor))}</td>
+            <td>${escape(t(`log.action.${e.action}`))}</td><td>${escape(e.target ?? '')}</td></tr>`).join('')
+        : `<tr><td colspan="4" class="empty">${escape(t('log.empty'))}</td></tr>`;
+    } catch (error) {
+      toast(error.message, true);
+    }
   });
 
   // ---------- Abonnement ----------

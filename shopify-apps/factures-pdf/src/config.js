@@ -22,6 +22,15 @@ export function loadConfig(env = process.env) {
     // Adresse affichée dans la FAQ et l'aide (question « Comment contacter le support ? »).
     supportEmail: get('SUPPORT_EMAIL', ''),
     databasePath: get('DATABASE_PATH', './data/factures.sqlite'),
+    // Chiffrement au repos (32 octets en base64 ou hexadécimal) : `npm run key` en génère une.
+    dataEncryptionKey: get('DATA_ENCRYPTION_KEY', ''),
+    // Sauvegardes automatiques chiffrées : dossier (idéalement un autre disque), rythme, durée.
+    backup: {
+      dir: get('BACKUP_DIR', ''),
+      key: get('BACKUP_ENCRYPTION_KEY', ''),
+      intervalHours: Number(get('BACKUP_INTERVAL_HOURS', 24)),
+      retentionDays: Number(get('BACKUP_RETENTION_DAYS', 30)),
+    },
     mail: {
       // smtp://user:pass@smtp.exemple.fr:587 ; "json" pour les tests (aucun envoi réel).
       transport: get('SMTP_URL', ''),

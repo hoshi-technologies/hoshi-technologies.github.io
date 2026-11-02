@@ -15,7 +15,10 @@
     "preview": "node --disable-warning=ExperimentalWarning scripts/preview.js",
     "demo": "node --disable-warning=ExperimentalWarning scripts/demo.js",
     "screenshots": "node --disable-warning=ExperimentalWarning scripts/screenshots.js",
-    "site": "node --disable-warning=ExperimentalWarning scripts/build-site.js"
+    "site": "node --disable-warning=ExperimentalWarning scripts/build-site.js",
+    "key": "node scripts/key.js",
+    "backup": "node --disable-warning=ExperimentalWarning scripts/backup.js",
+    "restore": "node --disable-warning=ExperimentalWarning scripts/restore.js"
   },
   "dependencies": {
     "express": "^5.3.0",

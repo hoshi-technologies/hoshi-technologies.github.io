@@ -48,6 +48,20 @@ par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Sh
   de réponse a été codé d'après la documentation de l'API et testé avec des réponses
   simulées : à vérifier sur l'API réelle avant la mise en production.
 
+## Sécurité et protection des données
+
+- **Chiffrement au repos** (AES-256-GCM, `src/crypto.js`) des données personnelles : PDF,
+  nom et e-mail des clients, commandes en attente, jetons d'accès Shopify. Clé :
+  `DATA_ENCRYPTION_KEY` (`npm run key`) ; à défaut, dérivée du secret de l'appli.
+- **Sauvegardes automatiques chiffrées** (`src/backup.js`) dans `BACKUP_DIR`, purge après
+  `BACKUP_RETENTION_DAYS` jours ; `npm run backup` et `npm run restore`.
+- **Journal des accès** aux données personnelles (`access_log`), consultable par le marchand
+  dans Réglages › Journal des accès, IP tronquées, purge à 12 mois.
+- Documents : `docs/securite/` (incidents, accès et mots de passe, sauvegardes, réponses au
+  questionnaire Shopify de protection des données).
+- Les tests (`test/security.test.js`) vérifient qu'aucune donnée personnelle n'apparaît en
+  clair dans le fichier de la base ni dans les sauvegardes.
+
 ## Interface et aide
 
 - **4 onglets** : Accueil (checklist de démarrage en 3 étapes, état de l'appli, dernières
