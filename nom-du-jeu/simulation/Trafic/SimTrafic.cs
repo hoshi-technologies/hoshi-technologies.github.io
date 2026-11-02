@@ -20,9 +20,10 @@ public sealed class SimTrafic
     public int TrajetsImpossibles { get; }
 
     public SimTrafic(GrapheRoutier g, int nbVehicules, ulong graine, double distanceMax = 3000)
+        : this(g, PairesAleatoires(g, nbVehicules, graine, distanceMax), graine) { }
+
+    private static (int, int)[] PairesAleatoires(GrapheRoutier g, int nbVehicules, ulong graine, double distanceMax)
     {
-        _g = g;
-        NbVehicules = nbVehicules;
         var valide = g.PlusGrandeComposante();
         var noeuds = Enumerable.Range(0, g.NbNoeuds).Where(n => valide[n]).ToArray();
         var alea = new Alea(graine);
@@ -39,6 +40,16 @@ public sealed class SimTrafic
             }
             paires[i] = (d, t);
         }
+        return paires;
+    }
+
+    /// <summary>Trafic à partir de trajets donnés (départ, arrivée) en indices du graphe.</summary>
+    public SimTrafic(GrapheRoutier g, IReadOnlyList<(int dom, int trav)> paires, ulong graine)
+    {
+        _g = g;
+        int nbVehicules = paires.Count;
+        NbVehicules = nbVehicules;
+        var alea = new Alea(graine ^ 0x9E3779B97F4A7C15UL);
         // calcul des trajets en parallèle ; le résultat ne dépend pas de l'ordre (déterministe)
         var chemins = new int[nbVehicules][];
         Parallel.For(0, nbVehicules, () => new EspaceCalcul(),

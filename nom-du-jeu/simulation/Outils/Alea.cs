@@ -18,6 +18,9 @@ public struct Alea
         Suivant();
     }
 
+    /// <summary>État interne (pour la sauvegarde).</summary>
+    public ulong Etat { readonly get => _etat; set => _etat = value; }
+
     public uint Suivant()
     {
         ulong ancien = _etat;

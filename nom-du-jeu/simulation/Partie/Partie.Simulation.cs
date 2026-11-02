@@ -1,0 +1,417 @@
+namespace Ville.Coeur;
+
+public sealed partial class Partie
+{
+    private static readonly string[] Prenoms =
+        { "Camille", "Lucas", "Inès", "Hugo", "Léa", "Nathan", "Chloé", "Yanis", "Manon", "Théo", "Sarah", "Malik", "Jeanne", "Paul", "Aïcha", "Tom" };
+
+    private string Habitant() => Prenoms[_alea.Entre(0, Prenoms.Length)];
+
+    public int Capacite(Batiment b) => R.Zones[NomZone(b.Type)].Capacite[b.Niveau - 1];
+
+    /// <summary>Capacité utilisable maintenant : pendant un agrandissement, l'ancien niveau reste en service.</summary>
+    public int CapaciteActive(Batiment b) =>
+        !b.EnChantier ? Capacite(b) : b.Niveau > 1 ? R.Zones[NomZone(b.Type)].Capacite[b.Niveau - 2] : 0;
+    public double Hauteur(Batiment b) => R.Zones[NomZone(b.Type)].HauteurM[b.Niveau - 1];
+
+    public static string NomZone(Zone z) => z switch
+    {
+        Zone.Habitat => "habitat", Zone.Commerce => "commerce", Zone.Activites => "activites", _ => "",
+    };
+
+    /// <summary>Le nœud de route par lequel une parcelle est desservie.</summary>
+    private int NoeudParcelle(Parcelle p)
+    {
+        if (!Reseau.Aretes.TryGetValue(p.Arete, out var e)) return -1;
+        return V2.Distance(Reseau.Noeuds[e.A].Pos, p.Centre) <= V2.Distance(Reseau.Noeuds[e.B].Pos, p.Centre) ? e.A : e.B;
+    }
+
+    public bool ParcelleReliee(Parcelle p)
+    {
+        int n = NoeudParcelle(p);
+        return n >= 0 && Reseau.Relie(n, R);
+    }
+
+    // ================================================================== un jour
+    public void AvancerJour()
+    {
+        Jour++;
+        if (!_servicesAJour || Jour % 3 == 0) MettreAJourServices();
+
+        // chantiers et emménagements
+        double facteur = DemandeHabitat > 0 ? 1 : DemandeHabitat > -40 ? 0.15 : -0.4;
+        foreach (var p in Parcelles.Values)
+        {
+            var b = p.Batiment;
+            if (b == null) continue;
+            if (b.JoursChantier > 0)
+            {
+                if (--b.JoursChantier == 0) CarresModifies.Add(Carre(p.Centre));
+                if (b.Niveau == 1) continue;
+            }
+            if (b.Type == Zone.Habitat && b.Eau && b.Elec)
+                b.Occupants = Math.Clamp(b.Occupants + R.EmmenagementsParJour * facteur, 0, CapaciteActive(b));
+        }
+
+        Croissance();
+        if (Jour % R.JoursParMois == 0) FinDeMois();
+    }
+
+    private readonly Dictionary<int, (double eau, double elec)> _resteParComposante = new();
+
+    private void Croissance()
+    {
+        var demandes = new[] { (Zone.Habitat, DemandeHabitat), (Zone.Commerce, DemandeCommerce), (Zone.Activites, DemandeActivites) };
+        foreach (var (zone, d) in demandes)
+        {
+            if (d <= 0) continue;
+            int nb = (int)(d / 50) + (_alea.Reel() < (d % 50) / 50 ? 1 : 0);
+            nb = Math.Min(nb, R.Demande.ConstructionsMaxParJour);
+            if (nb == 0) continue;
+            var cap = R.Zones[NomZone(zone)].Capacite[0];
+            double besoinEau = cap * (zone == Zone.Habitat ? R.PersonnesParLogement * R.Consommation.EauParHabitant : R.Consommation.EauParEmploi);
+            double besoinElec = cap * (zone == Zone.Habitat ? R.PersonnesParLogement * R.Consommation.ElecParHabitant : R.Consommation.ElecParEmploi);
+            var candidats = new List<(Parcelle p, double score, int comp)>();
+            foreach (var p in Parcelles.Values)
+            {
+                if (p.Zone != zone || !p.Libre) continue;
+                int n = NoeudParcelle(p);
+                if (n < 0 || !Reseau.Relie(n, R)) continue;
+                int comp = Reseau.Composante(n, R);
+                if (!_resteParComposante.TryGetValue(comp, out var reste) || reste.eau < besoinEau || reste.elec < besoinElec) continue;
+                candidats.Add((p, p.Attrait + _alea.Reel() * 20, comp));
+            }
+            foreach (var (p, _, comp) in candidats.OrderByDescending(c => c.score).ThenBy(c => c.p.Id).Take(nb))
+            {
+                var reste = _resteParComposante[comp];
+                if (reste.eau < besoinEau || reste.elec < besoinElec) continue;
+                _resteParComposante[comp] = (reste.eau - besoinEau, reste.elec - besoinElec);
+                p.Batiment = new Batiment { Type = zone, JoursChantier = R.JoursConstruction, Eau = true, Elec = true };
+                CarresModifies.Add(Carre(p.Centre));
+            }
+        }
+    }
+
+    // ================================================================== services, emplois, demande
+    public void MettreAJourServices()
+    {
+        _servicesAJour = true;
+        var prodEau = new Dictionary<int, double>();
+        var prodElec = new Dictionary<int, double>();
+        double totalEau = 0, totalElec = 0;
+        foreach (var p in Parcelles.Values)
+        {
+            if (p.Service == null) continue;
+            var s = R.Services[p.Service];
+            if (s.Eau <= 0 && s.Electricite <= 0) continue;
+            int n = NoeudParcelle(p);
+            if (n < 0) continue;
+            int c = Reseau.Composante(n, R);
+            prodEau[c] = prodEau.GetValueOrDefault(c) + s.Eau;
+            prodElec[c] = prodElec.GetValueOrDefault(c) + s.Electricite;
+            totalEau += s.Eau; totalElec += s.Electricite;
+        }
+
+        // population et emplois
+        double logements = 0, capCommerce = 0, capActivites = 0, capServices = 0;
+        foreach (var p in Parcelles.Values)
+        {
+            if (p.Service != null) { capServices += R.Services[p.Service].Emplois; continue; }
+            var b = p.Batiment;
+            if (b == null) continue;
+            if (b.Type == Zone.Habitat) logements += b.Occupants;
+            else if (b.Type == Zone.Commerce) capCommerce += CapaciteActive(b);
+            else capActivites += CapaciteActive(b);
+        }
+        Population = (int)Math.Round(logements * R.PersonnesParLogement);
+        Actifs = (int)Math.Round(Population * R.PartActifs);
+        Enfants = (int)Math.Round(Population * R.PartEnfants);
+        double emploisTotal = capCommerce + capActivites + capServices;
+        // emplois occupés : par les habitants, et par des travailleurs venus de l'extérieur (limités)
+        double remplissage = emploisTotal <= 0 ? 0 : Math.Min(1, (Actifs + R.Demande.EmploisExterieurs) / emploisTotal);
+        EmploisLocaux = (int)Math.Round(emploisTotal * remplissage);
+        Chomeurs = (int)Math.Max(0, Actifs - emploisTotal - R.Demande.EmploisExterieurs);
+
+        // distribution de l'eau et de l'électricité, bâtiment par bâtiment (ordre stable)
+        var consEau = new Dictionary<int, double>();
+        var consElec = new Dictionary<int, double>();
+        double totalConsEau = 0, totalConsElec = 0;
+        foreach (var p in Parcelles.Values)
+        {
+            var b = p.Batiment;
+            if (b == null) continue;
+            int n = NoeudParcelle(p);
+            int c = n >= 0 ? Reseau.Composante(n, R) : -1;
+            double occ = b.Type == Zone.Habitat ? b.Occupants * R.PersonnesParLogement : CapaciteActive(b) * remplissage;
+            double ce = occ * (b.Type == Zone.Habitat ? R.Consommation.EauParHabitant : R.Consommation.EauParEmploi);
+            double cl = occ * (b.Type == Zone.Habitat ? R.Consommation.ElecParHabitant : R.Consommation.ElecParEmploi);
+            double ue = consEau.GetValueOrDefault(c) + ce, ul = consElec.GetValueOrDefault(c) + cl;
+            b.Eau = c >= 0 && ue <= prodEau.GetValueOrDefault(c) + 1e-6;
+            b.Elec = c >= 0 && ul <= prodElec.GetValueOrDefault(c) + 1e-6;
+            if (b.Eau) consEau[c] = ue;
+            if (b.Elec) consElec[c] = ul;
+            totalConsEau += ce; totalConsElec += cl;
+        }
+        _resteParComposante.Clear();
+        foreach (var c in prodEau.Keys)
+            _resteParComposante[c] = (prodEau[c] - consEau.GetValueOrDefault(c), prodElec.GetValueOrDefault(c) - consElec.GetValueOrDefault(c));
+        EauProduite = totalEau; EauConsommee = totalConsEau;
+        ElecProduite = totalElec; ElecConsommee = totalConsElec;
+
+        // demande
+        double penal(double taux) => (taux - R.Demande.ImpotReference) * 100 * R.Demande.PenaliteParPointImpot;
+        double w = Math.Max(Actifs, 150);
+        double vacants = emploisTotal + R.Demande.EmploisExterieurs - Actifs;
+        double h = R.Demande.AttraitRegion + 80 * vacants / w - penal(ImpotHabitat);
+        if (Enfants > 120 && !Parcelles.Values.Any(p => p.Service == "ecole")) h -= 15;
+        DemandeHabitat = Math.Clamp(h, -100, 100);
+        double clientsBesoin = Population / R.Demande.ClientsParEmploiCommerce;
+        DemandeCommerce = Math.Clamp(100 * (clientsBesoin - capCommerce) / Math.Max(clientsBesoin, 30) - penal(ImpotCommerce) + (Population < 150 ? -40 : 0), -100, 100);
+        double besoinA = Chomeurs + Actifs * R.Demande.PartActifsActivites;
+        DemandeActivites = Math.Clamp(25 + 100 * (besoinA - capActivites) / Math.Max(besoinA, 40) - 25 - penal(ImpotActivites) + (Population < 100 ? -30 : 0), -100, 100);
+
+        if (LigneBusVersion != VersionServices + Reseau.Version) CalculerLigneBus();
+    }
+
+    private int LigneBusVersion = -1;
+
+    private void CalculerLigneBus()
+    {
+        LigneBusVersion = VersionServices + Reseau.Version;
+        LigneBus = new List<V2>();
+        if (Arrets.Count < 2) return;
+        var g = Reseau.Graphe(R);
+        var es = new Ville.Reseau.EspaceCalcul();
+        var arrets = Arrets.Values.ToList();
+        for (int k = 0; k < arrets.Count; k++)
+        {
+            var a = arrets[k]; var b = arrets[(k + 1) % arrets.Count];
+            if (!Reseau.Aretes.TryGetValue(a.Arete, out var ea) || !Reseau.Aretes.TryGetValue(b.Arete, out var eb)) continue;
+            int na = Reseau.IndexGraphe(ea.A), nb = Reseau.IndexGraphe(eb.A);
+            LigneBus.Add(a.Pos);
+            foreach (var arc in g.Chemin(na, nb, es)) LigneBus.Add(new V2(g.X[g.CibleArc(arc)], g.Y[g.CibleArc(arc)]));
+        }
+        if (LigneBus.Count > 0) LigneBus.Add(LigneBus[0]);
+    }
+
+    // ================================================================== fin de mois
+    private void FinDeMois()
+    {
+        MettreAJourServices();
+        CalculerAttrait();
+        NiveauxEtDeparts();
+        Budget();
+        MettreAJourServices();
+        Paliers();
+        MessagesDuMois();
+        Historique.Add(new PointMois(Mois, Population, EmploisLocaux, Math.Round(Argent), Math.Round(RecettesMois), Math.Round(DepensesMois)));
+    }
+
+    private void CalculerAttrait()
+    {
+        // index spatial grossier (carrés de 250 m) des sources d'attrait et de nuisance
+        var parCarre = new Dictionary<(int, int), List<Parcelle>>();
+        foreach (var p in Parcelles.Values)
+            if (p.Service != null || (p.Batiment != null && p.Batiment.Type == Zone.Activites && !p.Batiment.EnChantier))
+            {
+                var c = Carre(p.Centre);
+                if (!parCarre.TryGetValue(c, out var l)) parCarre[c] = l = new List<Parcelle>();
+                l.Add(p);
+            }
+        IEnumerable<Parcelle> Voisins(V2 pos, double rayon)
+        {
+            int r = (int)Math.Ceiling(rayon / TailleCarre);
+            var (cx, cy) = Carre(pos);
+            for (int dx = -r; dx <= r; dx++)
+                for (int dy = -r; dy <= r; dy++)
+                    if (parCarre.TryGetValue((cx + dx, cy + dy), out var l))
+                        foreach (var p in l) if (V2.Distance(p.Centre, pos) <= rayon) yield return p;
+        }
+
+        // écoles : chaque école accueille un nombre limité d'élèves, en commençant par les plus proches
+        foreach (var p in Parcelles.Values) if (p.Batiment != null) p.Batiment.Ecole = 0;
+        foreach (var ecole in Parcelles.Values.Where(p => p.Service == "ecole"))
+        {
+            var s = R.Services["ecole"];
+            double places = s.Eleves;
+            foreach (var p in Parcelles.Values.Where(p => p.Batiment is { Type: Zone.Habitat } && V2.Distance(p.Centre, ecole.Centre) <= s.RayonM)
+                         .OrderBy(p => V2.Distance(p.Centre, ecole.Centre)).ThenBy(p => p.Id))
+            {
+                var b = p.Batiment!;
+                double enfants = b.Occupants * R.PersonnesParLogement * R.PartEnfants;
+                double besoin = enfants * (1 - b.Ecole);
+                if (besoin <= 0 || places <= 0) continue;
+                double pris = Math.Min(places, besoin);
+                places -= pris;
+                b.Ecole = enfants <= 0 ? 1 : Math.Min(1, b.Ecole + pris / enfants);
+            }
+        }
+
+        foreach (var p in Parcelles.Values)
+        {
+            if (p.Zone == Zone.Aucune) continue;
+            double a = 40;
+            double dEau = Grille.DistanceEau(p.Centre);
+            if (dEau < 300) a += 14 * (1 - dEau / 300);                       // vue sur l'eau
+            if (Reseau.Aretes.TryGetValue(p.Arete, out var e) && e.Gabarit is "avenue" or "voie_rapide")
+                a += p.Zone == Zone.Habitat ? -6 : 6;                         // bruit / visibilité
+            foreach (var v in Voisins(p.Centre, 450))
+            {
+                double d = V2.Distance(v.Centre, p.Centre);
+                if (v.Service == "parc" && d <= R.Services["parc"].RayonM) a += 10;
+                else if (v.Service == "centrale_gaz" && p.Zone == Zone.Habitat && d <= R.Services["centrale_gaz"].PollutionRayonM) a -= 22;
+                else if (v.Batiment != null && p.Zone == Zone.Habitat && d <= R.PollutionActivitesRayonM) a -= 4;
+            }
+            if (Arrets.Values.Any(s => V2.Distance(s.Pos, p.Centre) <= R.Services["arret_bus"].RayonM) && Arrets.Count >= 2) a += 9;
+            if (p.Batiment != null)
+            {
+                if (p.Zone == Zone.Habitat)
+                {
+                    double enfants = p.Batiment.Occupants * R.PersonnesParLogement * R.PartEnfants;
+                    if (enfants > 0.5) a += p.Batiment.Ecole >= 0.8 ? 12 : -6;
+                }
+                if (!p.Batiment.Eau || !p.Batiment.Elec) a -= 25;
+            }
+            if (p.Zone == Zone.Commerce) a += Math.Min(15, Population / 200.0);
+            p.Attrait = Math.Clamp(a, 0, 100);
+        }
+    }
+
+    private void NiveauxEtDeparts()
+    {
+        int niveauMax = Palier >= 3 ? 3 : 2;
+        int departs = 0;
+        foreach (var p in Parcelles.Values)
+        {
+            var b = p.Batiment;
+            if (b == null || b.EnChantier) continue;
+            b.MoisDepuisNiveau++;
+            if (!b.Eau || !b.Elec)
+            {
+                b.MoisSansService++;
+                if (b.MoisSansService > R.MoisSansServiceAvantDepart)
+                {
+                    if (b.Type == Zone.Habitat) b.Occupants = Math.Floor(b.Occupants / 2);
+                    if (b.Type != Zone.Habitat || b.Occupants < 1) { p.Batiment = null; departs++; CarresModifies.Add(Carre(p.Centre)); }
+                }
+                continue;
+            }
+            b.MoisSansService = 0;
+            if (b.Niveau >= niveauMax || b.MoisDepuisNiveau < R.Niveaux.MoisEntreNiveaux) continue;
+            double seuil = b.Niveau == 1 ? R.Niveaux.AttraitNiveau2 : R.Niveaux.AttraitNiveau3;
+            bool plein = b.Type != Zone.Habitat || b.Occupants >= Capacite(b) * 0.9;
+            if (p.Attrait >= seuil && plein)
+            {
+                b.Niveau++;
+                b.MoisDepuisNiveau = 0;
+                b.JoursChantier = R.JoursConstruction / 2;
+                CarresModifies.Add(Carre(p.Centre));
+            }
+        }
+        if (departs > 0)
+            Message("alerte", $"{departs} bâtiment(s) abandonné(s) : sans eau ou sans électricité, les occupants sont partis.");
+    }
+
+    private void Budget()
+    {
+        DetailRecettes.Clear(); DetailDepenses.Clear();
+        double empCommerce = 0, empActivites = 0;
+        double emploisTotal = Math.Max(1, Parcelles.Values.Sum(p => p.Service != null ? R.Services[p.Service].Emplois : p.Batiment is { } b && b.Type != Zone.Habitat ? CapaciteActive(b) : 0));
+        double remplissage = Math.Min(1, EmploisLocaux / emploisTotal);
+        foreach (var p in Parcelles.Values)
+        {
+            var b = p.Batiment;
+            if (b == null || !b.Eau || !b.Elec) continue;
+            if (b.Type == Zone.Commerce) empCommerce += CapaciteActive(b) * remplissage;
+            else if (b.Type == Zone.Activites) empActivites += CapaciteActive(b) * remplissage;
+        }
+        double refT = R.Demande.ImpotReference;
+        DetailRecettes["Impôts des habitants"] = Population * R.Impots.HabitatParHabitant * ImpotHabitat / refT;
+        DetailRecettes["Impôts des commerces"] = empCommerce * R.Impots.CommerceParEmploi * ImpotCommerce / refT;
+        DetailRecettes["Impôts des activités"] = empActivites * R.Impots.ActivitesParEmploi * ImpotActivites / refT;
+
+        double routes = Reseau.Aretes.Values.Where(e => !e.Departemental).Sum(e => e.Longueur / 1000 * R.Route(e.Gabarit).EntretienParKmMois);
+        DetailDepenses["Entretien des routes"] = routes;
+        foreach (var g in Parcelles.Values.Where(p => p.Service != null).GroupBy(p => p.Service!).OrderBy(g => g.Key))
+            DetailDepenses[R.Services[g.Key].Nom] = g.Count() * R.Services[g.Key].Entretien;
+        if (Arrets.Count > 0) DetailDepenses["Arrêts de bus"] = Arrets.Count * R.Services["arret_bus"].Entretien;
+        if (NbBus > 0) DetailDepenses["Bus"] = NbBus * R.Bus.CoutParBusMois;
+        double remboursements = 0;
+        foreach (var em in Emprunts)
+        {
+            double interets = em.Restant * R.Emprunt.TauxAnnuel / 12;
+            em.Restant = Math.Max(0, em.Restant - (em.Mensualite - interets));
+            em.MoisRestants--;
+            remboursements += em.Mensualite;
+        }
+        Emprunts.RemoveAll(e => e.MoisRestants <= 0);
+        if (remboursements > 0) DetailDepenses["Remboursement des emprunts"] = remboursements;
+
+        RecettesMois = DetailRecettes.Values.Sum();
+        DepensesMois = DetailDepenses.Values.Sum();
+        Argent += RecettesMois - DepensesMois;
+    }
+
+    private void Paliers()
+    {
+        while (Palier + 1 < R.Paliers.Count && Population >= R.Paliers[Palier + 1].Population)
+        {
+            Palier++;
+            Message("palier", R.Paliers[Palier].Message);
+        }
+    }
+
+    private void MessagesDuMois()
+    {
+        var zonesSansEau = Parcelles.Values.Count(p => p.Zone != Zone.Aucune && p.Libre && ParcelleReliee(p)) > 0 && EauProduite <= EauConsommee + 1;
+        if (Parcelles.Values.Any(p => p.Zone != Zone.Aucune) && EauProduite <= 0)
+            MessageLimite("eau0", 60, "alerte", "Les promoteurs attendent : sans château d'eau relié aux rues, rien ne se construira.");
+        else if (zonesSansEau)
+            MessageLimite("eau", 90, "alerte", "L'eau manque : les nouveaux bâtiments ne peuvent plus être raccordés.");
+        if (Parcelles.Values.Any(p => p.Zone != Zone.Aucune) && ElecProduite <= 0)
+            MessageLimite("elec0", 60, "alerte", "Pas d'électricité : construisez une centrale le long d'une rue reliée.");
+        else if (ElecProduite > 0 && ElecConsommee > ElecProduite * 0.95)
+            MessageLimite("elec", 90, "alerte", "Le réseau électrique est saturé : il faut une centrale de plus.");
+        if (Parcelles.Values.Any(p => p.Zone != Zone.Aucune && !ParcelleReliee(p)))
+            MessageLimite("relie", 120, "alerte", "Certaines rues ne sont reliées à aucun grand axe : personne ne peut y venir.");
+        if (Actifs > 200 && Chomeurs > Actifs * 0.12)
+            MessageLimite("chomage", 90, "habitant", $"{Habitant()} : « Je cherche du travail depuis des mois. Il faudrait des commerces ou des zones d'activités ici. »");
+        if (DemandeCommerce > 50 && Population > 300)
+            MessageLimite("commerce", 90, "habitant", $"{Habitant()} : « Il faut prendre la voiture pour acheter du pain ! »");
+        if (Enfants > 120 && Parcelles.Values.Any(p => p.Batiment is { Type: Zone.Habitat, Ecole: < 0.5 } b && b.Occupants > 2))
+            MessageLimite("ecole", 90, "habitant", $"{Habitant()} : « Nos enfants n'ont pas de place à l'école près de chez nous. »");
+        if (ImpotHabitat > 0.15)
+            MessageLimite("impots", 120, "habitant", $"{Habitant()} : « Avec ces impôts, je pense déménager. »");
+        if (Argent < 0)
+            MessageLimite("budget", 60, "alerte", "Les caisses sont vides : réduisez les dépenses, augmentez un peu les impôts ou empruntez.");
+        if (Population > 50 && Parcelles.Values.Any(p => p.Batiment is { Type: Zone.Habitat } && Grille.DistanceEau(p.Centre) < 120))
+            MessageLimite("lac", 100000, "info", "Le journal local : « Les terrains avec vue sur l'eau sont les plus recherchés de la commune. »");
+        if (Population >= 800 && Arrets.Count == 0 && Palier >= 2)
+            MessageLimite("bus", 150, "habitant", $"{Habitant()} : « Une ligne de bus éviterait de prendre la voiture pour tout. »");
+    }
+
+    // ================================================================== déplacements (pour l'affichage du trafic)
+    /// <summary>Trajets domicile → travail (indices du graphe), proportionnels à la population.</summary>
+    public List<(int depart, int arrivee)> Deplacements(int max)
+    {
+        var g = Reseau.Graphe(R);
+        var maisons = new List<int>();
+        var travail = new List<int>();
+        foreach (var p in Parcelles.Values)
+        {
+            if (p.Batiment == null || p.Batiment.EnChantier) continue;
+            int n = NoeudParcelle(p);
+            if (n < 0 || !Reseau.Relie(n, R)) continue;
+            if (p.Batiment.Type == Zone.Habitat)
+                for (int k = 0; k < Math.Ceiling(p.Batiment.Occupants / 3); k++) maisons.Add(Reseau.IndexGraphe(n));
+            else travail.Add(Reseau.IndexGraphe(n));
+        }
+        foreach (var n in Reseau.Noeuds.Values.Where(n => n.Entree && Reseau.Degre(n.Id) > 0)) travail.Add(Reseau.IndexGraphe(n.Id));
+        var res = new List<(int, int)>();
+        if (maisons.Count == 0 || travail.Count == 0) return res;
+        var alea = new Ville.Outils.Alea((ulong)Jour + 7);
+        int nb = Math.Min(max, maisons.Count);
+        for (int i = 0; i < nb; i++) res.Add((maisons[alea.Entre(0, maisons.Count)], travail[alea.Entre(0, travail.Count)]));
+        return res;
+    }
+}

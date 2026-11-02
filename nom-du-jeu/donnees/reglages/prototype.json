@@ -1,0 +1,66 @@
+{
+  "_note": "Tous les chiffres d'équilibrage du prototype. Montants en euros de jeu, durées en jours de jeu (1 mois = 30 jours).",
+  "argent_depart": 250000,
+  "jours_par_mois": 30,
+
+  "routes": {
+    "rue":    { "largeur_m": 8,  "cout_par_m": 40, "entretien_par_km_mois": 120, "vitesse_kmh": 30, "parcelles": true },
+    "avenue": { "largeur_m": 14, "cout_par_m": 95, "entretien_par_km_mois": 260, "vitesse_kmh": 50, "parcelles": true },
+    "voie_rapide": { "largeur_m": 18, "cout_par_m": 0, "entretien_par_km_mois": 0, "vitesse_kmh": 90, "parcelles": false },
+    "pente_max": 0.14,
+    "accrochage_m": 12,
+    "longueur_min_m": 15,
+    "axes_reels_importes": ["voie_rapide", "avenue"],
+    "note_axes_reels": "Les grands axes réels sont présents au départ ; leur entretien est payé par le Département (gratuit pour la commune)."
+  },
+
+  "parcelles": { "largeur_m": 16, "profondeur_m": 26, "ecart_route_m": 1, "denivele_max_m": 5 },
+
+  "zones": {
+    "habitat":   { "capacite": [4, 10, 24], "hauteur_m": [7, 13, 27] },
+    "commerce":  { "capacite": [6, 14, 30], "hauteur_m": [5, 9, 18] },
+    "activites": { "capacite": [12, 24, 40], "hauteur_m": [8, 11, 15] }
+  },
+  "personnes_par_logement": 2.2,
+  "part_actifs": 0.48,
+  "part_enfants": 0.17,
+  "jours_construction": 18,
+  "emmenagements_par_jour": 0.2,
+
+  "demande": {
+    "attrait_region": 30,
+    "emplois_exterieurs": 350,
+    "clients_par_emploi_commerce": 15,
+    "part_actifs_activites": 0.35,
+    "impot_reference": 0.10,
+    "penalite_par_point_impot": 4,
+    "constructions_max_par_jour": 2
+  },
+
+  "niveaux": { "attrait_niveau2": 48, "attrait_niveau3": 68, "mois_entre_niveaux": 5 },
+
+  "impots": { "habitat_par_habitant": 7, "commerce_par_emploi": 16, "activites_par_emploi": 13, "taux_min": 0.02, "taux_max": 0.25 },
+
+  "emprunt": { "montant": 150000, "taux_annuel": 0.035, "duree_mois": 120, "max": 2 },
+
+  "services": {
+    "chateau_eau":     { "nom": "Château d'eau", "cout": 30000, "entretien": 1200, "eau": 2500, "palier": 0 },
+    "pompage_lac":     { "nom": "Station de pompage", "cout": 55000, "entretien": 2600, "eau": 12000, "distance_eau_max_m": 60, "palier": 2 },
+    "centrale_solaire":{ "nom": "Centrale solaire", "cout": 45000, "entretien": 1500, "electricite": 2200, "palier": 0 },
+    "centrale_gaz":    { "nom": "Centrale au gaz", "cout": 95000, "entretien": 3800, "electricite": 14000, "pollution_rayon_m": 450, "palier": 2 },
+    "ecole":           { "nom": "École", "cout": 70000, "entretien": 2800, "eleves": 320, "rayon_m": 800, "emplois": 25, "palier": 1 },
+    "parc":            { "nom": "Parc", "cout": 12000, "entretien": 250, "rayon_m": 250, "palier": 1 },
+    "arret_bus":       { "nom": "Arrêt de bus", "cout": 4000, "entretien": 150, "rayon_m": 320, "palier": 2 }
+  },
+  "bus": { "cout_par_bus_mois": 700, "arrets_par_bus": 4 },
+  "consommation": { "eau_par_habitant": 1.0, "eau_par_emploi": 0.6, "elec_par_habitant": 0.8, "elec_par_emploi": 1.0 },
+  "pollution_activites_rayon_m": 160,
+  "mois_sans_service_avant_depart": 2,
+
+  "paliers": [
+    { "nom": "Hameau",      "population": 0,    "message": "Bienvenue, Madame ou Monsieur le Maire. Tracez une rue depuis un grand axe, puis zonez de l'habitat." },
+    { "nom": "Bourg",       "population": 300,  "message": "Votre commune devient un bourg ! École et parcs sont disponibles." },
+    { "nom": "Village",     "population": 1200, "message": "Village atteint ! Bus, station de pompage dans le lac et centrale au gaz débloqués." },
+    { "nom": "Petite ville","population": 3500, "message": "Petite ville ! Les immeubles de niveau 3 peuvent apparaître. (La suite arrivera dans le jeu complet.)" }
+  ]
+}

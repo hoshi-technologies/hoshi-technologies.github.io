@@ -6,6 +6,28 @@ using Ville.Donnees;
 using Ville.Reseau;
 using Ville.Trafic;
 
+if (args.Length > 0 && args[0] == "--robot")
+{
+    // partie automatique : python-like sortie mois par mois pour régler l'équilibre
+    var dossier = args[1];
+    var reglages = Ville.Coeur.Reglages.Charger(args[2]);
+    int mois = args.Length > 3 ? int.Parse(args[3]) : 20;
+    var paquet = PaquetVille.Charger(dossier);
+    var partie = Ville.Coeur.Partie.NouvelleFondation(reglages, paquet, 1);
+    var robot = new Ville.Coeur.Robot(partie);
+    robot.Demarrer();
+    var chrono = Stopwatch.StartNew();
+    robot.Jouer(mois, p => Console.WriteLine(
+        $"mois {p.Mois,3} pop {p.Population,6} emplois {p.EmploisLocaux,5} chômeurs {p.Chomeurs,4} argent {p.Argent,10:N0} " +
+        $"rec {p.RecettesMois,7:N0} dep {p.DepensesMois,7:N0} D(h/c/a) {p.DemandeHabitat,4:F0}/{p.DemandeCommerce,4:F0}/{p.DemandeActivites,4:F0} " +
+        $"eau {p.EauConsommee,6:F0}/{p.EauProduite,6:F0} élec {p.ElecConsommee,6:F0}/{p.ElecProduite,6:F0} palier {p.Palier} bât {p.Parcelles.Values.Count(x => x.Batiment != null)}"));
+    if (args.Length > 4) { partie.SauvegarderFichier(args[4]); Console.WriteLine("Sauvegarde écrite : " + args[4]); }
+    foreach (var l in robot.Journal) Console.WriteLine("  " + l);
+    foreach (var m in partie.Messages) Console.WriteLine($"  [j{m.Jour} {m.Type}] {m.Texte}");
+    Console.WriteLine($"Temps de simulation : {chrono.ElapsedMilliseconds} ms pour {mois} mois");
+    return;
+}
+
 var resultats = new Dictionary<string, object>
 {
     ["machine"] = $"{Environment.ProcessorCount} cœurs, {System.Runtime.InteropServices.RuntimeInformation.OSDescription}",
