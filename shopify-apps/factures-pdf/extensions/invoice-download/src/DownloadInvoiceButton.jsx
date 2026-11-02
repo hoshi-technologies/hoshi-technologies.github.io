@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 // Bouton du menu d'actions d'une commande (espace client) : ouvre la facture PDF.
 // Le serveur vérifie le jeton de session du client et ne renvoie le lien que si la commande lui
 // appartient. Sans facture (pas encore émise, quota atteint…), aucun bouton n'est affiché.
