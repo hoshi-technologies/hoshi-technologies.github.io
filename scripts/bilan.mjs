@@ -13,6 +13,10 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.join(ROOT, 'hippique/data');
 const DETAIL_DAYS = 14;
+const DRIFT_WINDOW = Number(process.env.DRIFT_WINDOW) || 100; // courses récentes surveillées
+const DRIFT_Z = 2; // écart significatif (en écarts-types)
+const TOPIC = (process.env.NTFY_TOPIC || '').trim();
+const PAGE = 'https://hoshi-technologies.github.io/hippique/';
 const readJson = async (f) => {
   try {
     return JSON.parse(await readFile(f, 'utf8'));
@@ -104,7 +108,45 @@ function scoreCourse(reu, c) {
   };
 }
 
+/**
+ * Alerte de dérive : sur les DRIFT_WINDOW dernières courses figées, compare le nombre de n°1
+ * placés au nombre annoncé par nos probabilités. Un écart de plus de DRIFT_Z écarts-types
+ * déclenche une notification (au plus une par semaine et par sens).
+ */
+async function checkDrift(recent, prev) {
+  const last = recent.slice(-DRIFT_WINDOW);
+  const drift = { courses: last.length, window: DRIFT_WINDOW, lastAlert: (prev && prev.drift && prev.drift.lastAlert) || {} };
+  if (last.length < DRIFT_WINDOW) return drift;
+  const obs = last.filter((x) => x.placed).length;
+  const exp = last.reduce((a, x) => a + x.p, 0);
+  const sd = Math.sqrt(last.reduce((a, x) => a + x.p * (1 - x.p), 0)) || 1;
+  const z = (obs - exp) / sd;
+  Object.assign(drift, { observed: obs, expected: +exp.toFixed(1), z: +z.toFixed(2) });
+  const dir = z <= -DRIFT_Z ? 'bas' : z >= DRIFT_Z ? 'haut' : null;
+  if (!dir) return drift;
+  const lastAt = drift.lastAlert[dir];
+  if (lastAt && Date.now() - new Date(lastAt) < 7 * 86400000) return drift;
+  const title = dir === 'bas' ? '⚠️ Hoshi Turf : le modèle se trompe plus que prévu' : 'ℹ️ Hoshi Turf : le modèle est trop prudent';
+  const msg =
+    `Sur les ${DRIFT_WINDOW} dernières courses, notre n°1 a été placé ${obs} fois pour ${exp.toFixed(0)} annoncées. ` +
+    (dir === 'bas'
+      ? 'Les pourcentages affichés sont trop optimistes en ce moment : prudence, et demandez une analyse.'
+      : 'Les pourcentages affichés sont trop pessimistes : le recalibrage quotidien devrait corriger.');
+  console.log('DÉRIVE ' + title + ' — ' + msg);
+  if (TOPIC) {
+    await fetch('https://ntfy.sh/', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ topic: TOPIC, title, message: msg, tags: ['chart_with_downwards_trend'], priority: 4, click: PAGE }),
+    }).catch(() => {});
+  }
+  drift.lastAlert[dir] = new Date().toISOString();
+  return drift;
+}
+
 async function main() {
+  const prev = await readJson(path.join(DATA, 'bilan.json'));
+  const recent = []; // { p, placed } dans l'ordre chronologique (France)
   const files = (await readdir(DATA)).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   const out = { updated: new Date().toISOString(), total: { fr: emptyAgg(), all: emptyAgg() }, days: [] };
   for (const f of files) {
@@ -116,7 +158,10 @@ async function main() {
         const r = scoreCourse(reu, c);
         if (!r) continue;
         add(d.all, r.agg);
-        if (r.fr) add(d.fr, r.agg);
+        if (r.fr) {
+          add(d.fr, r.agg);
+          recent.push({ h: r.detail.heure || 0, p: r.detail.top.p, placed: r.detail.placed });
+        }
         d.details.push(r.detail);
       }
     if (!d.all.courses) continue;
@@ -125,6 +170,8 @@ async function main() {
     d.details.sort((a, b) => (a.heure || 0) - (b.heure || 0));
     out.days.push(d);
   }
+  recent.sort((a, b) => a.h - b.h);
+  out.drift = await checkDrift(recent, prev);
   out.days.reverse(); // le plus récent d'abord
   out.days.forEach((d, k) => {
     if (k >= DETAIL_DAYS) delete d.details;
