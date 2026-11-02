@@ -202,6 +202,11 @@
               <span><b data-i18n="delivery.email"></b><br><small data-i18n="delivery.emailHelp"></small></span></label>
           </div>
           <p><small data-i18n="delivery.accountButton"></small></p>
+          <div class="banner info setup" id="activate-button">
+            <p><b data-i18n="delivery.activateTitle"></b></p>
+            <p data-i18n="delivery.activateSteps"></p>
+            <div class="actions" style="margin:0"><button type="button" class="primary" id="open-checkout-settings" data-i18n="delivery.activateOpen"></button></div>
+          </div>
           <details id="delivery-link-setup" class="advanced" hidden>
             <summary data-i18n="delivery.advanced"></summary>
             <div class="banner info setup">
@@ -606,6 +611,9 @@
       toast(t('liquid.copied'));
     });
   }
+
+  // Bouton de l'espace client : Shopify exige que le marchand l'active dans l'éditeur.
+  $('open-checkout-settings').addEventListener('click', () => open('shopify://admin/settings/checkout', '_top'));
 
   // Mode de remise de la facture : lien dans la confirmation Shopify, ou e-mail séparé.
   const syncDelivery = () => {

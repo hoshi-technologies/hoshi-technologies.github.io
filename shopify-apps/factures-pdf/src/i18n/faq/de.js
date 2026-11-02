@@ -20,7 +20,7 @@ export default [
       ],
       [
         'Warum ist die Rechnung nicht in der Shopify-Bestellbestätigung?',
-        "Shopify erlaubt Apps nicht, eigenen E-Mails Anhänge hinzuzufügen. Um eine zweite E-Mail zu vermeiden, wählen Sie „Keine zusätzliche E-Mail“: Der Kunde klickt in der Shopify-Bestätigung auf „Bestellung ansehen“, dann auf „Rechnung herunterladen“ und bestätigt seine E-Mail-Adresse mit einem Code. Kein Konto, kein Passwort, keine Einrichtung. Nutzt Ihr Shop noch die „klassischen Konten“ von Shopify, wählen Sie die separate E-Mail.",
+        "Shopify erlaubt Apps nicht, eigenen E-Mails Anhänge hinzuzufügen. Um eine zweite E-Mail zu vermeiden, wählen Sie „Keine zusätzliche E-Mail“: Der Kunde klickt in der Shopify-Bestätigung auf „Bestellung ansehen“, dann auf „Rechnung herunterladen“ und bestätigt seine E-Mail-Adresse mit einem Code. Kein Konto, kein Passwort. Sie aktivieren die Schaltfläche einmalig: Einstellungen › Checkout › Anpassen › Seite „Bestellstatus“ › Apps › Rechnung herunterladen › Speichern. Nutzt Ihr Shop noch die „klassischen Konten“ von Shopify, wählen Sie die separate E-Mail.",
       ],
       [
         'Wie erhalte ich eine Kopie meiner Rechnungen?',

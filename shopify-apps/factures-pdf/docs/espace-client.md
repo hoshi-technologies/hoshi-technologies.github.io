@@ -5,8 +5,11 @@ Le client connecté à son compte client Shopify voit un bouton **Télécharger 
 - dans la liste de ses commandes,
 - sur la page de chaque commande.
 
-Rien à faire pour le marchand : le bouton arrive avec l'appli, sur toutes les boutiques.
-Il n'apparaît que si la facture de la commande existe déjà.
+Le bouton arrive avec l'appli, sans code à coller. Shopify exige que le marchand l'active une
+seule fois dans l'éditeur : **Paramètres › Paiement › Personnaliser**, page **Statut de la
+commande**, icône **Applications**, **Télécharger ma facture**, **Enregistrer**. Les réglages de
+l'appli affichent ces étapes et un bouton qui ouvre directement les réglages de paiement.
+Le bouton n'apparaît que si la facture de la commande existe déjà.
 
 **Sans compte client.** L'e-mail de confirmation de Shopify contient un lien « Voir ma commande ».
 Ce lien ouvre la page de la commande sans connexion, et le bouton y est affiché. Au clic, Shopify

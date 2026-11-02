@@ -20,7 +20,7 @@ export default [
       ],
       [
         '¿Por qué la factura no está en el correo de confirmación de Shopify?',
-        "Shopify no permite que las aplicaciones adjunten archivos a sus propios correos. Para evitar un segundo correo, elija «Sin correo adicional»: en el correo de confirmación de Shopify, el cliente hace clic en «Ver pedido», luego en «Descargar factura», y confirma su correo con un código. Sin cuenta, sin contraseña, sin configuración. Si su tienda aún usa las «cuentas clásicas» de Shopify, elija el correo aparte.",
+        "Shopify no permite que las aplicaciones adjunten archivos a sus propios correos. Para evitar un segundo correo, elija «Sin correo adicional»: en el correo de confirmación de Shopify, el cliente hace clic en «Ver pedido», luego en «Descargar factura», y confirma su correo con un código. Sin cuenta ni contraseña. Por su parte, active el botón una sola vez: Configuración › Pago › Personalizar › página «Estado del pedido» › Aplicaciones › Descargar factura › Guardar. Si su tienda aún usa las «cuentas clásicas» de Shopify, elija el correo aparte.",
       ],
       [
         '¿Cómo recibo una copia de mis facturas?',
