@@ -324,7 +324,7 @@
       }
       .kpis {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 10px;
         margin-bottom: 14px;
       }
@@ -582,6 +582,58 @@
       .opp-row .why b {
         font-weight: 700;
       }
+      .bdays {
+        display: grid;
+        gap: 8px;
+      }
+      .bday {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .bday-head {
+        width: 100%;
+        text-align: left;
+        border: 0;
+        border-radius: 0;
+        background: var(--card2);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 14px;
+        align-items: center;
+        padding: 10px 12px;
+      }
+      .bday-date {
+        font-weight: 700;
+      }
+      .bday-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+        font-size: 13px;
+        align-items: center;
+      }
+      .bday-list {
+        padding: 4px 12px 8px;
+      }
+      .brace {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .brace:last-child {
+        border-bottom: 0;
+      }
+      .brace-top {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+      .brace-res {
+        margin-left: auto;
+      }
       .oth.alert-row .nm {
         white-space: normal;
       }
@@ -706,6 +758,7 @@
         <div class="mark">H</div>
         <h1>Hoshi Turf</h1>
         <span class="spacer"></span>
+        <button id="btnBilan" class="ghost">📊 Bilan</button>
         <button id="btnExpert" class="ghost" aria-pressed="false">Mode expert</button>
       </header>
       <p class="sub">Pour chaque course : les chevaux qui ont le plus de chances d'être placés, et s'il vaut la peine de jouer.</p>
@@ -738,6 +791,7 @@
         <section class="card hero" id="sHero"></section>
         <section class="card" id="sPick"></section>
         <section class="card" id="sAdvice"></section>
+        <section class="card" id="sBilan"></section>
         <section class="card" id="sAlerts"></section>
       </div>
 
@@ -2548,6 +2602,174 @@
           if (!document.hidden) renderSimple();
         }, 60000);
 
+
+        // ---------------- Bilan des pronostics ----------------
+        var bilan = null,
+          bilanOpen = {};
+        function loadBilan() {
+          return getJson('data/bilan.json')
+            .then(function (b) {
+              bilan = b;
+            })
+            .catch(function () {
+              bilan = null;
+            })
+            .then(renderBilan);
+        }
+        function ratio(a, b) {
+          return b ? Math.round((a / b) * 100) + ' %' : '—';
+        }
+        function signedMoney(x) {
+          return (x >= 0 ? '+' : '−') + money(Math.abs(x));
+        }
+        function renderBilan() {
+          var el = $('sBilan');
+          var scope = $('progFilter').value === 'fr' ? 'fr' : 'all';
+          var html =
+            '<h2>📊 Bilan de nos pronostics</h2><p class="hint" style="margin:-6px 0 12px">Uniquement les pronostics figés avant le départ, comparés à l\'arrivée réelle. ' +
+            (scope === 'fr' ? 'Courses en France.' : 'Toutes les courses.') +
+            '</p>';
+          var days = ((bilan && bilan.days) || []).filter(function (d) {
+            return d[scope].courses;
+          });
+          if (!days.length) {
+            el.innerHTML =
+              html +
+              '<p class="muted">Pas encore de résultat : les pronostics sont figés depuis le 2 novembre. Le bilan se remplit au fil des arrivées, course après course.</p>';
+            return;
+          }
+          var t = bilan.total[scope];
+          var gainP = t.returnP - t.stakeP,
+            gainSel = t.selReturn - t.selStake;
+          html += '<div class="kpis">';
+          html +=
+            '<div class="kpi"><small>Notre n°1 placé</small><strong>' +
+            t.topPlaced +
+            ' / ' +
+            t.courses +
+            '</strong><br><small>' +
+            ratio(t.topPlaced, t.courses) +
+            ' (annoncé ' +
+            ratio(t.expectedPlaced, t.courses) +
+            ')</small></div>';
+          html +=
+            '<div class="kpi"><small>Notre n°1 gagnant</small><strong>' +
+            t.topWon +
+            ' / ' +
+            t.courses +
+            '</strong><br><small>' +
+            ratio(t.topWon, t.courses) +
+            '</small></div>';
+          html +=
+            '<div class="kpi"><small>Favori des cotes placé</small><strong>' +
+            ratio(t.favPlaced, t.favCourses) +
+            '</strong><br><small>pour comparer</small></div>';
+          html +=
+            '<div class="kpi"><small>1 € placé sur notre n°1</small><strong style="color:' +
+            (gainP >= 0 ? 'var(--good)' : 'var(--bad)') +
+            '">' +
+            signedMoney(gainP) +
+            '</strong><br><small>sur ' +
+            t.stakeP +
+            ' courses (' +
+            (t.stakeP ? ((gainP / t.stakeP) * 100).toFixed(1) + ' %' : '—') +
+            ')</small></div>';
+          if (t.selCourses)
+            html +=
+              '<div class="kpi"><small>Sélection ⭐</small><strong>' +
+              t.selPlaced +
+              ' / ' +
+              t.selCourses +
+              ' placés</strong><br><small>1 € placé : ' +
+              signedMoney(gainSel) +
+              '</small></div>';
+          html += '</div>';
+          html += '<div class="bdays">';
+          days.forEach(function (d) {
+            var a = d[scope];
+            var g = a.returnP - a.stakeP;
+            var open = bilanOpen[d.date];
+            var rate = a.topPlaced / a.courses;
+            html +=
+              '<div class="bday"><button class="bday-head" data-day="' +
+              d.date +
+              '"><span class="bday-date">' +
+              esc(fmtDay(d.date)) +
+              (d.details ? ' <span class="muted">' + (open ? '▾' : '▸') + '</span>' : '') +
+              '</span><span class="bday-stats"><span class="pill ' +
+              (rate >= 0.55 ? 'good' : rate >= 0.4 ? 'mid' : 'bad') +
+              '">n°1 placé ' +
+              a.topPlaced +
+              '/' +
+              a.courses +
+              ' · ' +
+              ratio(a.topPlaced, a.courses) +
+              '</span><span>gagnant ' +
+              a.topWon +
+              '</span><span>trio ' +
+              (a.podium / a.courses).toFixed(1).replace('.', ',') +
+              '/3</span><span style="color:' +
+              (g >= 0 ? 'var(--good)' : 'var(--bad)') +
+              '">1 € placé ' +
+              signedMoney(g) +
+              '</span>' +
+              (a.selCourses ? '<span>⭐ ' + a.selPlaced + '/' + a.selCourses + '</span>' : '') +
+              '</span></button>';
+            if (open && d.details) {
+              html += '<div class="bday-list">';
+              d.details
+                .filter(function (x) {
+                  return scope === 'all' || !x.pays || x.pays === 'FRA';
+                })
+                .forEach(function (x) {
+                  html +=
+                    '<div class="brace"><div class="brace-top"><span class="tag">' +
+                    fmtHour(x.heure) +
+                    ' R' +
+                    x.r +
+                    'C' +
+                    x.c +
+                    (x.selected ? ' ⭐' : '') +
+                    '</span><span class="muted">' +
+                    esc(x.hippodrome) +
+                    '</span><span class="brace-res">' +
+                    (x.placed
+                      ? '<span class="ok-mark">✓ ' + x.top.pos + (x.top.pos === 1 ? 'er' : 'e') + (x.rapportP ? ' · ' + x.rapportP.toFixed(2).replace('.', ',') + ' €' : '') + '</span>'
+                      : '<span class="ko-mark">✗ ' + (x.top.pos < 99 ? x.top.pos + 'e' : 'non placé') + '</span>') +
+                    '</span></div><div>n°' +
+                    esc(x.top.num) +
+                    ' <b>' +
+                    esc(x.top.nom) +
+                    '</b> (' +
+                    Math.round(x.top.p * 100) +
+                    ' %) · arrivée ' +
+                    x.arrivee.map((n) => '<span class="num-badge">' + esc(n) + '</span>').join(' ') +
+                    '</div></div>';
+                });
+              html += '</div>';
+            }
+            html += '</div>';
+          });
+          html += '</div>';
+          html +=
+            '<p class="hint">« Annoncé » : ce que nos probabilités prévoyaient. Si le nombre de n°1 placés reste proche de l\'annoncé, nos pourcentages sont fiables. Le gain fictif utilise les vrais rapports du PMU ; il inclut la commission du PMU, d\'où un résultat souvent négatif.</p>';
+          el.innerHTML = html;
+        }
+        $('sBilan').addEventListener('click', function (e) {
+          var tr = e.target.closest('.bday-head');
+          if (!tr) return;
+          bilanOpen[tr.dataset.day] = !bilanOpen[tr.dataset.day];
+          renderBilan();
+        });
+        $('btnBilan').onclick = function () {
+          if (store.expert) setExpert(false);
+          $('sBilan').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        $('progFilter').addEventListener('change', renderBilan);
+        setInterval(function () {
+          if (!document.hidden) loadBilan();
+        }, 5 * 60000);
+
         // ---------------- Alertes ----------------
         var alertsData = null;
         store.seenAlerts = store.seenAlerts || {};
@@ -3334,6 +3556,7 @@
         initProgram();
         settleJournal();
         loadAlerts();
+        loadBilan();
       })();
     </script>
   </body>

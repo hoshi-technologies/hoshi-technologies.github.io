@@ -57,6 +57,7 @@ while :; do
     node scripts/pmu-fetch.mjs --quick || ok=0
   fi
   node scripts/pmu-alerts.mjs || ok=0
+  node scripts/bilan.mjs || ok=0
   echo "{\"ok\":$([ $ok = 1 ] && echo true || echo false),\"at\":\"$(date -u +%FT%TZ)\"}" > "$HEALTH"
   publish || ok=0
   echo "::endgroup::"
