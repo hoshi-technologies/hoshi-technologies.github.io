@@ -18,6 +18,7 @@ import {
   SHOP_INFO_QUERY,
   BUSINESS_ENTITY_QUERY,
   SUBSCRIPTION_CREATE,
+  SHOP_PLAN_QUERY,
   SUBSCRIPTION_CANCEL,
   ACTIVE_SUBSCRIPTIONS,
 } from './shopify.js';
@@ -461,11 +462,19 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
     const plan = PLANS[(await body(c)).plan];
     if (!plan || plan.price === 0) return c.json({ error: 'Formule inconnue' }, 400);
     try {
+      // Boutiques de développement (dont celles des testeurs de Shopify) : abonnement de test,
+      // jamais facturé, même quand la facturation réelle est activée (BILLING_TEST=false).
+      let devStore = false;
+      try {
+        devStore = Boolean((await graphql(shop, SHOP_PLAN_QUERY)).shop?.plan?.partnerDevelopment);
+      } catch (error) {
+        logger.warn(`${shop} : type de boutique inconnu (${error.message})`);
+      }
       const data = await graphql(shop, SUBSCRIPTION_CREATE, {
         name: subscriptionName(plan),
         returnUrl: `https://${shop}/admin/apps/${config.apiKey}`,
         trialDays: plan.trialDays ?? 0,
-        test: config.billingTest,
+        test: Boolean(config.billingTest || devStore),
         lineItems: [
           {
             plan: {

@@ -163,6 +163,8 @@ export const BUSINESS_ENTITY_QUERY = `#graphql
 
 // ---------- Facturation de l'appli (Billing API) ----------
 
+export const SHOP_PLAN_QUERY = `query ShopPlan { shop { plan { partnerDevelopment } } }`;
+
 export const SUBSCRIPTION_CREATE = `#graphql
   mutation AppSubscriptionCreate(
     $name: String!

@@ -150,3 +150,35 @@ test('la formule est resynchronisée avec Shopify à l’ouverture de l’appli'
     ctx.close();
   }
 });
+
+test('facturation réelle : abonnement de test sur une boutique de développement, réel ailleurs', async () => {
+  for (const [partnerDevelopment, expected] of [[true, true], [false, false]]) {
+    const store = openDatabase(':memory:');
+    let sentTest;
+    const fakeShopify = async (url, options) => {
+      if (url.endsWith('/admin/oauth/access_token')) return Response.json({ access_token: 'shpat_x', scope: 'read_orders' });
+      const { query, variables } = JSON.parse(options.body);
+      if (query.includes('ShopPlan')) return Response.json({ data: { shop: { plan: { partnerDevelopment } } } });
+      if (query.includes('appSubscriptionCreate')) {
+        sentTest = variables.test;
+        return Response.json({ data: { appSubscriptionCreate: { confirmationUrl: 'https://x/confirm', appSubscription: { id: 'gid://shopify/AppSubscription/1', status: 'PENDING' }, userErrors: [] } } });
+      }
+      return Response.json({ data: { shop: { name: 'A', billingAddress: {} }, currentAppInstallation: { activeSubscriptions: [] } } });
+    };
+    const service = new InvoiceService({ store, transport: null, mailFrom: null, logger: quiet });
+    const app = createApp({ config: { ...config, billingTest: false }, store, service, logger: quiet, fetchImpl: fakeShopify });
+    const server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      const token = signSessionToken({ iss: `https://${SHOP}/admin`, dest: `https://${SHOP}`, aud: config.apiKey, exp: now + 60, nbf: now - 1 }, config.apiSecret);
+      const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+      const base = `http://127.0.0.1:${server.address().port}/api`;
+      await fetch(`${base}/session`, { method: 'POST', headers });
+      const res = await fetch(`${base}/billing/subscribe`, { method: 'POST', headers, body: JSON.stringify({ plan: 'essentiel' }) });
+      assert.equal(res.status, 200);
+      assert.equal(sentTest, expected, partnerDevelopment ? 'boutique de développement : test' : 'boutique réelle : facturée');
+    } finally {
+      server.close();
+    }
+  }
+});

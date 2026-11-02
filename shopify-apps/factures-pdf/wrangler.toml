@@ -35,6 +35,8 @@ enabled = true
 SHOPIFY_API_KEY = "29382e5537f3d51df592997c1947800a"
 SHOPIFY_API_VERSION = "2026-10"
 SHOPIFY_APP_URL = "https://hoshi-factures.hoshi-technologies.workers.dev"
-BILLING_TEST = "true"
+# Facturation réelle. Les boutiques de développement (dont celles des testeurs de Shopify)
+# reçoivent toujours un abonnement de test, jamais facturé.
+BILLING_TEST = "false"
 MAIL_FROM = "hoshi.technologies@gmail.com"
-SUPPORT_EMAIL = ""
+SUPPORT_EMAIL = "hoshi.technologies@gmail.com"
