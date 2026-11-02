@@ -7,6 +7,7 @@ import nodemailer from 'nodemailer';
 import { fillTemplate } from './settings.js';
 import { dictionary } from './i18n/index.js';
 
+/** `url` : adresse smtp://…, objet de réglages nodemailer, ou "json" (tests, aucun envoi). */
 export function createTransport(url) {
   if (!url) return null;
   if (url === 'json') return nodemailer.createTransport({ jsonTransport: true });

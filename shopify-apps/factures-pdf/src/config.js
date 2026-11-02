@@ -8,6 +8,18 @@ function required(name) {
 
 const withHttps = (url) => (/^https?:\/\//.test(url) ? url : `https://${url}`).replace(/\/$/, '');
 
+/** SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS → réglages nodemailer (plus simple que SMTP_URL). */
+function smtpFromParts(env) {
+  if (!env.SMTP_HOST) return '';
+  const port = Number(env.SMTP_PORT || 587);
+  return {
+    host: env.SMTP_HOST,
+    port,
+    secure: port === 465,
+    auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS || '' } : undefined,
+  };
+}
+
 export function loadConfig(env = process.env) {
   const get = (name, fallback) => env[name] ?? fallback;
   return {
@@ -33,7 +45,7 @@ export function loadConfig(env = process.env) {
     },
     mail: {
       // smtp://user:pass@smtp.exemple.fr:587 ; "json" pour les tests (aucun envoi réel).
-      transport: get('SMTP_URL', ''),
+      transport: get('SMTP_URL', '') || smtpFromParts(env),
       from: get('MAIL_FROM', ''),
     },
   };

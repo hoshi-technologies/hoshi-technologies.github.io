@@ -8,6 +8,11 @@ import { createApp } from './server.js';
 import { resolveKey } from './crypto.js';
 import { createBackup } from './backup.js';
 
+// Réglages locaux : fichier .env du dossier de l'appli (facultatif, jamais envoyé sur GitHub).
+try {
+  process.loadEnvFile();
+} catch {}
+
 let config;
 try {
   config = loadConfig();

@@ -271,3 +271,11 @@ test('sans service d’e-mail configuré, la facture reste « Non envoyé » (pa
   await settle();
   assert.equal(store.listInvoices(SHOP)[0].email_status, 'pending');
 });
+
+test('configuration SMTP en champs séparés (identifiant avec « @ »)', async () => {
+  const { loadConfig } = await import('../src/config.js');
+  const cfg = loadConfig({ SHOPIFY_APP_URL: 'x.fr', SHOPIFY_API_KEY: 'k', SHOPIFY_API_SECRET: 's', SMTP_HOST: 'smtp-relay.brevo.com', SMTP_USER: '9a1b2c@smtp-brevo.com', SMTP_PASS: 'xsmtpsib-123' });
+  assert.deepEqual(cfg.mail.transport, { host: 'smtp-relay.brevo.com', port: 587, secure: false, auth: { user: '9a1b2c@smtp-brevo.com', pass: 'xsmtpsib-123' } });
+  assert.equal(cfg.appUrl, 'https://x.fr');
+  assert.equal(loadConfig({ SHOPIFY_APP_URL: 'x', SHOPIFY_API_KEY: 'k', SHOPIFY_API_SECRET: 's' }).mail.transport, '');
+});
