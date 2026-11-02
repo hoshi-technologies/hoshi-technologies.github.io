@@ -1417,9 +1417,9 @@
         }
         // ---------- Courses « à jouer » ----------
         // 🔔 pari validé (alerte) · 💰 cote intéressante selon le modèle · ⭐ favori solide pour le placé.
-        var OPP_VALUE = 1.1,
-          OPP_SOLID = 0.65;
         store.progMode = store.progMode || 'jouer';
+        store.oppSolid = store.oppSolid || 0.55; // chances de placé minimum du favori
+        store.oppValue = store.oppValue || 1.05; // valeur minimale (probabilité × cote)
         function settingsForDiscipline(dis) {
           if (settingsSource === 'calibrated' && calibration && calibration.status === 'ok')
             return T.settingsFor(calibration, dis) || state.settings;
@@ -1446,10 +1446,10 @@
                   return x.pPlace != null ? x.pPlace : x.pTop3;
                 };
                 var top = a.runners.slice().sort((x, y) => pp(y) - pp(x))[0];
-                var val = T.valueBets(a, calibration, { minEdge: OPP_VALUE })[0] || null;
+                var val = T.valueBets(a, calibration, { minEdge: store.oppValue })[0] || null;
                 var al = alerts.filter((x) => x.r == reu.r && x.c == c.c)[0] || null;
                 var o = { reu: reu, course: c, top: top, pTop: pp(top), value: val, alert: al, hasOdds: !!a.market, nPlaces: a.placesPayees };
-                o.kind = al ? 'alert' : val ? 'value' : o.pTop >= OPP_SOLID ? 'solid' : null;
+                o.kind = al ? 'alert' : val ? 'value' : o.pTop >= store.oppSolid ? 'solid' : null;
                 prog.opps[reu.r + '-' + c.c] = o;
               } catch (e) {}
             });
@@ -1489,11 +1489,36 @@
             .filter((o) => o.kind && (!fr || !o.reu.pays || o.reu.pays === 'FRA'))
             .sort((a, b) => (a.course.heure || 0) - (b.course.heure || 0));
           if (!prog.day) return '';
-          if (!list.length)
-            return (
-              '<p class="muted">Aucune course intéressante à venir sur cette journée. Passez à « Toutes les courses » pour voir le programme complet.</p>'
-            );
-          var html = '<div class="opps">';
+          var opt = function (vals, cur, fmt) {
+            return vals
+              .map(function (v) {
+                return '<option value="' + v + '"' + (Math.abs(v - cur) < 1e-9 ? ' selected' : '') + '>' + fmt(v) + '</option>';
+              })
+              .join('');
+          };
+          var html =
+            '<div class="row" style="margin-bottom:10px">' +
+            '<label class="f">⭐ Favori placé au moins<select id="oppSolid">' +
+            opt([0.45, 0.5, 0.55, 0.6, 0.65, 0.7], store.oppSolid, (v) => Math.round(v * 100) + ' %') +
+            '</select></label>' +
+            '<label class="f">💰 Valeur minimale<select id="oppValue">' +
+            opt([1, 1.05, 1.1, 1.2], store.oppValue, (v) => v.toFixed(2).replace('.', ',')) +
+            '</select></label></div>';
+          var fallback = false;
+          if (!list.length) {
+            // Rien ne passe les critères : on montre quand même les courses où notre favori est le plus sûr.
+            fallback = true;
+            list = Object.keys(prog.opps || {})
+              .map((k) => prog.opps[k])
+              .filter((o) => !fr || !o.reu.pays || o.reu.pays === 'FRA')
+              .sort((a, b) => b.pTop - a.pTop)
+              .slice(0, 5)
+              .map((o) => Object.assign({}, o, { kind: 'solid' }))
+              .sort((a, b) => (a.course.heure || 0) - (b.course.heure || 0));
+            if (!list.length) return html + '<p class="muted">Plus aucune course à venir sur cette journée.</p>';
+            html += '<p class="hint" style="margin-top:0">Aucune course ne passe ces critères. Voici les 5 courses à venir où notre favori est le plus sûr :</p>';
+          }
+          html += '<div class="opps">';
           list.forEach(function (o) {
             var on = prog.sel && prog.sel.date === prog.day.date && prog.sel.r == o.reu.r && prog.sel.c == o.course.c;
             html +=
@@ -1520,11 +1545,19 @@
           });
           html += '</div>';
           html +=
-            '<p class="hint" style="margin-top:10px">🔔 pari validé par la simulation (le seul signal fiable) · 💰 cote au-dessus de notre estimation, non validé · ⭐ cheval placé ' +
-            Math.round(OPP_SOLID * 100) +
-            ' % du temps ou plus selon nous, mais un favori placé rapporte souvent peu.</p>';
+            '<p class="hint" style="margin-top:10px">🔔 pari validé par la simulation (le seul signal fiable) · 💰 cote au-dessus de notre estimation, non validé · ⭐ ' +
+            (fallback ? 'meilleures chances de placé de la journée' : 'favori placé ' + Math.round(store.oppSolid * 100) + ' % du temps ou plus selon nous') +
+            ', mais un favori placé rapporte souvent peu.</p>';
           return html;
         }
+        $('progList').addEventListener('change', function (e) {
+          if (e.target.id === 'oppSolid') store.oppSolid = parseFloat(e.target.value);
+          else if (e.target.id === 'oppValue') store.oppValue = parseFloat(e.target.value);
+          else return;
+          save(store);
+          computeOpportunities();
+          renderProgram();
+        });
         $('progMode').addEventListener('click', function (e) {
           var m = e.target.closest('[data-mode]');
           if (!m) return;
@@ -1542,7 +1575,14 @@
         }
         function renderProgram() {
           Array.prototype.forEach.call($('progMode').children, function (b) {
-            var n = b.dataset.mode === 'jouer' ? Object.keys(prog.opps || {}).filter((k) => prog.opps[k].kind).length : null;
+            var frOnly = $('progFilter').value === 'fr';
+            var n =
+              b.dataset.mode === 'jouer'
+                ? Object.keys(prog.opps || {}).filter(function (k) {
+                    var o = prog.opps[k];
+                    return o.kind && (!frOnly || !o.reu.pays || o.reu.pays === 'FRA');
+                  }).length
+                : null;
             b.classList.toggle('on', b.dataset.mode === store.progMode);
             if (n != null) b.textContent = '⭐ À jouer' + (prog.day ? ' (' + n + ')' : '');
           });
