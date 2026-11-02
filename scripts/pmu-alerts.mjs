@@ -160,6 +160,40 @@ async function selectionAndReminders(state, today, cal, stats, day) {
   for (const d of Object.keys(state.selection)) if (d < parisDate(-3)) delete state.selection[d];
 }
 
+/**
+ * Pronostic figé : à chaque passage AVANT le départ, le pronostic de la course est enregistré
+ * dans le fichier du jour ; une fois l'heure de départ passée, il n'est plus jamais modifié.
+ * La page l'affiche pour les courses parties et s'en sert pour comparer avec l'arrivée.
+ */
+async function freezePronos(day, cal, stats, today) {
+  const now = Date.now();
+  let n = 0;
+  for (const reu of day.reunions)
+    for (const c of reu.courses) {
+      if (!c.heure || c.heure <= now || c.arrivee || !c.partants || !c.partants.length) continue;
+      if (c.heure - now > 3 * 3600000) continue; // inutile trop longtemps à l'avance
+      const a = analyze(c, cal, stats, today);
+      if (a.error) continue;
+      c.prono = {
+        at: now,
+        placesPayees: a.placesPayees,
+        runners: a.runners.map((x) => ({
+          num: x.runner.num,
+          note: +x.note.toFixed(1),
+          pWin: +x.pWin.toFixed(4),
+          pPlace: x.pPlace == null ? null : +x.pPlace.toFixed(4),
+          pTop3: +x.pTop3.toFixed(4),
+          cote: x.runner.cote || null,
+        })),
+      };
+      n++;
+    }
+  if (n) {
+    await writeFile(path.join(DATA, today + '.json'), JSON.stringify(day));
+    console.log(`${n} pronostic(s) enregistré(s) avant le départ`);
+  }
+}
+
 async function main() {
   // Variables de test : ALERT_DATE (AAAA-MM-JJ) et ALERT_NOW (horodatage ms).
   const today = process.env.ALERT_DATE || parisDate(0);
@@ -230,6 +264,7 @@ async function main() {
       }
   }
   await selectionAndReminders(state, today, cal, stats, day);
+  if (day && !process.env.ALERT_DATE) await freezePronos(day, cal, stats, today);
 
   // On ne garde que les 3 derniers jours.
   const limit = parisDate(-3);

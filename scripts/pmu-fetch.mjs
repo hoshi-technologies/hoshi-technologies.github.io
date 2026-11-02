@@ -191,6 +191,8 @@ async function fetchDay(iso, prevDay, opts = {}) {
   const base = `${API}${pmuDate(iso)}`;
   await pool(jobs, 4, async ({ R, reu, course, old }) => {
     const tag = 'R' + R + 'C' + course.c;
+    // Pronostic figé au départ : conservé tel quel, jamais recalculé.
+    if (old && old.prono) course.prono = old.prono;
     // Mode rapide : seules les courses proches du départ (cotes) ou qui viennent de finir (rapports).
     if (opts.quick && old) {
       const now = Date.now();

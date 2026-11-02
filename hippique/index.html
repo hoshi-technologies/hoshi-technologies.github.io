@@ -1758,6 +1758,7 @@
               terrain: f.course.terrain,
               allocation: f.course.allocation || '',
               categorie: f.course.categorie || '',
+              prono: f.course.prono || null,
               heure: f.course.heure || null,
               arriveeCourse: f.course.arrivee || null,
               runners: withRecul(enrich(mergePublished(partants, f.course.partants), iso), f.course.discipline),
@@ -2269,6 +2270,31 @@
 
         // ---------------- Conseils de mise & journal ----------------
         var lastAnalysis = null;
+        // Course partie : on affiche le pronostic enregistré avant le départ, jamais recalculé après coup.
+        function applyFrozen(a) {
+          var r = state.race || {};
+          if (!a || a.error || !r.heure || r.heure > Date.now()) return;
+          if (!r.prono) {
+            a.notFrozen = !!r.auto;
+            return;
+          }
+          var byNum = {};
+          r.prono.runners.forEach(function (f) {
+            byNum[String(f.num)] = f;
+          });
+          a.runners.forEach(function (x) {
+            var f = byNum[String(x.runner.num)];
+            if (!f) return;
+            x.pWin = f.pWin;
+            x.pPlace = f.pPlace;
+            x.pTop3 = f.pTop3;
+            x.note = f.note;
+            x.coteJuste = 1 / f.pWin;
+            x.frozenCote = f.cote;
+            x.value = f.cote ? f.pWin * f.cote : null;
+          });
+          a.frozenAt = r.prono.at;
+        }
         var lastAdvice = null;
 
         // ---------------- Vue simple ----------------
@@ -2327,6 +2353,13 @@
               .join(' ');
             hero += '<div class="when">Course terminée · arrivée ' + arr + '</div>';
           } else if (w.txt) hero += '<div class="when ' + w.cls + '">' + w.txt + '</div>';
+          if (a && a.frozenAt)
+            hero +=
+              '<p class="hint" style="margin:6px 0 0">🔒 Pronostic figé à ' +
+              new Date(a.frozenAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) +
+              ', avant le départ : il n\'est plus modifié.</p>';
+          else if (a && a.notFrozen)
+            hero += '<p class="hint" style="margin:6px 0 0">Aucun pronostic n\'a été enregistré avant le départ de cette course : celui-ci est recalculé après coup, à titre indicatif.</p>';
           $('sHero').innerHTML = hero;
 
           if (!a || a.error) {
@@ -2351,7 +2384,8 @@
           list.slice(0, 3).forEach(function (x, k) {
             var p = pp(x);
             var lab = confidenceLabel(p);
-            var cote = x.runner.cote ? String(x.runner.cote).replace('.', ',') : '—';
+            var cv = x.frozenCote || x.runner.cote;
+            var cote = cv ? String(cv).replace('.', ',') : '—';
             html +=
               '<div class="pick' +
               (k === 0 ? ' first' : '') +
@@ -2408,7 +2442,7 @@
                 '"></i></div><span class="pcs">' +
                 Math.round(p * 100) +
                 ' %</span><span class="ct">' +
-                esc(x.runner.cote ? String(x.runner.cote).replace('.', ',') : '—') +
+                esc(x.frozenCote || x.runner.cote ? String(x.frozenCote || x.runner.cote).replace('.', ',') : '—') +
                 '</span></div>';
             });
             html += '</div>';
@@ -3093,6 +3127,7 @@
           };
           var out = $('out');
           var a = T.analyzeRace(race, effectiveSettings());
+          applyFrozen(a);
           lastAnalysis = a;
           renderAdvisor();
           renderSimple();
