@@ -281,6 +281,20 @@ function fitLearned(items, base) {
   return s;
 }
 
+/** Référence « cotes du marché seules », avec seulement le correctif des places ajusté. */
+function fitMarket(items, base) {
+  const s = Object.assign(JSON.parse(JSON.stringify(base)), { marketWeight: 1 });
+  let best = Infinity,
+    bestL = s.placeDiscount;
+  for (let l = 0.5; l <= 1.15; l += 0.05) {
+    s.placeDiscount = l;
+    const o = evaluate(items, s).objective;
+    if (o < best) (best = o), (bestL = l);
+  }
+  s.placeDiscount = +bestL.toFixed(2);
+  return s;
+}
+
 // ------------------------------------------------------------------ rapports placés
 /** Relation cote gagnant → rapport placé : log(rapport - 1) = a + b·log(cote - 1). */
 function fitPlaceOdds(items) {
@@ -442,7 +456,7 @@ const publicSettings = (s) => ({
 
 async function main() {
   const prev = await readJson(OUT, null);
-  if (!FORCE && prev && prev.updated && Date.now() - new Date(prev.updated) < 20 * 3600000) {
+  if (!FORCE && prev && prev.status === 'ok' && prev.version === 2 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
     console.log('Calibrage récent (' + prev.updated + '), rien à faire.');
     return;
   }
@@ -470,7 +484,7 @@ async function main() {
     const tr = train.filter((it) => it.group === g),
       te = test.filter((it) => it.group === g);
     const info = { trainCourses: tr.length, testCourses: te.length };
-    let cand = { global: globalTrain };
+    let cand = { global: globalTrain, market: fitMarket(tr.length >= 50 ? tr : train, defaults) };
     if (tr.length >= MIN_GROUP) {
       console.log(`  groupe ${g} : ${tr.length} courses d'entraînement`);
       const f = fitGroup(tr, globalTrain, console.log);
@@ -534,7 +548,9 @@ async function main() {
     const all = items.filter((it) => it.group === g);
     const info = groupsOut[g];
     const o = { courses: all.length, model: info.model, test: info.test || null };
-    if (info.model === 'global' || all.length < MIN_GROUP) {
+    if (info.model === 'market') {
+      o.settings = publicSettings(fitMarket(all, defaults));
+    } else if (info.model === 'global' || all.length < MIN_GROUP) {
       o.settings = out.settings;
     } else {
       const f = fitGroup(all, chosen[g].learned ? publicSettings(chosen[g]) : chosen[g], null, info.model === 'learned');

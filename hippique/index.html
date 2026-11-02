@@ -1462,7 +1462,7 @@
                   ? ' · ' +
                     T.disciplineGroup(state.race.discipline) +
                     ' : ' +
-                    ({ learned: 'modèle appris sur les résultats', weighted: 'réglages propres à la discipline', global: 'réglages communs' }[
+                    ({ learned: 'modèle appris sur les résultats', weighted: 'réglages propres à la discipline', global: 'réglages communs', market: 'cotes du marché seules' }[
                       (calibration.groups[T.disciplineGroup(state.race.discipline)] || {}).model
                     ] || '')
                   : '')
@@ -1598,7 +1598,7 @@
             c.settings.placeDiscount +
             '.</p>';
           if (c.groups) {
-            var lbl = { learned: 'modèle appris sur les résultats', weighted: 'réglages propres', global: 'réglages communs' };
+            var lbl = { learned: 'modèle appris sur les résultats', weighted: 'réglages propres', global: 'réglages communs', market: 'cotes du marché seules (le modèle ne fait pas mieux)' };
             html +=
               '<p class="hint">Modèle utilisé : ' +
               ['trot', 'galop']
