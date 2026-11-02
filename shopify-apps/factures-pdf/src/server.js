@@ -108,7 +108,17 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
     return c.json({ error: error.message }, 500);
   });
 
-  app.get('/health', (c) => c.json({ ok: true }));
+  // Diagnostic sans aucune valeur secrète : l'envoi d'e-mails est-il configuré sur ce serveur ?
+  app.get('/health', (c) =>
+    c.json({
+      ok: true,
+      mail: {
+        configured: Boolean((config.mail.brevoApiKey || config.mail.transport) && config.mail.from),
+        provider: config.mail.brevoApiKey ? 'brevo' : config.mail.transport ? 'smtp' : null,
+        from: config.mail.from || null,
+      },
+    }),
+  );
 
   // ---------- Webhooks (corps brut obligatoire pour vérifier la signature) ----------
   app.post('/webhooks', async (c) => {
