@@ -764,7 +764,7 @@ public partial class JeuPrincipal : Node3D
             }
             c = robot.Centre;
         }
-        var vues = new (string nom, float dist, float tangage, float lacet)[] { ("ensemble", 900, 0.75f, 0.6f), ("quartier", 260, 0.55f, 2.2f), ("rue", 7, 0.3f, 0.9f), ("trafic", 700, 1.1f, 0.6f), ("attrait", 700, 1.1f, 0.6f), ("lac", 260, 0.3f, 2.4f), ("pietons", 45, 0.35f, 0.9f) };
+        var vues = new (string nom, float dist, float tangage, float lacet)[] { ("ensemble", 900, 0.75f, 0.6f), ("quartier", 260, 0.55f, 2.2f), ("rue", 7, 0.3f, 0.9f), ("trafic", 700, 1.1f, 0.6f), ("attrait", 700, 1.1f, 0.6f), ("lac", 260, 0.3f, 2.4f), ("pietons", 45, 0.35f, 0.9f), ("satisfaction", 700, 1.1f, 0.6f) };
         var dossier = ProjectSettings.GlobalizePath("user://");
         foreach (var d in _partie!.Decisions.ToList()) _partie.Repondre(d.Id, 1);
         foreach (var (nom, dist, tangage, lacet) in vues)
@@ -772,7 +772,7 @@ public partial class JeuPrincipal : Node3D
             _camera.Cible = new Vector3((float)c.X + (nom == "rue" ? 50 : 0), 0, (float)-c.Y);
             if (nom == "lac") _camera.Cible = new Vector3(1150, 0, 450);
             _camera.Distance = dist; _camera.Tangage = tangage; _camera.Lacet = lacet;
-            _rendu.Vue = nom == "trafic" ? RenduVille.Vues.Trafic : nom == "attrait" ? RenduVille.Vues.Attrait : RenduVille.Vues.Normale;
+            _rendu.Vue = nom == "trafic" ? RenduVille.Vues.Trafic : nom == "attrait" ? RenduVille.Vues.Attrait : nom == "satisfaction" ? RenduVille.Vues.Satisfaction : RenduVille.Vues.Normale;
             _camera.Appliquer();
             for (int i = 0; i < 30; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_{nom}.png"));
@@ -789,6 +789,13 @@ public partial class JeuPrincipal : Node3D
             GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_{nom}.png"));
         }
         _meteo.MoisForce = null; _meteo.TempsForce = null;
+        for (int o = 0; o < 3; o++)
+        {
+            _hud.OuvrirMairie(o);
+            for (int i = 0; i < 10; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_mairie{o}.png"));
+        }
+        _hud.FermerFenetres();
         if (_partie!.Module<Ville.Gestion.VraieGestion>() != null)
         {
             _rendu.Vue = RenduVille.Vues.Normale;

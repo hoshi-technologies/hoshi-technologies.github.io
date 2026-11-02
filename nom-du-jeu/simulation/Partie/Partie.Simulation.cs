@@ -194,6 +194,12 @@ public sealed partial class Partie
         DemandeCommerce = Math.Clamp(100 * (clientsBesoin - capCommerce) / Math.Max(clientsBesoin, 30) - penal(ImpotCommerce) + (Population < 150 ? -40 : 0), -100, 100);
         double besoinA = Chomeurs + Actifs * R.Demande.PartActifsActivites;
         DemandeActivites = Math.Clamp(25 + 100 * (besoinA - capActivites) / Math.Max(besoinA, 40) - 25 - penal(ImpotActivites) + (Population < 100 ? -30 : 0), -100, 100);
+        foreach (var m in Modules)
+        {
+            DemandeHabitat = Math.Clamp(m.ModifierDemande(this, Zone.Habitat, DemandeHabitat), -100, 100);
+            DemandeCommerce = Math.Clamp(m.ModifierDemande(this, Zone.Commerce, DemandeCommerce), -100, 100);
+            DemandeActivites = Math.Clamp(m.ModifierDemande(this, Zone.Activites, DemandeActivites), -100, 100);
+        }
 
         if (LigneBusVersion != VersionServices + Reseau.Version) CalculerLigneBus();
     }
@@ -230,6 +236,7 @@ public sealed partial class Partie
             }
         double partBus = habitantsTotal > 0 ? 0.3 * habitantsBus / habitantsTotal : 0;
         double echelle = Actifs * R.Routes.PartTrajetsVoiture * R.Routes.PartHeureDePointe * (1 - partBus) / trajets.Count;
+        foreach (var m in Modules) echelle *= m.FacteurVoitures(this);
         var chemins = new int[trajets.Count][];
         Parallel.For(0, trajets.Count, () => new Ville.Reseau.EspaceCalcul(),
             (i, _, es) => { chemins[i] = g.Chemin(trajets[i].depart, trajets[i].arrivee, es); return es; }, _ => { });

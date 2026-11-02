@@ -15,6 +15,10 @@ public interface IModule
     double ModifierAttrait(Partie p, Parcelle parcelle, double attrait) => attrait;
     /// <summary>Facteur appliqué à la production d'un équipement (eau, électricité, déchets).</summary>
     double FacteurProduction(Partie p, Parcelle service) => 1;
+    /// <summary>Ajuste la demande d'une zone (politiques publiques…).</summary>
+    double ModifierDemande(Partie p, Zone z, double demande) => demande;
+    /// <summary>Facteur appliqué au nombre de voitures à l'heure de pointe (transports, vélo…).</summary>
+    double FacteurVoitures(Partie p) => 1;
     /// <summary>Le joueur répond à une décision proposée par ce module.</summary>
     void Choisir(Partie p, Decision d, int choix) { }
     JsonElement Sauvegarder();

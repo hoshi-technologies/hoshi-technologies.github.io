@@ -21,6 +21,7 @@
 | Évolution | Les vrais bâtiments se rénovent et se surélèvent quand le quartier est recherché ; les bâtiments construits par le joueur montent de niveau. |
 | Graphismes | Véhicules (voitures, camionnettes, camions, bus), vedettes et voiliers sur le lac, piétons sur les trottoirs, arbres (4 822 vrais arbres isolés + bois réels comme la forêt du Semnoz), lampadaires et bancs réels le long des rues. Tout est fabriqué par le code du jeu (aucune licence tierce) ; registre : conception/REGISTRE_ASSETS.md. |
 | Ambiance | Fenêtres sur tous les bâtiments, allumées la nuit ; phares et lampadaires lumineux ; 4 saisons (herbe, feuillage roux en automne, arbres nus et neige en altitude l'hiver) ; météo (beau, nuageux, pluie, neige) selon un climat de type Annecy ; sons d'ambiance fabriqués en direct qui changent selon l'endroit regardé (ville, campagne, bord du lac, montagne) et l'heure (oiseaux le jour, grillons les nuits d'été). M : couper le son. |
+| Mairie (vraie gestion) | Satisfaction par quartier (quartiers nommés d'après leur rue principale) et par type d'habitant (familles, jeunes actifs, seniors), avec effet sur l'attrait ; vue « Satisfaction » ; 8 politiques publiques (transports gratuits, zones piétonnes, encadrement des loyers, logement social, aide aux commerces, plan vélo, végétalisation, éclairage réduit) avec coût et effets réels ; 4 objectifs facultatifs (ville verte, attractive, solidaire, économe) avec conditions affichées. |
 | Tutoriel | 10 étapes par la pratique (caméra, rue, habitat, eau, électricité, croissance, emplois, budget, vues, 300 habitants), chacune validée par l'action réelle ; « Passer le tutoriel ». Vérifié de bout en bout par une partie automatique. |
 | Menu pause (Échap) | Reprendre, sauvegarder sous un nom, charger une partie (liste avec ville, carte, mode, date et population), options, menu principal, quitter. |
 | Options (enregistrées) | Volume, couper le son, qualité graphique (basse / moyenne / haute : ombres, occlusion, lueur, anticrénelage, résolution), taille du texte, couleurs adaptées au daltonisme (zones et vues). Manette : déplacement, rotation, zoom. |
@@ -29,6 +30,7 @@
 | Trafic | Heure de pointe calculée chaque mois : les rues saturées font baisser l'attrait de l'habitat (et aident les commerces). Le bus réduit le nombre de voitures. |
 | Vues (V) | Réseaux, attrait, trafic, services. |
 | Bac à sable | Argent illimité, tout débloqué. |
+| Mairie (vraie gestion) | Satisfaction par quartier (quartiers nommés d'après leur rue principale) et par type d'habitant (familles, jeunes actifs, seniors), avec effet sur l'attrait ; vue « Satisfaction » ; 8 politiques publiques (transports gratuits, zones piétonnes, encadrement des loyers, logement social, aide aux commerces, plan vélo, végétalisation, éclairage réduit) avec coût et effets réels ; 4 objectifs facultatifs (ville verte, attractive, solidaire, économe) avec conditions affichées. |
 | Tutoriel | « Premiers pas », puis « Conseils du moment » qui suivent les problèmes de la ville. |
 | Accessibilité | Taille du texte réglable (Ctrl + / Ctrl -), clavier AZERTY et QWERTY. |
 | Économie | Emplois et chômage, demande pour chaque zone, 3 taxes, entretien, emprunts, budget détaillé. |
@@ -39,7 +41,7 @@
 | Sauvegarde | Automatique tous les 3 mois de jeu, F5, bouton « Continuer ». |
 
 ## Ce qui a été testé
-- **43 tests automatiques réussis (35 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
+- **45 tests automatiques réussis (37 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
 - **Une partie complète de 20 mois jouée par le « robot maire »** (`bench/Ville.Bench -- --robot`) :
   - la ville passe de 0 à environ 3 500 habitants ;
   - 3 paliers sont franchis ;

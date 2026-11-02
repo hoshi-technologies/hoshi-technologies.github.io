@@ -44,7 +44,11 @@ public partial class Hud : Control
     public Action? PasserTutoriel;
     public bool BudgetVisible => _budget.Visible;
     public void OuvrirBudget() => _budget.Visible = true;
+    public void OuvrirMairie(int onglet = 0) { _mairie.Afficher(_p!); _mairie.Onglet(onglet); }
+    public void FermerFenetres() { _budget.Visible = false; _mairie.Visible = false; }
     private Button _passer = null!;
+    private FenetreMairie _mairie = null!;
+    private Label _satisfaction = null!;
 
     public static readonly Color Fond = new(0.10f, 0.12f, 0.15f, 0.88f);
 
@@ -61,6 +65,8 @@ public partial class Hud : Control
         ConstruireObjectifs();
         ConstruireBudget();
         ConstruireAide();
+        _mairie = new FenetreMairie { Visible = false };
+        AddChild(_mairie);
         _info = new Label { Position = new Vector2(12, 0), AutowrapMode = TextServer.AutowrapMode.Off };
         _info.SetAnchorsPreset(LayoutPreset.BottomLeft);
         _info.Position = new Vector2(14, -150);
@@ -94,12 +100,13 @@ public partial class Hud : Control
         pc.SetAnchorsPreset(LayoutPreset.TopWide);
         AddChild(pc);
         var h = new HBoxContainer();
-        h.AddThemeConstantOverride("separation", 22);
+        h.AddThemeConstantOverride("separation", 14);
         pc.AddChild(h);
         _date = new Label(); _pop = new Label(); _argent = new Label(); _palier = new Label(); _emplois = new Label();
-        foreach (var l in new[] { _date, _palier, _pop, _emplois, _argent }) h.AddChild(l);
+        _satisfaction = new Label { TooltipText = "Satisfaction moyenne des habitants (fenêtre Mairie)" };
+        foreach (var l in new[] { _date, _palier, _pop, _emplois, _argent, _satisfaction }) h.AddChild(l);
         var demandes = new HBoxContainer();
-        demandes.AddChild(new Label { Text = "Demande :" });
+        demandes.AddChild(new Label { Text = "Demande", TooltipText = "Demande en habitat, commerces et activités" });
         _dh = Barre(new Color(0.45f, 0.78f, 0.42f), "Habitat"); _dc = Barre(new Color(0.38f, 0.60f, 0.92f), "Commerce"); _da = Barre(new Color(0.95f, 0.78f, 0.30f), "Activités");
         foreach (var b in new[] { _dh, _dc, _da }) demandes.AddChild(b);
         h.AddChild(demandes);
@@ -120,7 +127,7 @@ public partial class Hud : Control
 
     private static ProgressBar Barre(Color c, string nom)
     {
-        var b = new ProgressBar { MinValue = -100, MaxValue = 100, CustomMinimumSize = new Vector2(70, 18), ShowPercentage = false, TooltipText = $"Demande {nom}" };
+        var b = new ProgressBar { MinValue = -100, MaxValue = 100, CustomMinimumSize = new Vector2(46, 18), ShowPercentage = false, TooltipText = $"Demande {nom}" };
         b.AddThemeStyleboxOverride("fill", new StyleBoxFlat { BgColor = c });
         b.AddThemeStyleboxOverride("background", new StyleBoxFlat { BgColor = new Color(0.25f, 0.25f, 0.28f) });
         return b;
@@ -181,6 +188,9 @@ public partial class Hud : Control
         renover.Pressed += () => OutilChoisi?.Invoke(OutilActif == "renover" ? "" : "renover");
         _boutonsOutils["renover"] = renover;
         h.AddChild(renover);
+        var mairie = new Button { Text = "Mairie", TooltipText = "Quartiers, politiques publiques, objectifs", CustomMinimumSize = new Vector2(90, 38) };
+        mairie.Pressed += () => { if (_p != null) { if (_mairie.Visible) _mairie.Visible = false; else _mairie.Afficher(_p); } };
+        h.AddChild(mairie);
         var budget = new Button { Text = "Budget", CustomMinimumSize = new Vector2(100, 38) };
         budget.Pressed += () => _budget.Visible = !_budget.Visible;
         h.AddChild(budget);
@@ -358,13 +368,19 @@ public partial class Hud : Control
         var p = _p;
         int annee = 2027 + p.Mois / 12;
         string[] mois = { "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre" };
-        _date.Text = $"{p.Paquet.Manifest.Ville.Nom} · {p.Jour % 30 + 1} {mois[p.Mois % 12]} {annee} · {MeteoTexte}";
+        _date.Text = $"{p.Jour % 30 + 1} {mois[p.Mois % 12]} {annee} · {MeteoTexte}";
+        _date.TooltipText = p.Paquet.Manifest.Ville.Nom;
         _palier.Text = p.R.Paliers[p.Palier].Nom;
-        _pop.Text = $"{p.Population:N0} habitants";
-        _emplois.Text = $"Emplois {p.EmploisLocaux:N0} · chômeurs {p.Chomeurs:N0}";
+        _pop.Text = $"{p.Population:N0} hab.";
+        _emplois.Text = $"Chômage {(p.Actifs > 0 ? 100.0 * p.Chomeurs / p.Actifs : 0):F0} %";
+        _emplois.TooltipText = $"{p.EmploisLocaux:N0} emplois occupés, {p.Chomeurs:N0} chômeurs";
         double solde = p.RecettesMois - p.DepensesMois;
-        _argent.Text = $"{p.Argent:N0} € ({(solde >= 0 ? "+" : "")}{solde:N0}/mois)";
+        _argent.Text = $"{p.Argent:N0} € ({(solde >= 0 ? "+" : "")}{solde:N0})";
+        _argent.TooltipText = "Trésorerie (solde du mois dernier)";
         _argent.AddThemeColorOverride("font_color", p.Argent < 0 ? new Color(1, 0.5f, 0.45f) : Colors.White);
+        var vg = p.Module<Ville.Gestion.VraieGestion>();
+        _satisfaction.Text = vg != null ? $"Satisfaction {vg.SatisfactionGlobale:F0}" : "";
+        _satisfaction.AddThemeColorOverride("font_color", vg != null ? Rendu.RenduVille.EchelleCouleur((vg.SatisfactionGlobale - 25) / 50) : Colors.White);
         _dh.Value = p.DemandeHabitat; _dc.Value = p.DemandeCommerce; _da.Value = p.DemandeActivites;
         if (_budget.Visible) MettreAJourBudget();
         if (_nbMessages != p.Messages.Count || p.Mois != _moisMessages) { _moisMessages = p.Mois; MettreAJourMessages(); }

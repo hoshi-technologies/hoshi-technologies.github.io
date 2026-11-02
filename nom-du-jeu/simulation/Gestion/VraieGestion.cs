@@ -9,7 +9,7 @@ namespace Ville.Gestion;
 /// événements avec décisions, niveaux de difficulté. Activable : le socle fonctionne sans lui.
 /// Tous les chiffres viennent de donnees/reglages/*.json (section « vraie_gestion »).
 /// </summary>
-public sealed class VraieGestion : IModule
+public sealed partial class VraieGestion : IModule
 {
     public const string Identifiant = "vraie_gestion";
     public string Id => Identifiant;
@@ -32,7 +32,15 @@ public sealed class VraieGestion : IModule
         public int MoisCanicule { get; set; }
         public int Evenements { get; set; }
         public bool ReservesExcessives { get; set; }
+        public List<string> Politiques { get; set; } = new();
+        public string? Objectif { get; set; }
+        public List<string> ObjectifsAtteints { get; set; } = new();
+        public List<int> PopulationParMois { get; set; } = new();
+        /// <summary>Satisfaction du dernier mois par quartier (sauvegardée : la simulation reprend à l'identique).</summary>
+        public List<QuartierEtat> Quartiers { get; set; } = new();
+        public double SatisfactionGlobale { get; set; } = 50;
     }
+    public sealed record QuartierEtat(int I, int J, string Nom, int Population, double Familles, double JeunesActifs, double Seniors);
     public Etat E { get; private set; } = new();
 
     public VraieGestion(Reglages r, string difficulte = "realiste")
@@ -84,6 +92,9 @@ public sealed class VraieGestion : IModule
             p.PublierLimite("reserves", 120, "alerte", $"Le journal local : « La commune dort sur {p.Argent:N0} € de réserves. L'État suspend sa dotation et les habitants demandent une baisse des impôts, ou des investissements. »");
         E.ReservesExcessives = tropRiche;
 
+        PolitiquesDuMois(p);
+        CalculerSatisfaction(p);
+        SuivreObjectifs(p);
         if (E.MoisPenurieMedecins > 0) E.MoisPenurieMedecins--;
         if (E.MoisCanicule > 0) E.MoisCanicule--;
 
@@ -111,6 +122,7 @@ public sealed class VraieGestion : IModule
     public double ModifierAttrait(Partie p, Parcelle par, double a)
     {
         if (UsureRoute(par.Arete) > Seuil) a -= 6;
+        if (par.Zone == Zone.Commerce && Active("zones_pietonnes")) a += 5;
         if (par.Zone == Zone.Habitat && par.Batiment is { } b)
         {
             // plus la ville grandit, plus les habitants attendent des services
@@ -121,7 +133,9 @@ public sealed class VraieGestion : IModule
             }
             if (E.MoisPenurieMedecins > 0) a -= 6;
             if (E.ReservesExcessives && p.ImpotHabitat > C("impot_juge_raisonnable")) a -= 6;
-            if (E.MoisCanicule > 0) a -= 5;
+            if (E.MoisCanicule > 0) a -= Active("vegetalisation") ? 2 : 5;
+            if (_satisfactionParQuartier.TryGetValue(CleQuartier(par.Centre), out var sq))
+                a += (sq - 50) * C("effet_satisfaction_sur_attrait");
         }
         return a;
     }
@@ -293,5 +307,5 @@ public sealed class VraieGestion : IModule
     }
 
     public JsonElement Sauvegarder() => JsonSerializer.SerializeToElement(E, Reglages.Json);
-    public void Restaurer(JsonElement etat) => E = etat.Deserialize<Etat>(Reglages.Json) ?? new Etat();
+    public void Restaurer(JsonElement etat) { E = etat.Deserialize<Etat>(Reglages.Json) ?? new Etat(); _cacheSatisfaction = null; }
 }

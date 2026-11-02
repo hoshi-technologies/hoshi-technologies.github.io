@@ -335,6 +335,50 @@
     "cout_administration_par_habitant": 2.0,
     "hausse_administration_par_palier": 0.15,
     "reserves_max_en_mois_de_recettes": 12,
-    "impot_juge_raisonnable": 0.06
+    "impot_juge_raisonnable": 0.06,
+    "politiques": {
+      "transports_gratuits": {
+        "nom": "Transports en commun gratuits",
+        "cout_par_habitant": 0.6,
+        "effet": "Moins de voitures (-15 %), jeunes et seniors plus satisfaits."
+      },
+      "zones_pietonnes": {
+        "nom": "Zones piétonnes en centre-ville",
+        "cout_par_habitant": 0.15,
+        "effet": "Commerces plus attractifs (+8 de demande), familles plus satisfaites, un peu plus de bouchons ailleurs."
+      },
+      "encadrement_loyers": {
+        "nom": "Encadrement des loyers",
+        "cout_par_habitant": 0.05,
+        "effet": "Jeunes actifs plus satisfaits, mais les promoteurs construisent moins (-10 de demande d'habitat)."
+      },
+      "logement_social": {
+        "nom": "Logement social (25 % des constructions)",
+        "cout_par_habitant": 0.5,
+        "effet": "Familles et jeunes plus satisfaits, la ville attire davantage (+6 de demande d'habitat)."
+      },
+      "aide_commerces": {
+        "nom": "Aide aux commerces de proximité",
+        "cout_par_habitant": 0.25,
+        "effet": "+12 de demande de commerces, seniors plus satisfaits."
+      },
+      "plan_velo": {
+        "nom": "Plan vélo",
+        "cout_par_habitant": 0.3,
+        "effet": "Moins de voitures (-10 %), jeunes plus satisfaits."
+      },
+      "vegetalisation": {
+        "nom": "Végétalisation des rues",
+        "cout_par_habitant": 0.35,
+        "effet": "Les canicules pèsent moins, familles et seniors plus satisfaits."
+      },
+      "eclairage_reduit": {
+        "nom": "Éclairage public réduit la nuit",
+        "cout_par_habitant": -0.2,
+        "effet": "Économie d'argent, mais les seniors se sentent moins en sécurité."
+      }
+    },
+    "quartier_taille_m": 600,
+    "effet_satisfaction_sur_attrait": 0.2
   }
 }

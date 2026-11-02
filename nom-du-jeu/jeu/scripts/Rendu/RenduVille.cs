@@ -21,9 +21,9 @@ public partial class RenduVille : Node3D
     public void ForcerRoutes() => _versionReseau = -1;
     private int _moisVue = -1;
 
-    public enum Vues { Normale, Reseaux, Attrait, Trafic, Securite, Usure }
+    public enum Vues { Normale, Reseaux, Attrait, Trafic, Securite, Usure, Satisfaction }
     private Vues _vue = Vues.Normale;
-    public static readonly string[] NomsVues = { "Vue normale", "Vue : eau, électricité, déchets", "Vue : attrait des terrains", "Vue : trafic à l'heure de pointe", "Vue : santé, école, pompiers, police", "Vue : usure des rues et équipements" };
+    public static readonly string[] NomsVues = { "Vue normale", "Vue : eau, électricité, déchets", "Vue : attrait des terrains", "Vue : trafic à l'heure de pointe", "Vue : santé, école, pompiers, police", "Vue : usure des rues et équipements", "Vue : satisfaction des quartiers" };
 
     public Vues Vue
     {
@@ -49,6 +49,10 @@ public partial class RenduVille : Node3D
                 return b.Eau && b.Elec && b.Dechets ? new Color(0.25f, 0.75f, 0.95f) : !b.Eau || !b.Elec ? new Color(0.9f, 0.2f, 0.2f) : new Color(0.95f, 0.65f, 0.15f);
             case Vues.Attrait:
                 return p.Zone == Zone.Aucune ? null : Echelle(p.Attrait / 80.0);
+            case Vues.Satisfaction:
+                if (p.Zone == Zone.Aucune) return null;
+                var sat = _p.Module<Ville.Gestion.VraieGestion>()?.SatisfactionEn(p.Centre);
+                return sat is { } sv2 ? Echelle((sv2 - 25) / 50) : new Color(0.75f, 0.75f, 0.75f);
             case Vues.Usure:
                 if (p.Service is { } sv && sv != "existant" && _p.Module<Ville.Gestion.VraieGestion>() is { } gv)
                     return Echelle(1 - gv.UsureService(p.Id));
