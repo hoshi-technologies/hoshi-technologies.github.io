@@ -541,6 +541,47 @@
           display: none;
         }
       }
+      .crs button.opp {
+        border-color: var(--good);
+      }
+      .crs button.opp-alert {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent) inset;
+      }
+      .opps {
+        display: grid;
+        gap: 8px;
+      }
+      .opp-row {
+        display: grid;
+        grid-template-columns: 58px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        text-align: left;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: var(--card2);
+      }
+      .opp-row.on {
+        outline: 2px solid var(--accent);
+      }
+      .opp-row .t {
+        font-size: 18px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+      .opp-row .c {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .opp-row .why {
+        font-size: 14px;
+        margin-top: 2px;
+      }
+      .opp-row .why b {
+        font-weight: 700;
+      }
       .oth.alert-row .nm {
         white-space: normal;
       }
@@ -684,8 +725,12 @@
           <button id="btnProgNext" class="primary">Prochaine course</button>
           <button id="btnProgRefresh" class="ghost">Actualiser</button>
         </div>
+        <div class="chips" id="progMode" style="margin-top: 12px">
+          <button class="chip" data-mode="jouer">⭐ À jouer</button>
+          <button class="chip" data-mode="toutes">Toutes les courses</button>
+        </div>
+        <div id="progList" class="reus" style="margin-top: 4px"></div>
         <p id="progStatus" class="status">Chargement du programme…</p>
-        <div id="progList" class="reus" style="margin-top: 12px"></div>
       </section>
 
       <!-- Vue simple -->
@@ -1356,6 +1401,7 @@
             })
             .then(function (day) {
               prog.day = day;
+              computeOpportunities();
               renderProgram();
               var upd = day.updated ? ' · mis à jour le ' + new Date(day.updated).toLocaleString('fr-FR') : '';
               setStatus(day.live ? 'Programme PMU en direct' : 'Programme publié automatiquement' + upd, day.live);
@@ -1369,6 +1415,124 @@
               );
             });
         }
+        // ---------- Courses « à jouer » ----------
+        // 🔔 pari validé (alerte) · 💰 cote intéressante selon le modèle · ⭐ favori solide pour le placé.
+        var OPP_VALUE = 1.1,
+          OPP_SOLID = 0.65;
+        store.progMode = store.progMode || 'jouer';
+        function settingsForDiscipline(dis) {
+          if (settingsSource === 'calibrated' && calibration && calibration.status === 'ok')
+            return T.settingsFor(calibration, dis) || state.settings;
+          return state.settings;
+        }
+        function computeOpportunities() {
+          prog.opps = {};
+          if (!prog.day || !prog.day.reunions) return;
+          var now = Date.now(),
+            iso = prog.day.date;
+          var alerts = todaysAlerts();
+          prog.day.reunions.forEach(function (reu) {
+            reu.courses.forEach(function (c) {
+              if (!c.partants || !c.partants.length || c.arrivee) return;
+              if (c.heure && c.heure < now - 2 * 60000) return;
+              try {
+                var runners = withRecul(enrich(c.partants, iso), c.discipline);
+                var a = T.analyzeRace(
+                  { discipline: c.discipline, allocation: c.allocation, runners: runners },
+                  Object.assign({}, settingsForDiscipline(c.discipline), { simulations: 0 }),
+                );
+                if (a.error) return;
+                var pp = function (x) {
+                  return x.pPlace != null ? x.pPlace : x.pTop3;
+                };
+                var top = a.runners.slice().sort((x, y) => pp(y) - pp(x))[0];
+                var val = T.valueBets(a, calibration, { minEdge: OPP_VALUE })[0] || null;
+                var al = alerts.filter((x) => x.r == reu.r && x.c == c.c)[0] || null;
+                var o = { reu: reu, course: c, top: top, pTop: pp(top), value: val, alert: al, hasOdds: !!a.market, nPlaces: a.placesPayees };
+                o.kind = al ? 'alert' : val ? 'value' : o.pTop >= OPP_SOLID ? 'solid' : null;
+                prog.opps[reu.r + '-' + c.c] = o;
+              } catch (e) {}
+            });
+          });
+        }
+        function oppIcon(o) {
+          return !o || !o.kind ? '' : o.kind === 'alert' ? '🔔' : o.kind === 'value' ? '💰' : '⭐';
+        }
+        function oppText(o) {
+          var horse = function (x) {
+            return 'n°' + esc(x.runner.num) + ' ' + esc(x.runner.nom);
+          };
+          if (o.kind === 'alert') return '🔔 <b>Pari validé</b> : ' + esc(alertText(o.alert));
+          if (o.kind === 'value')
+            return (
+              '💰 <b>Cote intéressante</b> : ' +
+              horse(o.value.x) +
+              ' en ' +
+              (o.value.type === 'g' ? 'gagnant' : 'placé') +
+              ', valeur ' +
+              o.value.ev.toFixed(2).replace('.', ',') +
+              ' <span class="muted">(selon le modèle, non validé)</span>'
+            );
+          return (
+            '⭐ <b>Favori solide</b> : ' +
+            horse(o.top) +
+            ' — ' +
+            Math.round(o.pTop * 100) +
+            ' % placé' +
+            (o.hasOdds ? '' : ' <span class="muted">(sans cotes pour l\'instant)</span>')
+          );
+        }
+        function renderOpportunities() {
+          var fr = $('progFilter').value === 'fr';
+          var list = Object.keys(prog.opps || {})
+            .map((k) => prog.opps[k])
+            .filter((o) => o.kind && (!fr || !o.reu.pays || o.reu.pays === 'FRA'))
+            .sort((a, b) => (a.course.heure || 0) - (b.course.heure || 0));
+          if (!prog.day) return '';
+          if (!list.length)
+            return (
+              '<p class="muted">Aucune course intéressante à venir sur cette journée. Passez à « Toutes les courses » pour voir le programme complet.</p>'
+            );
+          var html = '<div class="opps">';
+          list.forEach(function (o) {
+            var on = prog.sel && prog.sel.date === prog.day.date && prog.sel.r == o.reu.r && prog.sel.c == o.course.c;
+            html +=
+              '<button class="opp-row' +
+              (on ? ' on' : '') +
+              '" data-r="' +
+              o.reu.r +
+              '" data-c="' +
+              o.course.c +
+              '"><div><div class="t">' +
+              fmtHour(o.course.heure) +
+              '</div><div class="c">R' +
+              o.reu.r +
+              'C' +
+              o.course.c +
+              '</div></div><div><div class="c">' +
+              esc(o.reu.hippodrome) +
+              ' · ' +
+              esc(o.course.discipline) +
+              (o.course.distance ? ' · ' + o.course.distance + ' m' : '') +
+              '</div><div class="why">' +
+              oppText(o) +
+              '</div></div></button>';
+          });
+          html += '</div>';
+          html +=
+            '<p class="hint" style="margin-top:10px">🔔 pari validé par la simulation (le seul signal fiable) · 💰 cote au-dessus de notre estimation, non validé · ⭐ cheval placé ' +
+            Math.round(OPP_SOLID * 100) +
+            ' % du temps ou plus selon nous, mais un favori placé rapporte souvent peu.</p>';
+          return html;
+        }
+        $('progMode').addEventListener('click', function (e) {
+          var m = e.target.closest('[data-mode]');
+          if (!m) return;
+          store.progMode = m.dataset.mode;
+          save(store);
+          renderProgram();
+        });
+
         function visibleReunions() {
           if (!prog.day) return [];
           var fr = $('progFilter').value === 'fr';
@@ -1377,6 +1541,15 @@
           });
         }
         function renderProgram() {
+          Array.prototype.forEach.call($('progMode').children, function (b) {
+            var n = b.dataset.mode === 'jouer' ? Object.keys(prog.opps || {}).filter((k) => prog.opps[k].kind).length : null;
+            b.classList.toggle('on', b.dataset.mode === store.progMode);
+            if (n != null) b.textContent = '⭐ À jouer' + (prog.day ? ' (' + n + ')' : '');
+          });
+          if (store.progMode === 'jouer') {
+            $('progList').innerHTML = renderOpportunities();
+            return;
+          }
           var reus = visibleReunions();
           if (!reus.length) {
             $('progList').innerHTML = '<p class="muted">Aucune réunion.</p>';
@@ -1400,6 +1573,7 @@
                   r.r +
                   ' · ' +
                   esc(r.hippodrome) +
+                  (r.courses.some((c) => prog.opps && prog.opps[r.r + '-' + c.c] && prog.opps[r.r + '-' + c.c].kind) ? ' ⭐' : '') +
                   (r.pays && r.pays !== 'FRA' ? ' (' + esc(r.pays) + ')' : '') +
                   '</button>'
                 );
@@ -1409,6 +1583,7 @@
             cur.courses
               .map(function (c) {
                 var on = prog.sel && prog.sel.date === prog.day.date && prog.sel.r == cur.r && prog.sel.c == c.c;
+                var opp = prog.opps && prog.opps[cur.r + '-' + c.c];
                 var n = c.partants ? c.partants.filter((p) => !p.nonPartant).length : c.nPartants;
                 return (
                   '<button data-r="' +
@@ -1417,13 +1592,15 @@
                   c.c +
                   '" class="' +
                   (on ? 'on ' : '') +
-                  (c.arrivee ? 'done' : '') +
+                  (c.arrivee ? 'done ' : '') +
+                  (opp && opp.kind ? (opp.kind === 'alert' ? 'opp-alert' : 'opp') : '') +
                   '" title="' +
                   esc(c.libelle) +
                   '"><b>C' +
                   c.c +
                   '</b> · ' +
                   fmtHour(c.heure) +
+                  (opp && opp.kind ? ' ' + oppIcon(opp) : '') +
                   '<small>' +
                   esc(c.discipline) +
                   (n ? ' · ' + n + ' part.' : '') +
@@ -1583,6 +1760,14 @@
         function nextCourse() {
           var now = Date.now(),
             best = null;
+          if (store.progMode === 'jouer' && prog.opps) {
+            Object.keys(prog.opps).forEach(function (k) {
+              var o = prog.opps[k];
+              if (!o.kind || !o.course.heure || o.course.heure < now - 5 * 60000) return;
+              if (!best || o.course.heure < best.heure) best = { r: o.reu.r, c: o.course.c, heure: o.course.heure };
+            });
+            if (best) return best;
+          }
           visibleReunions().forEach(function (r) {
             r.courses.forEach(function (c) {
               if (!c.heure || c.arrivee || c.heure < now - 5 * 60000) return;
@@ -1647,6 +1832,8 @@
               initBetForm();
               renderAdvisor();
               renderSimple();
+              computeOpportunities();
+              renderProgram();
             });
           Promise.all([statsP, idxP, calP]).then(function () {
             days.sort().reverse();
@@ -2228,6 +2415,8 @@
             .then(function () {
               renderAlerts();
               notifyNewAlerts();
+              computeOpportunities();
+              renderProgram();
             });
         }
         function todaysAlerts() {
