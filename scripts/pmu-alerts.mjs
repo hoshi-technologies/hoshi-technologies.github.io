@@ -65,9 +65,12 @@ async function notify(title, message, tags = 'horse_racing', opts = {}) {
 }
 
 // Mêmes compléments que la page : taux jockey/entraîneur tirés des statistiques archivées.
+let RATINGS = {};
 function enrich(partants, stats, dateIso) {
   return partants.map((p) => {
     const r = Object.assign({}, p);
+    const el = RATINGS[p.nom];
+    if (el) (r.rating = el[0]), (r.ratingN = el[1]);
     const j = Turf.statRate(stats && stats.jockeys && stats.jockeys[p.jockeyNom]);
     const e = Turf.statRate(stats && stats.entraineurs && stats.entraineurs[p.entraineurNom]);
     if (j != null) r.jockey = j;
@@ -80,7 +83,7 @@ function enrich(partants, stats, dateIso) {
 
 /** Analyse d'une course avec les réglages calibrés de sa discipline. */
 function analyze(c, cal, stats, today) {
-  const settings = Turf.settingsFor(cal, c.discipline);
+  const settings = Turf.settingsFor(cal, { discipline: c.discipline, categorie: c.categorie });
   return Turf.analyzeRace(
     { discipline: c.discipline, allocation: c.allocation, runners: enrich(c.partants, stats, today) },
     Object.assign({}, settings || {}, { simulations: 0 }),
@@ -170,6 +173,7 @@ async function main() {
 
   const cal = await readJson(process.env.CALIBRATION_FILE || path.join(DATA, 'calibration.json'), null);
   const stats = await readJson(path.join(DATA, 'stats.json'), null);
+  RATINGS = ((await readJson(path.join(DATA, 'ratings.json'), null)) || {}).ratings || {};
   const day = await readJson(path.join(DATA, today + '.json'), null);
   const strat = Turf.validatedStrategy(cal);
   state.updated = new Date().toISOString();
@@ -183,7 +187,7 @@ async function main() {
       for (const c of reu.courses) {
         if (!c.heure || c.arrivee || c.heure < now || c.heure > now + WINDOW_MIN * 60000) continue;
         if (!c.partants || !c.partants.length) continue;
-        const settings = Turf.settingsFor(cal, c.discipline);
+        const settings = Turf.settingsFor(cal, { discipline: c.discipline, categorie: c.categorie });
         const a = Turf.analyzeRace(
           { discipline: c.discipline, allocation: c.allocation, runners: enrich(c.partants, stats, today) },
           Object.assign({}, settings || {}, { simulations: 0 }),

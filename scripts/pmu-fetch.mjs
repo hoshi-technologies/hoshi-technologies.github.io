@@ -15,6 +15,7 @@
 import { createRequire } from 'node:module';
 import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
@@ -147,6 +148,7 @@ function parseRapports(list) {
 }
 
 let loggedCourseKeys = false;
+let sampled = false;
 async function fetchDay(iso, prevDay, opts = {}) {
   const prog = await getJson(API + pmuDate(iso));
   const reunions = prog && prog.programme && prog.programme.reunions;
@@ -177,6 +179,7 @@ async function fetchDay(iso, prevDay, opts = {}) {
         discipline: discipline(c),
         terrain: terrain(c),
         allocation: c.montantPrix || c.montantTotalOffert || c.montantOffert1er || '',
+        categorie: c.categorieParticularite || '',
         statut: c.statut || '',
         arrivee: arrivalOrder(c),
         partants: [],
@@ -216,6 +219,31 @@ async function fetchDay(iso, prevDay, opts = {}) {
           if (raw[i] && raw[i].ordreArrivee) o.arrivee = raw[i].ordreArrivee;
           return o;
         });
+        // Cote « au moment de parier » : dernière cote vue au moins 20 min avant le départ,
+        // figée ensuite. La simulation de paris l'utilise à la place de la cote finale.
+        const oldT = {};
+        for (const p of (old && old.partants) || []) if (p.coteT != null) oldT[p.num] = p;
+        const early = course.heure && course.heure - Date.now() >= 20 * 60000;
+        for (const p of course.partants) {
+          if (early && p.cote) {
+            p.coteT = p.cote;
+            p.coteTAt = Date.now();
+          } else if (oldT[p.num]) {
+            p.coteT = oldT[p.num].coteT;
+            p.coteTAt = oldT[p.num].coteTAt;
+          }
+        }
+        // Rapports probables au placé : on enregistre un exemplaire de la réponse (diagnostic).
+        if (opts.quick && !sampled && !existsSync(path.join(DATA, '_sample-combinaisons.json')) && course.heure && course.heure - Date.now() < 30 * 60000) {
+          sampled = true;
+          try {
+            const res = await fetch(`${base}/R${R}/C${course.c}/combinaisons?specialisation=INTERNET`, { headers: { accept: 'application/json' } });
+            if (res.status === 200) {
+              await writeFile(path.join(DATA, '_sample-combinaisons.json'), await res.text());
+              console.log('  (exemplaire des rapports probables enregistré : ' + tag + ')');
+            }
+          } catch {}
+        }
       }
     } catch (e) {
       console.warn('  ! ' + tag + ' partants : ' + e.message);
@@ -336,6 +364,13 @@ async function main() {
       `  ${day.reunions.length} réunions, ${all.length} courses, ${all.filter((c) => c.rapports).length} avec rapports, ` +
         `${all.filter((c) => c.partants.some((p) => p.nPerf != null)).length} avec performances`,
     );
+    // Contrôle de cohérence : un programme sans aucun partant signale un changement de l'API.
+    const nPart = all.reduce((n, c) => n + c.partants.length, 0);
+    if (all.length >= 5 && nPart === 0) {
+      console.error('  ! aucun partant récupéré : l\'API du PMU a peut-être changé');
+      process.exitCode = 1;
+      continue;
+    }
     await writeFile(path.join(DATA, iso + '.json'), JSON.stringify(day));
     if (iso < parisDate(0) && updateStats(stats, day)) console.log('  statistiques mises à jour');
   }

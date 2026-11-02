@@ -1420,9 +1420,9 @@
         store.progMode = store.progMode || 'jouer';
         store.oppSolid = store.oppSolid || 0.55; // chances de placé minimum du favori
         store.oppValue = store.oppValue || 1.05; // valeur minimale (probabilité × cote)
-        function settingsForDiscipline(dis) {
+        function settingsForDiscipline(dis, categorie) {
           if (settingsSource === 'calibrated' && calibration && calibration.status === 'ok')
-            return T.settingsFor(calibration, dis) || state.settings;
+            return T.settingsFor(calibration, { discipline: dis, categorie: categorie }) || state.settings;
           return state.settings;
         }
         function computeOpportunities() {
@@ -1439,7 +1439,7 @@
                 var runners = withRecul(enrich(c.partants, iso), c.discipline);
                 var a = T.analyzeRace(
                   { discipline: c.discipline, allocation: c.allocation, runners: runners },
-                  Object.assign({}, settingsForDiscipline(c.discipline), { simulations: 0 }),
+                  Object.assign({}, settingsForDiscipline(c.discipline, c.categorie), { simulations: 0 }),
                 );
                 if (a.error) return;
                 var pp = function (x) {
@@ -1691,6 +1691,8 @@
               if (p[f] != null && p[f] !== '') r[f] = p[f];
             });
             r.nonPartant = !!p.nonPartant;
+            var el = prog.ratings && prog.ratings[p.nom];
+            if (el) (r.rating = el[0]), (r.ratingN = el[1]);
             if (st) {
               if (!r.jockey) r.jockey = rateFrom(st.jockeys, p.jockeyNom);
               if (!r.entraineur) r.entraineur = rateFrom(st.entraineurs, p.entraineurNom);
@@ -1755,6 +1757,7 @@
               distance: f.course.distance,
               terrain: f.course.terrain,
               allocation: f.course.allocation || '',
+              categorie: f.course.categorie || '',
               heure: f.course.heure || null,
               arriveeCourse: f.course.arrivee || null,
               runners: withRecul(enrich(mergePublished(partants, f.course.partants), iso), f.course.discipline),
@@ -1860,11 +1863,14 @@
         });
         function initProgram() {
           var days = [parisIso(-1), parisIso(0), parisIso(1)];
-          var statsP = getJson('data/stats.json')
-            .then(function (s) {
+          var statsP = Promise.all([
+            getJson('data/stats.json').then(function (s) {
               prog.stats = s;
-            })
-            .catch(function () {});
+            }),
+            getJson('data/ratings.json').then(function (r) {
+              prog.ratings = r.ratings || {};
+            }),
+          ]).catch(function () {});
           var idxP = getJson('data/index.json')
             .then(function (ix) {
               (ix.days || []).forEach(function (d) {
@@ -1970,19 +1976,43 @@
           settingsSource = 'custom';
           renderSettingsSrc();
         }
+        function GROUP_LABEL(k) {
+          return (
+            {
+              trot: 'trot',
+              plat: 'plat',
+              obstacle: 'obstacle',
+              galop: 'galop',
+              'trot-cond': 'trot hors handicap',
+              'trot-hcp': 'trot handicap',
+              'plat-cond': 'plat hors handicap',
+              'plat-hcp': 'plat handicap',
+              'obstacle-cond': 'obstacle hors handicap',
+              'obstacle-hcp': 'obstacle handicap',
+            }[k] || k
+          );
+        }
+        // Groupe de réglages calibrés utilisé pour la course affichée.
+        function resolvedGroup() {
+          if (!calibration || !calibration.groups || !state.race) return null;
+          var keys = T.raceGroupKeys(state.race);
+          for (var i = 0; i < keys.length; i++) if (calibration.groups[keys[i]]) return Object.assign({ key: keys[i] }, calibration.groups[keys[i]]);
+          return null;
+        }
         function renderSettingsSrc() {
           $('settingsSrc').textContent =
             settingsSource === 'calibrated'
               ? 'Réglages calibrés sur les résultats' +
                 (calibration ? ' (' + new Date(calibration.updated).toLocaleDateString('fr-FR') + ')' : '') +
-                (calibration && calibration.groups && state.race
-                  ? ' · ' +
-                    T.disciplineGroup(state.race.discipline) +
-                    ' : ' +
-                    ({ learned: 'modèle appris sur les résultats', weighted: 'réglages propres à la discipline', global: 'réglages communs', market: 'cotes du marché seules' }[
-                      (calibration.groups[T.disciplineGroup(state.race.discipline)] || {}).model
-                    ] || '')
-                  : '')
+                (function () {
+                  var g = resolvedGroup();
+                  return g
+                    ? ' · ' +
+                        GROUP_LABEL(g.key) +
+                        ' : ' +
+                        ({ learned: 'modèle appris sur les résultats', weighted: 'réglages propres', global: 'réglages communs', market: 'cotes du marché seules' }[g.model] || '')
+                    : '';
+                })()
               : settingsSource === 'custom'
                 ? 'Réglages personnalisés'
                 : 'Réglages par défaut';
@@ -1997,7 +2027,7 @@
         }
         // Réglages calibrés du groupe (trot / galop) de la course affichée, reportés sur les curseurs.
         function syncCalibratedSliders() {
-          var eff = T.settingsFor(calibration, state.race && state.race.discipline);
+          var eff = T.settingsFor(calibration, state.race);
           if (!eff) return;
           var s = defaultSettings();
           Object.assign(s.weights, eff.weights);
@@ -2014,7 +2044,7 @@
           if (settingsSource === 'calibrated' && calibration && calibration.status === 'ok') {
             syncCalibratedSliders();
             renderSettingsSrc();
-            return T.settingsFor(calibration, state.race.discipline) || state.settings;
+            return T.settingsFor(calibration, state.race) || state.settings;
           }
           return state.settings;
         }
@@ -2118,10 +2148,10 @@
             var lbl = { learned: 'modèle appris sur les résultats', weighted: 'réglages propres', global: 'réglages communs', market: 'cotes du marché seules (le modèle ne fait pas mieux)' };
             html +=
               '<p class="hint">Modèle utilisé : ' +
-              ['trot', 'galop']
+              Object.keys(c.groups)
                 .map(function (g) {
                   var o = c.groups[g];
-                  return o ? g + ' → ' + (lbl[o.model] || o.model) + ' (' + o.courses + ' courses)' : '';
+                  return o ? GROUP_LABEL(g) + ' → ' + (lbl[o.model] || o.model) + ' (' + o.courses + ' courses)' : '';
                 })
                 .filter(Boolean)
                 .join(' ; ') +
@@ -2129,21 +2159,44 @@
           }
           var bt = c.backtest;
           if (bt) {
+            var two = bt.selectionFrom != null;
+            var fmtD = function (d) {
+              return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR');
+            };
+            var srcO = c.oddsSource || {};
             html +=
-              '<h2 style="margin-top:16px">Simulation de paris</h2><p class="hint" style="margin-top:-6px">Chaque stratégie est rejouée sur les ' +
-              bt.courses +
-              ' courses récentes (depuis le ' +
-              new Date(bt.from + 'T12:00:00').toLocaleDateString('fr-FR') +
-              ') avec les vrais rapports définitifs du PMU, sans que le modèle ait vu ces courses. Mise fixe de 1 € ; la colonne Kelly part de 100 € avec ¼ de Kelly plafonné à 2 % par pari. ✔ = rentable même en retirant deux erreurs-types (marge de hasard).</p>';
+              '<h2 style="margin-top:16px">Simulation de paris</h2><p class="hint" style="margin-top:-6px">' +
+              (two
+                ? 'Les stratégies sont rejouées avec les vrais rapports définitifs du PMU, en deux temps : la meilleure est <b>choisie</b> sur une première période (' +
+                  bt.selectionCourses +
+                  ' courses depuis le ' +
+                  fmtD(bt.selectionFrom) +
+                  '), puis <b>confirmée ou non</b> sur la période suivante (' +
+                  bt.courses +
+                  ' courses depuis le ' +
+                  fmtD(bt.from) +
+                  '), que rien n\'a servi à choisir. Cela évite de retenir une stratégie chanceuse. '
+                : 'Chaque stratégie est rejouée sur les ' + bt.courses + ' courses récentes avec les vrais rapports définitifs du PMU. ') +
+              'Les décisions utilisent la cote disponible au moment de parier' +
+              (srcO.ref || srcO.T ? ' (cote 20 min avant le départ quand elle a été enregistrée, sinon cote du matin)' : '') +
+              ', pas la cote finale. Mise fixe de 1 € ; la colonne Kelly part de 100 € (¼ de Kelly, 2 % maximum par pari).</p>';
             html +=
-              '<div class="scroll"><table><thead><tr><th>Stratégie</th><th>Paris</th><th>Gagnants</th><th title="Retour sur investissement ± deux erreurs-types">ROI</th><th title="Plus forte baisse depuis un sommet, en mises de 1 €">Pire série</th><th title="Bankroll finale en partant de 100 €">Kelly 100 € →</th><th></th></tr></thead><tbody>';
+              '<div class="scroll"><table><thead><tr><th>Stratégie</th>' +
+              (two ? '<th title="Rendement sur la période de choix">Choix</th>' : '') +
+              '<th>Paris</th><th>Gagnants</th><th title="Rendement sur la période de confirmation ± deux erreurs-types">' +
+              (two ? 'Confirmation' : 'ROI') +
+              '</th><th title="Plus forte baisse depuis un sommet, en mises de 1 €">Pire série</th><th title="Bankroll finale en partant de 100 €">Kelly 100 € →</th><th></th></tr></thead><tbody>';
             bt.strategies.forEach(function (st) {
+              var sel = st.roiSelection;
               html +=
                 '<tr' +
-                (st.validated ? ' style="font-weight:700"' : '') +
+                (st.validated || st.chosen ? ' style="font-weight:700"' : '') +
                 '><td>' +
                 esc(st.label) +
-                '</td><td>' +
+                (st.chosen ? ' <span class="tag">choisie</span>' : '') +
+                '</td>' +
+                (two ? '<td>' + (st.betsSelection ? (sel >= 0 ? '+' : '') + (sel * 100).toFixed(1) + ' %' : '—') + '</td>' : '') +
+                '<td>' +
                 st.bets +
                 '</td><td>' +
                 (st.bets ? pct(st.hitRate) : '—') +
@@ -2174,7 +2227,9 @@
               '<p class="hint">' +
               (validated.length
                 ? 'Au moins une stratégie dépasse la marge de hasard sur cette période. Les conseils de mise l\'utilisent ; surveillez le journal pour confirmer en conditions réelles.'
-                : 'Aucune stratégie ne bat de façon fiable le prélèvement du PMU sur cette période : les conseils de mise recommandent 0 €.') +
+                : bt.best
+                  ? 'La stratégie choisie sur la première période n\'a pas été confirmée sur la suivante : son résultat était probablement dû au hasard. Les conseils de mise recommandent 0 €.'
+                  : 'Aucune stratégie ne bat de façon fiable le prélèvement du PMU : les conseils de mise recommandent 0 €.') +
               '</p>';
           }
           el.innerHTML = html;

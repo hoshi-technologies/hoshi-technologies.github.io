@@ -57,3 +57,26 @@ Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PM
   `NTFY_TOPIC`) : 📋 sélection du jour vers 9 h (favori placé ≥ 60 %, 10 courses maximum, en France),
   ⏰ rappel 10 à 40 min avant chaque course sélectionnée avec la cote à jour, 🔔 pari validé (prioritaire).
   Une notification ouvre la course concernée (`#AAAA-MM-JJ/R1C2`).
+
+### Bonnes pratiques appliquées
+
+- **Simulation réaliste** : les décisions de pari utilisent la cote disponible au moment de parier (`coteT`,
+  dernière cote vue au moins 20 min avant le départ, figée ensuite), sinon la cote du matin, jamais la cote finale.
+  Les gains sont calculés avec les rapports définitifs réels.
+- **Pas de biais de sélection** : les courses sont découpées en trois périodes chronologiques. Les modèles sont
+  ajustés sur la première (60 %), le modèle de chaque groupe et la meilleure stratégie sont choisis sur la
+  deuxième (20 %), et la stratégie n'est « validée » que si elle reste rentable sur la troisième (20 %),
+  au-delà de deux erreurs-types.
+- **Biais favori-outsider** : les probabilités du marché sont corrigées par `p ∝ (1/cote)^k`, avec `k` appris.
+- **Note Elo** de chaque cheval, rejouée course après course sur l'historique (`hippique/data/ratings.json`).
+- **Réglages par type de course** : trot, plat et obstacle, handicap ou non, avec repli sur le groupe plus général
+  quand les données manquent.
+- **Tests automatiques** du moteur (`node --test tests/*.test.mjs`), lancés à chaque modification et avant chaque
+  passage de la tâche planifiée.
+- **Surveillance** : notification « ⚠️ récupération en panne » au premier échec, puis « ✅ de nouveau opérationnel ».
+  Un programme sans aucun partant fait échouer la tâche, car c'est le signe d'un changement de l'API.
+- **Taille du dépôt** : mesurée à environ 0,6 Mo par jour (environ 220 Mo par an). Si un jour elle approche 1 Go,
+  il faudra publier les données sur une branche dédiée remise à zéro régulièrement, avec GitHub Pages en mode
+  « GitHub Actions ».
+- **Rapports probables au placé** : la tâche enregistre un exemplaire de la réponse de l'API
+  (`hippique/data/_sample-combinaisons.json`) pour pouvoir les exploiter une fois leur format connu.

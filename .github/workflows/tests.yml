@@ -1,0 +1,24 @@
+name: Tests Hoshi Turf
+
+# Vérifie le moteur de calcul et la syntaxe des scripts à chaque modification.
+on:
+  push:
+    paths: ['hippique/**/*.js', 'hippique/index.html', 'scripts/**', 'tests/**', '.github/workflows/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Syntaxe des scripts
+        run: for f in scripts/*.mjs hippique/engine.js; do node --check "$f"; done
+      - name: Tests du moteur
+        run: node --test tests/*.test.mjs

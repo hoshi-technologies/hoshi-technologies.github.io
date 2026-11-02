@@ -22,6 +22,7 @@ on:
 
 permissions:
   contents: write
+  actions: read # lire l'état du passage précédent (notifications de panne)
 
 concurrency:
   group: pmu-programme
@@ -32,10 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Tests du moteur
+        run: node --test tests/*.test.mjs
       - name: Diagnostic API
         if: ${{ inputs.probe }}
         run: node scripts/pmu-probe.mjs
@@ -71,3 +74,26 @@ jobs:
             git pull --rebase --autostash && git push && break
             sleep 5
           done
+      # Prévient sur le téléphone quand la tâche tombe en panne (une seule fois), puis quand elle repart.
+      - name: Prévenir en cas de panne
+        if: ${{ failure() && !inputs.probe }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'hoshi-turf-b12tj5jfgndm' }}
+        run: |
+          prev=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow pmu-programme.yml --branch "$GITHUB_REF_NAME" --limit 5 \
+            --json databaseId,conclusion -q "[.[] | select(.databaseId != $GITHUB_RUN_ID)][0].conclusion" || echo "")
+          if [ "$prev" != "failure" ]; then
+            curl -s -H 'Content-Type: application/json' -d "{\"topic\":\"$NTFY_TOPIC\",\"title\":\"⚠️ Hoshi Turf : récupération en panne\",\"message\":\"La mise à jour des courses a échoué (API du PMU modifiée ou indisponible ?). Les notifications sont suspendues jusqu'au retour à la normale.\",\"tags\":[\"warning\"],\"priority\":4,\"click\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}" https://ntfy.sh/
+          fi
+      - name: Prévenir du retour à la normale
+        if: ${{ success() && !inputs.probe }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'hoshi-turf-b12tj5jfgndm' }}
+        run: |
+          prev=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow pmu-programme.yml --branch "$GITHUB_REF_NAME" --limit 5 \
+            --json databaseId,conclusion -q "[.[] | select(.databaseId != $GITHUB_RUN_ID)][0].conclusion" || echo "")
+          if [ "$prev" = "failure" ]; then
+            curl -s -H 'Content-Type: application/json' -d "{\"topic\":\"$NTFY_TOPIC\",\"title\":\"✅ Hoshi Turf : de nouveau opérationnel\",\"message\":\"La récupération des courses fonctionne à nouveau.\",\"tags\":[\"white_check_mark\"],\"priority\":3}" https://ntfy.sh/
+          fi
