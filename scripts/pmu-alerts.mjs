@@ -165,7 +165,7 @@ async function selectionAndReminders(state, today, cal, stats, day) {
  * dans le fichier du jour ; une fois l'heure de départ passée, il n'est plus jamais modifié.
  * La page l'affiche pour les courses parties et s'en sert pour comparer avec l'arrivée.
  */
-async function freezePronos(day, cal, stats, today) {
+async function freezePronos(day, cal, stats, today, state) {
   const now = Date.now();
   let n = 0;
   for (const reu of day.reunions)
@@ -177,6 +177,7 @@ async function freezePronos(day, cal, stats, today) {
       c.prono = {
         at: now,
         placesPayees: a.placesPayees,
+        selected: ((state && state.selection && state.selection[today]) || []).includes(`R${reu.r}C${c.c}`),
         runners: a.runners.map((x) => ({
           num: x.runner.num,
           note: +x.note.toFixed(1),
@@ -264,7 +265,7 @@ async function main() {
       }
   }
   await selectionAndReminders(state, today, cal, stats, day);
-  if (day && !process.env.ALERT_DATE) await freezePronos(day, cal, stats, today);
+  if (day && !process.env.ALERT_DATE) await freezePronos(day, cal, stats, today, state);
 
   // On ne garde que les 3 derniers jours.
   const limit = parisDate(-3);

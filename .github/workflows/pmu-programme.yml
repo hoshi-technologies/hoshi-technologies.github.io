@@ -80,6 +80,9 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'hoshi-turf-b12tj5jfgndm' }}
           ALERT_TEST: ${{ inputs.test_alert }}
         run: node scripts/pmu-alerts.mjs
+      - name: Bilan des pronostics
+        if: ${{ !inputs.probe }}
+        run: node scripts/bilan.mjs
       - name: Publier les données
         run: |
           git add hippique/data
