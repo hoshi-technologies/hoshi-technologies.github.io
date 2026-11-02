@@ -81,8 +81,19 @@ let statelessApp = null;
 
 export default {
   async fetch(request, env) {
-    const config = loadConfig(env);
     const { pathname } = new URL(request.url);
+    let config;
+    try {
+      config = loadConfig(env);
+      resolveKey({ key: config.dataEncryptionKey, fallbackSecret: config.apiSecret });
+    } catch (error) {
+      // Configuration incomplète : message explicite (sans aucune valeur secrète) au lieu d'une erreur 1101.
+      console.error(`Configuration : ${error.message}`);
+      return new Response(`Hoshi Factures : configuration incomplète. ${error.message}\nVoir docs/cloudflare.md (npx wrangler secret put …).`, {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
+    }
 
     // Webhooks : la boutique est indiquée par Shopify (la signature est vérifiée ensuite).
     if (pathname === '/webhooks') {
