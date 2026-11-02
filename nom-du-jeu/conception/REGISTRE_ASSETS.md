@@ -21,6 +21,9 @@ Licences refusées : NC (non commercial), ND (pas de modification), « gratuit �
 | Bâtiments réels (forme, hauteur) | `jeu/scripts/Rendu/RenduVille.cs` | OpenStreetMap / Overture (ODbL), voir les crédits de chaque ville |
 | Arbres réels, bois, lampadaires et bancs réels (positions) | `jeu/scripts/Rendu/RenduNature.cs` | OpenStreetMap / Overture (ODbL) |
 | Terrain, eau | `jeu/scripts/Rendu/ConstructeurVille.cs` | Copernicus DEM, OpenStreetMap / Overture |
+| Fenêtres (jour et nuit), saisons, neige, sol mouillé | `jeu/shaders/*.gdshader` (calcul, aucune texture) | aucune |
+| Pluie et neige (particules), ciel, météo | `jeu/scripts/Jeu/Meteo.cs` | aucune |
+| Sons d'ambiance : ville, vent, vagues, oiseaux, grillons, pluie | `jeu/scripts/Jeu/AmbianceSonore.cs` (synthèse en direct, aucun fichier son) | aucune |
 
 ## Sources repérées pour plus tard (vérifiées le 2 novembre 2026, non utilisées)
 

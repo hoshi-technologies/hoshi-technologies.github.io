@@ -291,7 +291,7 @@ public partial class JeuPrincipal : Node3D
         _env = new Godot.Environment
         {
             BackgroundMode = Godot.Environment.BGMode.Sky,
-            Sky = new Sky { SkyMaterial = new ProceduralSkyMaterial() },
+            Sky = new Sky { SkyMaterial = _ciel },
             TonemapMode = Godot.Environment.ToneMapper.Filmic,
             AmbientLightSource = Godot.Environment.AmbientSource.Sky,
             SsaoEnabled = true,
@@ -302,6 +302,49 @@ public partial class JeuPrincipal : Node3D
         AddChild(new WorldEnvironment { Environment = _env });
         _soleil = new DirectionalLight3D { ShadowEnabled = true, DirectionalShadowMaxDistance = 1500, LightEnergy = 1.1f, ShadowBias = 0.08f, ShadowNormalBias = 2.5f };
         AddChild(_soleil);
+        _meteo = new Meteo { Name = "Meteo" };
+        AddChild(_meteo);
+        _son = new AmbianceSonore { Name = "Son" };
+        AddChild(_son);
+    }
+
+    private readonly ProceduralSkyMaterial _ciel = new();
+    private Meteo _meteo = null!;
+    private AmbianceSonore _son = null!;
+    private double _minuterieSon;
+    private float _nuit;
+
+    /// <summary>Météo, saison et ambiance sonore selon ce que regarde la caméra.</summary>
+    private void MettreAJourAmbiance(double delta)
+    {
+        int jour = _partie?.Jour ?? 150, mois = (_partie?.Mois ?? 5) % 12;
+        double fraction = (_partie?.Jour ?? 150) % 30 / 30.0;
+        var cible = _camera.Cible;
+        float sol = _paquet.Altitude(cible.X, -cible.Z);
+        _meteo.MettreAJour(delta, jour, mois, fraction, _camera.GlobalPosition, sol, _env, _ciel);
+        _soleil.LightEnergy *= 1 - 0.6f * _meteo.CouvertureNuageuse;
+        _hud.MeteoTexte = $"{_meteo.NomSaison} · {_meteo.Description}";
+        if ((_minuterieSon -= delta) > 0) return;
+        _minuterieSon = 0.5;
+        var c = new V2(cible.X, -cible.Z);
+        float ville = 0, eau = 0;
+        if (_partie != null)
+        {
+            ville = Mathf.Clamp(_partie.ParcellesProches(c, 300).Count(p => p.Batiment != null) / 60f, 0, 1);
+            double d = _partie.Grille.DistanceEau(c);
+            eau = d < 250 ? (float)(1 - d / 250) : 0;
+        }
+        float hauteurCam = _camera.GlobalPosition.Y - sol;
+        float loin = Mathf.Clamp(1 - (_camera.Distance - 800) / 2500f, 0.25f, 1);
+        bool pluie = _meteo.Actuel == Meteo.Temps.Pluie;
+        float jourF = 1 - _nuit;
+        _son.Ville = ville * (0.55f + 0.45f * jourF) * loin;
+        _son.Eau = eau * loin;
+        _son.Vent = Mathf.Clamp(hauteurCam / 1500f, 0, 0.6f) + Mathf.Clamp((sol - (float)_paquet.Manifest.Relief.AltMin) / 400f, 0, 0.5f) + (pluie ? 0.2f : 0);
+        bool hiver = mois is 11 or 0 or 1;
+        _son.Oiseaux = !pluie && !hiver ? (1 - ville) * 0.8f * jourF * loin : 0;
+        _son.Grillons = !pluie && mois is >= 5 and <= 8 ? (1 - ville * 0.7f) * 0.7f * _nuit * loin : 0;
+        _son.Pluie = pluie ? _meteo.Intensite : 0;
     }
 
     private void MettreAJourCiel(double delta)
@@ -316,12 +359,15 @@ public partial class JeuPrincipal : Node3D
         _soleil.LightColor = new Color(1, 0.85f + 0.15f * jour, 0.7f + 0.3f * jour);
         _env.AmbientLightEnergy = 0.35f + 0.65f * jour;
         _env.BackgroundEnergyMultiplier = jour;
+        _nuit = Mathf.Clamp((0.35f - hauteur) * 2.2f, 0, 1);
+        RenderingServer.GlobalShaderParameterSet("nuit", _nuit);
     }
 
     // ------------------------------------------------------------------ boucle
     public override void _Process(double delta)
     {
         MettreAJourCiel(delta);
+        MettreAJourAmbiance(delta);
         if (_partie == null) return;
         _accumulateur += delta * JoursParSeconde * Multiplicateurs[_vitesse];
         int n = 0;
@@ -375,6 +421,7 @@ public partial class JeuPrincipal : Node3D
                 case Key.F1: _hud.BasculerAide(); break;
                 case Key.F5: Sauvegarder("rapide", true); break;
                 case Key.G: BasculerFantome(); break;
+                case Key.M: _son.Muet = !_son.Muet; _hud.Toast(_son.Muet ? "Son coupé (M)" : "Son rétabli (M)"); break;
                 case Key.V: VueSuivante(); break;
                 case Key.Equal: case Key.Plus: case Key.KpAdd: if (k.CtrlPressed) _hud.TailleTexte(+2); break;
                 case Key.Minus: case Key.KpSubtract: if (k.CtrlPressed) _hud.TailleTexte(-2); break;
@@ -611,6 +658,18 @@ public partial class JeuPrincipal : Node3D
             for (int i = 0; i < 30; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_{nom}.png"));
         }
+        // nuit, automne, hiver sous la neige, pluie
+        foreach (var (nom, heure, moisF, temps) in new (string, double, int, Meteo.Temps)[]
+                 { ("nuit", 22.5, 6, Meteo.Temps.Beau), ("automne", 15, 9, Meteo.Temps.Beau), ("hiver", 13, 0, Meteo.Temps.Neige), ("pluie", 11, 3, Meteo.Temps.Pluie) })
+        {
+            _heure = heure; _meteo.MoisForce = moisF; _meteo.TempsForce = temps;
+            _camera.Cible = new Vector3((float)c.X, 0, (float)-c.Y);
+            _camera.Distance = nom == "hiver" ? 1600 : 330; _camera.Tangage = nom == "hiver" ? 0.35f : 0.5f; _camera.Lacet = nom == "hiver" ? 2.6f : 2.2f;
+            _camera.Appliquer();
+            for (int i = 0; i < 60; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_{nom}.png"));
+        }
+        _meteo.MoisForce = null; _meteo.TempsForce = null;
         if (_partie!.Module<Ville.Gestion.VraieGestion>() != null)
         {
             _rendu.Vue = RenduVille.Vues.Normale;

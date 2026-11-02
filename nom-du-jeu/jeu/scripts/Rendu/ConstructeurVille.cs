@@ -66,7 +66,7 @@ public sealed class ConstructeurVille
                 indices[k++] = b; indices[k++] = e; indices[k++] = d;
             }
         var mesh = Maillage(sommets, Normales(sommets, indices), couleurs, indices);
-        return new MeshInstance3D { Name = "Terrain", Mesh = mesh, MaterialOverride = Materiau(rugosite: 1f) };
+        return new MeshInstance3D { Name = "Terrain", Mesh = mesh, MaterialOverride = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/terrain.gdshader") } };
     }
 
     // ---------------------------------------------------------------- eau

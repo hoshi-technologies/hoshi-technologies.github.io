@@ -14,7 +14,7 @@ public partial class RenduVille : Node3D
     private MeshInstance3D _ligneBus = null!;
     private readonly Dictionary<(int, int), MeshInstance3D> _carres = new();
     private int _versionReseau = -1, _versionServices = -1;
-    private readonly StandardMaterial3D _matBatiments = Maillage.Materiau(0.9f);
+    private readonly Material _matBatiments = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/batiments.gdshader") };
     private readonly StandardMaterial3D _matSol = Maillage.Materiau(1f, doubleFace: true);
     private bool _parcellesVides;
     public RenduNature? Nature { get; set; }

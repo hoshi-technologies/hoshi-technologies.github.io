@@ -35,14 +35,15 @@ public partial class Hud : Control
     private int _nbMessages = -1, _moisMessages = -1;
     private string _categorie = "";
     public string OutilActif { get; set; } = "";
+    public string MeteoTexte { get; set; } = "";
 
     public static readonly Color Fond = new(0.10f, 0.12f, 0.15f, 0.88f);
 
     public override void _Ready()
     {
         SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        Size = GetViewportRect().Size;
-        GetViewport().SizeChanged += () => Size = GetViewportRect().Size;
+        CallDeferred(Control.MethodName.SetSize, GetViewportRect().Size, false);
+        GetViewport().SizeChanged += () => CallDeferred(Control.MethodName.SetSize, GetViewportRect().Size, false);
         MouseFilter = MouseFilterEnum.Ignore;
         Theme = new Theme { DefaultFontSize = 15 };
         ConstruireBarreHaut();
@@ -274,7 +275,7 @@ public partial class Hud : Control
                    "Services : cliquez sur un terrain libre le long d'une rue.\n\n" +
                    "Temps : Espace = pause, 1 / 2 / 3 = vitesses        G : vraie ville en transparence\n" +
                    "F5 : sauvegarder        Échap : annuler l'outil        V : vues d'information\n" +
-                   "Ctrl + / Ctrl - : taille du texte\n\n" +
+                   "Ctrl + / Ctrl - : taille du texte        M : couper le son\n\n" +
                    "Pour que la ville grandisse : une rue reliée à un grand axe, des zones, de l'eau et de l'électricité.\n" +
                    "Ce jeu est une fiction inspirée de données réelles. Ce n'est pas une prédiction.",
         });
@@ -343,7 +344,7 @@ public partial class Hud : Control
         var p = _p;
         int annee = 2027 + p.Mois / 12;
         string[] mois = { "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre" };
-        _date.Text = $"{p.Paquet.Manifest.Ville.Nom} · {p.Jour % 30 + 1} {mois[p.Mois % 12]} {annee}";
+        _date.Text = $"{p.Paquet.Manifest.Ville.Nom} · {p.Jour % 30 + 1} {mois[p.Mois % 12]} {annee} · {MeteoTexte}";
         _palier.Text = p.R.Paliers[p.Palier].Nom;
         _pop.Text = $"{p.Population:N0} habitants";
         _emplois.Text = $"Emplois {p.EmploisLocaux:N0} · chômeurs {p.Chomeurs:N0}";

@@ -20,7 +20,7 @@ En bref :
 - Eau & énergie : un château d'eau et une centrale solaire le long d'une rue.
 - Puis commerces et activités (emplois), école, santé, pompiers, police, déchets, parcs, bus...
 - V : vues d'information (réseaux, attrait, trafic, services). G : vraie ville d'Annecy en transparence.
-- Espace : pause. 1/2/3 : vitesses. Ctrl +/- : taille du texte. F5 : sauvegarder (automatique tous les 3 mois).
+- Espace : pause. 1/2/3 : vitesses. Ctrl +/- : taille du texte. M : couper le son. F5 : sauvegarder (automatique tous les 3 mois).
 
 Après 20 minutes de jeu : avez-vous envie de continuer ? Qu'est-ce qui était ennuyeux, confus ou frustrant ?
 

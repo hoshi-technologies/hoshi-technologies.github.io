@@ -16,3 +16,22 @@ project/assembly_name="Jeu"
 
 [rendering]
 anti_aliasing/quality/msaa_3d=1
+
+[shader_globals]
+
+nuit={
+"type": "float",
+"value": 0.0
+}
+saison={
+"type": "float",
+"value": 0.4
+}
+neige_altitude={
+"type": "float",
+"value": 5000.0
+}
+pluie={
+"type": "float",
+"value": 0.0
+}

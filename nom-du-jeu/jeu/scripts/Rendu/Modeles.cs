@@ -11,13 +11,16 @@ namespace Jeu.Rendu;
 public static class Modeles
 {
     private static readonly Color Blanc = new(1, 1, 1);
+    private static ShaderMaterial? _objets;
+    /// <summary>Matériau commun : couleurs par sommet et par exemplaire, phares et lampes lumineux la nuit.</summary>
+    public static ShaderMaterial Objets => _objets ??= new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/objets.gdshader") };
     private static readonly Color Vitre = new(0.12f, 0.16f, 0.22f);
     private static readonly Color Pneu = new(0.08f, 0.08f, 0.09f);
 
     private static ArrayMesh Fin(Maillage m, Material? mat = null)
     {
         var mesh = m.VersMesh()!;
-        mesh.SurfaceSetMaterial(0, mat ?? new StandardMaterial3D { VertexColorUseAsAlbedo = true, VertexColorIsSrgb = true, Roughness = 0.5f });
+        mesh.SurfaceSetMaterial(0, mat ?? Objets);
         return mesh;
     }
 
@@ -125,7 +128,9 @@ public static class Modeles
         var feuillage = conifere ? new Color(0.20f, 0.40f, 0.26f) : new Color(0.33f, 0.55f, 0.27f);
         m.Arbre(Vector3.Zero, conifere ? 1f : 0.85f, feuillage);
         if (!conifere) m.Arbre(new Vector3(0, 0.25f, 0), 0.7f, feuillage.Lightened(0.08f));
-        return Fin(m, new StandardMaterial3D { VertexColorUseAsAlbedo = true, VertexColorIsSrgb = true, Roughness = 0.9f });
+        var mat = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/arbres.gdshader") };
+        mat.SetShaderParameter("persistant", conifere);
+        return Fin(m, mat);
     }
 
     public static ArrayMesh Lampadaire()
