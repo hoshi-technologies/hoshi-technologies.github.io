@@ -20,7 +20,7 @@ export default [
       ],
       [
         'Why isn’t the invoice in the Shopify order confirmation email?',
-        'Shopify doesn’t let apps add attachments to its own emails, so the app sends a separate email. You can also add a “Download my invoice” button to the Shopify order confirmation: copy the code shown in the settings and paste it into Settings › Notifications › Order confirmation.',
+        "Shopify doesn’t let apps add attachments to its own emails. To avoid a second email, choose “No extra email”: customers download their invoice with the “Download invoice” button in their customer account, with no setup. Optionally, the same button can be added to the Shopify confirmation email (“advanced” section of the settings).",
       ],
       [
         'How do I get a copy of my invoices?',

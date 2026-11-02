@@ -87,6 +87,8 @@
     .choice input { margin-top:3px; }
     .banner.setup { display:block; margin:0 0 10px; }
     .banner.setup p { margin:0 0 8px; }
+    details.advanced { margin:0 0 10px; }
+    details.advanced > summary { cursor:pointer; color:var(--muted); font-size:13px; margin-bottom:8px; }
     .faq-section h3 { font-size:14px; margin:18px 0 6px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
     details.faq { border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
     details.faq summary { cursor:pointer; padding:10px 12px; font-weight:600; }
@@ -200,11 +202,14 @@
               <span><b data-i18n="delivery.email"></b><br><small data-i18n="delivery.emailHelp"></small></span></label>
           </div>
           <p><small data-i18n="delivery.accountButton"></small></p>
-          <div id="delivery-link-setup" class="banner info setup" hidden>
-            <p data-i18n="delivery.setup"></p>
-            <pre class="liquid-code"></pre>
-            <div class="actions" style="margin:0"><button type="button" class="copy-liquid primary" data-i18n="liquid.copy"></button></div>
-          </div>
+          <details id="delivery-link-setup" class="advanced" hidden>
+            <summary data-i18n="delivery.advanced"></summary>
+            <div class="banner info setup">
+              <p data-i18n="delivery.setup"></p>
+              <pre class="liquid-code"></pre>
+              <div class="actions" style="margin:0"><button type="button" class="copy-liquid primary" data-i18n="liquid.copy"></button></div>
+            </div>
+          </details>
           <label class="check" id="bcc-field"><input type="checkbox" name="bccMerchant"> <span data-i18n="general.bcc"></span></label>
         </div>
       </div>
