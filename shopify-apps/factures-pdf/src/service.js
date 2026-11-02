@@ -74,7 +74,8 @@ export class InvoiceService {
     if (topic !== wanted) return null;
 
     const result = await this.createInvoice(shop, order);
-    if (result.created && settings.autoSend) {
+    // Sans service d'e-mail configuré, on n'essaie pas : la facture reste « Non envoyé ».
+    if (result.created && settings.autoSend && this.transport && this.mailFrom) {
       // L'e-mail part après la réponse au webhook ; un échec reste visible dans l'admin.
       this.sendInvoice(shop, result.invoice.id).catch(() => {});
     }
@@ -106,7 +107,7 @@ export class InvoiceService {
       const result = await this.createInvoice(shop, order);
       if (!result.created) continue;
       created += 1;
-      if (settings.autoSend) await this.sendInvoice(shop, result.invoice.id).catch(() => {});
+      if (settings.autoSend && this.transport && this.mailFrom) await this.sendInvoice(shop, result.invoice.id).catch(() => {});
     }
     return { created, pending: this.store.listPendingOrders(shop).length };
   }

@@ -263,3 +263,11 @@ test('guide public : chapitres, sommaire, impression, liens entre guide et FAQ',
     ctx.close();
   }
 });
+
+test('sans service d’e-mail configuré, la facture reste « Non envoyé » (pas « Échec »)', async () => {
+  const store = openDatabase(':memory:');
+  const service = new InvoiceService({ store, transport: null, mailFrom: null, logger: quiet });
+  await service.handleOrder(SHOP, ORDER, 'orders/paid');
+  await settle();
+  assert.equal(store.listInvoices(SHOP)[0].email_status, 'pending');
+});
