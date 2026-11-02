@@ -1,0 +1,8 @@
+{
+  "pays": "US",
+  "herite": "generique",
+  "m2_habitable_par_habitant": 65,
+  "hauteur_etage_m": 3.2,
+  "note_sources": "Valeur provisoire d'ordre de grandeur, à remplacer par les données du Census (ACS) quand la source sera branchée.",
+  "source_population_officielle": "États-Unis : Census, American Community Survey"
+}

@@ -223,7 +223,7 @@ public sealed class Elections : IModule
         }
         p.Proposer(Id, "compromis", "Le conseil municipal hésite",
             $"Pas de majorité ({pour} voix sur {TotalSieges}). L'opposition propose un compromis.",
-            new[] { "Accepter le compromis : la mesure passe, mais coûte une prime de 20 000 € aux quartiers", "Retirer le projet" },
+            new[] { $"Accepter le compromis : la mesure passe, mais coûte une prime de 20 000 {p.R.Monnaie} aux quartiers", "Retirer le projet" },
             new() { ["politique_index"] = Array.IndexOf(g.CataloguePolitiques().Select(x => x.id).ToArray(), politique), ["activer"] = activer ? 1 : 0 });
         return new Resultat(false, "Pas de majorité : une décision vous attend.");
     }

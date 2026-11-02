@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "768a79662159f5a543963965d7247095958139257d8fa7f9ac83a71513ccedd8",
+  "eau.json.gz": "ebf3d6e113b534c4910362e085516b593fbbf9ab3f5511a45ae5ee68b4aee528",
+  "mobilier.json.gz": "deb71c2cb3940c19fb7c2e8219debe812164420283ba3ab72c71d04396475528",
+  "nature.json.gz": "dbc0ec0f94a222d6ef6bc5daf28e9cfbba1db8f98c0feccc5c08de4acea9740e",
+  "relief.f32": "62c646d41eaeb86f49cd870e216f2dc4dfde14286b988b6eae3d39c2aa8c78c0",
+  "routes.json.gz": "bfaf9f81cc0cbdb9675dfe6eb933716d17d14484be3e5e7097f09f7c5eb94511",
+  "sols.json.gz": "ceee5ef2df95dde7e8a13c29c56ca09a973b8e9bb05e53700035a009a6d88f3a"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 74,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 53,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (France : INSEE, données carroyées)",
+   "methode": "surface habitable estimée / 40 m² par habitant",
+   "quoi": "population",
+   "valeur": 165100
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 15682,
+  "cours_eau": 85,
+  "km_routes_carrossables": 350.9,
+  "note_sur_100": 83,
+  "pct_batiments_detection_ia": 1,
+  "pct_batiments_osm": 99,
+  "pct_hauteur_reelle": 26,
+  "pct_routes_nommees": 71,
+  "pct_usage_reel": 47,
+  "plans_eau": 80,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 1551
+ },
+ "relief": {
+  "alt_max_m": 146.5500030517578,
+  "alt_min_m": 128.97000122070312,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 48.583,
+   "lon": 7.748
+  },
+  "cote_km": 4.0,
+  "id": "fr-strasbourg",
+  "nom": "Strasbourg",
+  "pays": "FR",
+  "region": "Grand Est",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

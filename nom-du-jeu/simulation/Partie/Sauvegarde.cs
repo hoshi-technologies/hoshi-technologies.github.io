@@ -32,6 +32,7 @@ public sealed class SauvegardeDto
     // ajoutés après la v1 (champs facultatifs : les anciennes sauvegardes restent lisibles)
     public bool BacASable { get; set; }
     public bool ModeVilleReelle { get; set; }
+    public double? RecetteEquilibreParHabitant { get; set; }
     public ModeDepart Depart { get; set; } = ModeDepart.GrandsAxes;
     /// <summary>Taille de la carte (quartier, ville…) : choisit le bon paquet au chargement.</summary>
     public string Taille { get; set; } = "quartier";
@@ -70,6 +71,7 @@ public sealed partial class Partie
         DernierMessage = new Dictionary<string, int>(_dernierMessage),
         BacASable = BacASable,
         ModeVilleReelle = ModeVilleReelle,
+        RecetteEquilibreParHabitant = RecetteEquilibreParHabitant,
         Depart = Depart,
         Taille = Paquet.Manifest.Ville.Taille,
         Modules = Modules.ToDictionary(m => m.Id, m => m.Sauvegarder()),
@@ -113,7 +115,9 @@ public sealed partial class Partie
         var p = new Partie(r, paquet, 1)
         {
             Jour = dto.Jour, Argent = dto.Argent, ImpotHabitat = dto.ImpotHabitat, ImpotCommerce = dto.ImpotCommerce,
-            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable, ModeVilleReelle = dto.ModeVilleReelle, Depart = dto.Depart, Verrou = dto.Verrou,
+            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable, ModeVilleReelle = dto.ModeVilleReelle,
+            // anciennes sauvegardes : pas de recette d'équilibre (sauf partie enregistrée avant sa première fin de mois)
+            RecetteEquilibreParHabitant = dto.RecetteEquilibreParHabitant ?? (!dto.ModeVilleReelle || dto.Jour < r.JoursParMois ? null : 0), Depart = dto.Depart, Verrou = dto.Verrou,
         };
         p._alea.Etat = dto.Alea;
         foreach (var n in dto.Noeuds) p.Reseau.RestaurerNoeud(new NoeudRoute { Id = n.Id, Pos = new V2(n.X, n.Y), Entree = n.Entree });

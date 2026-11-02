@@ -1,0 +1,5 @@
+{
+  "_note": "Règles propres à la France (seules les différences avec les règles génériques). Mandat municipal de 6 ans.",
+  "monnaie": "€",
+  "elections": { "duree_mandat_mois": 72 }
+}

@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "6ad0a67d0b81c5285215535c46b0bb416c90d682ee1c396a35ffe1e5dbef2fc7",
+  "eau.json.gz": "c9520ee8a8c02e92b2e34d1f92e928ebb17dc2067471621e9b7aa9fce32198ba",
+  "mobilier.json.gz": "6ad2d1907a51c02c8f168dd43061e663c2d23dfbcdb953fd05eed31bf6404707",
+  "nature.json.gz": "4840e0ba5b23777fe7b1ea77c421e8b8d79f556941b05339b0d89d010da12a17",
+  "relief.f32": "dac7eeafb49ee7f1626e834ebfecc138082283ee73d3d2f678abb4e189c4d78e",
+  "routes.json.gz": "259c95820caadeb76813fc41926aa2ee01c668d81b43e568d96fd8e7b3365019",
+  "sols.json.gz": "d95432547487830ab512ebf0338187472c67e6e21419a26bb6eb308652cb4970"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 22,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 61,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (États-Unis : Census, American Community Survey)",
+   "methode": "surface habitable estimée / 65 m² par habitant",
+   "quoi": "population",
+   "valeur": 151700
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 7603,
+  "cours_eau": 4,
+  "km_routes_carrossables": 379.6,
+  "note_sur_100": 85,
+  "pct_batiments_detection_ia": 17,
+  "pct_batiments_osm": 83,
+  "pct_hauteur_reelle": 78,
+  "pct_routes_nommees": 60,
+  "pct_usage_reel": 39,
+  "plans_eau": 29,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 744
+ },
+ "relief": {
+  "alt_max_m": 134.64999389648438,
+  "alt_min_m": -2.940000057220459,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 47.608,
+   "lon": -122.335
+  },
+  "cote_km": 4.0,
+  "id": "us-seattle",
+  "nom": "Seattle",
+  "pays": "US",
+  "region": "Washington",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

@@ -2,10 +2,7 @@ namespace Ville.Coeur;
 
 public sealed partial class Partie
 {
-    private static readonly string[] Prenoms =
-        { "Camille", "Lucas", "Inès", "Hugo", "Léa", "Nathan", "Chloé", "Yanis", "Manon", "Théo", "Sarah", "Malik", "Jeanne", "Paul", "Aïcha", "Tom" };
-
-    private string Habitant() => Prenoms[_alea.Entre(0, Prenoms.Length)];
+    private string Habitant() => R.Prenoms[_alea.Entre(0, R.Prenoms.Length)];
 
     public int Capacite(Batiment b) => b.CapaciteFixe ?? R.Zones[NomZone(b.Type)].Capacite[b.Niveau - 1];
 
@@ -323,10 +320,27 @@ public sealed partial class Partie
         Etape("incendies", () => IncendiesDuMois(Parcelles.Values.Where(p => p.Service == "caserne_pompiers").Select(p => p.Centre).ToList()));
         Etape("budget", Budget);
         foreach (var m in Modules) Etape("module_" + m.Id, () => m.FinDeMois(this));
+        if (ModeVilleReelle) RecetteEquilibre();
         Etape("services2", MettreAJourServices);
         Paliers();
         Etape("messages", MessagesDuMois);
         Historique.Add(new PointMois(Mois, Population, EmploisLocaux, Math.Round(Argent), Math.Round(RecettesMois), Math.Round(DepensesMois)));
+    }
+
+    private void RecetteEquilibre()
+    {
+        if (RecetteEquilibreParHabitant == null)
+        {
+            // positif : recettes non détaillées (dotations, tarifs, subventions) ; négatif : charges non détaillées
+            double ecart = DepensesMois * (1 + R.VilleReelle.MargeEquilibre) - RecettesMois;
+            RecetteEquilibreParHabitant = Population > 0 ? Math.Round(ecart / Population, 3) : 0;
+            if (RecetteEquilibreParHabitant != 0)
+                Message("info", $"Budget de la vraie commune : ses {(ecart > 0 ? "recettes" : "charges")} que le jeu ne détaille pas sont estimées à " +
+                                $"{Math.Abs(RecetteEquilibreParHabitant.Value):F2} {R.Monnaie} par habitant et par mois, pour un budget de départ à l'équilibre. C'est une estimation, pas un chiffre officiel.");
+        }
+        double montant = Math.Round(Population * RecetteEquilibreParHabitant.Value);
+        if (montant > 0) Recette("Autres recettes de la commune (estimation)", montant);
+        else if (montant < 0) Depense("Autres charges de la commune (estimation)", -montant);
     }
 
     private void CalculerAttrait()

@@ -208,8 +208,8 @@ public partial class Hud : Control
     private string Cout(string id)
     {
         if (_p == null) return "";
-        if (_p.R.Services.TryGetValue(id, out var s)) return $"\n{s.Cout:N0} €";
-        if (id is "rue" or "avenue" or "rue_courbe" or "avenue_courbe") return $"\n{_p.R.Route(id.Replace("_courbe", "")).CoutParM:N0} €/m";
+        if (_p.R.Services.TryGetValue(id, out var s)) return $"\n{s.Cout:N0} {_p.R.Monnaie}";
+        if (id is "rue" or "avenue" or "rue_courbe" or "avenue_courbe") return $"\n{_p.R.Route(id.Replace("_courbe", "")).CoutParM:N0} {_p.R.Monnaie}/m";
         return "";
     }
 
@@ -274,7 +274,7 @@ public partial class Hud : Control
             var g = _p?.Module<Ville.Gestion.VraieGestion>();
             if (_p == null || g == null) { Toast("Module « vraie gestion » désactivé.", false); return; }
             double d = g.RenoverUrgent(_p, Math.Max(0, _p.Argent * 0.3));
-            Toast(d > 0 ? $"Rénovations : {d:N0} €" : "Rien d'urgent à rénover (ou pas assez d'argent).", d > 0);
+            Toast(d > 0 ? $"Rénovations : {d:N0} {_p.R.Monnaie}" : "Rien d'urgent à rénover (ou pas assez d'argent).", d > 0);
         };
         h2.AddChild(emprunt); h2.AddChild(urgent); h2.AddChild(fermer);
         v.AddChild(h2);
@@ -375,7 +375,7 @@ public partial class Hud : Control
         _emplois.Text = $"Chômage {(p.Actifs > 0 ? 100.0 * p.Chomeurs / p.Actifs : 0):F0} %";
         _emplois.TooltipText = $"{p.EmploisLocaux:N0} emplois occupés, {p.Chomeurs:N0} chômeurs";
         double solde = p.RecettesMois - p.DepensesMois;
-        _argent.Text = $"{p.Argent:N0} € ({(solde >= 0 ? "+" : "")}{solde:N0})";
+        _argent.Text = $"{p.Argent:N0} {p.R.Monnaie} ({(solde >= 0 ? "+" : "")}{solde:N0})";
         _argent.TooltipText = "Trésorerie (solde du mois dernier)";
         _argent.AddThemeColorOverride("font_color", p.Argent < 0 ? new Color(1, 0.5f, 0.45f) : Colors.White);
         var vg = p.Module<Ville.Gestion.VraieGestion>();
@@ -394,16 +394,16 @@ public partial class Hud : Control
         _ic.SetValueNoSignal(p.ImpotCommerce * 100); _icL.Text = $"{p.ImpotCommerce * 100:F1} %";
         _ia.SetValueNoSignal(p.ImpotActivites * 100); _iaL.Text = $"{p.ImpotActivites * 100:F1} %";
         var t = new System.Text.StringBuilder("\nLe mois dernier :\n");
-        foreach (var (k, v) in p.DetailRecettes) t.AppendLine($"  + {k} : {v:N0} €");
-        foreach (var (k, v) in p.DetailDepenses) t.AppendLine($"  − {k} : {v:N0} €");
-        t.AppendLine($"  = Solde : {p.RecettesMois - p.DepensesMois:N0} €");
+        foreach (var (k, v) in p.DetailRecettes) t.AppendLine($"  + {k} : {v:N0} {p.R.Monnaie}");
+        foreach (var (k, v) in p.DetailDepenses) t.AppendLine($"  − {k} : {v:N0} {p.R.Monnaie}");
+        t.AppendLine($"  = Solde : {p.RecettesMois - p.DepensesMois:N0} {p.R.Monnaie}");
         t.AppendLine($"\nEau : {p.EauConsommee:N0} / {p.EauProduite:N0}    Électricité : {p.ElecConsommee:N0} / {p.ElecProduite:N0}");
         if (p.Module<Ville.Gestion.VraieGestion>() is { } g)
         {
             int usees = p.Reseau.Aretes.Values.Count(e => !e.Departemental && g.UsureRoute(e.Id) > g.Seuil);
             t.AppendLine($"Difficulté : {g.NomDifficulte} · Rues en mauvais état : {usees} · Événements vécus : {g.E.Evenements}");
         }
-        if (p.Emprunts.Count > 0) t.AppendLine($"Emprunts : {p.Emprunts.Count} ({p.Emprunts.Sum(e => e.Restant):N0} € restant à rembourser)");
+        if (p.Emprunts.Count > 0) t.AppendLine($"Emprunts : {p.Emprunts.Count} ({p.Emprunts.Sum(e => e.Restant):N0} {p.R.Monnaie} restant à rembourser)");
         _budgetDetail.Text = t.ToString();
     }
 

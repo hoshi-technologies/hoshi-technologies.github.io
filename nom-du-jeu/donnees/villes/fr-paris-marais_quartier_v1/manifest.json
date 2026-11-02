@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "c6784ac54d542b73f7aee592105438baccc3284e423ee023a8011daf81284248",
+  "eau.json.gz": "95e49076edae9deffe8ba0fc8e313b43e4685c8a69c541fbea1a3a8e42ac2839",
+  "mobilier.json.gz": "3b48d7035893eb951ec7e584e36347df5df796a29d887fec9ca2198e5a67b15e",
+  "nature.json.gz": "7a55c40595297564649c3846a683a2163922176556b50d0853096195ad2fca89",
+  "relief.f32": "5ea85a276d0664f517a2079889f92dbf78a4094293fc12366e457855ac4b653f",
+  "routes.json.gz": "71bf102cae14fc4b0f4d0f7153339a75261eafc9e44bcd0be8a34357f7972444",
+  "sols.json.gz": "777ed23eefb5e0863793840cd6bc74bd8f5f3e2df59e7fbd6bdfb56cefeb02d7"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 31,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 34,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (France : INSEE, données carroyées)",
+   "methode": "surface habitable estimée / 40 m² par habitant",
+   "quoi": "population",
+   "valeur": 574000
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 22606,
+  "cours_eau": 49,
+  "km_routes_carrossables": 322.8,
+  "note_sur_100": 93,
+  "pct_batiments_detection_ia": 1,
+  "pct_batiments_osm": 99,
+  "pct_hauteur_reelle": 69,
+  "pct_routes_nommees": 90,
+  "pct_usage_reel": 66,
+  "plans_eau": 78,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 1597
+ },
+ "relief": {
+  "alt_max_m": 96.43000030517578,
+  "alt_min_m": 19.950000762939453,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 48.858,
+   "lon": 2.358
+  },
+  "cote_km": 4.0,
+  "id": "fr-paris-marais",
+  "nom": "Paris (Le Marais)",
+  "pays": "FR",
+  "region": "Île-de-France",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

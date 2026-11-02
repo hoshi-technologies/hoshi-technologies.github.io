@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "cc4fff9461641dfdc79a8aa94399aa2dbe7df149923b6b08a19d6872e0307073",
+  "eau.json.gz": "e685c3305062e9fb49c9ce5921ecedac2cbfc1b92eb80fdf69512679a6856c84",
+  "mobilier.json.gz": "b31d686a1e595a4cdd1bdbf3f1de9a03fd135c1f53600b109025f0f668167c09",
+  "nature.json.gz": "0144757e9cecba6d94e083d680c00a1c70d1cb8e0555c6a4a12e7d25ad1c2304",
+  "relief.f32": "7f30d96142df65ac548b8d2716fba76fbff9e5af389d1f2ffcac2de7ac361dc0",
+  "routes.json.gz": "80cf4e144a2b511d4cfdd829a73b43a803e71a5b4a98af68f86d328983ced2f0",
+  "sols.json.gz": "23f33e8025dee57e4bff361f1a9b0b156da49ad4eee0cea35d6f6d7df9933e66"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 93,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 90,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (France : INSEE, données carroyées)",
+   "methode": "surface habitable estimée / 40 m² par habitant",
+   "quoi": "population",
+   "valeur": 79500
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 15236,
+  "cours_eau": 12,
+  "km_routes_carrossables": 223.3,
+  "note_sur_100": 79,
+  "pct_batiments_detection_ia": 5,
+  "pct_batiments_osm": 95,
+  "pct_hauteur_reelle": 7,
+  "pct_routes_nommees": 68,
+  "pct_usage_reel": 10,
+  "plans_eau": 52,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 430
+ },
+ "relief": {
+  "alt_max_m": 41.290000915527344,
+  "alt_min_m": -0.5,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 48.643,
+   "lon": -2.015
+  },
+  "cote_km": 4.0,
+  "id": "fr-saint-malo",
+  "nom": "Saint-Malo",
+  "pays": "FR",
+  "region": "Bretagne",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

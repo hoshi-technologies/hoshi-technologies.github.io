@@ -1,14 +1,16 @@
-[NOM DU JEU] - VERSION DE TEST (Annecy)
-=======================================
+[NOM DU JEU] - VERSION DE TEST
+===============================
 1. Décompresser tout le dossier (clic droit > Extraire tout).
 2. Double-cliquer sur Prototype.exe.
    Si Windows affiche « Windows a protégé votre ordinateur » : « Informations complémentaires » > « Exécuter quand même ».
 3. Première fois ? Lancez le « Tutoriel (5 minutes) ».
-   Sinon, choisissez la carte (Quartier 4 km ou Ville 10 km), puis comment commencer :
+   Sinon, choisissez la ville (France ou États-Unis), la carte (Quartier 4 km ; Ville 10 km pour Annecy),
+   puis comment commencer :
    - Terrain seul : la vraie géographie, aucune route (reliez votre première rue au bord de la carte)
    - Terrain et grands axes réels
    - Vraies rues sans bâtiments
-   - Ville réelle : Annecy telle qu'elle est
+   - Ville réelle : la ville telle qu'elle est (population estimée)
+   Option « Élections » : mandats, promesses, conseil municipal (listes fictives).
    Option « Vraie gestion » (conseillée) : les rues s'usent, l'État revoit sa dotation, des événements demandent vos décisions.
    Difficulté : Découverte, Réaliste ou Crise.
    Suivez les objectifs en haut à gauche. F1 : aide.
@@ -20,7 +22,7 @@ En bref :
 - Les vrais bâtiments évoluent : un quartier recherché se rénove et se surélève.
 - Eau & énergie : un château d'eau et une centrale solaire le long d'une rue.
 - Puis commerces et activités (emplois), école, santé, pompiers, police, déchets, parcs, bus...
-- V : vues d'information (réseaux, attrait, trafic, services). G : vraie ville d'Annecy en transparence.
+- V : vues d'information (réseaux, attrait, trafic, services). G : vraie ville en transparence.
 - Espace : pause. 1/2/3 : vitesses. Ctrl +/- : taille du texte. M : couper le son. Échap : menu pause (sauvegarder, charger, options). F5 : sauvegarder (automatique tous les 3 mois).
 
 Après 20 minutes de jeu : avez-vous envie de continuer ? Qu'est-ce qui était ennuyeux, confus ou frustrant ?

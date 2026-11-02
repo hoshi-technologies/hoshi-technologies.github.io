@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "c4df33fa51f72a85600e632e357afaf489ab27bd84eace9053cc78b3efa61ec0",
+  "eau.json.gz": "9ee00c435f98c72cc271954d21b21c982e896421ba38a8da0e9b54f41ccd2c4d",
+  "mobilier.json.gz": "92de42d45e30850a95675afe75d466cf721566bdb3f9999a2e91f1c215276f44",
+  "nature.json.gz": "942be32843371d0e5c6011d723e3bf6f5da9a7d32e3083d49f4d88cd1a4cf26f",
+  "relief.f32": "2517723549b34d1fd1ce5be36168113717e7c2979602d94a3aedeea5183f7b1e",
+  "routes.json.gz": "a4265591937fb3b38de27efa128e355ab9f02970ce4c56e0b43ab66fb5c9e5b9",
+  "sols.json.gz": "29de716ed131a87906462fcec225ccf9749a17539f146f306548d232a3ff4465"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 1,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 80,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (États-Unis : Census, American Community Survey)",
+   "methode": "surface habitable estimée / 65 m² par habitant",
+   "quoi": "population",
+   "valeur": 595000
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 11588,
+  "cours_eau": 6,
+  "km_routes_carrossables": 295.4,
+  "note_sur_100": 96,
+  "pct_batiments_detection_ia": 0,
+  "pct_batiments_osm": 100,
+  "pct_hauteur_reelle": 99,
+  "pct_routes_nommees": 79,
+  "pct_usage_reel": 20,
+  "plans_eau": 40,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 977
+ },
+ "relief": {
+  "alt_max_m": 104.01000213623047,
+  "alt_min_m": -8.630000114440918,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 40.755,
+   "lon": -73.975
+  },
+  "cote_km": 4.0,
+  "id": "us-new-york-midtown",
+  "nom": "New York (Midtown)",
+  "pays": "US",
+  "region": "New York",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

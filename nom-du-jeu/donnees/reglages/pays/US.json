@@ -1,0 +1,29 @@
+{
+  "_note": "Règles propres aux États-Unis (seules les différences avec les règles génériques). Valeurs de jeu simplifiées, pas une description du droit américain.",
+  "monnaie": "$",
+  "elections": {
+    "duree_mandat_mois": 48
+  },
+  "personnes_par_logement": 2.5,
+  "demande": {
+    "attrait_region": 34
+  },
+  "prenoms": [
+    "Emma",
+    "Liam",
+    "Sofia",
+    "Noah",
+    "Ava",
+    "Mateo",
+    "Maya",
+    "Ethan",
+    "Jada",
+    "Lucas",
+    "Grace",
+    "Omar",
+    "Chloe",
+    "Daniel",
+    "Priya",
+    "Tyler"
+  ]
+}

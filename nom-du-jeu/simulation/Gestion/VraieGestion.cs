@@ -89,7 +89,7 @@ public sealed partial class VraieGestion : IModule
         if (!tropRiche)
             p.Recette("Dotation de l'État", Math.Round(p.Population * C("dotation_par_habitant") * E.FacteurDotation * D("dotation")));
         else
-            p.PublierLimite("reserves", 120, "alerte", $"Le journal local : « La commune dort sur {p.Argent:N0} € de réserves. L'État suspend sa dotation et les habitants demandent une baisse des impôts, ou des investissements. »");
+            p.PublierLimite("reserves", 120, "alerte", $"Le journal local : « La commune dort sur {p.Argent:N0} {p.R.Monnaie} de réserves. L'État suspend sa dotation et les habitants demandent une baisse des impôts, ou des investissements. »");
         E.ReservesExcessives = tropRiche;
 
         PolitiquesDuMois(p);
@@ -157,7 +157,7 @@ public sealed partial class VraieGestion : IModule
             if (!p.BacASable) p.Argent -= c;
             E.UsureServices[par.Id] = 0;
             p.Invalider();
-            return new Resultat(true, $"Équipement rénové ({c:N0} €).", c);
+            return new Resultat(true, $"Équipement rénové ({c:N0} {p.R.Monnaie}).", c);
         }
         var arete = p.Reseau.AreteProche(point, 10);
         if (arete == null || arete.Departemental) return Resultat.Non("Cliquez sur une rue ou un équipement de la commune.");
@@ -165,7 +165,7 @@ public sealed partial class VraieGestion : IModule
         if (cr > p.Argent && !p.BacASable) return Resultat.Non("Pas assez d'argent.");
         if (!p.BacASable) p.Argent -= cr;
         E.UsureRoutes[arete.Id] = 0;
-        return new Resultat(true, $"Rue rénovée ({cr:N0} €).", cr);
+        return new Resultat(true, $"Rue rénovée ({cr:N0} {p.R.Monnaie}).", cr);
     }
 
     /// <summary>Rénove les éléments les plus usés dans la limite d'un budget. Renvoie le montant dépensé.</summary>
@@ -192,8 +192,7 @@ public sealed partial class VraieGestion : IModule
     }
 
     // ------------------------------------------------------------------ événements
-    private static readonly string[] Prenoms = { "Camille", "Lucas", "Inès", "Hugo", "Léa", "Nathan", "Chloé", "Yanis", "Manon", "Théo" };
-    private static string Prenom(Partie p) => Prenoms[(int)(p.Aleatoire() * Prenoms.Length) % Prenoms.Length];
+    private static string Prenom(Partie p) => p.R.Prenoms[(int)(p.Aleatoire() * p.R.Prenoms.Length) % p.R.Prenoms.Length];
 
     private void Evenement(Partie p)
     {
@@ -211,7 +210,7 @@ public sealed partial class VraieGestion : IModule
                 double cout = Mille((20000 + p.Population * 3) * couts);
                 p.Proposer(Id, type, "Tempête sur la commune",
                     "Une violente tempête a arraché des arbres et abîmé plusieurs rues. Les services techniques attendent vos ordres.",
-                    new[] { $"Réparer tout de suite ({cout:N0} €)", "Réparer plus tard (les rues restent abîmées)" },
+                    new[] { $"Réparer tout de suite ({cout:N0} {p.R.Monnaie})", "Réparer plus tard (les rues restent abîmées)" },
                     new() { ["cout"] = cout });
                 break;
             }
@@ -223,7 +222,7 @@ public sealed partial class VraieGestion : IModule
                 double aide = Mille(emplois * 900 * couts);
                 p.Proposer(Id, type, "Une entreprise menace de fermer",
                     $"La plus grande entreprise de la commune ({emplois:N0} emplois) annonce sa fermeture. Elle resterait avec une aide publique.",
-                    new[] { $"Verser une aide ({aide:N0} €)", "Laisser fermer" },
+                    new[] { $"Verser une aide ({aide:N0} {p.R.Monnaie})", "Laisser fermer" },
                     new() { ["cout"] = aide, ["parcelle"] = usine.Id });
                 break;
             }
@@ -232,7 +231,7 @@ public sealed partial class VraieGestion : IModule
                 double cout = Mille((15000 + p.Population * 2) * couts);
                 p.Proposer(Id, type, "Pénurie de médecins",
                     "Trois médecins partent à la retraite sans successeur. Les habitants s'inquiètent.",
-                    new[] { $"Financer une maison de santé ({cout:N0} €)", "Ne rien faire (attrait en baisse pendant un an)" },
+                    new[] { $"Financer une maison de santé ({cout:N0} {p.R.Monnaie})", "Ne rien faire (attrait en baisse pendant un an)" },
                     new() { ["cout"] = cout });
                 break;
             }
@@ -240,8 +239,8 @@ public sealed partial class VraieGestion : IModule
             {
                 double gain = Mille(30000 + p.Population * 4);
                 p.Proposer(Id, type, "Projet immobilier",
-                    $"Un promoteur propose de construire un ensemble de logements. Il verserait {gain:N0} € à la commune pour les équipements, mais le quartier serait plus dense.",
-                    new[] { $"Accepter (+{gain:N0} €, des terrains deviennent constructibles)", "Refuser" },
+                    $"Un promoteur propose de construire un ensemble de logements. Il verserait {gain:N0} {p.R.Monnaie} à la commune pour les équipements, mais le quartier serait plus dense.",
+                    new[] { $"Accepter (+{gain:N0} {p.R.Monnaie}, des terrains deviennent constructibles)", "Refuser" },
                     new() { ["gain"] = gain });
                 break;
             }
@@ -250,7 +249,7 @@ public sealed partial class VraieGestion : IModule
                 double cout = Mille((8000 + p.Population * 1.5) * couts);
                 p.Proposer(Id, type, "Canicule",
                     "Une vague de chaleur s'annonce. Les personnes âgées sont les plus exposées.",
-                    new[] { $"Ouvrir des salles rafraîchies et des fontaines ({cout:N0} €)", "Se contenter de conseils de prudence" },
+                    new[] { $"Ouvrir des salles rafraîchies et des fontaines ({cout:N0} {p.R.Monnaie})", "Se contenter de conseils de prudence" },
                     new() { ["cout"] = cout });
                 break;
             }

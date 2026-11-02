@@ -432,7 +432,7 @@ def construire(fichier_ville, cache, sortie):
          "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)"},
         {"quoi": "population", "valeur": pop_est,
          "methode": f"surface habitable estimée / {regles['m2_habitable_par_habitant']} m² par habitant",
-         "fiabilite": "faible : à remplacer par une source officielle (France : INSEE, données carroyées)"},
+         "fiabilite": f"faible : à remplacer par une source officielle ({regles.get('source_population_officielle', 'statistiques nationales')})"},
     ]
 
     nom_paquet = f"{ville['id']}_{ville['taille']}_v{VERSION_FORMAT}"

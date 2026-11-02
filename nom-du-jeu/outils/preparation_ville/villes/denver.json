@@ -1,0 +1,14 @@
+{
+  "id": "us-denver",
+  "nom": "Denver",
+  "pays": "US",
+  "region": "Colorado",
+  "centre": {
+    "lat": 39.742,
+    "lon": -104.975
+  },
+  "taille": "quartier",
+  "cote_km": 4.0,
+  "statut": "en_verification",
+  "notes": "Downtown, ville en altitude (1 600 m)."
+}

@@ -120,6 +120,10 @@ public sealed partial class Partie
     public bool BacASable { get; set; }
     /// <summary>Mode Ville réelle : la vraie ville existe au départ, eau et énergie viennent du réseau régional.</summary>
     public bool ModeVilleReelle { get; set; }
+
+    /// <summary>Ville réelle : recettes que le jeu ne modélise pas (dotations, tarifs, subventions…), estimées une seule
+    /// fois à la première fin de mois pour que la vraie commune démarre à l'équilibre. null = pas encore estimée.</summary>
+    public double? RecetteEquilibreParHabitant { get; set; }
     public ModeDepart Depart { get; set; } = ModeDepart.GrandsAxes;
     /// <summary>Si non nul, les commandes du maire sont bloquées avec ce message (ex. : période d'opposition).</summary>
     public string? Verrou { get; set; }
@@ -624,7 +628,7 @@ public sealed partial class Partie
         double mensualite = Math.Round(m * t / (1 - Math.Pow(1 + t, -n)), 2);
         Emprunts.Add(new Emprunt { Restant = m, Mensualite = mensualite, MoisRestants = n });
         Argent += m;
-        return new Resultat(true, $"Emprunt de {m:N0} € accordé : {mensualite:N0} € par mois pendant {n / 12} ans.");
+        return new Resultat(true, $"Emprunt de {m:N0} {R.Monnaie} accordé : {mensualite:N0} {R.Monnaie} par mois pendant {n / 12} ans.");
     }
 
     private void Message(string type, string texte)

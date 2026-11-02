@@ -18,3 +18,20 @@ Copier `villes/annecy.json`, changer `id`, `nom`, `pays`, `centre` et `cote_km`.
 
 ## Règles par pays
 `regles_pays/generique.json` contient les valeurs par défaut ; `regles_pays/FR.json` les remplace pour la France.
+
+## Villes déjà préparées (taille Quartier, 4 × 4 km)
+| Fichier | Ville | Pays |
+|---|---|---|
+| annecy.json (+ annecy_ville.json, 10 km) | Annecy | FR |
+| lyon.json | Lyon (Presqu'île, Fourvière) | FR |
+| paris-marais.json | Paris (Le Marais, îles) | FR |
+| bordeaux.json | Bordeaux (centre, Garonne) | FR |
+| strasbourg.json | Strasbourg (Grande Île) | FR |
+| saint-malo.json | Saint-Malo (ville close, port) | FR |
+| new-york-midtown.json | New York (Midtown, East River) | US |
+| austin.json | Austin (Downtown, Lady Bird Lake) | US |
+| denver.json | Denver (Downtown) | US |
+| seattle.json | Seattle (Downtown, Elliott Bay) | US |
+
+Le jeu trouve tout seul les paquets copiés dans `donnees/villes/` (un dossier `<id>_<taille>_v1` par ville) et les propose dans le menu.
+Les règles du pays (`donnees/reglages/pays/<PAYS>.json` pour le jeu, `regles_pays/<PAYS>.json` pour la préparation) sont appliquées automatiquement.

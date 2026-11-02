@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "ba73a0e1c8585fff2d27bdedfd2b9146dd3d315209cf7181ff66625be54df9f8",
+  "eau.json.gz": "bf39a2cfea2749df75d2afc6ae068a0cde51e591174c45008f67530600cbf6a1",
+  "mobilier.json.gz": "ba8aa0a90b8a512a7ae5de0450f3419b6a0c3bdd21e5389fa898743182f64446",
+  "nature.json.gz": "cdf3ef14c140cd5d37b9851ba24dae12ad6180cf22be8313dc17ab8df87d5889",
+  "relief.f32": "5603a6f8b843bb364882ef18745624bcb22002e7ec8f6bafafd57752a8c86233",
+  "routes.json.gz": "20a52bef3413ddbd6cab47f54964b29ed1d982d5aef58d61753e8bb8254deaa4",
+  "sols.json.gz": "7a4477107862693ac2152bbc1e637f931d5b6b95e8cc645530bceafab88d94b4"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 67,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 53,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (France : INSEE, données carroyées)",
+   "methode": "surface habitable estimée / 40 m² par habitant",
+   "quoi": "population",
+   "valeur": 306000
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 18459,
+  "cours_eau": 16,
+  "km_routes_carrossables": 372.6,
+  "note_sur_100": 86,
+  "pct_batiments_detection_ia": 0,
+  "pct_batiments_osm": 100,
+  "pct_hauteur_reelle": 33,
+  "pct_routes_nommees": 80,
+  "pct_usage_reel": 47,
+  "plans_eau": 91,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 1709
+ },
+ "relief": {
+  "alt_max_m": 301.739990234375,
+  "alt_min_m": 160.14999389648438,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 45.762,
+   "lon": 4.835
+  },
+  "cote_km": 4.0,
+  "id": "fr-lyon",
+  "nom": "Lyon",
+  "pays": "FR",
+  "region": "Auvergne-Rhône-Alpes",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

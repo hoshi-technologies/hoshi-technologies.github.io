@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "4f8ab00d792db7044208419c18887d7e54f3ca70ff7e08bf69d269f15f974cae",
+  "eau.json.gz": "1362987961e8ff89c6764634f465924422bd3f402fb9a37652e06c4b2169f95b",
+  "mobilier.json.gz": "267b52ccdcc25cb7c92978facc14d95ed52305d5c0c4127b70770e13268da346",
+  "nature.json.gz": "f17b0b5954c1024db8edcbc8dedb7421ee27659a019fd661d11b214d1f06dba5",
+  "relief.f32": "edab873a36bd1a444e5840a114a99debf94aa064288b6d9baa8ed312760aa0bc",
+  "routes.json.gz": "232c7726decae10fbf101d85fb6174720f6d5db6677966b874b745d132b1afb7",
+  "sols.json.gz": "a64dc41b1d0998014eb39c3836f4bcff3a242a8cbc5af2c42ce60a34f4d0639d"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 13,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 4,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (États-Unis : Census, American Community Survey)",
+   "methode": "surface habitable estimée / 65 m² par habitant",
+   "quoi": "population",
+   "valeur": 119000
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 17324,
+  "cours_eau": 2,
+  "km_routes_carrossables": 478.2,
+  "note_sur_100": 88,
+  "pct_batiments_detection_ia": 1,
+  "pct_batiments_osm": 99,
+  "pct_hauteur_reelle": 87,
+  "pct_routes_nommees": 49,
+  "pct_usage_reel": 96,
+  "plans_eau": 104,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 4552
+ },
+ "relief": {
+  "alt_max_m": 1641.6600341796875,
+  "alt_min_m": 1573.1400146484375,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 39.742,
+   "lon": -104.975
+  },
+  "cote_km": 4.0,
+  "id": "us-denver",
+  "nom": "Denver",
+  "pays": "US",
+  "region": "Colorado",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

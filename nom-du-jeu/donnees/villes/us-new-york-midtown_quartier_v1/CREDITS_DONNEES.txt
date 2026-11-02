@@ -1,0 +1,19 @@
+SOURCES DES DONNÉES DE CETTE VILLE
+==================================
+Ce paquet est une base de données dérivée, publiée sous Open Database License (ODbL) 1.0 :
+https://opendatacommons.org/licenses/odbl/1-0/
+
+Bâtiments, routes, eau, occupation du sol :
+  © OpenStreetMap contributors (https://www.openstreetmap.org/copyright), Overture Maps Foundation
+  (https://overturemaps.org). Version Overture : 2026-10-21.0.
+  Certains bâtiments proviennent de détections automatiques sur images (Microsoft, Google, Esri)
+  distribuées par Overture ; voir le champ "source" de chaque bâtiment.
+
+Relief :
+  produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH
+  2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.
+  Le relief a été modifié (estimation du sol, lissage, nivellement des plans d'eau).
+  Les données Copernicus sont fournies « en l'état », sans garantie.
+
+Les hauteurs, usages et populations marqués « estimé » sont calculés par le jeu, pas mesurés.
+Ce jeu est une fiction inspirée de données réelles. Ce n'est pas une prédiction.

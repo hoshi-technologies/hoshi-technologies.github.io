@@ -6,6 +6,11 @@ namespace Ville.Coeur;
 public sealed class Reglages
 {
     public double ArgentDepart { get; set; }
+    /// <summary>Symbole monétaire affiché (« € », « $ »…), selon le pays de la ville.</summary>
+    public string Monnaie { get; set; } = "€";
+    /// <summary>Prénoms des habitants fictifs qui s'expriment dans le journal (remplacés par pays).</summary>
+    public string[] Prenoms { get; set; } =
+        { "Camille", "Lucas", "Inès", "Hugo", "Léa", "Nathan", "Chloé", "Yanis", "Manon", "Théo", "Sarah", "Malik", "Jeanne", "Paul", "Aïcha", "Tom" };
     public int JoursParMois { get; set; } = 30;
     public ReglagesRoutes Routes { get; set; } = new();
     public ReglagesParcelles Parcelles { get; set; } = new();
@@ -45,6 +50,29 @@ public sealed class Reglages
 
     public static Reglages Charger(string chemin) =>
         JsonSerializer.Deserialize<Reglages>(File.ReadAllText(chemin), Json) ?? throw new InvalidDataException("Réglages illisibles");
+
+    /// <summary>
+    /// Réglages génériques + règles du pays (fichier pays/XX.json à côté, s'il existe), fusionnés champ par champ.
+    /// Les règles génériques s'appliquent partout ; un pays ne remplace que ce qui diffère.
+    /// </summary>
+    public static Reglages ChargerPourPays(string chemin, string pays)
+    {
+        var base_ = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(chemin))!.AsObject();
+        var fichierPays = Path.Combine(Path.GetDirectoryName(chemin)!, "pays", pays + ".json");
+        if (File.Exists(fichierPays))
+            Fusionner(base_, System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(fichierPays))!.AsObject());
+        return base_.Deserialize<Reglages>(Json) ?? throw new InvalidDataException("Réglages illisibles");
+    }
+
+    private static void Fusionner(System.Text.Json.Nodes.JsonObject cible, System.Text.Json.Nodes.JsonObject ajout)
+    {
+        foreach (var (cle, valeur) in ajout.ToList())
+        {
+            if (cle.StartsWith('_')) continue;
+            if (valeur is System.Text.Json.Nodes.JsonObject o && cible[cle] is System.Text.Json.Nodes.JsonObject c) Fusionner(c, o);
+            else cible[cle] = valeur?.DeepClone();
+        }
+    }
 
     public ReglagesRoute Route(string gabarit) => gabarit switch
     {
@@ -95,6 +123,7 @@ public sealed class ReglagesVilleReelle
     public double ArgentDepartMin { get; set; }
     public double CoutSecoursPoliceParHabitant { get; set; }
     public double CoutServicesExistantsParHabitant { get; set; }
+    public double MargeEquilibre { get; set; } = 0.03;
 }
 
 public sealed class ReglagesPont

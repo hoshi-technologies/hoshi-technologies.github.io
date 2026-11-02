@@ -147,7 +147,7 @@ public partial class FenetreMairie : PanelContainer
         {
             var c = new CheckBox
             {
-                Text = $"{nom}  ({(cout >= 0 ? "" : "économie ")}{Math.Abs(cout * _p.Population):N0} €/mois)",
+                Text = $"{nom}  ({(cout >= 0 ? "" : "économie ")}{Math.Abs(cout * _p.Population):N0} {_p.R.Monnaie}/mois)",
                 ButtonPressed = g.Active(id),
             };
             string ident = id;

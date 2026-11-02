@@ -2,5 +2,6 @@
   "pays": "FR",
   "herite": "generique",
   "m2_habitable_par_habitant": 40,
-  "note_sources": "Valeur provisoire d'ordre de grandeur, à remplacer par la donnée INSEE (surface moyenne par personne) quand la source sera branchée."
+  "note_sources": "Valeur provisoire d'ordre de grandeur, à remplacer par la donnée INSEE (surface moyenne par personne) quand la source sera branchée.",
+  "source_population_officielle": "France : INSEE, données carroyées"
 }

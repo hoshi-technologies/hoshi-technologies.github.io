@@ -1,0 +1,14 @@
+{
+  "id": "fr-bordeaux",
+  "nom": "Bordeaux",
+  "pays": "FR",
+  "region": "Nouvelle-Aquitaine",
+  "centre": {
+    "lat": 44.84,
+    "lon": -0.573
+  },
+  "taille": "quartier",
+  "cote_km": 4.0,
+  "statut": "en_verification",
+  "notes": "Centre historique et quais de la Garonne."
+}

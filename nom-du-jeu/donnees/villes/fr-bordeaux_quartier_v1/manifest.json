@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "4b5fb0fcac6fdcc4a4db2393952905001b386fd8687d6f545bad1047ef7050db",
+  "eau.json.gz": "7d6072b6671f60f73a00e1be71a46fd74373e50c4e688199c275e5e4fed973fd",
+  "mobilier.json.gz": "84ffd974606902270090a7f926b3ac2395ac50a28b91f9fadae9fd824b801735",
+  "nature.json.gz": "9bcf785ed05592b9a1a495bbee64d8a2da7a8430df671677218ef26df72fda09",
+  "relief.f32": "b18b23ddbbbd8eb11f7dfe5a8e0fe50a555f554c6e0fb435e97620c50f10726a",
+  "routes.json.gz": "10421f0cee00969ad4b6445f7a06e7cb899841b9c3dd7621cece8e387b83a2d6",
+  "sols.json.gz": "5273368e8461048e307512e38005df1f6b3a20acb6890b3830668da93e1f4fc3"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 92,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 91,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (France : INSEE, données carroyées)",
+   "methode": "surface habitable estimée / 40 m² par habitant",
+   "quoi": "population",
+   "valeur": 272500
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 44231,
+  "cours_eau": 24,
+  "km_routes_carrossables": 369.1,
+  "note_sur_100": 82,
+  "pct_batiments_detection_ia": 1,
+  "pct_batiments_osm": 99,
+  "pct_hauteur_reelle": 8,
+  "pct_routes_nommees": 78,
+  "pct_usage_reel": 9,
+  "plans_eau": 285,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 946
+ },
+ "relief": {
+  "alt_max_m": 22.100000381469727,
+  "alt_min_m": -0.25999999046325684,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 44.84,
+   "lon": -0.573
+  },
+  "cote_km": 4.0,
+  "id": "fr-bordeaux",
+  "nom": "Bordeaux",
+  "pays": "FR",
+  "region": "Nouvelle-Aquitaine",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

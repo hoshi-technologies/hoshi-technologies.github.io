@@ -1,0 +1,89 @@
+{
+ "empreintes_sha256": {
+  "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
+  "batiments.json.gz": "69bc1d41c556ab5843111956f3adba844a238e19f64a42382e16d2d5f94f80e6",
+  "eau.json.gz": "797f5f76cb7f444fe34f47a17253ef1114743aa4123871d51a7c99be9167ba4a",
+  "mobilier.json.gz": "2bb1dfa171647426c6b5c38124f13b306a382a63652b68e1560b863e716636d0",
+  "nature.json.gz": "491fbf26f92a70ad58ed6b2936f5b0b8afe712e395359e3ea3804d6de49f62e5",
+  "relief.f32": "8ef00c2589136f816a5089a739c9b07bee398e9a3e8fde249b799237eb14d7e3",
+  "routes.json.gz": "b0cac1e0ed0351174871390d9f265b954a4500c28e93b996d62309d707fd4e4d",
+  "sols.json.gz": "b5880002e2bd9f35098996cf181cf79f0805bbef727dcf198d092b7fd863ff1f"
+ },
+ "estimations": [
+  {
+   "methode": "selon la surface au sol (règles du pays)",
+   "part_pct": 11,
+   "quoi": "hauteur des bâtiments"
+  },
+  {
+   "methode": "habitat par défaut, annexe sous 30 m², activités au-delà de 1 500 m²",
+   "part_pct": 87,
+   "quoi": "usage des bâtiments"
+  },
+  {
+   "methode": "modèle de surface Copernicus filtré (toits et arbres retirés approximativement)",
+   "part_pct": 100,
+   "quoi": "altitude du sol"
+  },
+  {
+   "fiabilite": "faible : à remplacer par une source officielle (États-Unis : Census, American Community Survey)",
+   "methode": "surface habitable estimée / 65 m² par habitant",
+   "quoi": "population",
+   "valeur": 114600
+  }
+ ],
+ "format": "paquet_ville",
+ "population_reference": null,
+ "qualite": {
+  "batiments": 9660,
+  "cours_eau": 52,
+  "km_routes_carrossables": 385.3,
+  "note_sur_100": 88,
+  "pct_batiments_detection_ia": 4,
+  "pct_batiments_osm": 96,
+  "pct_hauteur_reelle": 89,
+  "pct_routes_nommees": 52,
+  "pct_usage_reel": 13,
+  "plans_eau": 261,
+  "relief": "Copernicus GLO-30 (30 m), sol estimé par filtrage, grille de 10 m",
+  "zones_sol": 868
+ },
+ "relief": {
+  "alt_max_m": 188.11000061035156,
+  "alt_min_m": 128.8800048828125,
+  "colonne_0": "ouest",
+  "colonnes": 401,
+  "fichier": "relief.f32",
+  "ligne_0": "nord",
+  "lignes": 401,
+  "pas_m": 10.0,
+  "type": "float32 little-endian"
+ },
+ "repere": {
+  "demi_cote_m": 2000.0,
+  "origine": "centre de la zone",
+  "unite": "metre",
+  "x": "est",
+  "y": "nord"
+ },
+ "sources": {
+  "licence_paquet": "ODbL-1.0",
+  "overture_release": "2026-10-21.0",
+  "relief": "Copernicus DEM GLO-30"
+ },
+ "version_format": 1,
+ "version_outil": "0.1.0",
+ "ville": {
+  "centre": {
+   "lat": 30.27,
+   "lon": -97.742
+  },
+  "cote_km": 4.0,
+  "id": "us-austin",
+  "nom": "Austin",
+  "pays": "US",
+  "region": "Texas",
+  "statut": "en_verification",
+  "taille": "quartier"
+ }
+}

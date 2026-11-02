@@ -281,7 +281,9 @@
     "note": "Réseaux régionaux : la commune achète eau, électricité et traitement des déchets ; ses propres équipements réduisent la facture.",
     "cout_secours_police_par_habitant": 0.8,
     "note_estimation": "Population estimée depuis la surface des bâtiments (110 m² de plancher brut par logement). À remplacer par les données carroyées de l'INSEE.",
-    "cout_services_existants_par_habitant": 5.5
+    "cout_services_existants_par_habitant": 5.5,
+    "marge_equilibre": 0.03,
+    "_note_equilibre": "Ville réelle : à la 1re fin de mois, une recette (ou une charge) par habitant, estimée, met le budget de départ à l équilibre + 3 % : les vraies communes ont des recettes et des charges que le jeu ne détaille pas."
   },
   "territoire": {
     "_note": "Pour les cartes de plus de 5 km : rayon constructible (m) autour du centre, par palier. Les cartes Quartier sont entièrement ouvertes.",
@@ -397,7 +399,7 @@
     "groupes": [
       {
         "id": "lac",
-        "nom": "Liste du Lac",
+        "nom": "Liste Ville Nature",
         "priorites": [
           "vegetalisation",
           "plan_velo",

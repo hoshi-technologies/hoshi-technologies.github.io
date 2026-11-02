@@ -50,11 +50,36 @@ public partial class JeuPrincipal : Node3D
     private double _rayonAffiche = -1;
     private CanvasLayer _calque = null!;
 
-    /// <summary>Charge la carte d'une taille (quartier 4 km, ville 10 km) et reconstruit le décor.</summary>
-    private void ChargerCarte(string taille)
+    private string _villeId = "fr-annecy";
+
+    /// <summary>Villes disponibles (un dossier par ville et par taille dans donnees/villes), lues dans les manifestes.</summary>
+    private static List<InfoVille> Catalogue()
     {
-        if (_paquet != null && _paquet.Manifest.Ville.Taille == taille) return;
-        _paquet = PaquetVille.Charger(System.IO.Path.Combine(Racine(), "donnees", "villes", $"fr-annecy_{taille}_v1"));
+        var res = new List<InfoVille>();
+        var dossier = System.IO.Path.Combine(Racine(), "donnees", "villes");
+        if (!System.IO.Directory.Exists(dossier)) return res;
+        foreach (var d in System.IO.Directory.EnumerateDirectories(dossier).Order())
+        {
+            var m = System.IO.Path.Combine(d, "manifest.json");
+            if (!System.IO.File.Exists(m)) continue;
+            try { res.Add(System.Text.Json.JsonSerializer.Deserialize<Manifest>(System.IO.File.ReadAllText(m))!.Ville); }
+            catch (Exception ex) { GD.PrintErr($"Paquet illisible {d} : {ex.Message}"); }
+        }
+        return res;
+    }
+
+    private static string DossierPaquet(string villeId, string taille) =>
+        System.IO.Path.Combine(Racine(), "donnees", "villes", $"{villeId}_{taille}_v1");
+
+    /// <summary>Charge la carte d'une ville et d'une taille (quartier 4 km, ville 10 km), les règles de son pays, et reconstruit le décor.</summary>
+    private void ChargerCarte(string taille, string? villeId = null)
+    {
+        villeId ??= _villeId;
+        if (!System.IO.Directory.Exists(DossierPaquet(villeId, taille))) taille = "quartier";
+        if (_paquet != null && _paquet.Manifest.Ville.Taille == taille && _paquet.Manifest.Ville.Id == villeId) return;
+        _paquet = PaquetVille.Charger(DossierPaquet(villeId, taille));
+        _villeId = villeId;
+        _reglages = Reglages.ChargerPourPays(System.IO.Path.Combine(Racine(), "donnees", "reglages", "prototype.json"), _paquet.Manifest.Ville.Pays);
         foreach (var n in _decor) n.QueueFree();
         _decor.Clear();
         var decor = new ConstructeurVille(_paquet);
@@ -70,8 +95,7 @@ public partial class JeuPrincipal : Node3D
         }
     }
 
-    public static bool CarteDisponible(string taille) =>
-        System.IO.Directory.Exists(System.IO.Path.Combine(Racine(), "donnees", "villes", $"fr-annecy_{taille}_v1"));
+    public bool CarteDisponible(string taille) => System.IO.Directory.Exists(DossierPaquet(_villeId, taille));
 
     private void DessinerTerritoire()
     {
@@ -109,7 +133,6 @@ public partial class JeuPrincipal : Node3D
     public override void _Ready()
     {
         var racine = Racine();
-        _reglages = Reglages.Charger(System.IO.Path.Combine(racine, "donnees", "reglages", "prototype.json"));
         _dossierSauvegardes = ProjectSettings.GlobalizePath("user://sauvegardes");
         System.IO.Directory.CreateDirectory(_dossierSauvegardes);
 
@@ -162,6 +185,7 @@ public partial class JeuPrincipal : Node3D
         {
             if (a.StartsWith("--auto=")) _optionAuto = a["--auto=".Length..];
             if (a.StartsWith("--carte=")) ChargerCarte(a["--carte=".Length..]);
+            if (a.StartsWith("--ville=")) ChargerCarte("quartier", a["--ville=".Length..]);
         }
         if (_optionAuto != "") CallDeferred(nameof(ModeAuto));
     }
@@ -182,6 +206,16 @@ public partial class JeuPrincipal : Node3D
         titre.AddThemeFontSizeOverride("font_size", 44);
         v.AddChild(titre);
         v.AddChild(new Label { Text = "Prends les commandes de ta vraie ville.  —  Prototype de plaisir", HorizontalAlignment = HorizontalAlignment.Center });
+        // choix de la ville (par pays)
+        var villes = new HBoxContainer();
+        villes.AddChild(new Label { Text = "Ville : " });
+        var choixVille = new OptionButton { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        var liste = Catalogue().Where(c => c.Taille == "quartier").OrderBy(c => c.Pays).ThenBy(c => c.Nom).ToList();
+        foreach (var c in liste) choixVille.AddItem($"{(c.Pays == "FR" ? "France" : c.Pays == "US" ? "États-Unis" : c.Pays)} — {c.Nom}");
+        choixVille.Selected = liste.FindIndex(c => c.Id == _villeId);
+        choixVille.ItemSelected += i => { ChargerCarte("quartier", liste[(int)i].Id); ReconstruireMenu(); };
+        villes.AddChild(choixVille);
+        v.AddChild(villes);
         // taille de la carte
         var tailles = new HBoxContainer();
         tailles.AddChild(new Label { Text = "Carte : " });
@@ -273,7 +307,8 @@ public partial class JeuPrincipal : Node3D
             if (sauvegarde != null)
             {
                 var json = Partie.LireFichier(sauvegarde);
-                ChargerCarte(Partie.LireEntete(json).taille);
+                var (villeSauv, tailleSauv) = Partie.LireEntete(json);
+                ChargerCarte(tailleSauv, villeSauv);
                 _partie = Partie.Charger(json, _reglages, _paquet);
             }
             else
@@ -296,7 +331,7 @@ public partial class JeuPrincipal : Node3D
             _hud.Toast("La sauvegarde n'a pas pu être chargée : nouvelle partie.", false);
         }
         _rayonAffiche = -1;
-        _camera.Cible = new Vector3(-400, 0, -150);
+        _camera.Cible = _villeId == "fr-annecy" ? new Vector3(-400, 0, -150) : Vector3.Zero;
         _camera.Distance = _paquet.Manifest.Ville.CoteKm > 5 ? 2200 : 1100;
         _rendu.Initialiser(_partie);
         _trafic.Initialiser(_partie);
@@ -482,7 +517,7 @@ public partial class JeuPrincipal : Node3D
                 if (_debutRoute == null) { _debutRoute = partie.Reseau.Accrocher(p, partie.R.Routes.AccrochageM).point; return; }
                 var r = partie.ConstruireRoute(_debutRoute.Value, p, _outil);
                 if (!r.Ok) { _hud.Toast(r); return; }
-                _hud.Toast($"{r.Message} Coût : {r.Cout:N0} €");
+                _hud.Toast($"{r.Message} Coût : {r.Cout:N0} {_partie!.R.Monnaie}");
                 _debutRoute = partie.Reseau.Accrocher(p, partie.R.Routes.AccrochageM).point; // on enchaîne
                 return;
             case "habitat":
@@ -498,7 +533,7 @@ public partial class JeuPrincipal : Node3D
                 if (_debutRoute == null) { _debutRoute = partie.Reseau.Accrocher(p, partie.R.Routes.AccrochageM).point; return; }
                 if (_controleCourbe == null) { _controleCourbe = p; return; }
                 var rc = partie.ConstruireCourbe(_debutRoute.Value, _controleCourbe.Value, p, g);
-                _hud.Toast(rc.Ok ? $"{rc.Message} Coût : {rc.Cout:N0} €" : rc.Message, rc.Ok);
+                _hud.Toast(rc.Ok ? $"{rc.Message} Coût : {rc.Cout:N0} {_partie!.R.Monnaie}" : rc.Message, rc.Ok);
                 if (rc.Ok) { _debutRoute = partie.Reseau.Accrocher(p, partie.R.Routes.AccrochageM).point; _controleCourbe = null; }
                 return;
             }
@@ -537,7 +572,7 @@ public partial class JeuPrincipal : Node3D
             var apc = _controleCourbe == null ? partie.PrevoirRoute(_debutRoute.Value, p.Value, g) : partie.PrevoirCourbe(_debutRoute.Value, ctrl, p.Value, g);
             var colc = apc.Ok ? new Color(0.3f, 0.9f, 0.4f, 0.8f) : new Color(1f, 0.3f, 0.25f, 0.8f);
             for (int i = 0; i + 1 < pts.Count; i++) Ligne(pts[i], pts[i + 1], (float)partie.R.Route(g).LargeurM / 2, colc);
-            _hud.Info(_controleCourbe == null ? "Cliquez le point de courbure" : apc.Ok ? $"{apc.Longueur:F0} m — {apc.Cout:N0} € — cliquez l'arrivée" : apc.Raison);
+            _hud.Info(_controleCourbe == null ? "Cliquez le point de courbure" : apc.Ok ? $"{apc.Longueur:F0} m — {apc.Cout:N0} {_partie!.R.Monnaie} — cliquez l'arrivée" : apc.Raison);
             return;
         }
         if ((_outil is "rue" or "avenue") && _debutRoute != null)
@@ -545,7 +580,7 @@ public partial class JeuPrincipal : Node3D
             var ap = partie.PrevoirRoute(_debutRoute.Value, p.Value, _outil);
             var col = ap.Ok ? new Color(0.3f, 0.9f, 0.4f, 0.8f) : new Color(1f, 0.3f, 0.25f, 0.8f);
             Ligne(ap.A, ap.B, (float)partie.R.Route(_outil).LargeurM / 2, col);
-            _hud.Info(ap.Ok ? $"{ap.Longueur:F0} m — {ap.Cout:N0} €   (clic droit : arrêter)" : $"{ap.Raison}");
+            _hud.Info(ap.Ok ? $"{ap.Longueur:F0} m — {ap.Cout:N0} {_partie!.R.Monnaie}   (clic droit : arrêter)" : $"{ap.Raison}");
             return;
         }
         if (_outil is "habitat" or "commerce" or "activites" or "dezoner")
@@ -559,7 +594,7 @@ public partial class JeuPrincipal : Node3D
         if (_outil != "" && _outil != "demolir" && partie.R.Services.TryGetValue(_outil, out var s))
         {
             Cercle(p.Value, (float)Math.Max(15, s.RayonM > 0 ? s.RayonM : 15), new Color(0.4f, 0.7f, 1f, 0.6f));
-            _hud.Info($"{s.Nom} : {s.Cout:N0} € puis {s.Entretien:N0} €/mois" + (s.RayonM > 0 ? $" — rayon d'action {s.RayonM:F0} m" : ""));
+            _hud.Info($"{s.Nom} : {s.Cout:N0} {_partie!.R.Monnaie} puis {s.Entretien:N0} {_partie!.R.Monnaie}/mois" + (s.RayonM > 0 ? $" — rayon d'action {s.RayonM:F0} m" : ""));
             return;
         }
         if (par == null) { _hud.Info(_outil == "demolir" ? "Cliquez sur un bâtiment, un service ou une route" : ""); return; }
@@ -649,7 +684,7 @@ public partial class JeuPrincipal : Node3D
 
     private void DemarrerTutoriel()
     {
-        ChargerCarte("quartier");
+        ChargerCarte("quartier", "fr-annecy");   // le tutoriel est écrit pour Annecy
         Commencer(null, ModeDepart.GrandsAxes);
         _tutoriel = new Interface.Tutoriel();
         _etatTuto = new Interface.Tutoriel.Etat { P = _partie! };

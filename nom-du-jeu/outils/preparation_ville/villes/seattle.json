@@ -1,0 +1,14 @@
+{
+  "id": "us-seattle",
+  "nom": "Seattle",
+  "pays": "US",
+  "region": "Washington",
+  "centre": {
+    "lat": 47.608,
+    "lon": -122.335
+  },
+  "taille": "quartier",
+  "cote_km": 4.0,
+  "statut": "en_verification",
+  "notes": "Downtown, Elliott Bay et collines."
+}
