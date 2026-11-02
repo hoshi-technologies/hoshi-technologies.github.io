@@ -80,3 +80,11 @@ Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PM
   « GitHub Actions ».
 - **Rapports probables au placé** : la tâche enregistre un exemplaire de la réponse de l'API
   (`hippique/data/_sample-combinaisons.json`) pour pouvoir les exploiter une fois leur format connu.
+
+### Planification
+
+GitHub ne garantit pas les horaires planifiés : ils peuvent être retardés, voire sautés, ce qui est arrivé la
+première nuit. La mise à jour tourne donc dans une **boucle qui se relance elle-même** (`scripts/run-loop.sh`) :
+toutes les 10 minutes de 8 h à 23 h (heure de Paris), toutes les heures la nuit, puis une nouvelle boucle prend le
+relais toutes les ~5 h 40. La tâche planifiée horaire ne sert qu'à redémarrer la boucle si elle s'est arrêtée.
+`hippique/data/health.json` indique l'état du dernier passage.
