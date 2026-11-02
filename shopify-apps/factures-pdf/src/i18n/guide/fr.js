@@ -51,7 +51,7 @@ export default [
     intro: 'Par défaut, la facture est créée au paiement de la commande et envoyée aussitôt au client par e-mail.',
     steps: [
       "Dans Réglages › Fonctionnement, choisissez quand créer la facture : quand la commande est payée (recommandé) ou dès qu'elle est passée.",
-      "Dans « Comment vos clients reçoivent leur facture », choisissez : pas d’e-mail en plus (le client clique sur « Voir ma commande » dans l’e-mail de confirmation de Shopify, puis sur « Télécharger ma facture »), ou un e-mail séparé avec le PDF en pièce jointe. Pour le bouton, une seule activation en 3 clics : Paramètres › Paiement › Personnaliser › page « Statut de la commande » › Applications › Télécharger ma facture › Enregistrer.",
+      "Dans « Comment vos clients reçoivent leur facture », choisissez : un e-mail avec le PDF joint (recommandé, aucun réglage), ou un seul e-mail avec un bouton « Télécharger ma facture » dans la confirmation de Shopify (coller une fois un code, guide pas à pas dans les réglages). En plus, un bouton peut s’afficher sur la page de commande du client, après une activation dans l’éditeur de paiement.",
       "Cochez « M'envoyer une copie de chaque facture » pour recevoir chaque facture et constituer vos archives.",
       "Pour personnaliser l'e-mail, ouvrez « E-mail au client » : objet et message acceptent les variables {{first_name}}, {{name}}, {{invoice_number}}, {{order}} et {{shop}}.",
     ],

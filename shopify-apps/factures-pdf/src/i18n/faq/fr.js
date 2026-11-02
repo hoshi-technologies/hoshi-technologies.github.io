@@ -22,7 +22,7 @@ export default [
       ],
       [
         'Pourquoi la facture ne figure-t-elle pas dans l’e-mail de confirmation de Shopify ?',
-        "Shopify ne permet pas aux applis d’ajouter une pièce jointe à ses propres e-mails. Pour éviter un deuxième e-mail, choisissez « Pas d’e-mail en plus » : dans l’e-mail de confirmation de Shopify, le client clique sur « Voir ma commande », puis sur « Télécharger ma facture » et confirme son adresse avec un code reçu par e-mail. Aucun compte ni mot de passe à créer. De votre côté, activez le bouton une seule fois : Paramètres › Paiement › Personnaliser › page « Statut de la commande » › Applications › Télécharger ma facture › Enregistrer. Avec les anciens « comptes classiques » de Shopify, choisissez plutôt l’e-mail séparé.",
+        "Shopify ne permet pas aux applis d’ajouter une pièce jointe à ses propres e-mails. Pour n’envoyer qu’un seul e-mail, choisissez « Un seul e-mail » : un bouton « Télécharger ma facture » est ajouté à la confirmation de Shopify. Il suffit de coller une fois un code dans Paramètres › Notifications › Confirmation de commande ; les réglages de l’appli vous guident pas à pas. Le client clique et le PDF s’ouvre, sans code ni compte.",
       ],
       [
         'Comment recevoir une copie de mes factures ?',

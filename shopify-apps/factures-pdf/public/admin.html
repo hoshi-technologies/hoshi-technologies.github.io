@@ -88,6 +88,8 @@
     .banner.setup { display:block; margin:0 0 10px; }
     .banner.setup p { margin:0 0 8px; }
     details.advanced { margin:0 0 10px; }
+    .setup-steps { margin:0 0 10px; padding-left:20px; }
+    .setup-steps li { margin-bottom:4px; }
     details.advanced > summary { cursor:pointer; color:var(--muted); font-size:13px; margin-bottom:8px; }
     .faq-section h3 { font-size:14px; margin:18px 0 6px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; }
     details.faq { border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
@@ -196,23 +198,31 @@
         <div class="full">
           <label data-i18n="delivery.title"></label>
           <div class="choices">
-            <label class="choice"><input type="radio" name="delivery" value="link">
-              <span><b data-i18n="delivery.link"></b><br><small data-i18n="delivery.linkHelp"></small></span></label>
             <label class="choice"><input type="radio" name="delivery" value="email">
               <span><b data-i18n="delivery.email"></b><br><small data-i18n="delivery.emailHelp"></small></span></label>
+            <label class="choice"><input type="radio" name="delivery" value="link">
+              <span><b data-i18n="delivery.link"></b><br><small data-i18n="delivery.linkHelp"></small></span></label>
           </div>
-          <p><small data-i18n="delivery.accountButton"></small></p>
-          <div class="banner info setup" id="activate-button">
-            <p><b data-i18n="delivery.activateTitle"></b></p>
-            <p data-i18n="delivery.activateSteps"></p>
-            <div class="actions" style="margin:0"><button type="button" class="primary" id="open-checkout-settings" data-i18n="delivery.activateOpen"></button></div>
+          <div id="delivery-link-setup" class="banner info setup" hidden>
+            <p><b data-i18n="delivery.setupTitle"></b></p>
+            <ol class="setup-steps">
+              <li data-i18n="delivery.step1"></li>
+              <li data-i18n="delivery.step2"></li>
+              <li data-i18n="delivery.step3"></li>
+              <li data-i18n="delivery.step4"></li>
+            </ol>
+            <pre class="liquid-code"></pre>
+            <div class="actions" style="margin:0">
+              <button type="button" class="copy-liquid primary" data-i18n="liquid.copy"></button>
+              <button type="button" id="open-notifications" data-i18n="delivery.openNotifications"></button>
+            </div>
           </div>
-          <details id="delivery-link-setup" class="advanced" hidden>
-            <summary data-i18n="delivery.advanced"></summary>
+          <details class="advanced" id="activate-button">
+            <summary data-i18n="delivery.bonusTitle"></summary>
             <div class="banner info setup">
-              <p data-i18n="delivery.setup"></p>
-              <pre class="liquid-code"></pre>
-              <div class="actions" style="margin:0"><button type="button" class="copy-liquid primary" data-i18n="liquid.copy"></button></div>
+              <p data-i18n="delivery.bonusHelp"></p>
+              <p data-i18n="delivery.activateSteps"></p>
+              <div class="actions" style="margin:0"><button type="button" id="open-checkout-settings" data-i18n="delivery.activateOpen"></button></div>
             </div>
           </details>
           <label class="check" id="bcc-field"><input type="checkbox" name="bccMerchant"> <span data-i18n="general.bcc"></span></label>
@@ -269,12 +279,6 @@
       </div>
     </details>
 
-    <details class="card">
-      <summary><h2><span data-i18n="liquid.title"></span> <small data-i18n="liquid.optional"></small></h2></summary>
-      <p class="help" data-i18n="liquid.help"></p>
-      <pre class="liquid-code"></pre>
-      <div class="actions"><button type="button" class="copy-liquid" data-i18n="liquid.copy"></button></div>
-    </details>
 
     <details class="card" id="log-card">
       <summary><h2 data-i18n="log.title"></h2></summary>
@@ -614,6 +618,7 @@
 
   // Bouton de l'espace client : Shopify exige que le marchand l'active dans l'éditeur.
   $('open-checkout-settings').addEventListener('click', () => open('shopify://admin/settings/checkout', '_top'));
+  $('open-notifications').addEventListener('click', () => open('shopify://admin/settings/notifications', '_top'));
 
   // Mode de remise de la facture : lien dans la confirmation Shopify, ou e-mail séparé.
   const syncDelivery = () => {

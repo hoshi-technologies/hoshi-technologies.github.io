@@ -49,7 +49,7 @@ export default [
     intro: 'Standardmäßig wird die Rechnung bei Zahlung erstellt und sofort per E-Mail an den Kunden gesendet.',
     steps: [
       'Wählen Sie unter Einstellungen › Funktionsweise, wann die Rechnung erstellt wird: wenn die Bestellung bezahlt ist (empfohlen) oder sobald sie aufgegeben wird.',
-      "Wählen Sie unter „So erhalten Ihre Kunden ihre Rechnung“: keine zusätzliche E-Mail (der Kunde klickt in der Shopify-Bestätigung auf „Bestellung ansehen“ und dann auf „Rechnung herunterladen“) oder eine separate E-Mail mit der PDF im Anhang. Die Schaltfläche wird einmalig in 3 Klicks aktiviert: Einstellungen › Checkout › Anpassen › Seite „Bestellstatus“ › Apps › Rechnung herunterladen › Speichern.",
+      "Wählen Sie unter „So erhalten Ihre Kunden ihre Rechnung“: eine E-Mail mit der PDF im Anhang (empfohlen, ohne Einrichtung) oder nur eine E-Mail mit einer Schaltfläche „Rechnung herunterladen“ in der Shopify-Bestätigung (einmalig einen Code einfügen, Schritt-für-Schritt-Anleitung in den Einstellungen). Zusätzlich kann eine Schaltfläche auf der Bestellseite des Kunden erscheinen, nach Aktivierung im Checkout-Editor.",
       'Aktivieren Sie „Mir eine Kopie jeder Rechnung senden“, um jede Rechnung zu erhalten und Ihr Archiv aufzubauen.',
       'Um die E-Mail anzupassen, öffnen Sie „E-Mail an den Kunden“: Betreff und Text akzeptieren die Variablen {{first_name}}, {{name}}, {{invoice_number}}, {{order}} und {{shop}}.',
     ],

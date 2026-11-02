@@ -20,7 +20,7 @@ export default [
       ],
       [
         'Por que a fatura não está no e-mail de confirmação da Shopify?',
-        "A Shopify não permite que apps anexem arquivos aos próprios e-mails. Para evitar um segundo e-mail, escolha “Sem e-mail extra”: no e-mail de confirmação da Shopify, o cliente clica em “Ver pedido”, depois em “Baixar fatura”, e confirma o e-mail com um código. Sem conta nem senha. Do seu lado, ative o botão uma única vez: Configurações › Checkout › Personalizar › página “Status do pedido” › Apps › Baixar fatura › Salvar. Se sua loja ainda usa as “contas clássicas” da Shopify, escolha o e-mail separado.",
+        "A Shopify não permite que apps anexem arquivos aos próprios e-mails. Para enviar um só e-mail, escolha “Um só e-mail”: um botão “Baixar fatura” é adicionado à confirmação da Shopify. Basta colar uma vez um código em Configurações › Notificações › Confirmação do pedido; as configurações do app guiam você passo a passo. O cliente clica e o PDF abre, sem código nem conta.",
       ],
       [
         'Como recebo uma cópia das minhas faturas?',

@@ -49,7 +49,7 @@ export default [
     intro: "Per impostazione predefinita, la fattura viene creata al pagamento dell'ordine e inviata subito al cliente via email.",
     steps: [
       "In Impostazioni › Funzionamento, scegli quando creare la fattura: quando l'ordine è pagato (consigliato) o appena viene effettuato.",
-      "In «Come i clienti ricevono la fattura», scegli: nessuna email in più (il cliente fa clic su «Visualizza ordine» nell’email di conferma di Shopify, poi su «Scarica fattura») oppure un’email separata con il PDF allegato. Il pulsante si attiva una sola volta in 3 clic: Impostazioni › Pagamento › Personalizza › pagina «Stato dell’ordine» › App › Scarica fattura › Salva.",
+      "In «Come i clienti ricevono la fattura», scegli: un’email con il PDF allegato (consigliato, nessuna configurazione) oppure una sola email con un pulsante «Scarica fattura» nella conferma di Shopify (incollare un codice una volta; guida passo passo nelle impostazioni). Inoltre, un pulsante può comparire sulla pagina dell’ordine del cliente, dopo l’attivazione nell’editor di pagamento.",
       'Seleziona «Inviami una copia di ogni fattura» per ricevere ogni fattura e costruire il tuo archivio.',
       "Per personalizzare l'email, apri «Email al cliente»: oggetto e messaggio accettano le variabili {{first_name}}, {{name}}, {{invoice_number}}, {{order}} e {{shop}}.",
     ],

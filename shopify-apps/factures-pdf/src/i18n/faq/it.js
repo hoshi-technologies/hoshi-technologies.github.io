@@ -20,7 +20,7 @@ export default [
       ],
       [
         "Perché la fattura non è nell'email di conferma di Shopify?",
-        "Shopify non permette alle app di allegare file alle proprie email. Per evitare una seconda email, scegli «Nessuna email in più»: nell’email di conferma di Shopify, il cliente fa clic su «Visualizza ordine», poi su «Scarica fattura», e conferma il suo indirizzo con un codice. Nessun account né password. Da parte tua, attiva il pulsante una sola volta: Impostazioni › Pagamento › Personalizza › pagina «Stato dell’ordine» › App › Scarica fattura › Salva. Se il tuo negozio usa ancora gli «account classici» di Shopify, scegli l’email separata.",
+        "Shopify non permette alle app di allegare file alle proprie email. Per inviare una sola email, scegli «Una sola email»: un pulsante «Scarica fattura» viene aggiunto alla conferma di Shopify. Basta incollare una volta un codice in Impostazioni › Notifiche › Conferma dell’ordine; le impostazioni dell’app ti guidano passo passo. Il cliente fa clic e il PDF si apre, senza codice né account.",
       ],
       [
         'Come ricevo una copia delle mie fatture?',
