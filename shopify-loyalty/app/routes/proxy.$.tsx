@@ -7,6 +7,7 @@
  */
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
+import { readJson } from "../utils.server";
 import db from "../db.server";
 import {
   activeBonus,
@@ -148,7 +149,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (!session || !admin) return json({ error: "Application non installée" }, 404);
   const shop = session.shop;
   const customerId = new URL(request.url).searchParams.get("logged_in_customer_id");
-  const body = (await request.json().catch(() => ({}))) as Record<string, string | number | undefined>;
+  const body = (await readJson(request)) as Record<string, string | number | undefined>;
   const action = String(body.action || "redeem");
 
   try {

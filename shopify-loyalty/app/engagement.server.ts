@@ -2,8 +2,8 @@
  * Fonctionnalités d'engagement : parrainage, anniversaire, réseaux sociaux,
  * suivi des codes utilisés, expiration des points et tâches quotidiennes.
  */
-import type { Member, Program } from "@prisma/client";
-import { Prisma } from "@prisma/client";
+import type { Member, Program } from "./generated/prisma/client";
+import { Prisma } from "./generated/prisma/client";
 import db from "./db.server";
 import type { AdminGraphql } from "./loyalty.server";
 import { addPoints, customerGid, getProgram } from "./loyalty.server";

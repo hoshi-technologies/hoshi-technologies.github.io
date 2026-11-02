@@ -7,6 +7,7 @@ import type {
 import { useFetcher, useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
+import { readJson } from "../utils.server";
 import db from "../db.server";
 import { getProgram } from "../loyalty.server";
 import { useActionToast } from "../components/ui";
@@ -24,7 +25,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { session } = await authenticate.admin(request);
-  const data = await request.json();
+  const data = await readJson(request);
   const num = (v: unknown, min = 0) => Math.max(min, Number(v) || 0);
   const url = (v: unknown) => {
     const s = String(v || "").trim();

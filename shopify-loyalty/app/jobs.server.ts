@@ -1,14 +1,12 @@
 /**
- * Tâches périodiques (anniversaires, expiration des points), lancées dans le
- * processus serveur toutes les heures. Elles sont idempotentes : plusieurs
- * instances ou exécutions le même jour ne créditent jamais deux fois.
+ * Tâches périodiques (anniversaires, expiration des points), déclenchées toutes
+ * les heures par le Cron Trigger Cloudflare (voir wrangler.jsonc et workers/app.ts).
+ * Elles sont idempotentes : plusieurs exécutions le même jour ne créditent jamais deux fois.
  */
 import db from "./db.server";
 import { unauthenticated } from "./shopify.server";
 import { awardBirthdays, expirePoints } from "./engagement.server";
 import { syncMemberTag } from "./levels.server";
-
-const HOUR = 3600 * 1000;
 
 export async function runDailyJobs(now = new Date()) {
   const programs = await db.program.findMany({ where: { enabled: true }, select: { shop: true } });
@@ -28,17 +26,4 @@ export async function runDailyJobs(now = new Date()) {
       console.error(`Tâches quotidiennes en échec pour ${shop}`, error);
     }
   }
-}
-
-declare global {
-  // eslint-disable-next-line no-var
-  var loyaltyJobsStarted: boolean | undefined;
-}
-
-export function startJobs() {
-  if (global.loyaltyJobsStarted || process.env.DISABLE_JOBS === "1") return;
-  global.loyaltyJobsStarted = true;
-  const run = () => runDailyJobs().catch((e) => console.error("Tâches quotidiennes", e));
-  setTimeout(run, 60 * 1000);
-  setInterval(run, HOUR).unref();
 }

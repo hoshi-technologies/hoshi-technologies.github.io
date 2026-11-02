@@ -6,8 +6,9 @@ import type {
 } from "react-router";
 import { useFetcher, useLoaderData, useNavigate, useSearchParams } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "../generated/prisma/client";
 import { authenticate } from "../shopify.server";
+import { readJson } from "../utils.server";
 import db from "../db.server";
 import {
   addMemberManually,
@@ -119,7 +120,7 @@ interface CustomerPage {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { admin, session } = await authenticate.admin(request);
   const shop = session.shop;
-  const data = await request.json().catch(() => ({}));
+  const data = await readJson(request);
 
   // Ajout d'un client précis, avec niveau éventuel
   if (data.intent === "add") {

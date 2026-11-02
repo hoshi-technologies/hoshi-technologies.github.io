@@ -8,7 +8,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   if (url.searchParams.get("shop")) {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
-  return { showForm: Boolean(login) };
+  // Sur l'App Store, l'installation se fait depuis la fiche de l'app :
+  // le formulaire de connexion n'est affiché qu'en développement.
+  return { showForm: Boolean(login) && process.env.SHOW_LOGIN_FORM === "true" };
 };
 
 export default function Landing() {
@@ -34,6 +36,11 @@ export default function Landing() {
             </button>
           </Form>
         )}
+        {!showForm && (
+          <p className={styles.text}>
+            Installez Hoshi Fidélité depuis l'App Store Shopify.
+          </p>
+        )}
         <ul className={styles.list}>
           <li>
             <strong>Points automatiques.</strong> Vos clients gagnent des points à
@@ -48,6 +55,9 @@ export default function Landing() {
             votre boutique pour consulter et échanger ses points.
           </li>
         </ul>
+        <p className={styles.footer}>
+          <a href="/privacy">Politique de confidentialité</a> · <a href="/support">Aide et contact</a>
+        </p>
       </div>
     </div>
   );

@@ -12,3 +12,6 @@ package-lock.json
 .shopify/*
 .shopify.lock
 .react-router/
+/app/generated/
+.dev.vars
+.wrangler/

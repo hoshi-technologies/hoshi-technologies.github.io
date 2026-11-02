@@ -5,7 +5,7 @@
  *    et des remises automatiques (sans code) lui sont réservées.
  * Ainsi la remise s'applique toute seule au paiement, y compris hors du widget.
  */
-import type { Tier } from "@prisma/client";
+import type { Tier } from "./generated/prisma/client";
 import db from "./db.server";
 import type { AdminGraphql } from "./loyalty.server";
 import { getTiers, memberTier } from "./loyalty.server";

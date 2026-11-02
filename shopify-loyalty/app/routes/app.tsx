@@ -5,7 +5,21 @@ import { AppProvider } from "@shopify/shopify-app-react-router/react";
 import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  const { billing, session, redirect } = await authenticate.admin(request);
+
+  // Abonnement obligatoire (tarification gérée par Shopify, définie dans le Partner Dashboard).
+  // Sans abonnement actif, le marchand est envoyé sur la page de choix de formule de Shopify.
+  if (process.env.BILLING_REQUIRED !== "false") {
+    const { hasActivePayment } = await billing.check();
+    if (!hasActivePayment) {
+      const store = session.shop.replace(".myshopify.com", "");
+      const handle = process.env.SHOPIFY_APP_HANDLE || "hoshi-fidelite";
+      throw redirect(`https://admin.shopify.com/store/${store}/charges/${handle}/pricing_plans`, {
+        target: "_top",
+      });
+    }
+  }
+
   return { apiKey: process.env.SHOPIFY_API_KEY || "" };
 };
 

@@ -7,6 +7,7 @@ import type {
 import { useFetcher, useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
+import { readJson } from "../utils.server";
 import db from "../db.server";
 import { getProgram, getTiers, memberTier, tierPerks, uniqueTierTag } from "../loyalty.server";
 import { deleteTier, syncAllMemberTags, syncTierDiscounts } from "../levels.server";
@@ -36,7 +37,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { admin, session } = await authenticate.admin(request);
   const shop = session.shop;
-  const data = await request.json();
+  const data = await readJson(request);
 
   if (data.intent === "delete") {
     await deleteTier(admin, shop, String(data.id));

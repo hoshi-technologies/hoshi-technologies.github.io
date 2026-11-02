@@ -75,3 +75,11 @@
   padding: 1rem 1.25rem;
   box-shadow: 0 2px 8px rgba(31, 33, 64, 0.06);
 }
+.footer {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #4a4d6b;
+}
+.footer a {
+  color: #5c6ac4;
+}

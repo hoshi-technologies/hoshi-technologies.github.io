@@ -1,5 +1,6 @@
 # Configuration de l'application Shopify « Hoshi Fidélité ».
-# `npm run config:link` remplit client_id et application_url automatiquement.
+# `npm run config:link` remplit client_id. En production, remplacez https://example.com
+# par l'URL du Worker Cloudflare (même valeur que SHOPIFY_APP_URL dans wrangler.jsonc).
 client_id = ""
 name = "Hoshi Fidélité"
 application_url = "https://example.com"

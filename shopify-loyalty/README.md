@@ -66,65 +66,107 @@ page Niveaux recrée tout en cas de modification manuelle.
 
 Tous les webhooks sont idempotents : un webhook rejoué ne crédite jamais deux fois.
 
-**Tâches périodiques** : toutes les heures, le serveur crédite les anniversaires du jour
-et fait expirer les points des membres inactifs (si l'option est activée). Ces tâches sont
-idempotentes ; définissez `DISABLE_JOBS=1` pour les désactiver sur une instance.
+**Tâches périodiques** : toutes les heures, un Cron Trigger Cloudflare crédite les
+anniversaires du jour et fait expirer les points des membres inactifs (si l'option est
+activée). Ces tâches sont idempotentes.
 
 ## Architecture
 
+Hébergement **Cloudflare Workers** (application) + **D1** (base de données) + **Cron Trigger** (tâches horaires).
+
 ```
+workers/app.ts             point d'entrée du Worker (fetch + tâche horaire)
+wrangler.jsonc             configuration Cloudflare (D1, Cron, variables)
+migrations/                migrations SQL de la base D1
 app/
   loyalty.server.ts        logique métier (points, niveaux, échanges, stats)
   levels.server.ts         synchro des niveaux avec Shopify (étiquettes, segments, remises automatiques)
   engagement.server.ts     parrainage, anniversaire, réseaux sociaux, expiration, suivi des codes
-  jobs.server.ts           tâches périodiques
+  jobs.server.ts           tâches horaires
+  session-storage.server.ts sessions Shopify stockées dans D1
   routes/app.*.tsx         pages d'administration (Polaris web components)
   routes/webhooks.*.tsx    webhooks Shopify
   routes/proxy.$.tsx       API du widget via le proxy d'application (/apps/fidelite/loyalty)
+  routes/privacy.tsx       politique de confidentialité (exigée par l'App Store)
+  routes/support.tsx       page d'aide
 extensions/loyalty-widget  extension de thème (Liquid + JS/CSS sans dépendance)
-prisma/schema.prisma       Program, Member, Transaction, Reward, Tier, Redemption
+prisma/schema.prisma       modèle de données (client Prisma généré pour Workers)
 ```
 
-Stack : React Router 7, `@shopify/shopify-app-react-router`, Polaris web components, Prisma (SQLite par défaut).
+Stack : React Router 7, `@shopify/shopify-app-react-router`, Polaris web components, Prisma (adaptateur D1), plugin Vite Cloudflare.
 
-## Installation
+## Développement
 
 Prérequis : Node.js ≥ 22.12, un [compte Partenaire Shopify](https://partners.shopify.com) et une boutique de développement.
 
 ```bash
 cd shopify-loyalty
-npm install
+npm install             # génère aussi le client Prisma
 npm run config:link     # crée/associe l'application dans votre compte Partenaire
-npm run dev             # lance l'app, le tunnel et l'extension de thème
+npm run dev             # base D1 locale + Worker local (workerd) + tunnel Shopify
 ```
 
-Appuyez sur `p` pour ouvrir l'application dans votre boutique de test, puis :
-
-1. Ouvrez **Réglages** pour ajuster le taux de points et la couleur.
-2. Dans le tableau de bord, cliquez sur **Ouvrir l'éditeur de thème** et activez
-   « Fidélité Hoshi » dans *Intégrations d'applications*.
-3. Passez une commande test avec un compte client : les points apparaissent.
+En développement, la facturation est désactivée et l'app tourne dans `workerd`, le même moteur
+qu'en production. Appuyez sur `p` pour ouvrir l'application dans votre boutique de test, puis
+activez « Fidélité Hoshi » dans *Thème > Personnaliser > Intégrations d'applications*.
 
 ### Accès aux données client protégées
 
-Les webhooks `orders/paid` et `customers/create` contiennent des données
-personnelles. Dans le Partner Dashboard → *API access* → **Protected customer
-data access**, demandez l'accès (nom, e-mail) avant de passer en production.
-En développement sur une boutique de test, l'accès de niveau 1 suffit.
+Les webhooks `orders/paid` et `customers/create` contiennent des données personnelles. Dans le
+Partner Dashboard → *API access* → **Protected customer data access**, demandez l'accès (nom,
+e-mail) ; les justifications à copier sont dans [`docs/APP_STORE.md`](docs/APP_STORE.md).
 
-## Mise en production
+## Déploiement sur Cloudflare
 
-1. Hébergez l'app (Fly.io, Render, Railway, Google Cloud Run…) avec le `Dockerfile` fourni.
-2. Pour plusieurs instances, passez Prisma sur PostgreSQL ou MySQL (`prisma/schema.prisma`, `provider`), puis régénérez la migration.
-3. Variables d'environnement : `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `SHOPIFY_APP_URL`, `SCOPES=write_customers,read_orders,write_discounts`.
-4. Mettez à jour `application_url`, `redirect_urls` et `app_proxy.url` dans `shopify.app.toml`, puis `npm run deploy`.
+Une seule fois :
+
+```bash
+npx wrangler login
+npx wrangler d1 create hoshi-fidelite          # copiez le database_id dans wrangler.jsonc
+npx wrangler secret put SHOPIFY_API_SECRET      # « Secret » de l'app (Partner Dashboard)
+```
+
+Dans `wrangler.jsonc`, renseignez `SHOPIFY_API_KEY` (Client ID), `SHOPIFY_APP_URL` (ex.
+`https://fidelite.votre-domaine.com`), `SUPPORT_EMAIL` et décommentez `routes` pour utiliser un
+sous-domaine de votre zone Cloudflare.
+
+Dans `shopify.app.toml`, remplacez `https://example.com` par la même URL (application, redirection
+OAuth et proxy), puis à chaque mise en production :
+
+```bash
+npm run db:migrate:remote   # applique les nouvelles migrations à D1
+npm run deploy:worker       # build + déploiement du Worker
+npm run deploy              # publie la configuration Shopify et l'extension de thème
+```
+
+Le plan **Workers Paid** (5 $/mois) est recommandé pour une app publique (limites de CPU et de
+requêtes plus larges) ; le Worker pèse environ 1 Mo compressé et tient aussi dans le plan gratuit.
+
+### Modifier la base de données
+
+1. Modifiez `prisma/schema.prisma`.
+2. Générez la migration SQL : `npx prisma migrate diff --from-local-d1 --to-schema-datamodel prisma/schema.prisma --script > migrations/000X_nom.sql`
+3. Appliquez-la : `npm run db:migrate:local` puis `npm run db:migrate:remote`.
+
+## Facturation
+
+L'application utilise la **tarification gérée par Shopify** (*Managed pricing*) : les formules et
+l'essai gratuit se définissent dans le Partner Dashboard, sans code. Un marchand sans abonnement
+actif est redirigé vers la page de choix de formule de Shopify. `BILLING_REQUIRED=false` désactive
+cette vérification (c'est le cas automatiquement en développement).
+
+## Publication sur l'App Store
+
+Voir le guide complet : [`docs/APP_STORE.md`](docs/APP_STORE.md).
 
 ## Commandes utiles
 
 | Commande | Description |
 | --- | --- |
-| `npm run dev` | Développement avec la CLI Shopify |
-| `npm run build` | Build de production |
+| `npm run dev` | Développement avec la CLI Shopify (Worker et D1 locaux) |
+| `npm run build` | Build de production du Worker |
 | `npm run typecheck` | Vérification TypeScript |
-| `npm run deploy` | Publie la configuration et l'extension de thème |
-| `npx prisma studio` | Explorer la base de données |
+| `npm run deploy:worker` | Build + déploiement sur Cloudflare |
+| `npm run db:migrate:remote` | Applique les migrations à la base D1 de production |
+| `npm run deploy` | Publie la configuration Shopify et l'extension de thème |
+| `npx wrangler tail` | Journaux du Worker en production |

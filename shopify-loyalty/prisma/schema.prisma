@@ -1,11 +1,17 @@
+// Client généré pour Cloudflare Workers (sans moteur natif)
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client"
+  output          = "../app/generated/prisma"
+  runtime         = "cloudflare"
+  moduleFormat    = "esm"
+  engineType      = "client"
 }
 
-// SQLite pour démarrer ; passez à PostgreSQL/MySQL en production si besoin.
+// Base Cloudflare D1 (SQLite). Les migrations SQL sont dans /migrations
+// et s'appliquent avec : npm run db:migrate:local / db:migrate:remote
 datasource db {
   provider = "sqlite"
-  url      = "file:dev.sqlite"
+  url      = "file:./dev.sqlite"
 }
 
 model Session {

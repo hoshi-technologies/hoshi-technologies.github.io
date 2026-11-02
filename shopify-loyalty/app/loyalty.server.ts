@@ -2,8 +2,8 @@
  * Logique métier du programme de fidélité : réglages, membres, points,
  * niveaux clients et échange de récompenses contre des codes de réduction.
  */
-import { Prisma } from "@prisma/client";
-import type { Member, Program, Reward, Tier } from "@prisma/client";
+import { Prisma } from "./generated/prisma/client";
+import type { Member, Program, Reward, Tier } from "./generated/prisma/client";
 import db from "./db.server";
 import { rewardLabel } from "./rewards";
 
@@ -44,32 +44,30 @@ export async function getProgram(shop: string): Promise<Program> {
   const existing = await db.program.findUnique({ where: { shop } });
   if (existing) return existing;
 
+  let program: Program;
   try {
-    return await db.$transaction(async (tx) => {
-      const program = await tx.program.create({ data: { shop } });
-      await tx.tier.createMany({
-        data: [
-          { shop, name: "Bronze", minPoints: 0, multiplier: 1, color: "#B08D57", tag: "Fidélité Bronze" },
-          { shop, name: "Argent", minPoints: 500, multiplier: 1.25, color: "#9CA3AF", tag: "Fidélité Argent" },
-          { shop, name: "Or", minPoints: 1500, multiplier: 1.5, color: "#D4A017", tag: "Fidélité Or" },
-        ],
-      });
-      await tx.reward.createMany({
-        data: [
-          { shop, title: "5 € de réduction", type: "AMOUNT", value: 5, pointsCost: 500 },
-          { shop, title: "10 % de réduction", type: "PERCENT", value: 10, pointsCost: 1000 },
-          { shop, title: "Livraison offerte", type: "FREE_SHIPPING", value: 0, pointsCost: 300 },
-        ],
-      });
-      return program;
-    });
+    program = await db.program.create({ data: { shop } });
   } catch (error) {
     // Deux requêtes simultanées : l'autre a déjà créé le programme.
-    if (isUniqueError(error)) {
-      return db.program.findUniqueOrThrow({ where: { shop } });
-    }
+    if (isUniqueError(error)) return db.program.findUniqueOrThrow({ where: { shop } });
     throw error;
   }
+  // Programme prêt à l'emploi : 3 niveaux et 3 récompenses.
+  await db.tier.createMany({
+    data: [
+      { shop, name: "Bronze", minPoints: 0, multiplier: 1, color: "#B08D57", tag: "Fidélité Bronze" },
+      { shop, name: "Argent", minPoints: 500, multiplier: 1.25, color: "#9CA3AF", tag: "Fidélité Argent" },
+      { shop, name: "Or", minPoints: 1500, multiplier: 1.5, color: "#D4A017", tag: "Fidélité Or" },
+    ],
+  });
+  await db.reward.createMany({
+    data: [
+      { shop, title: "5 € de réduction", type: "AMOUNT", value: 5, pointsCost: 500 },
+      { shop, title: "10 % de réduction", type: "PERCENT", value: 10, pointsCost: 1000 },
+      { shop, title: "Livraison offerte", type: "FREE_SHIPPING", value: 0, pointsCost: 300 },
+    ],
+  });
+  return program;
 }
 
 export async function getTiers(shop: string): Promise<Tier[]> {
@@ -274,39 +272,50 @@ export async function addPoints(args: {
   const points = Math.trunc(args.points);
   if (points === 0) return null;
 
+  // 1) L'écriture de l'historique sert de verrou d'idempotence (référence unique).
+  //    Vérification préalable pour éviter des erreurs inutiles dans les journaux.
+  if (args.reference) {
+    const already = await db.transaction.findUnique({
+      where: {
+        shop_type_reference: { shop: args.shop, type: args.type, reference: args.reference },
+      },
+      select: { id: true },
+    });
+    if (already) return null;
+  }
   try {
-    return await db.$transaction(async (tx) => {
-      await tx.transaction.create({
-        data: {
-          shop: args.shop,
-          memberId: args.memberId,
-          points,
-          type: args.type,
-          description: args.description,
-          reference: args.reference ?? null,
-        },
-      });
-      const member = await tx.member.findUniqueOrThrow({
-        where: { id: args.memberId },
-      });
-      // Le solde ne descend jamais sous zéro.
-      const newBalance = Math.max(0, member.points + points);
-      // Les points cumulés (pour les paliers) ne comptent que les gains.
-      const lifetimeDelta = points > 0 ? points : 0;
-      return tx.member.update({
-        where: { id: args.memberId },
-        data: {
-          points: newBalance,
-          lifetimePoints: member.lifetimePoints + lifetimeDelta,
-          // L'expiration n'est pas une activité du client
-          ...(args.type !== "EXPIRE" ? { lastActivityAt: new Date() } : {}),
-        },
-      });
+    await db.transaction.create({
+      data: {
+        shop: args.shop,
+        memberId: args.memberId,
+        points,
+        type: args.type,
+        description: args.description,
+        reference: args.reference ?? null,
+      },
     });
   } catch (error) {
     if (isUniqueError(error)) return null;
     throw error;
   }
+
+  // 2) Mise à jour atomique du solde (jamais sous zéro) : pas de lecture/écriture
+  //    concurrente, car D1 n'offre pas de transactions interactives.
+  //    Les points cumulés (pour les niveaux) ne comptent que les gains.
+  const lifetimeDelta = points > 0 ? points : 0;
+  await db.$executeRaw`UPDATE "Member"
+    SET "points" = MAX(0, "points" + ${points}),
+        "lifetimePoints" = "lifetimePoints" + ${lifetimeDelta}
+    WHERE "id" = ${args.memberId}`;
+
+  // L'expiration n'est pas une activité du client.
+  if (args.type === "EXPIRE") {
+    return db.member.findUniqueOrThrow({ where: { id: args.memberId } });
+  }
+  return db.member.update({
+    where: { id: args.memberId },
+    data: { lastActivityAt: new Date() },
+  });
 }
 
 /** Ajustement manuel depuis l'administration. */

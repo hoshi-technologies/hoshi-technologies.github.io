@@ -1,0 +1,37 @@
+// Configuration Cloudflare Workers de « Hoshi Fidélité »
+// Documentation : https://developers.cloudflare.com/workers/wrangler/configuration/
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hoshi-fidelite",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // Base de données (créée avec : npx wrangler d1 create hoshi-fidelite)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hoshi-fidelite",
+      "database_id": "REMPLACER_PAR_L_ID_DE_LA_BASE_D1",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Tâche horaire : anniversaires et expiration des points
+  "triggers": { "crons": ["7 * * * *"] },
+
+  // Variables non secrètes. Les secrets (SHOPIFY_API_SECRET) se définissent avec :
+  //   npx wrangler secret put SHOPIFY_API_SECRET
+  "vars": {
+    "SHOPIFY_API_KEY": "REMPLACER_PAR_LE_CLIENT_ID",
+    "SHOPIFY_APP_URL": "https://fidelite.example.com",
+    "SHOPIFY_APP_HANDLE": "hoshi-fidelite",
+    "SCOPES": "write_customers,read_orders,write_discounts",
+    "BILLING_REQUIRED": "true",
+    "SUPPORT_EMAIL": "support@example.com"
+  }
+
+  // Domaine personnalisé sur votre zone Cloudflare (décommentez et adaptez) :
+  // "routes": [{ "pattern": "fidelite.example.com", "custom_domain": true }]
+}
