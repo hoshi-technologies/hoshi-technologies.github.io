@@ -74,7 +74,7 @@ export async function adminGraphql(shop, accessToken, apiVersion, query, variabl
     headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': accessToken },
     body: JSON.stringify({ query, variables }),
   });
-  if (!response.ok) throw new Error(`API Admin : HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`API Admin : HTTP ${response.status} ${(await response.text().catch(() => '')).slice(0, 300)}`);
   const body = await response.json();
   if (body.errors) throw new Error(`API Admin : ${JSON.stringify(body.errors)}`);
   return body.data;

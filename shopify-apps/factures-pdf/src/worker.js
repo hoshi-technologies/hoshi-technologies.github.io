@@ -31,6 +31,11 @@ export class ShopStore extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
     const config = loadConfig(env);
+    // Diagnostic visible dans `npx wrangler tail` (aucune valeur secrète).
+    console.log(
+      `ShopStore démarré : e-mail ${config.mail.brevoApiKey && config.mail.from ? 'configuré' : 'NON configuré'}` +
+        ` (clé Brevo : ${config.mail.brevoApiKey ? 'oui' : 'non'}, MAIL_FROM : ${config.mail.from || 'vide'})`,
+    );
     const store = createStore(durableObjectSql(ctx.storage), resolveKey({ key: config.dataEncryptionKey, fallbackSecret: config.apiSecret }));
     const service = new InvoiceService({
       store,
