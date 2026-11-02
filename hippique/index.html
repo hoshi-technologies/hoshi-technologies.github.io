@@ -371,6 +371,220 @@
       .hide {
         display: none !important;
       }
+      /* ---------- Vue simple ---------- */
+      header .spacer {
+        flex: 1;
+      }
+      #btnExpert {
+        font-size: 13px;
+        padding: 6px 10px;
+      }
+      .tag {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--card2);
+        border: 1px solid var(--line);
+      }
+      .tag.accent {
+        background: var(--accent);
+        color: #000;
+        border-color: transparent;
+      }
+      .hero .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .hero h2 {
+        font-size: 22px;
+        margin: 10px 0 4px;
+        line-height: 1.2;
+      }
+      .hero .when {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .hero .when.soon {
+        color: var(--good);
+      }
+      .podium {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      @media (max-width: 700px) {
+        .podium {
+          grid-template-columns: 1fr;
+        }
+      }
+      .pick {
+        background: var(--card2);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+        position: relative;
+      }
+      .pick.first {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent) inset;
+      }
+      .pick .rank {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .pick .who {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding-right: 30px;
+      }
+      .pick .big-num {
+        min-width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        background: var(--fg);
+        color: var(--bg);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        font-size: 20px;
+      }
+      .pick .name {
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 1.2;
+      }
+      .pick .pc {
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+      .pick .pc small {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-left: 4px;
+      }
+      .pick .bar {
+        height: 10px;
+        border-radius: 5px;
+        margin: 8px 0;
+      }
+      .pick .bar i {
+        border-radius: 5px;
+      }
+      .pick .foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--muted);
+        flex-wrap: wrap;
+      }
+      .others {
+        margin-top: 14px;
+        display: grid;
+        gap: 2px;
+      }
+      .oth {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr) 90px 48px 48px;
+        gap: 10px;
+        align-items: center;
+        padding: 7px 4px;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .oth .nm {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .oth .pcs {
+        text-align: right;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+      .oth .ct {
+        text-align: right;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .oth.head {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      @media (max-width: 520px) {
+        .oth {
+          grid-template-columns: 30px minmax(0, 1fr) 44px 40px;
+        }
+        .oth > .bar {
+          display: none;
+        }
+        .oth.head > span:nth-child(3) {
+          display: none;
+        }
+      }
+      .oth.np {
+        opacity: 0.45;
+      }
+      .verdict {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .verdict .ico {
+        font-size: 28px;
+        line-height: 1;
+      }
+      .verdict p {
+        margin: 0 0 6px;
+      }
+      .verdict .lead {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .ok-mark {
+        color: var(--good);
+        font-weight: 800;
+      }
+      .ko-mark {
+        color: var(--bad);
+        font-weight: 800;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 10px;
+      }
+      .legend span::before {
+        content: '';
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 5px;
+        background: var(--c);
+      }
       .reus {
         display: grid;
         gap: 10px;
@@ -383,10 +597,32 @@
         color: var(--muted);
         font-weight: 400;
       }
-      .crs {
+      .crs,
+      .chips {
         display: flex;
-        flex-wrap: wrap;
         gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+      }
+      .chips {
+        margin-bottom: 8px;
+      }
+      .crs button,
+      .chip {
+        flex: 0 0 auto;
+      }
+      .chip {
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .chip.on {
+        background: var(--fg);
+        color: var(--bg);
+        border-color: transparent;
       }
       .crs button {
         padding: 6px 9px;
@@ -425,15 +661,14 @@
       <header>
         <div class="mark">H</div>
         <h1>Hoshi Turf</h1>
+        <span class="spacer"></span>
+        <button id="btnExpert" class="ghost" aria-pressed="false">Mode expert</button>
       </header>
-      <p class="sub">
-        Analyse des courses hippiques : chaque cheval reçoit une note sur 20 et des probabilités de victoire et de place,
-        calculées à partir de sa musique, de sa carrière, de son entourage et des cotes.
-      </p>
+      <p class="sub">Pour chaque course : les chevaux qui ont le plus de chances d'être placés, et s'il vaut la peine de jouer.</p>
 
       <!-- Programme automatique -->
       <section class="card">
-        <h2>Programme des courses</h2>
+        <h2>Choisir une course</h2>
         <div class="row">
           <label class="f">Journée<select id="progDate"></select></label>
           <label class="f"
@@ -450,6 +685,14 @@
         <div id="progList" class="reus" style="margin-top: 12px"></div>
       </section>
 
+      <!-- Vue simple -->
+      <div id="simple">
+        <section class="card hero" id="sHero"></section>
+        <section class="card" id="sPick"></section>
+        <section class="card" id="sAdvice"></section>
+      </div>
+
+      <div id="expert" class="hide">
       <!-- Course -->
       <section class="card">
         <h2>1. La course</h2>
@@ -646,6 +889,8 @@
         <h2>Fiabilité du modèle</h2>
         <div id="calibOut" class="muted">Chargement…</div>
       </section>
+
+      </div>
 
       <p class="disclaimer">
         Outil d'aide à l'analyse fourni à titre indicatif : les probabilités sont des estimations statistiques, jamais une
@@ -1133,46 +1378,58 @@
             $('progList').innerHTML = '<p class="muted">Aucune réunion.</p>';
             return;
           }
-          $('progList').innerHTML = reus
-            .map(function (r) {
-              return (
-                '<div class="reu"><h3>R' +
-                r.r +
-                ' · ' +
-                esc(r.hippodrome) +
-                (r.pays && r.pays !== 'FRA' ? ' <small>(' + esc(r.pays) + ')</small>' : '') +
-                '</h3><div class="crs">' +
-                r.courses
-                  .map(function (c) {
-                    var on = prog.sel && prog.sel.date === prog.day.date && prog.sel.r == r.r && prog.sel.c == c.c;
-                    var n = c.partants ? c.partants.filter((p) => !p.nonPartant).length : c.nPartants;
-                    return (
-                      '<button data-r="' +
-                      r.r +
-                      '" data-c="' +
-                      c.c +
-                      '" class="' +
-                      (on ? 'on ' : '') +
-                      (c.arrivee ? 'done' : '') +
-                      '" title="' +
-                      esc(c.libelle) +
-                      '">C' +
-                      c.c +
-                      ' · ' +
-                      fmtHour(c.heure) +
-                      '<small>' +
-                      esc(c.discipline) +
-                      (c.distance ? ' · ' + c.distance + ' m' : '') +
-                      (n ? ' · ' + n + ' part.' : '') +
-                      (c.arrivee ? ' · arrivée' : '') +
-                      '</small></button>'
-                    );
-                  })
-                  .join('') +
-                '</div></div>'
-              );
-            })
-            .join('');
+          // Une rangée de réunions, puis les courses de la réunion choisie (défilement horizontal).
+          var cur = reus.filter(function (r) {
+            return prog.reu != null ? r.r == prog.reu : prog.sel && prog.sel.date === prog.day.date && r.r == prog.sel.r;
+          })[0] || reus[0];
+          prog.reu = cur.r;
+          var html =
+            '<div class="chips">' +
+            reus
+              .map(function (r) {
+                return (
+                  '<button data-reu="' +
+                  r.r +
+                  '" class="chip' +
+                  (r.r == cur.r ? ' on' : '') +
+                  '">R' +
+                  r.r +
+                  ' · ' +
+                  esc(r.hippodrome) +
+                  (r.pays && r.pays !== 'FRA' ? ' (' + esc(r.pays) + ')' : '') +
+                  '</button>'
+                );
+              })
+              .join('') +
+            '</div><div class="crs">' +
+            cur.courses
+              .map(function (c) {
+                var on = prog.sel && prog.sel.date === prog.day.date && prog.sel.r == cur.r && prog.sel.c == c.c;
+                var n = c.partants ? c.partants.filter((p) => !p.nonPartant).length : c.nPartants;
+                return (
+                  '<button data-r="' +
+                  cur.r +
+                  '" data-c="' +
+                  c.c +
+                  '" class="' +
+                  (on ? 'on ' : '') +
+                  (c.arrivee ? 'done' : '') +
+                  '" title="' +
+                  esc(c.libelle) +
+                  '"><b>C' +
+                  c.c +
+                  '</b> · ' +
+                  fmtHour(c.heure) +
+                  '<small>' +
+                  esc(c.discipline) +
+                  (n ? ' · ' + n + ' part.' : '') +
+                  (c.arrivee ? ' · ✓' : '') +
+                  '</small></button>'
+                );
+              })
+              .join('') +
+            '</div>';
+          $('progList').innerHTML = html;
         }
         function findCourse(r, c) {
           if (!prog.day) return null;
@@ -1266,6 +1523,7 @@
           if (!f) return;
           var iso = prog.day.date;
           prog.sel = { date: iso, r: r, c: c };
+          prog.reu = r;
           store.prog = prog.sel;
           renderProgram();
           var apply = function (partants, live) {
@@ -1276,6 +1534,8 @@
               distance: f.course.distance,
               terrain: f.course.terrain,
               allocation: f.course.allocation || '',
+              heure: f.course.heure || null,
+              arriveeCourse: f.course.arrivee || null,
               runners: withRecul(enrich(mergePublished(partants, f.course.partants), iso), f.course.discipline),
               auto: { date: iso, r: r, c: c },
             };
@@ -1286,7 +1546,7 @@
               'R' + r + 'C' + c + ' chargée' + (live ? ' avec les cotes PMU en direct' : ' (données publiées)') + ' · ' + new Date().toLocaleTimeString('fr-FR'),
               live,
             );
-            if (!quiet) $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (!quiet) $(store.expert ? 'results' : 'simple').scrollIntoView({ behavior: 'smooth', block: 'start' });
           };
           // Cotes les plus fraîches possibles : API en direct, sinon données publiées.
           livePartants(iso, r, c)
@@ -1328,11 +1588,18 @@
           return best;
         }
         $('progList').addEventListener('click', function (e) {
+          var rb = e.target.closest('button[data-reu]');
+          if (rb) {
+            prog.reu = rb.dataset.reu;
+            renderProgram();
+            return;
+          }
           var b = e.target.closest('button[data-r]');
           if (b) selectCourse(b.dataset.r, b.dataset.c);
         });
         $('progDate').onchange = function () {
           prog.sel = null;
+          prog.reu = null;
           loadDay(this.value);
         };
         $('progFilter').onchange = renderProgram;
@@ -1375,6 +1642,7 @@
               applyCalibration(false);
               initBetForm();
               renderAdvisor();
+              renderSimple();
             });
           Promise.all([statsP, idxP, calP]).then(function () {
             days.sort().reverse();
@@ -1697,6 +1965,238 @@
 
         // ---------------- Conseils de mise & journal ----------------
         var lastAnalysis = null;
+        var lastAdvice = null;
+
+        // ---------------- Vue simple ----------------
+        function setExpert(on) {
+          store.expert = !!on;
+          save(store);
+          $('expert').classList.toggle('hide', !on);
+          $('btnExpert').textContent = on ? 'Vue simple' : 'Mode expert';
+          $('btnExpert').setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+        $('btnExpert').onclick = function () {
+          setExpert(!store.expert);
+          if (store.expert) $('expert').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        function confidenceLabel(p) {
+          if (p >= 0.6) return ['Très solide', 'good'];
+          if (p >= 0.45) return ['Solide', 'good'];
+          if (p >= 0.3) return ['Possible', 'mid'];
+          return ['Outsider', 'bad'];
+        }
+        function colorP(p) {
+          return p >= 0.45 ? 'var(--good)' : p >= 0.3 ? 'var(--mid)' : 'var(--bad)';
+        }
+        function whenText(ms) {
+          if (!ms) return { txt: '', cls: '' };
+          var d = Math.round((ms - Date.now()) / 60000);
+          var h = fmtHour(ms);
+          if (d > 90) return { txt: 'Départ à ' + h, cls: '' };
+          if (d > 0) return { txt: 'Départ à ' + h + ' · dans ' + d + ' min', cls: 'soon' };
+          if (d > -15) return { txt: 'Départ à ' + h + ' · en cours', cls: 'soon' };
+          return { txt: 'Départ à ' + h, cls: '' };
+        }
+        function renderSimple() {
+          var a = lastAnalysis;
+          var race = state.race || {};
+          var au = race.auto;
+          // En-tête de la course
+          var hero = '<div class="meta">';
+          if (au) hero += '<span class="tag accent">R' + esc(au.r) + 'C' + esc(au.c) + '</span>';
+          if (race.discipline) hero += '<span class="tag">' + esc(race.discipline.charAt(0).toUpperCase() + race.discipline.slice(1)) + '</span>';
+          var bits = [];
+          if (race.distance) bits.push(Number(race.distance).toLocaleString('fr-FR') + ' m');
+          if (race.terrain) bits.push('terrain ' + String(race.terrain).toLowerCase());
+          if (a && !a.error) bits.push(a.nPartants + ' partants');
+          hero += '<span>' + bits.join(' · ') + '</span></div>';
+          var title = race.name || 'Course';
+          if (au) title = title.replace(/^R\d+C\d+\s*/, '').replace(/\s*\(\d\d:\d\d\)$/, '');
+          hero += '<h2>' + esc(title) + '</h2>';
+          var w = whenText(race.heure);
+          var finished = a && !a.error && a.runners.some((x) => x.runner.arrivee);
+          if (finished) {
+            var arr = a.runners
+              .filter((x) => x.runner.arrivee && x.runner.arrivee <= 5)
+              .sort((x, y) => x.runner.arrivee - y.runner.arrivee)
+              .map((x) => '<span class="num-badge">' + esc(x.runner.num) + '</span>')
+              .join(' ');
+            hero += '<div class="when">Course terminée · arrivée ' + arr + '</div>';
+          } else if (w.txt) hero += '<div class="when ' + w.cls + '">' + w.txt + '</div>';
+          $('sHero').innerHTML = hero;
+
+          if (!a || a.error) {
+            $('sPick').innerHTML = '<p class="muted">' + (a && a.error ? esc(a.error) : 'Choisissez une course ci-dessus.') + '</p>';
+            $('sAdvice').innerHTML = '';
+            return;
+          }
+          var np = a.placesPayees || 3;
+          var pp = function (x) {
+            return x.pPlace != null ? x.pPlace : x.pTop3;
+          };
+          var list = a.runners.slice().sort((x, y) => pp(y) - pp(x));
+          var placeTxt = np === 2 ? 'dans les 2 premiers' : 'dans les 3 premiers';
+          var hasArr = finished;
+          var isPlaced = function (x) {
+            return x.runner.arrivee && x.runner.arrivee <= np;
+          };
+
+          // Podium
+          var html = '<h2>Notre pronostic</h2><p class="hint" style="margin:-6px 0 12px">Chances de finir ' + placeTxt + ' (pari placé).</p>';
+          html += '<div class="podium">';
+          list.slice(0, 3).forEach(function (x, k) {
+            var p = pp(x);
+            var lab = confidenceLabel(p);
+            var cote = x.runner.cote ? String(x.runner.cote).replace('.', ',') : '—';
+            html +=
+              '<div class="pick' +
+              (k === 0 ? ' first' : '') +
+              '"><span class="rank">' +
+              (k + 1) +
+              (k === 0 ? 'er' : 'e') +
+              '</span><div class="who"><div class="big-num">' +
+              esc(x.runner.num) +
+              '</div><div><div class="name">' +
+              esc(x.runner.nom) +
+              '</div><span class="pill ' +
+              lab[1] +
+              '">' +
+              lab[0] +
+              '</span></div></div><div class="pc">' +
+              Math.round(p * 100) +
+              '<small>% placé</small></div><div class="bar"><i style="width:' +
+              Math.max(3, p * 100) +
+              '%;background:' +
+              colorP(p) +
+              '"></i></div><div class="foot"><span>Gagnant ' +
+              pct(x.pWin) +
+              '</span><span>Cote ' +
+              esc(cote) +
+              '</span><span>Note ' +
+              x.note.toFixed(1) +
+              '/20</span></div>' +
+              (hasArr
+                ? '<div style="margin-top:8px">' +
+                  (isPlaced(x)
+                    ? '<span class="ok-mark">✓ ' + x.runner.arrivee + (x.runner.arrivee === 1 ? 'er' : 'e') + '</span>'
+                    : '<span class="ko-mark">✗ ' + (x.runner.arrivee ? x.runner.arrivee + 'e' : 'non placé') + '</span>') +
+                  '</div>'
+                : '') +
+              '</div>';
+          });
+          html += '</div>';
+
+          // Autres partants
+          if (list.length > 3) {
+            html += '<div class="others"><div class="oth head"><span>N°</span><span>Cheval</span><span></span><span style="text-align:right">Placé</span><span style="text-align:right">Cote</span></div>';
+            list.slice(3).forEach(function (x) {
+              var p = pp(x);
+              html +=
+                '<div class="oth"><span class="num-badge">' +
+                esc(x.runner.num) +
+                '</span><span class="nm">' +
+                esc(x.runner.nom) +
+                (hasArr && x.runner.arrivee ? (isPlaced(x) ? ' <span class="ok-mark">✓</span>' : '') : '') +
+                '</span><div class="bar"><i style="width:' +
+                Math.max(2, p * 100) +
+                '%;background:' +
+                colorP(p) +
+                '"></i></div><span class="pcs">' +
+                Math.round(p * 100) +
+                ' %</span><span class="ct">' +
+                esc(x.runner.cote ? String(x.runner.cote).replace('.', ',') : '—') +
+                '</span></div>';
+            });
+            html += '</div>';
+          }
+          var nps = (race.runners || []).filter((r) => r.nonPartant);
+          if (nps.length)
+            html +=
+              '<p class="hint">Non-partant' +
+              (nps.length > 1 ? 's' : '') +
+              ' : ' +
+              nps
+                .map(function (r) {
+                  return esc(r.num) + ' ' + esc(r.nom);
+                })
+                .join(', ') +
+              '.</p>';
+          html +=
+            '<div class="legend"><span style="--c:var(--good)">45 % et plus</span><span style="--c:var(--mid)">30 à 45 %</span><span style="--c:var(--bad)">moins de 30 %</span></div>';
+          $('sPick').innerHTML = html;
+
+          // Conseil
+          var adv = lastAdvice;
+          var top = list[0];
+          var val = calibration && calibration.validation && calibration.validation.calibrated;
+          var c = '<h2>Faut-il jouer ?</h2><div class="verdict">';
+          var playable =
+            adv &&
+            adv.proven &&
+            !adv.stopped &&
+            !adv.finished &&
+            adv.bets.filter(function (b) {
+              return b.stakeCalc >= 1;
+            });
+          if (playable && playable.length) {
+            var b = playable[0];
+            c +=
+              '<div class="ico">✅</div><div><p class="lead">Jouer ' +
+              (b.type === 'g' ? 'gagnant' : 'placé') +
+              ' le n°' +
+              esc(b.x.runner.num) +
+              ' ' +
+              esc(b.x.runner.nom) +
+              ' · ' +
+              money(b.stakeCalc) +
+              '</p><p>Sa cote (' +
+              b.o.toFixed(1).replace('.', ',') +
+              (b.est ? ', estimée' : '') +
+              ') paie plus que le risque estimé : ' +
+              pct(b.p) +
+              ' de chances. Cette stratégie a été rentable sur les courses passées, sans garantie pour l\'avenir.</p></div>';
+          } else {
+            var why = !adv
+              ? ''
+              : adv.stopped
+                ? 'Vous avez atteint votre limite de perte du jour.'
+                : adv.finished
+                  ? 'La course est terminée.'
+                  : adv.noMarket
+                    ? 'Les cotes ne sont pas encore disponibles pour cette course.'
+                    : !adv.proven
+                      ? 'Sur les courses passées, aucune façon de jouer n\'a battu la commission du PMU : notre modèle prévoit aussi bien que les cotes, pas mieux.'
+                      : 'Aucune cote n\'est assez intéressante sur cette course.';
+            c +=
+              '<div class="ico">✋</div><div><p class="lead">Pas de pari conseillé</p><p>' +
+              why +
+              '</p>' +
+              (!adv || !adv.finished
+                ? '<p class="hint">Si vous jouez pour le plaisir, le cheval le plus sûr pour le placé est le <b>n°' +
+                  esc(top.runner.num) +
+                  ' ' +
+                  esc(top.runner.nom) +
+                  '</b> (' +
+                  pct(pp(top)) +
+                  ' de chances), avec une petite mise que vous acceptez de perdre.</p>'
+                : '') +
+              '</div>';
+          }
+          c += '</div>';
+          if (val)
+            c +=
+              '<p class="hint" style="margin-top:10px">Fiabilité : sur ' +
+              val.courses +
+              ' courses récentes, notre cheval n°1 a été placé ' +
+              pct(val.topPlaceRate) +
+              ' du temps et a gagné ' +
+              pct(val.topWinRate) +
+              ' du temps. Détails en mode expert.</p>';
+          $('sAdvice').innerHTML = c;
+        }
+        setInterval(function () {
+          if (!document.hidden) renderSimple();
+        }, 60000);
         store.bet = Object.assign({ bank: 100, kelly: 0.25, max: 2, edge: '', stop: 10, types: 'gp' }, store.bet || {});
         store.journal = store.journal || [];
         function money(x) {
@@ -1763,6 +2263,7 @@
           var a = lastAnalysis;
           if (!a || a.error) {
             el.innerHTML = '<span class="muted">Aucune course analysée.</span>';
+            lastAdvice = null;
             return;
           }
           var B = store.bet;
@@ -1885,6 +2386,17 @@
           if (finished) html += '<p class="hint">Course terminée : conseils affichés à titre de contrôle.</p>';
           el.innerHTML = html;
           el._bets = bets;
+          lastAdvice = {
+            bets: bets.map(function (b) {
+              var f = Math.min(maxPct, frac * T.kelly(b.p, b.o));
+              return Object.assign({ stakeCalc: Math.floor(bank * f * 2) / 2 }, b);
+            }),
+            proven: proven,
+            stopped: stopped,
+            finished: finished,
+            noMarket: !a.market,
+            edge: edge,
+          };
         }
         $('advisorOut').addEventListener('click', function (e) {
           var k = e.target.dataset.bet;
@@ -2121,6 +2633,7 @@
           var a = T.analyzeRace(race, effectiveSettings());
           lastAnalysis = a;
           renderAdvisor();
+          renderSimple();
           if (a.error) {
             out.innerHTML = '<span class="muted">' + a.error + '</span>';
             return;
@@ -2317,6 +2830,7 @@
         renderRace();
         renderSettings();
         renderSaved();
+        setExpert(!!store.expert);
         initBetForm();
         renderJournal();
         render();
