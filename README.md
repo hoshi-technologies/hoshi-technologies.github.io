@@ -43,3 +43,13 @@ Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PM
   La mise suit ¼ de Kelly, avec un plafond par pari et une perte maximale par jour. Le journal (stocké dans le
   navigateur, exportable) règle automatiquement les paris avec les rapports définitifs.
 
+
+### Mises à jour fréquentes et alertes
+
+- En plus du passage complet chaque heure, la tâche relit toutes les 10 minutes (de 9 h à 23 h environ) les cotes
+  des courses qui partent dans les 2 heures (`pmu-fetch.mjs --quick`).
+- `scripts/pmu-alerts.mjs` cherche ensuite, dans les courses qui partent dans les 45 minutes, un pari qui
+  correspond à une stratégie **validée** par la simulation. Tant qu'aucune n'est validée, aucune alerte ne part.
+  Les alertes sont écrites dans `hippique/data/alerts.json` (affichées et notifiées par la page) et envoyées sur le
+  téléphone via [ntfy](https://ntfy.sh) si le secret de dépôt `NTFY_TOPIC` est défini.
+- Test : *Actions* → *Programme PMU* → *Run workflow*, case « Envoyer une notification de test ».

@@ -147,7 +147,7 @@ function parseRapports(list) {
 }
 
 let loggedCourseKeys = false;
-async function fetchDay(iso, prevDay) {
+async function fetchDay(iso, prevDay, opts = {}) {
   const prog = await getJson(API + pmuDate(iso));
   const reunions = prog && prog.programme && prog.programme.reunions;
   if (!reunions) return null;
@@ -188,6 +188,17 @@ async function fetchDay(iso, prevDay) {
   const base = `${API}${pmuDate(iso)}`;
   await pool(jobs, 4, async ({ R, reu, course, old }) => {
     const tag = 'R' + R + 'C' + course.c;
+    // Mode rapide : seules les courses proches du départ (cotes) ou qui viennent de finir (rapports).
+    if (opts.quick && old) {
+      const now = Date.now();
+      const soon = course.heure && course.heure > now - 20 * 60000 && course.heure < now + 2 * 3600000;
+      const justFinished = course.arrivee && !old.rapports;
+      if (!soon && !justFinished) {
+        course.partants = old.partants || [];
+        if (old.rapports) course.rapports = old.rapports;
+        return;
+      }
+    }
     // Course terminée déjà complète : rien à retélécharger.
     if (old && old.rapports && old.partants && old.partants.length && course.arrivee) {
       course.partants = old.partants;
@@ -291,7 +302,10 @@ async function main() {
   const bi = args.indexOf('--backfill');
   const backfill = bi >= 0 ? Math.min(KEEP_DAYS, parseInt(args[bi + 1], 10) || 0) : 0;
   if (bi >= 0) args.splice(bi, 2);
-  let dates = args.length ? args : [parisDate(-1), parisDate(0), parisDate(1)];
+  const qi = args.indexOf('--quick');
+  const quick = qi >= 0;
+  if (quick) args.splice(qi, 1);
+  let dates = args.length ? args : quick ? [parisDate(0)] : [parisDate(-1), parisDate(0), parisDate(1)];
   // Historique : journées passées manquantes (servent au calibrage et à la simulation de paris).
   for (let k = backfill; k >= 2; k--) if (!dates.includes(parisDate(-k))) dates.unshift(parisDate(-k));
   const stats = await readJson(path.join(DATA, 'stats.json'), { dates: [], jockeys: {}, entraineurs: {}, chevaux: {} });
@@ -306,7 +320,7 @@ async function main() {
         console.log('  déjà complète');
         continue;
       }
-      day = await fetchDay(iso, prevDay);
+      day = await fetchDay(iso, prevDay, { quick: quick && !!prevDay });
     } catch (e) {
       console.warn('  ! ' + e.message);
       continue;
