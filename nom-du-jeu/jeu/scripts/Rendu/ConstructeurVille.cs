@@ -32,12 +32,12 @@ public sealed class ConstructeurVille
         racine.AddChild(Chrono("terrain_ms", ConstruireTerrain));
         racine.AddChild(Chrono("eau_ms", ConstruireEau));
         racine.AddChild(Chrono("routes_ms", ConstruireRoutes));
-        racine.AddChild(Chrono("batiments_ms", ConstruireBatiments));
+        racine.AddChild(Chrono("batiments_ms", () => ConstruireBatiments()));
         return racine;
     }
 
     // ---------------------------------------------------------------- terrain
-    private Node3D ConstruireTerrain()
+    public Node3D ConstruireTerrain()
     {
         var r = _p.Manifest.Relief;
         int nc = r.Colonnes, nl = r.Lignes;
@@ -68,7 +68,7 @@ public sealed class ConstructeurVille
     }
 
     // ---------------------------------------------------------------- eau
-    private Node3D ConstruireEau()
+    public Node3D ConstruireEau()
     {
         var sommets = new List<Vector3>();
         var indices = new List<int>();
@@ -139,7 +139,7 @@ public sealed class ConstructeurVille
         _ => new Color(0.88f, 0.86f, 0.82f),
     };
 
-    private Node3D ConstruireBatiments()
+    public Node3D ConstruireBatiments(Material? materiau = null)
     {
         var parCarre = new Dictionary<(int, int), Lots>();
         int echecs = 0;
@@ -171,7 +171,7 @@ public sealed class ConstructeurVille
             foreach (var t in tri) lot.Indices.Add(baseIdx + t);
         }
         Mesures["batiments_non_triangules"] = echecs;
-        return Regrouper("Batiments", parCarre, Materiau(rugosite: 0.85f));
+        return Regrouper("Batiments", parCarre, materiau ?? Materiau(rugosite: 0.85f));
     }
 
     // ---------------------------------------------------------------- outils

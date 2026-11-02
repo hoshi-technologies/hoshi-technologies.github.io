@@ -3,7 +3,7 @@
 Jeu solo de simulation de ville pour PC Windows, destiné à Steam.
 Promesse : « Prends les commandes de ta vraie ville, partout dans le monde. »
 
-## État actuel : lot 4 terminé (test de performance dans Godot)
+## État actuel : lot 5 terminé — prototype de plaisir jouable (voir PROTOTYPE.md)
 
 | Dossier | Contenu |
 |---|---|

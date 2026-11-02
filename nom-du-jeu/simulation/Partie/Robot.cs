@@ -13,6 +13,7 @@ public sealed class Robot
     public List<string> Journal { get; } = new();
 
     public Robot(Partie p) { _p = p; }
+    public V2 Centre => _centre;
 
     /// <summary>Trouve un terrain plat et sec près d'un grand axe, et y trace le premier quartier.</summary>
     public void Demarrer()
