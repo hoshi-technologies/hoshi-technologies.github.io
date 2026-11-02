@@ -1,0 +1,2 @@
+Déposer ici steam_api64.dll (SDK Steamworks, dossier redistributable_bin/win64).
+Sans ce fichier, le jeu fonctionne hors ligne (pas de succès Steam).

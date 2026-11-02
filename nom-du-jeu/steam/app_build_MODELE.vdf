@@ -1,0 +1,25 @@
+// Modèle d'envoi SteamPipe (à copier dans le dossier tools/ContentBuilder/scripts du SDK Steamworks).
+// Remplacer 0000000 par votre AppID et 0000001 par l'identifiant du dépôt Windows (Steamworks > SteamPipe > Dépôts).
+// Envoi : steamcmd +login VOTRE_IDENTIFIANT +run_app_build ..\scripts\app_build_MODELE.vdf +quit
+// (le mot de passe est demandé à l'écran : il n'est jamais écrit dans ce fichier).
+"AppBuild"
+{
+	"AppID" "0000000"
+	"Desc" "Version envoyée depuis build/windows"
+	"ContentRoot" "..\content\"
+	"BuildOutput" "..\output\"
+	"SetLive" ""
+	"Depots"
+	{
+		"0000001"
+		{
+			"FileMapping"
+			{
+				"LocalPath" "*"
+				"DepotPath" "."
+				"recursive" "1"
+			}
+			"FileExclusion" "*.pdb"
+		}
+	}
+}

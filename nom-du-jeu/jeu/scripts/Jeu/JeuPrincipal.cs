@@ -51,6 +51,14 @@ public partial class JeuPrincipal : Node3D
     private CanvasLayer _calque = null!;
 
     private string _villeId = "fr-annecy";
+    private Plateforme.IPlateforme _plateforme = null!;
+    private int _moisSucces = -1;
+
+    /// <summary>Version de démonstration (étiquette d'export « demo ») : 2 villes, carte Quartier, 5 ans de jeu.</summary>
+    public static bool Demo => OS.HasFeature("demo") || OS.GetCmdlineUserArgs().Contains("--demo");
+    private static readonly string[] VillesDemo = { "fr-annecy", "fr-lyon" };
+    private const int MoisDemo = 60;
+    private bool _finDemoAffichee;
 
     /// <summary>Villes disponibles (un dossier par ville et par taille dans donnees/villes), lues dans les manifestes.</summary>
     private static List<InfoVille> Catalogue()
@@ -62,7 +70,11 @@ public partial class JeuPrincipal : Node3D
         {
             var m = System.IO.Path.Combine(d, "manifest.json");
             if (!System.IO.File.Exists(m)) continue;
-            try { res.Add(System.Text.Json.JsonSerializer.Deserialize<Manifest>(System.IO.File.ReadAllText(m))!.Ville); }
+            try
+            {
+                var info = System.Text.Json.JsonSerializer.Deserialize<Manifest>(System.IO.File.ReadAllText(m))!.Ville;
+                if (!Demo || (VillesDemo.Contains(info.Id) && info.Taille == "quartier")) res.Add(info);
+            }
             catch (Exception ex) { GD.PrintErr($"Paquet illisible {d} : {ex.Message}"); }
         }
         return res;
@@ -95,7 +107,7 @@ public partial class JeuPrincipal : Node3D
         }
     }
 
-    public bool CarteDisponible(string taille) => System.IO.Directory.Exists(DossierPaquet(_villeId, taille));
+    public bool CarteDisponible(string taille) => (!Demo || taille == "quartier") && System.IO.Directory.Exists(DossierPaquet(_villeId, taille));
 
     private void DessinerTerritoire()
     {
@@ -133,7 +145,12 @@ public partial class JeuPrincipal : Node3D
     public override void _Ready()
     {
         var racine = Racine();
+        var plateforme = Plateforme.Plateformes.Creer(racine, Demo);
+        if (plateforme == null) { GetTree().Quit(); return; }   // Steam relance le jeu lui-même
+        _plateforme = plateforme;
+        GD.Print($"Plateforme : {_plateforme.Nom}");
         _dossierSauvegardes = ProjectSettings.GlobalizePath("user://sauvegardes");
+        RecupererAnciennesSauvegardes();
         System.IO.Directory.CreateDirectory(_dossierSauvegardes);
 
         Ambiance();
@@ -270,9 +287,13 @@ public partial class JeuPrincipal : Node3D
         var tuto = new Button { Text = _options.TutorielTermine ? "Tutoriel (5 minutes)" : "Tutoriel (5 minutes) — conseillé pour commencer", CustomMinimumSize = new Vector2(0, 40) };
         tuto.Pressed += DemarrerTutoriel;
         v.AddChild(tuto);
-        var sable = new Button { Text = "Bac à sable (argent illimité, tout débloqué)", CustomMinimumSize = new Vector2(0, 34) };
-        sable.Pressed += () => Commencer(null, ModeDepart.GrandsAxes, bacASable: true);
-        v.AddChild(sable);
+        if (!Demo)
+        {
+            var sable = new Button { Text = "Bac à sable (argent illimité, tout débloqué)", CustomMinimumSize = new Vector2(0, 34) };
+            sable.Pressed += () => Commencer(null, ModeDepart.GrandsAxes, bacASable: true);
+            v.AddChild(sable);
+        }
+        else v.AddChild(new Label { Text = "Démo : Annecy et Lyon, 5 ans de jeu. Les sauvegardes se chargent dans le jeu complet.", HorizontalAlignment = HorizontalAlignment.Center });
         var derniere = System.IO.Directory.EnumerateFiles(_dossierSauvegardes, "*.json").Where(f => !f.EndsWith(".info.json"))
             .OrderByDescending(System.IO.File.GetLastWriteTimeUtc).FirstOrDefault();
         if (derniere != null)
@@ -425,6 +446,8 @@ public partial class JeuPrincipal : Node3D
     // ------------------------------------------------------------------ boucle
     public override void _Process(double delta)
     {
+        if (_plateforme == null) return;   // le jeu se ferme (relance par Steam)
+        _plateforme.Traiter();
         MettreAJourCiel(delta);
         MettreAJourAmbiance(delta);
         if (_partie == null) return;
@@ -434,6 +457,8 @@ public partial class JeuPrincipal : Node3D
         if (_accumulateur > 4) _accumulateur = 0;
         _trafic.Vitesse = Multiplicateurs[_vitesse];
         if (_partie.Mois >= _dernierMoisSauve + 3) { Sauvegarder("auto", false); _dernierMoisSauve = _partie.Mois; }
+        if (_partie.Mois != _moisSucces) { _moisSucces = _partie.Mois; VerifierSucces(); }
+        if (Demo && _partie.Mois >= MoisDemo && !_finDemoAffichee) FinDemo();
         _hud.OutilActif = _outil;
         // une décision attend le maire : pause et fenêtre
         if (_partie.Decisions.Count > 0 && !_hud.DecisionAffichee)
@@ -670,8 +695,60 @@ public partial class JeuPrincipal : Node3D
     private void OuvrirPause() { _vitesseAvantPause = Math.Max(1, _vitesse); _vitesse = 0; _pause.Visible = true; _pause.Principal(); }
     private void FermerPause() { _pause.Visible = false; _vitesse = _vitesseAvantPause; }
 
+    /// <summary>Les premières versions de test rangeaient les sauvegardes dans app_userdata/[NOM DU JEU] ;
+    /// elles sont maintenant dans un dossier fixe (NomDuJeu) pour Steam Cloud. On les recopie une fois.</summary>
+    private void RecupererAnciennesSauvegardes()
+    {
+        try
+        {
+            if (System.IO.Directory.Exists(_dossierSauvegardes)) return;
+            foreach (var godot in new[] { "Godot", "godot" })
+            {
+                var ancien = System.IO.Path.Combine(OS.GetDataDir(), godot, "app_userdata", "[NOM DU JEU]");
+                if (!System.IO.Directory.Exists(ancien)) continue;
+                var nouveau = ProjectSettings.GlobalizePath("user://");
+                foreach (var f in System.IO.Directory.EnumerateFiles(ancien, "*", System.IO.SearchOption.AllDirectories))
+                {
+                    var cible = System.IO.Path.Combine(nouveau, System.IO.Path.GetRelativePath(ancien, f));
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(cible)!);
+                    if (!System.IO.File.Exists(cible)) System.IO.File.Copy(f, cible);
+                }
+                GD.Print($"Anciennes sauvegardes recopiées depuis {ancien}");
+                return;
+            }
+        }
+        catch (Exception e) { GD.PrintErr($"Récupération des anciennes sauvegardes impossible : {e.Message}"); }
+    }
+
+    private void VerifierSucces()
+    {
+        if (_partie == null || _tutoriel != null) return;
+        foreach (var id in Ville.Succes.CatalogueSucces.Verifier(_partie, _plateforme.SuccesObtenus))
+        {
+            _plateforme.DebloquerSucces(id);
+            var d = Ville.Succes.CatalogueSucces.Tous.First(x => x.Id == id);
+            _hud.Toast($"Succès obtenu : {d.Nom} — {d.Description}");
+        }
+    }
+
+    private void FinDemo()
+    {
+        _finDemoAffichee = true;
+        _vitesse = 0;
+        Sauvegarder("fin de démo", false);
+        string url = "";
+        try { url = Plateforme.ReglagesSteam.Lire(Racine()).UrlMagasin; } catch { /* pas d'adresse : pas de bouton */ }
+        _calque.AddChild(new Interface.EcranFinDemo { UrlMagasin = url, MenuPrincipal = RetourMenu });
+    }
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationWMCloseRequest || what == NotificationExitTree) _plateforme?.Fermer();
+    }
+
     private void RetourMenu()
     {
+        _finDemoAffichee = false;
         Sauvegarder("auto", false);
         _partie = null;
         _tutoriel = null;
@@ -786,9 +863,34 @@ public partial class JeuPrincipal : Node3D
         GetTree().Quit();
     }
 
+    /// <summary>--demo --auto=demo : menu de la démo, partie jouée par le robot jusqu'à la limite, écran de fin.</summary>
+    private async System.Threading.Tasks.Task TesterDemo()
+    {
+        var dossier = ProjectSettings.GlobalizePath("user://");
+        for (int i = 0; i < 10; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, "demo_menu.png"));
+        Commencer(null);
+        var robot = new Robot(_partie!);
+        robot.Demarrer();
+        while (_partie!.Mois < MoisDemo - 1)
+        {
+            robot.Decider();
+            foreach (var d in _partie.Decisions.ToList()) _partie.Repondre(d.Id, 1);
+            for (int j = 0; j < _reglages.JoursParMois; j++) _partie.AvancerJour();
+            if (_partie.Mois != _moisSucces) { _moisSucces = _partie.Mois; VerifierSucces(); }
+        }
+        _vitesse = 3;
+        while (!_finDemoAffichee) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        for (int i = 0; i < 20; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, "demo_fin.png"));
+        GD.Print($"AUTO demo mois={_partie.Mois} pop={_partie.Population} succes={string.Join(",", _plateforme.SuccesObtenus)}");
+        GetTree().Quit();
+    }
+
     private async void ModeAuto()
     {
         if (_optionAuto == "tutoriel") { await TesterTutoriel(); return; }
+        if (_optionAuto == "demo") { await TesterDemo(); return; }
         // --auto=capture : le robot joue N mois, puis on prend des images de contrôle
         // --auto=reelle : la vraie ville, 2 mois de simulation
         V2 c;

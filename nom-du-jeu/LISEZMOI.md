@@ -3,15 +3,17 @@
 Jeu solo de simulation de ville pour PC Windows, destiné à Steam.
 Promesse : « Prends les commandes de ta vraie ville, partout dans le monde. »
 
-## État actuel : prototype jouable + début du socle (lot 6) — voir PROTOTYPE.md
+## État actuel : jeu jouable, 10 villes, gestion, élections, Steam préparé (lot 15) — voir PROTOTYPE.md
 
-Fabriquer la version Windows : `outils/exporter_windows.sh <chemin de Godot 4.7 .NET>`.
+Fabriquer la version Windows : `outils/exporter_windows.sh <chemin de Godot 4.7 .NET>` (ajouter `demo` pour la démo).
 
 | Dossier | Contenu |
 |---|---|
 | `conception/DOSSIER_CONCEPTION.md` | Le dossier de conception (référence pour tout le projet) |
 | `outils/preparation_ville/` | L'outil qui prépare une vraie ville (voir son LISEZMOI) |
-| `donnees/villes/fr-annecy_quartier_v1/` | Le paquet d'Annecy (4 × 4 km), avec `apercu.png` |
+| `donnees/villes/` | Les paquets des 10 villes (Annecy aussi en 10 × 10 km) |
+| `donnees/reglages/` | Les réglages du jeu (`prototype.json`) et les règles par pays (`pays/`) |
+| `steam/` | Intégration Steam, textes de la page (FR/EN), démo, icônes des succès : **ce que vous devez faire** est dans `steam/INTEGRATION_STEAM.md` |
 | `simulation/` | Le cœur du jeu en C#, indépendant du moteur |
 | `tests/` | Tests automatiques de la simulation (`dotnet test jeu/Jeu.sln`) |
 | `bench/` | Banc d'essai de la simulation en C# |

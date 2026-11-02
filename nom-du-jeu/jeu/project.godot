@@ -3,6 +3,8 @@ config_version=5
 
 [application]
 config/name="[NOM DU JEU]"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="NomDuJeu"
 run/main_scene="res://scenes/Jeu.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 

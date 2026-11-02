@@ -8,5 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../simulation/Ville.Simulation.csproj" />
+    <!-- Steamworks.NET (licence MIT) : surcouche C# de Steam. La bibliothèque native steam_api64.dll vient du SDK Steamworks (voir steam/INTEGRATION_STEAM.md). -->
+    <PackageReference Include="Steamworks.NET" Version="2024.8.0" />
   </ItemGroup>
 </Project>

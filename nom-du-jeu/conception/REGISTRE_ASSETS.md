@@ -23,6 +23,7 @@ Licences refusées : NC (non commercial), ND (pas de modification), « gratuit �
 | Terrain, eau | `jeu/scripts/Rendu/ConstructeurVille.cs` | Copernicus DEM, OpenStreetMap / Overture |
 | Fenêtres (jour et nuit), saisons, neige, sol mouillé | `jeu/shaders/*.gdshader` (calcul, aucune texture) | aucune |
 | Pluie et neige (particules), ciel, météo | `jeu/scripts/Jeu/Meteo.cs` | aucune |
+| Icônes des succès Steam (64 × 64, provisoires) | `steam/fabriquer_icones_succes.py` (police DejaVu, licence libre) | aucune |
 | Sons d'ambiance : ville, vent, vagues, oiseaux, grillons, pluie | `jeu/scripts/Jeu/AmbianceSonore.cs` (synthèse en direct, aucun fichier son) | aucune |
 
 ## Sources repérées pour plus tard (vérifiées le 2 novembre 2026, non utilisées)

@@ -151,6 +151,7 @@ Les seuils de population se règlent dans un fichier de données. En mode Ville 
 - **Le simulateur utilise des règles génériques** : impôts, services, croissance.
 - **Un fichier par pays les surcharge** : impôts locaux, dotations, mandat, seuils des services, sources de données.
 - France et États-Unis d'abord. Ailleurs, on applique les règles génériques avec des estimations prudentes, signalées au joueur.
+- **Fait (lot 14)** : `donnees/reglages/prototype.json` = règles génériques ; `donnees/reglages/pays/FR.json` et `US.json` ne contiennent que les différences (fusion profonde au chargement, `Reglages.ChargerPourPays`).
 
 ---
 
@@ -246,4 +247,6 @@ Les seuils de population se règlent dans un fichier de données. En mode Ville 
 | 2026-11-02 | Lot 8 (suite) : tutoriel par la pratique (10 étapes), menu pause, sauvegardes nommées avec fiche d'information, options persistantes (volume, qualité, texte, daltonisme), manette pour la caméra. | Lot 8 |
 | 2026-11-02 | Lot 12 (suite) : satisfaction par quartier et par profil (familles, jeunes actifs, seniors), 8 politiques publiques, 4 objectifs facultatifs, fenêtre Mairie, vue Satisfaction. Nouveaux points d'accroche des modules : ModifierDemande, FacteurVoitures. Test 25 h : stable, argent borné. | Lot 12 |
 | 2026-11-02 | Lot 13 : élections et conseil municipal (module désactivable, listes fictives), verrou de commandes pendant l'opposition, 3 suites possibles après une défaite. | Lot 13 |
+| 2026-11-02 | Lot 14 : 9 nouvelles villes (taille Quartier) : Lyon, Paris (Le Marais), Bordeaux, Strasbourg, Saint-Malo, New York (Midtown), Austin, Denver, Seattle. Aperçus contrôlés à l'image (rivières, îles, centres historiques reconnaissables) ; statut « en vérification » jusqu'au contrôle humain. Choix de la ville dans le menu. Règles par pays fusionnées sur les règles génériques (donnees/reglages/pays) : monnaie, mandat (6 ans FR, 4 ans US), taille des ménages. | Propriétaire (« Fait tous ») / Lot 14 |
+| 2026-11-02 | Lot 15 : succès (15, conditions testées), plateforme Steam via Steamworks.NET (MIT) inactive tant qu'aucun AppID n'est renseigné, sauvegardes dans un dossier fixe pour Steam Auto-Cloud, démo (Annecy + Lyon, 5 ans de jeu), textes de page Steam FR/EN et déclaration IA en brouillon. Workshop déconseillé au lancement (licence ODbL, qualité, modération). **Rien n'est publié.** | Propriétaire (« Fait tous ») / Lot 15 |
 | 2026-11-01 | Accès Anticipé recommandé, prix visé de 24,99 $ puis 29,99 $ à la 1.0. | Recommandation, **à confirmer à l'étape 7** |

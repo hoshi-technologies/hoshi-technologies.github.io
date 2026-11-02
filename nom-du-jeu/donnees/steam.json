@@ -1,0 +1,6 @@
+{
+  "_explication": "Numéros publics de l'application sur Steam (AppID). 0 = pas encore de page Steam : le jeu fonctionne hors ligne. Ce ne sont PAS des clés secrètes. À remplir par le propriétaire après création de l'application sur partner.steamgames.com.",
+  "app_id": 0,
+  "app_id_demo": 0,
+  "url_magasin": ""
+}
