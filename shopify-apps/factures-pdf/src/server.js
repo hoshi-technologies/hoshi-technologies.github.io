@@ -12,6 +12,7 @@ import {
   numericOrderId,
   ORDER_CUSTOMER_QUERY,
   exchangeToken,
+  refreshAccessToken,
   adminGraphql,
   isValidShop,
   SHOP_INFO_QUERY,
@@ -60,10 +61,44 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
   const guide = (lang) => guideContent(lang, config.supportEmail);
   const faq = (lang) => faqContent(lang, config.supportEmail);
 
-  const graphql = (shop, query, variables) => {
-    const { access_token: token } = store.getShop(shop) ?? {};
-    if (!token) throw new Error("Appli non initialisée : rechargez la page de l'appli");
-    return adminGraphql(shop, token, config.apiVersion, query, variables, fetchImpl);
+  // Jetons hors ligne à durée limitée : renouvelés automatiquement un peu avant leur expiration
+  // (un seul renouvellement à la fois par boutique).
+  const refreshing = new Map();
+  const tokenOptions = (data) => ({ refreshToken: data.refresh_token, expiresIn: data.expires_in, refreshExpiresIn: data.refresh_token_expires_in });
+  function renewToken(shop) {
+    if (!refreshing.has(shop)) {
+      const run = (async () => {
+        const row = store.getShop(shop);
+        if (!row?.refresh_token) throw new Error("Jeton d'accès à renouveler : ouvrez l'appli dans l'admin Shopify");
+        try {
+          const data = await refreshAccessToken(shop, row.refresh_token, config, fetchImpl);
+          store.saveToken(shop, data.access_token, data.scope, tokenOptions(data));
+          return data.access_token;
+        } catch (error) {
+          if (error.reauthorize) store.clearToken(shop);
+          throw error;
+        }
+      })();
+      refreshing.set(shop, run);
+      run.finally(() => refreshing.delete(shop)).catch(() => {});
+    }
+    return refreshing.get(shop);
+  }
+  async function accessToken(shop) {
+    const row = store.getShop(shop) ?? {};
+    if (!row.access_token) throw new Error("Appli non initialisée : rechargez la page de l'appli");
+    if (row.token_expires_at && row.token_expires_at - 5 * 60e3 < Date.now()) return renewToken(shop);
+    return row.access_token;
+  }
+  const graphql = async (shop, query, variables) => {
+    const call = (token) => adminGraphql(shop, token, config.apiVersion, query, variables, fetchImpl);
+    try {
+      return await call(await accessToken(shop));
+    } catch (error) {
+      // Jeton refusé avant l'heure prévue : un renouvellement, une seule nouvelle tentative.
+      if (error.status !== 401 || !store.getShop(shop)?.refresh_token) throw error;
+      return call(await renewToken(shop));
+    }
   };
 
   /**
@@ -298,10 +333,18 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
     const shop = c.get('shop');
     const input = await body(c);
     const shopRow = store.ensureShop(shop);
-    if (!shopRow.access_token) {
+    // Pas de jeton de renouvellement : première ouverture, ou ancien jeton permanent que Shopify
+    // n'accepte plus. Un nouvel échange fournit un jeton à durée limitée et renouvelable.
+    if (!shopRow.access_token || !shopRow.refresh_token || (shopRow.refresh_expires_at ?? Infinity) < Date.now()) {
       try {
-        const { access_token, scope } = await exchangeToken(shop, c.get('sessionToken'), config, fetchImpl);
-        store.saveToken(shop, access_token, scope);
+        const data = await exchangeToken(shop, c.get('sessionToken'), config, fetchImpl);
+        store.saveToken(shop, data.access_token, data.scope, tokenOptions(data));
+      } catch (error) {
+        logger.error(`${shop} : échange de jeton impossible : ${error.message}`);
+      }
+    }
+    if (!shopRow.access_token && store.getShop(shop).access_token) {
+      try {
         const s = shopRow.settings;
         const info = await shopifyCompanyInfo(shop);
         // Pré-remplissage : on ne remplace jamais une valeur déjà saisie.

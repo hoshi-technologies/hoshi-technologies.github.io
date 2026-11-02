@@ -69,6 +69,11 @@ export function createStore(sql, key) {
     CREATE INDEX IF NOT EXISTS access_log_shop ON access_log (shop, id DESC);
   `);
   // Évolutions du schéma sur une base existante (sans effet sur une base neuve).
+  const shopColumns = new Set(sql.all('PRAGMA table_info(shops)').map((col) => col.name));
+  // Jetons hors ligne à durée limitée : jeton de renouvellement (chiffré) et dates d'expiration.
+  if (!shopColumns.has('refresh_token')) sql.exec('ALTER TABLE shops ADD COLUMN refresh_token TEXT');
+  if (!shopColumns.has('token_expires_at')) sql.exec('ALTER TABLE shops ADD COLUMN token_expires_at INTEGER');
+  if (!shopColumns.has('refresh_expires_at')) sql.exec('ALTER TABLE shops ADD COLUMN refresh_expires_at INTEGER');
   const invoiceColumns = new Set(sql.all('PRAGMA table_info(invoices)').map((col) => col.name));
   // Client Shopify de la commande : bouton « Télécharger ma facture » de l'espace client.
   if (!invoiceColumns.has('customer_id')) sql.exec('ALTER TABLE invoices ADD COLUMN customer_id TEXT');
@@ -109,6 +114,7 @@ export class Store {
     return {
       ...row,
       access_token: this.cipher.decryptText(row.access_token),
+      refresh_token: this.cipher.decryptText(row.refresh_token),
       settings: { ...DEFAULT_SETTINGS, ...JSON.parse(row.settings) },
     };
   }
@@ -118,9 +124,27 @@ export class Store {
     return this.getShop(shop);
   }
 
-  saveToken(shop, accessToken, scope) {
+  /**
+   * Jeton d'accès hors ligne. `expiresIn` / `refreshExpiresIn` en secondes (jetons à durée
+   * limitée) ; sans eux, le jeton est considéré comme permanent (anciennes installations).
+   */
+  saveToken(shop, accessToken, scope, { refreshToken = null, expiresIn = null, refreshExpiresIn = null, now = Date.now() } = {}) {
     this.ensureShop(shop);
-    this.sql.run('UPDATE shops SET access_token = ?, scope = ?, uninstalled_at = NULL WHERE shop = ?', this.cipher.encrypt(accessToken), scope, shop);
+    this.sql.run(
+      `UPDATE shops SET access_token = ?, scope = COALESCE(?, scope), refresh_token = ?, token_expires_at = ?,
+              refresh_expires_at = ?, uninstalled_at = NULL WHERE shop = ?`,
+      this.cipher.encrypt(accessToken),
+      scope ?? null,
+      refreshToken ? this.cipher.encrypt(refreshToken) : null,
+      expiresIn ? now + expiresIn * 1000 : null,
+      refreshExpiresIn ? now + refreshExpiresIn * 1000 : null,
+      shop,
+    );
+  }
+
+  /** Oublie le jeton d'accès (refusé par Shopify) : un nouvel échange aura lieu depuis l'admin. */
+  clearToken(shop) {
+    this.sql.run('UPDATE shops SET access_token = NULL, refresh_token = NULL, token_expires_at = NULL, refresh_expires_at = NULL WHERE shop = ?', shop);
   }
 
   saveSettings(shop, settings) {
@@ -140,7 +164,7 @@ export class Store {
   markUninstalled(shop) {
     // Shopify annule lui-même l'abonnement à la désinstallation.
     this.sql.run(
-        "UPDATE shops SET access_token = NULL, plan = 'free', subscription_id = NULL, uninstalled_at = datetime('now') WHERE shop = ?",
+        "UPDATE shops SET access_token = NULL, refresh_token = NULL, token_expires_at = NULL, refresh_expires_at = NULL, plan = 'free', subscription_id = NULL, uninstalled_at = datetime('now') WHERE shop = ?",
       shop);
   }
 

@@ -96,10 +96,32 @@ export async function exchangeToken(shop, sessionToken, { apiKey, apiSecret }, f
       subject_token: sessionToken,
       subject_token_type: 'urn:ietf:params:oauth:token-type:id_token',
       requested_token_type: 'urn:shopify:params:oauth:token-type:offline-access-token',
+      // Jeton hors ligne à durée limitée, renouvelable : Shopify n'accepte plus les jetons permanents.
+      expiring: '1',
     }),
   });
   if (!response.ok) throw new Error(`Échange de jeton refusé (${response.status})`);
-  return response.json(); // { access_token, scope }
+  return response.json(); // { access_token, scope, expires_in, refresh_token, refresh_token_expires_in }
+}
+
+/**
+ * Renouvelle un jeton hors ligne à durée limitée. Shopify renvoie un nouveau couple
+ * jeton d'accès / jeton de renouvellement : les deux doivent être enregistrés.
+ * Une erreur portant `reauthorize` signifie que le jeton de renouvellement n'est plus valable
+ * (expiré, révoqué, appli désinstallée) : un nouvel échange depuis l'admin est nécessaire.
+ */
+export async function refreshAccessToken(shop, refreshToken, { apiKey, apiSecret }, fetchImpl = fetch) {
+  const response = await fetchImpl(`https://${shop}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+    body: new URLSearchParams({ client_id: apiKey, client_secret: apiSecret, grant_type: 'refresh_token', refresh_token: refreshToken }).toString(),
+  });
+  if (!response.ok) {
+    const error = new Error(`Renouvellement du jeton refusé (${response.status})`);
+    error.reauthorize = response.status === 400 || response.status === 401;
+    throw error;
+  }
+  return response.json();
 }
 
 export async function adminGraphql(shop, accessToken, apiVersion, query, variables = {}, fetchImpl = fetch) {
@@ -108,7 +130,11 @@ export async function adminGraphql(shop, accessToken, apiVersion, query, variabl
     headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': accessToken },
     body: JSON.stringify({ query, variables }),
   });
-  if (!response.ok) throw new Error(`API Admin : HTTP ${response.status} ${(await response.text().catch(() => '')).slice(0, 300)}`);
+  if (!response.ok) {
+    const error = new Error(`API Admin : HTTP ${response.status} ${(await response.text().catch(() => '')).slice(0, 300)}`);
+    error.status = response.status;
+    throw error;
+  }
   const body = await response.json();
   if (body.errors) throw new Error(`API Admin : ${JSON.stringify(body.errors)}`);
   return body.data;
