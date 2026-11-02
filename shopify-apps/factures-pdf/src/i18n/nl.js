@@ -71,7 +71,7 @@ export default {
     saved: 'Instellingen opgeslagen',
     preview: 'PDF-voorbeeld',
     mailWarning:
-      'Het verzenden van e-mails is nog niet ingesteld op de app-server (SMTP_URL, MAIL_FROM): facturen worden aangemaakt maar niet verzonden.',
+      'Het verzenden van e-mails is nog niet ingesteld op de app-server (BREVO_API_KEY, MAIL_FROM): facturen worden aangemaakt maar niet verzonden.',
     'plan.free': 'Gratis',
     'plan.essentiel': 'Essentieel',
     'plan.illimite': 'Onbeperkt',

@@ -72,7 +72,7 @@ export default {
     saved: 'Réglages enregistrés',
     preview: 'Aperçu du PDF',
     mailWarning:
-      "L'envoi d'e-mails n'est pas encore configuré sur le serveur de l'appli (SMTP_URL, MAIL_FROM) : les factures sont créées mais pas envoyées.",
+      "L'envoi d'e-mails n'est pas encore configuré sur le serveur de l'appli (BREVO_API_KEY, MAIL_FROM) : les factures sont créées mais pas envoyées.",
     'plan.free': 'Gratuit',
     'plan.essentiel': 'Essentiel',
     'plan.illimite': 'Illimité',

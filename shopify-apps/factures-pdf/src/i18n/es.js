@@ -71,7 +71,7 @@ export default {
     saved: 'Ajustes guardados',
     preview: 'Vista previa del PDF',
     mailWarning:
-      'El envío de correos aún no está configurado en el servidor de la aplicación (SMTP_URL, MAIL_FROM): las facturas se crean pero no se envían.',
+      'El envío de correos aún no está configurado en el servidor de la aplicación (BREVO_API_KEY, MAIL_FROM): las facturas se crean pero no se envían.',
     'plan.free': 'Gratis',
     'plan.essentiel': 'Esencial',
     'plan.illimite': 'Ilimitado',

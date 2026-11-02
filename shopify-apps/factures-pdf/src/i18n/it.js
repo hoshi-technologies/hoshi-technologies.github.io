@@ -71,7 +71,7 @@ export default {
     saved: 'Impostazioni salvate',
     preview: 'Anteprima PDF',
     mailWarning:
-      "L'invio delle email non è ancora configurato sul server dell'app (SMTP_URL, MAIL_FROM): le fatture vengono create ma non inviate.",
+      "L'invio delle email non è ancora configurato sul server dell'app (BREVO_API_KEY, MAIL_FROM): le fatture vengono create ma non inviate.",
     'plan.free': 'Gratuito',
     'plan.essentiel': 'Essenziale',
     'plan.illimite': 'Illimitato',

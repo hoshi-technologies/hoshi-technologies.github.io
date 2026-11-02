@@ -71,7 +71,7 @@ export default {
     saved: 'Settings saved',
     preview: 'Preview PDF',
     mailWarning:
-      'Email sending is not configured on the app server yet (SMTP_URL, MAIL_FROM): invoices are created but not sent.',
+      'Email sending is not configured on the app server yet (BREVO_API_KEY, MAIL_FROM): invoices are created but not sent.',
     'plan.free': 'Free',
     'plan.essentiel': 'Essential',
     'plan.illimite': 'Unlimited',

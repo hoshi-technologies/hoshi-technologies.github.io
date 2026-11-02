@@ -71,7 +71,7 @@ export default {
     saved: 'Einstellungen gespeichert',
     preview: 'PDF-Vorschau',
     mailWarning:
-      'Der E-Mail-Versand ist auf dem App-Server noch nicht eingerichtet (SMTP_URL, MAIL_FROM): Rechnungen werden erstellt, aber nicht versendet.',
+      'Der E-Mail-Versand ist auf dem App-Server noch nicht eingerichtet (BREVO_API_KEY, MAIL_FROM): Rechnungen werden erstellt, aber nicht versendet.',
     'plan.free': 'Kostenlos',
     'plan.essentiel': 'Essential',
     'plan.illimite': 'Unbegrenzt',
