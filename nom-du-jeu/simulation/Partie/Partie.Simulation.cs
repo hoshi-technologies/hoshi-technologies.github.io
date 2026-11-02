@@ -25,17 +25,25 @@ public sealed partial class Partie
     };
 
     /// <summary>Le nœud de route par lequel une parcelle est desservie.</summary>
-    private int NoeudParcelle(Parcelle p)
+    // cache (nœud, composante, reliée) par parcelle, invalidé quand le réseau change
+    private readonly Dictionary<int, (int noeud, int comp, bool relie, int arete)> _infos = new();
+    private int _versionInfos = -1;
+
+    private (int noeud, int comp, bool relie) Infos(Parcelle p)
     {
-        if (!Reseau.Aretes.TryGetValue(p.Arete, out var e)) return -1;
-        return V2.Distance(Reseau.Noeuds[e.A].Pos, p.Centre) <= V2.Distance(Reseau.Noeuds[e.B].Pos, p.Centre) ? e.A : e.B;
+        if (_versionInfos != Reseau.Version) { _infos.Clear(); _versionInfos = Reseau.Version; }
+        if (_infos.TryGetValue(p.Id, out var i) && i.arete == p.Arete) return (i.noeud, i.comp, i.relie);
+        int n = -1;
+        if (Reseau.Aretes.TryGetValue(p.Arete, out var e))
+            n = V2.Distance(Reseau.Noeuds[e.A].Pos, p.Centre) <= V2.Distance(Reseau.Noeuds[e.B].Pos, p.Centre) ? e.A : e.B;
+        var r = (n, n >= 0 ? Reseau.Composante(n, R) : -1, n >= 0 && Reseau.Relie(n, R));
+        _infos[p.Id] = (r.Item1, r.Item2, r.Item3, p.Arete);
+        return r;
     }
 
-    public bool ParcelleReliee(Parcelle p)
-    {
-        int n = NoeudParcelle(p);
-        return n >= 0 && Reseau.Relie(n, R);
-    }
+    private int NoeudParcelle(Parcelle p) => Infos(p).noeud;
+
+    public bool ParcelleReliee(Parcelle p) => Infos(p).relie;
 
     // ================================================================== un jour
     public void AvancerJour()
@@ -80,9 +88,8 @@ public sealed partial class Partie
             foreach (var p in Parcelles.Values)
             {
                 if (p.Zone != zone || !p.Libre) continue;
-                int n = NoeudParcelle(p);
-                if (n < 0 || !Reseau.Relie(n, R)) continue;
-                int comp = Reseau.Composante(n, R);
+                var (n, comp, relie) = Infos(p);
+                if (n < 0 || !relie) continue;
                 if (!ModeVilleReelle && (!_resteParComposante.TryGetValue(comp, out var reste) || reste.eau < besoinEau || reste.elec < besoinElec)) continue;
                 candidats.Add((p, p.Attrait + _alea.Reel() * 20, comp));
             }
@@ -113,9 +120,8 @@ public sealed partial class Partie
             if (p.Service == null) continue;
             var s = R.Services[p.Service];
             if (s.Eau <= 0 && s.Electricite <= 0 && s.Dechets <= 0) continue;
-            int n = NoeudParcelle(p);
+            var (n, c, _) = Infos(p);
             if (n < 0) continue;
-            int c = Reseau.Composante(n, R);
             prodEau[c] = prodEau.GetValueOrDefault(c) + s.Eau;
             prodElec[c] = prodElec.GetValueOrDefault(c) + s.Electricite;
             prodDechets[c] = prodDechets.GetValueOrDefault(c) + s.Dechets;
@@ -152,13 +158,12 @@ public sealed partial class Partie
         {
             var b = p.Batiment;
             if (b == null) continue;
-            int n = NoeudParcelle(p);
-            int c = n >= 0 ? Reseau.Composante(n, R) : -1;
+            var (n, c, relieP) = Infos(p);
             double occ = b.Type == Zone.Habitat ? b.Occupants * R.PersonnesParLogement : CapaciteActive(b) * remplissage;
             double ce = occ * (b.Type == Zone.Habitat ? R.Consommation.EauParHabitant : R.Consommation.EauParEmploi);
             double cl = occ * (b.Type == Zone.Habitat ? R.Consommation.ElecParHabitant : R.Consommation.ElecParEmploi);
             double ue = consEau.GetValueOrDefault(c) + ce, ul = consElec.GetValueOrDefault(c) + cl;
-            bool regional = ModeVilleReelle && n >= 0 && Reseau.Relie(n, R);
+            bool regional = ModeVilleReelle && relieP;
             b.Eau = c >= 0 && (regional || ue <= prodEau.GetValueOrDefault(c) + 1e-6);
             b.Elec = c >= 0 && (regional || ul <= prodElec.GetValueOrDefault(c) + 1e-6);
             if (b.Eau) consEau[c] = ue;
@@ -209,7 +214,9 @@ public sealed partial class Partie
         Congestion.Clear();
         RueLaPlusChargee = null;
         if (Population < 50) return;
-        var trajets = Deplacements(1200);
+        // échantillon plus petit sur les très grands réseaux (le résultat est ramené à l'échelle)
+        int echantillon = Math.Clamp(1200 * 8000 / Math.Max(Reseau.Noeuds.Count, 1), 300, 1200);
+        var trajets = Deplacements(echantillon);
         if (trajets.Count == 0) return;
         var g = Reseau.Graphe(R);
         double habitantsBus = 0, habitantsTotal = 0;
@@ -287,38 +294,74 @@ public sealed partial class Partie
     }
 
     // ================================================================== fin de mois
+    /// <summary>Temps passé dans chaque étape de la dernière fin de mois (ms), pour repérer les lenteurs.</summary>
+    public Dictionary<string, double> ChronoFinDeMois { get; } = new();
+
+    private void Etape(string nom, Action a)
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        a();
+        ChronoFinDeMois[nom] = sw.Elapsed.TotalMilliseconds;
+    }
+
     private void FinDeMois()
     {
-        MettreAJourServices();
-        CalculerCongestion();
-        CalculerAttrait();
-        NiveauxEtDeparts();
-        IncendiesDuMois(Parcelles.Values.Where(p => p.Service == "caserne_pompiers").Select(p => p.Centre).ToList());
-        Budget();
-        MettreAJourServices();
+        Etape("services", MettreAJourServices);
+        // très grands réseaux : l'heure de pointe est recalculée tous les 3 mois (évite une saccade chaque mois)
+        if (Reseau.Noeuds.Count < 15000 || Mois % 3 == 0 || Congestion.Count == 0) Etape("congestion", CalculerCongestion);
+        Etape("attrait", CalculerAttrait);
+        Etape("niveaux", NiveauxEtDeparts);
+        Etape("incendies", () => IncendiesDuMois(Parcelles.Values.Where(p => p.Service == "caserne_pompiers").Select(p => p.Centre).ToList()));
+        Etape("budget", Budget);
+        Etape("services2", MettreAJourServices);
         Paliers();
-        MessagesDuMois();
+        Etape("messages", MessagesDuMois);
         Historique.Add(new PointMois(Mois, Population, EmploisLocaux, Math.Round(Argent), Math.Round(RecettesMois), Math.Round(DepensesMois)));
     }
 
     private void CalculerAttrait()
     {
-        // index spatial grossier (carrés de 250 m) des sources d'attrait et de nuisance
-        var parCarre = new Dictionary<(int, int), List<Parcelle>>();
+        // grille de 40 m des sources d'attrait et de nuisance (parcs, centrale au gaz, activités)
+        const double pasG = 40;
+        int nG = (int)Math.Ceiling(2 * DemiCote / pasG) + 1;
+        var parcs = new byte[nG * nG];
+        var gaz = new byte[nG * nG];
+        var activ = new byte[nG * nG];
+        void Tamponner(byte[] g, V2 c, double rayon)
+        {
+            int r = (int)Math.Ceiling(rayon / pasG);
+            int ci = (int)((c.X + DemiCote) / pasG), cj = (int)((c.Y + DemiCote) / pasG);
+            for (int j = Math.Max(0, cj - r); j <= Math.Min(nG - 1, cj + r); j++)
+                for (int i = Math.Max(0, ci - r); i <= Math.Min(nG - 1, ci + r); i++)
+                {
+                    var centre = new V2(-DemiCote + i * pasG, -DemiCote + j * pasG);
+                    if (V2.Distance(centre, c) <= rayon && g[j * nG + i] < 255) g[j * nG + i]++;
+                }
+        }
         foreach (var p in Parcelles.Values)
-            if ((p.Service != null && p.Service != "existant") || (p.Batiment != null && p.Batiment.Type == Zone.Activites && !p.Batiment.EnChantier))
+        {
+            if (p.Service == "parc") Tamponner(parcs, p.Centre, R.Services["parc"].RayonM);
+            else if (p.Service == "centrale_gaz") Tamponner(gaz, p.Centre, R.Services["centrale_gaz"].PollutionRayonM);
+            else if (p.Batiment is { Type: Zone.Activites, EnChantier: false }) Tamponner(activ, p.Centre, R.PollutionActivitesRayonM);
+        }
+        int Cellule(V2 c) => Math.Clamp((int)Math.Round((c.Y + DemiCote) / pasG), 0, nG - 1) * nG + Math.Clamp((int)Math.Round((c.X + DemiCote) / pasG), 0, nG - 1);
+
+        // index spatial des logements (carrés de 250 m)
+        var logementsParCarre = new Dictionary<(int, int), List<Parcelle>>();
+        foreach (var p in Parcelles.Values)
+            if (p.Batiment is { Type: Zone.Habitat })
             {
                 var c = Carre(p.Centre);
-                if (!parCarre.TryGetValue(c, out var l)) parCarre[c] = l = new List<Parcelle>();
+                if (!logementsParCarre.TryGetValue(c, out var l)) logementsParCarre[c] = l = new List<Parcelle>();
                 l.Add(p);
             }
-        IEnumerable<Parcelle> Voisins(V2 pos, double rayon)
+        IEnumerable<Parcelle> LogementsProches(V2 pos, double rayon)
         {
             int r = (int)Math.Ceiling(rayon / TailleCarre);
             var (cx, cy) = Carre(pos);
             for (int dx = -r; dx <= r; dx++)
                 for (int dy = -r; dy <= r; dy++)
-                    if (parCarre.TryGetValue((cx + dx, cy + dy), out var l))
+                    if (logementsParCarre.TryGetValue((cx + dx, cy + dy), out var l))
                         foreach (var p in l) if (V2.Distance(p.Centre, pos) <= rayon) yield return p;
         }
 
@@ -328,7 +371,7 @@ public sealed partial class Partie
         {
             var s = R.Services["ecole"];
             double places = s.Eleves;
-            foreach (var p in Parcelles.Values.Where(p => p.Batiment is { Type: Zone.Habitat } && V2.Distance(p.Centre, ecole.Centre) <= s.RayonM)
+            foreach (var p in LogementsProches(ecole.Centre, s.RayonM)
                          .OrderBy(p => V2.Distance(p.Centre, ecole.Centre)).ThenBy(p => p.Id))
             {
                 var b = p.Batiment!;
@@ -347,7 +390,7 @@ public sealed partial class Partie
         {
             var s = R.Services["centre_sante"];
             double places = s.Patients;
-            foreach (var p in Parcelles.Values.Where(p => p.Batiment is { Type: Zone.Habitat } && V2.Distance(p.Centre, cs.Centre) <= s.RayonM)
+            foreach (var p in LogementsProches(cs.Centre, s.RayonM)
                          .OrderBy(p => V2.Distance(p.Centre, cs.Centre)).ThenBy(p => p.Id))
             {
                 var b = p.Batiment!;
@@ -383,13 +426,9 @@ public sealed partial class Partie
             if (dEau < 300) a += 14 * (1 - dEau / 300);                       // vue sur l'eau
             if (Reseau.Aretes.TryGetValue(p.Arete, out var e) && e.Gabarit is "avenue" or "voie_rapide")
                 a += p.Zone == Zone.Habitat ? -6 : 6;                         // bruit / visibilité
-            foreach (var v in Voisins(p.Centre, 450))
-            {
-                double d = V2.Distance(v.Centre, p.Centre);
-                if (v.Service == "parc" && d <= R.Services["parc"].RayonM) a += 10;
-                else if (v.Service == "centrale_gaz" && p.Zone == Zone.Habitat && d <= R.Services["centrale_gaz"].PollutionRayonM) a -= 22;
-                else if (v.Batiment != null && p.Zone == Zone.Habitat && d <= R.PollutionActivitesRayonM) a -= 4;
-            }
+            int cg = Cellule(p.Centre);
+            a += 10 * parcs[cg];
+            if (p.Zone == Zone.Habitat) a -= 22 * gaz[cg] + 4 * Math.Max(0, activ[cg] - (p.Batiment is { Type: Zone.Activites } ? 1 : 0));
             if (Arrets.Values.Any(s => V2.Distance(s.Pos, p.Centre) <= R.Services["arret_bus"].RayonM) && Arrets.Count >= 2) a += 9;
             if (p.Batiment != null)
             {
@@ -408,7 +447,7 @@ public sealed partial class Partie
     private void NiveauxEtDeparts()
     {
         int niveauMax = Palier >= 3 ? 3 : 2;
-        int departs = 0;
+        int departs = 0, renovations = 0;
         foreach (var p in Parcelles.Values)
         {
             var b = p.Batiment;
@@ -425,7 +464,25 @@ public sealed partial class Partie
                 continue;
             }
             b.MoisSansService = 0;
-            if (b.Reel || b.Niveau >= niveauMax || b.MoisDepuisNiveau < R.Niveaux.MoisEntreNiveaux) continue;
+            if (b.Reel)
+            {
+                // les vrais bâtiments évoluent aussi : rénovation et surélévation quand le quartier est recherché
+                var ev = R.EvolutionBatimentsReels;
+                if (b.Niveau >= niveauMax || b.MoisDepuisNiveau < ev.MoisMinEntreRenovations) continue;
+                double demandeType = b.Type == Zone.Habitat ? DemandeHabitat : b.Type == Zone.Commerce ? DemandeCommerce : DemandeActivites;
+                double seuilR = b.Niveau == 1 ? R.Niveaux.AttraitNiveau2 : R.Niveaux.AttraitNiveau3;
+                if (p.Attrait >= seuilR && demandeType > ev.DemandeMin && (b.Type != Zone.Habitat || b.Occupants >= Capacite(b) * 0.9))
+                {
+                    b.Niveau++;
+                    b.MoisDepuisNiveau = 0;
+                    b.CapaciteFixe = (int)Math.Ceiling((b.CapaciteFixe ?? 1) * ev.FacteurCapacite);
+                    p.HauteurReelle += ev.HauteurAjouteeM;
+                    renovations++;
+                    CarresModifies.Add(Carre(p.Centre));
+                }
+                continue;
+            }
+            if (b.Niveau >= niveauMax || b.MoisDepuisNiveau < R.Niveaux.MoisEntreNiveaux) continue;
             double seuil = b.Niveau == 1 ? R.Niveaux.AttraitNiveau2 : R.Niveaux.AttraitNiveau3;
             bool plein = b.Type != Zone.Habitat || b.Occupants >= Capacite(b) * 0.9;
             if (p.Attrait >= seuil && plein)
@@ -436,6 +493,8 @@ public sealed partial class Partie
                 CarresModifies.Add(Carre(p.Centre));
             }
         }
+        if (renovations > 0)
+            MessageLimite("renovations", 60, "info", $"Le journal local : « {renovations} immeuble(s) rénové(s) et surélevé(s) : le quartier attire. »");
         if (departs > 0)
             Message("alerte", $"{departs} bâtiment(s) abandonné(s) : sans eau ou sans électricité, les occupants sont partis.");
     }
@@ -458,7 +517,7 @@ public sealed partial class Partie
         DetailRecettes["Impôts des commerces"] = empCommerce * R.Impots.CommerceParEmploi * ImpotCommerce / refT;
         DetailRecettes["Impôts des activités"] = empActivites * R.Impots.ActivitesParEmploi * ImpotActivites / refT;
 
-        double routes = Reseau.Aretes.Values.Where(e => !e.Departemental).Sum(e => e.Longueur / 1000 * R.Route(e.Gabarit).EntretienParKmMois);
+        double routes = Reseau.Aretes.Values.Where(e => !e.Departemental && !e.Importee).Sum(e => e.Longueur / 1000 * R.Route(e.Gabarit).EntretienParKmMois);
         DetailDepenses["Entretien des routes"] = routes;
         foreach (var g in Parcelles.Values.Where(p => p.Service != null).GroupBy(p => p.Service!).OrderBy(g => g.Key))
             DetailDepenses[R.Services[g.Key].Nom] = g.Count() * R.Services[g.Key].Entretien;

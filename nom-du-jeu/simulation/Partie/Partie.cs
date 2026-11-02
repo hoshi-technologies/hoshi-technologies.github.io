@@ -5,6 +5,19 @@ namespace Ville.Coeur;
 
 public enum Zone { Aucune, Habitat, Commerce, Activites }
 
+/// <summary>Comment commence la partie.</summary>
+public enum ModeDepart
+{
+    /// <summary>Seulement la vraie géographie : relief, eau. Aucune route.</summary>
+    TerrainSeul,
+    /// <summary>Géographie + grands axes réels (autoroutes, avenues).</summary>
+    GrandsAxes,
+    /// <summary>Géographie + toutes les vraies rues, sans bâtiments.</summary>
+    RoutesReelles,
+    /// <summary>La vraie ville complète : rues, bâtiments, population estimée.</summary>
+    VilleReelle,
+}
+
 public sealed class Batiment
 {
     public Zone Type { get; set; }
@@ -107,6 +120,53 @@ public sealed partial class Partie
     public bool BacASable { get; set; }
     /// <summary>Mode Ville réelle : la vraie ville existe au départ, eau et énergie viennent du réseau régional.</summary>
     public bool ModeVilleReelle { get; set; }
+    public ModeDepart Depart { get; set; } = ModeDepart.GrandsAxes;
+
+    /// <summary>Rayon (m) autour du centre où l'on peut construire. Les petites cartes sont entièrement ouvertes.</summary>
+    public double RayonConstructible
+    {
+        get
+        {
+            var r = R.Territoire.RayonsParPalierM;
+            if (BacASable || Paquet.Manifest.Ville.CoteKm <= 5 || r.Length == 0) return double.PositiveInfinity;
+            return r[Math.Min(Palier, r.Length - 1)];
+        }
+    }
+
+    public bool Constructible(V2 p) => p.Longueur <= RayonConstructible;
+
+    private string MessageTerritoire()
+    {
+        var r = R.Territoire.RayonsParPalierM;
+        int suivant = Enumerable.Range(Palier + 1, Math.Max(0, Math.Min(r.Length, R.Paliers.Count) - Palier - 1)).FirstOrDefault(-1);
+        return suivant > 0 ? $"Terrain pas encore ouvert à l'urbanisation : atteignez le palier « {R.Paliers[suivant].Nom} »." : "Terrain hors du territoire de la commune.";
+    }
+
+    /// <summary>Nouvelle partie selon le mode de départ choisi.</summary>
+    public static Partie Nouvelle(Reglages r, PaquetVille p, ModeDepart mode, ulong graine = 1)
+    {
+        switch (mode)
+        {
+            case ModeDepart.VilleReelle: return NouvelleVilleReelle(r, p, graine);
+            case ModeDepart.GrandsAxes: return NouvelleFondation(r, p, graine);
+        }
+        var partie = new Partie(r, p, graine)
+        {
+            Argent = mode == ModeDepart.RoutesReelles ? r.ArgentDepartRoutesReelles : r.ArgentDepart,
+            ImpotHabitat = r.Demande.ImpotReference, ImpotCommerce = r.Demande.ImpotReference, ImpotActivites = r.Demande.ImpotReference,
+            Depart = mode,
+        };
+        if (mode == ModeDepart.RoutesReelles)
+        {
+            partie.ImporterRoutesReelles(gratuites: true);
+            foreach (var e in partie.Reseau.Aretes.Values.ToList()) partie.GenererParcelles(e);
+            partie.Message("palier", "Les vraies rues sont là, mais la ville est vide. Zonez le long des rues, puis apportez l'eau et l'électricité.");
+        }
+        else
+            partie.Message("palier", "Terrain vierge. Tracez une première rue depuis le bord de la carte : c'est par là qu'arriveront les habitants.");
+        partie.MettreAJourServices();
+        return partie;
+    }
 
     // indicateurs (recalculés chaque jour)
     public int Population { get; private set; }
@@ -172,6 +232,7 @@ public sealed partial class Partie
             ImpotActivites = r.Demande.ImpotReference,
         };
         partie.ImporterAxesReels();
+        partie.Depart = ModeDepart.GrandsAxes;
         partie.Message("palier", r.Paliers[0].Message);
         partie.MettreAJourServices();
         return partie;
@@ -247,6 +308,7 @@ public sealed partial class Partie
             if (surEau > R.Routes.Pont.LongueurEauMaxM) raison = $"Pont trop long ({surEau:F0} m au-dessus de l'eau, maximum {R.Routes.Pont.LongueurEauMaxM:F0} m).";
             cout = Math.Round((l + surEau * (R.Routes.Pont.CoutMultiplicateur - 1)) * R.Route(gabarit).CoutParM);
         }
+        if (raison == null && (!Constructible(pa) || !Constructible(pb) || !Constructible((pa + pb) * 0.5))) raison = MessageTerritoire();
         if (raison == null)
         {
             var couloir = Grille.CellulesSegment(pa, pb, R.Route(gabarit).LargeurM / 2 + 0.5);
@@ -265,6 +327,9 @@ public sealed partial class Partie
         var decoupes = new List<ReseauVille.Decoupe>();
         var na = NoeudPour(a, decoupes);
         var nb = NoeudPour(b, decoupes);
+        // une route qui touche le bord de la carte est reliée au reste du monde
+        foreach (var n in new[] { na, nb })
+            if (Math.Max(Math.Abs(n.Pos.X), Math.Abs(n.Pos.Y)) > DemiCote - 25) n.Entree = true;
         if (na.Id == nb.Id) return Resultat.Non("Route trop courte.");
         var p = na.Pos; var q = nb.Pos;
         var sequence = new List<NoeudRoute> { na };
@@ -453,9 +518,10 @@ public sealed partial class Partie
     public Resultat Zoner(V2 centre, double rayon, Zone zone)
     {
         int n = 0;
+        if (!Constructible(centre)) return Resultat.Non(MessageTerritoire());
         foreach (var p in ParcellesProches(centre, rayon))
         {
-            if (p.Service != null || p.Zone == zone) continue;
+            if (p.Service != null || p.Zone == zone || !Constructible(p.Centre)) continue;
             if (p.Batiment != null) p.Batiment = null; // changer la zone d'un terrain bâti le fait démolir
             p.Zone = zone;
             CarresModifies.Add(Carre(p.Centre));
@@ -471,6 +537,7 @@ public sealed partial class Partie
     {
         if (!R.Services.TryGetValue(type, out var s)) return Resultat.Non("Service inconnu.");
         if (!ServiceDisponible(type)) return Resultat.Non($"Disponible au palier « {R.Paliers[s.Palier].Nom} ».");
+        if (!Constructible(p)) return Resultat.Non(MessageTerritoire());
         if (type == "arret_bus") return PlacerArret(p, s);
         if (!BacASable && s.Cout > Argent) return Resultat.Non("Pas assez d'argent.");
         var par = ParcelleSous(p) ?? ParcellesProches(p, 30).Where(x => x.Libre).OrderBy(x => V2.Distance(x.Centre, p)).FirstOrDefault();

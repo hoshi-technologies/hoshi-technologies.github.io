@@ -40,7 +40,9 @@ public sealed class ConstructeurVille
     public Node3D ConstruireTerrain()
     {
         var r = _p.Manifest.Relief;
-        int nc = r.Colonnes, nl = r.Lignes;
+        // grandes cartes : un point sur deux (grille de 20 m) pour garder un affichage fluide
+        int pas = r.Colonnes > 600 ? 2 : 1;
+        int nc = (r.Colonnes - 1) / pas + 1, nl = (r.Lignes - 1) / pas + 1;
         double demi = _p.Manifest.Repere.DemiCoteM;
         var sommets = new Vector3[nc * nl];
         var couleurs = new Color[nc * nl];
@@ -49,8 +51,8 @@ public sealed class ConstructeurVille
             for (int c = 0; c < nc; c++)
             {
                 int i = l * nc + c;
-                float z = _p.Relief[i];
-                sommets[i] = VersGodot(-demi + c * r.PasM, demi - l * r.PasM, z);
+                float z = _p.Relief[l * pas * r.Colonnes + c * pas];
+                sommets[i] = VersGodot(-demi + c * pas * r.PasM, demi - l * pas * r.PasM, z);
                 float t = (z - altMin) / plage;
                 couleurs[i] = new Color(0.55f, 0.66f, 0.42f).Lerp(new Color(0.62f, 0.60f, 0.52f), Mathf.Clamp(t * 1.5f, 0, 1));
             }
@@ -76,9 +78,16 @@ public sealed class ConstructeurVille
         {
             var poly = s.Contour.Select(p => new Vector2((float)p[0], (float)p[1])).ToArray();
             var tri = Geometry2D.TriangulatePolygon(poly);
-            if (tri.Length == 0) continue;
             // niveau de l'eau : altitude minimale du terrain sur le contour (le lac est déjà plat)
-            float niveau = s.Contour.Min(p => _p.Altitude(p[0], p[1])) + 0.3f;
+            // niveau de l'eau : altitude médiane du relief À L'INTÉRIEUR du plan d'eau (les lacs y sont aplanis)
+            var interieur = PointsInterieurs(poly).Select(q => _p.Altitude(q.X, q.Y)).OrderBy(z => z).ToArray();
+            float niveau = (interieur.Length > 0 ? interieur[interieur.Length / 2] : s.Contour.Min(p => _p.Altitude(p[0], p[1]))) + 0.5f;
+            if (tri.Length == 0)
+            {
+                // forme trop complexe (grand lac) : remplissage par bandes de 10 m
+                RemplirParBandes(poly, niveau, sommets, indices);
+                continue;
+            }
             int baseIdx = sommets.Count;
             sommets.AddRange(poly.Select(p => VersGodot(p.X, p.Y, niveau)));
             indices.AddRange(tri.Select(t => baseIdx + t));
@@ -89,6 +98,53 @@ public sealed class ConstructeurVille
         mat.Metallic = 0.1f;
         if (sommets.Count == 0) return new Node3D { Name = "Eau" };
         return new MeshInstance3D { Name = "Eau", Mesh = Maillage(sommets.ToArray(), n, col, indices.ToArray()), MaterialOverride = mat };
+    }
+
+    /// <summary>Quelques points à l'intérieur d'un polygone (milieux des bandes horizontales).</summary>
+    private static List<Vector2> PointsInterieurs(Vector2[] poly)
+    {
+        var res = new List<Vector2>();
+        float minY = poly.Min(p => p.Y), maxY = poly.Max(p => p.Y);
+        float pas = Math.Max(5f, (maxY - minY) / 12f);
+        var xs = new List<float>();
+        for (float y = minY + pas / 2; y < maxY; y += pas)
+        {
+            xs.Clear();
+            for (int k = 0, l = poly.Length - 1; k < poly.Length; l = k++)
+            {
+                var a = poly[k]; var b = poly[l];
+                if ((a.Y > y) != (b.Y > y)) xs.Add(a.X + (y - a.Y) * (b.X - a.X) / (b.Y - a.Y));
+            }
+            xs.Sort();
+            for (int k = 0; k + 1 < xs.Count; k += 2) res.Add(new Vector2((xs[k] + xs[k + 1]) / 2, y));
+        }
+        return res;
+    }
+
+    private static void RemplirParBandes(Vector2[] poly, float niveau, List<Vector3> sommets, List<int> indices)
+    {
+        const float pas = 10f;
+        float minY = poly.Min(p => p.Y), maxY = poly.Max(p => p.Y);
+        var xs = new List<float>();
+        for (float y = minY + pas / 2; y < maxY; y += pas)
+        {
+            xs.Clear();
+            for (int k = 0, l = poly.Length - 1; k < poly.Length; l = k++)
+            {
+                var a = poly[k]; var b = poly[l];
+                if ((a.Y > y) != (b.Y > y)) xs.Add(a.X + (y - a.Y) * (b.X - a.X) / (b.Y - a.Y));
+            }
+            xs.Sort();
+            for (int k = 0; k + 1 < xs.Count; k += 2)
+            {
+                int i = sommets.Count;
+                sommets.Add(VersGodot(xs[k], y - pas / 2 - 0.2f, niveau));
+                sommets.Add(VersGodot(xs[k + 1], y - pas / 2 - 0.2f, niveau));
+                sommets.Add(VersGodot(xs[k + 1], y + pas / 2 + 0.2f, niveau));
+                sommets.Add(VersGodot(xs[k], y + pas / 2 + 0.2f, niveau));
+                indices.AddRange(new[] { i, i + 1, i + 2, i, i + 2, i + 3 });
+            }
+        }
     }
 
     // ---------------------------------------------------------------- routes

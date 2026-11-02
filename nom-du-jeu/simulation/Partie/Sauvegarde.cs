@@ -32,10 +32,13 @@ public sealed class SauvegardeDto
     // ajoutés après la v1 (champs facultatifs : les anciennes sauvegardes restent lisibles)
     public bool BacASable { get; set; }
     public bool ModeVilleReelle { get; set; }
+    public ModeDepart Depart { get; set; } = ModeDepart.GrandsAxes;
+    /// <summary>Taille de la carte (quartier, ville…) : choisit le bon paquet au chargement.</summary>
+    public string Taille { get; set; } = "quartier";
 }
 
 public sealed record NoeudDto(int Id, double X, double Y, bool Entree);
-public sealed record AreteDto(int Id, int A, int B, double[] Trace, string Gabarit, bool Departemental, string? Nom, bool Pont = false);
+public sealed record AreteDto(int Id, int A, int B, double[] Trace, string Gabarit, bool Departemental, string? Nom, bool Pont = false, bool Importee = false);
 public sealed record ArretDto(int Id, int Arete, double X, double Y);
 public sealed record BatimentDto(Zone Type, int Niveau, double Occupants, int JoursChantier, int MoisDepuisNiveau, int MoisSansService, bool Reel = false, int? CapaciteFixe = null);
 public sealed record ParcelleDto(int Id, int Arete, double[] Geo, Zone Zone, string? Service, double Attrait, int Variante, BatimentDto? Batiment, double[]? Contour = null, double HauteurReelle = 0);
@@ -51,7 +54,7 @@ public sealed partial class Partie
         ProchainNoeud = Reseau.ProchainNoeud, ProchaineArete = Reseau.ProchaineArete,
         ProchaineParcelle = _prochaineParcelle, ProchainArret = _prochainArret,
         Noeuds = Reseau.Noeuds.Values.Select(n => new NoeudDto(n.Id, n.Pos.X, n.Pos.Y, n.Entree)).ToList(),
-        Aretes = Reseau.Aretes.Values.Select(e => new AreteDto(e.Id, e.A, e.B, e.Trace.SelectMany(p => new[] { p.X, p.Y }).ToArray(), e.Gabarit, e.Departemental, e.Nom, e.Pont)).ToList(),
+        Aretes = Reseau.Aretes.Values.Select(e => new AreteDto(e.Id, e.A, e.B, e.Trace.SelectMany(p => new[] { p.X, p.Y }).ToArray(), e.Gabarit, e.Departemental, e.Nom, e.Pont, e.Importee)).ToList(),
         Parcelles = Parcelles.Values.Select(p => new ParcelleDto(p.Id, p.Arete,
             new[] { p.Centre.X, p.Centre.Y, p.Dir.X, p.Dir.Y, p.Normale.X, p.Normale.Y }, p.Zone, p.Service, p.Attrait, p.Variante,
             p.Batiment == null ? null : new BatimentDto(p.Batiment.Type, p.Batiment.Niveau, p.Batiment.Occupants, p.Batiment.JoursChantier, p.Batiment.MoisDepuisNiveau, p.Batiment.MoisSansService, p.Batiment.Reel, p.Batiment.CapaciteFixe),
@@ -63,6 +66,8 @@ public sealed partial class Partie
         DernierMessage = new Dictionary<string, int>(_dernierMessage),
         BacASable = BacASable,
         ModeVilleReelle = ModeVilleReelle,
+        Depart = Depart,
+        Taille = Paquet.Manifest.Ville.Taille,
     };
 
     public string Sauvegarder() => JsonSerializer.Serialize(VersDto(), Reglages.Json);
@@ -95,11 +100,12 @@ public sealed partial class Partie
     {
         var dto = JsonSerializer.Deserialize<SauvegardeDto>(json, Reglages.Json) ?? throw new InvalidDataException("Sauvegarde illisible.");
         Migrer(dto);
+        if (dto.Taille != paquet.Manifest.Ville.Taille) throw new InvalidDataException($"Cette sauvegarde utilise la carte « {dto.Taille} ».");
         if (dto.VilleId != paquet.Manifest.Ville.Id) throw new InvalidDataException($"Cette sauvegarde concerne la ville « {dto.VilleId} ».");
         var p = new Partie(r, paquet, 1)
         {
             Jour = dto.Jour, Argent = dto.Argent, ImpotHabitat = dto.ImpotHabitat, ImpotCommerce = dto.ImpotCommerce,
-            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable, ModeVilleReelle = dto.ModeVilleReelle,
+            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable, ModeVilleReelle = dto.ModeVilleReelle, Depart = dto.Depart,
         };
         p._alea.Etat = dto.Alea;
         foreach (var n in dto.Noeuds) p.Reseau.RestaurerNoeud(new NoeudRoute { Id = n.Id, Pos = new V2(n.X, n.Y), Entree = n.Entree });
@@ -107,7 +113,7 @@ public sealed partial class Partie
         {
             var trace = new List<V2>();
             for (int i = 0; i + 1 < e.Trace.Length; i += 2) trace.Add(new V2(e.Trace[i], e.Trace[i + 1]));
-            var a = new AreteRoute { Id = e.Id, A = e.A, B = e.B, Trace = trace, Gabarit = e.Gabarit, Departemental = e.Departemental, Nom = e.Nom, Pont = e.Pont };
+            var a = new AreteRoute { Id = e.Id, A = e.A, B = e.B, Trace = trace, Gabarit = e.Gabarit, Departemental = e.Departemental, Nom = e.Nom, Pont = e.Pont, Importee = e.Importee };
             p.Reseau.RestaurerArete(a);
             p.RasteriserRoute(a);
         }
@@ -146,6 +152,13 @@ public sealed partial class Partie
     }
 
     internal void CalculerAttraitPublic() => CalculerAttrait();
+
+    /// <summary>Lit seulement la ville et la taille d'une sauvegarde (pour charger la bonne carte).</summary>
+    public static (string villeId, string taille) LireEntete(string json)
+    {
+        var dto = JsonSerializer.Deserialize<SauvegardeDto>(json, Reglages.Json) ?? throw new InvalidDataException("Sauvegarde illisible.");
+        return (dto.VilleId, dto.Taille);
+    }
 
     /// <summary>Fait passer une ancienne sauvegarde au format actuel, version par version.</summary>
     private static void Migrer(SauvegardeDto dto)

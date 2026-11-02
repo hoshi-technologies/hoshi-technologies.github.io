@@ -22,6 +22,8 @@ public sealed class AreteRoute
     public string? Nom { get; set; }
     /// <summary>Tronçon construit au-dessus de l'eau.</summary>
     public bool Pont { get; set; }
+    /// <summary>Rue réelle importée au départ (mode « vraies rues ») : déjà payée, entretien gratuit.</summary>
+    public bool Importee { get; set; }
     public double Longueur => Geo.LongueurPolyligne(Trace);
 }
 

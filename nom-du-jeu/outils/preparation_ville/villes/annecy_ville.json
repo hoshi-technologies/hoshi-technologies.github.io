@@ -1,0 +1,11 @@
+{
+  "id": "fr-annecy",
+  "nom": "Annecy",
+  "pays": "FR",
+  "region": "Auvergne-Rhône-Alpes",
+  "centre": {"lat": 45.8992, "lon": 6.1294},
+  "taille": "ville",
+  "cote_km": 10.0,
+  "statut": "en_verification",
+  "notes": "Taille Ville (10 x 10 km) : Annecy, une partie du lac, le Semnoz et les communes voisines."
+}

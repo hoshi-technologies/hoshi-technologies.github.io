@@ -16,7 +16,10 @@
 | Réseaux | Eau (château d'eau, pompage dans le lac) et électricité (solaire, gaz), distribuées par les rues reliées. |
 | Services | École et centre de santé (places limitées, rayon d'action), pompiers (incendies réels à partir du palier Village), police (insécurité au-delà de 3 000 hab.), centre de tri des déchets, parc, ligne de bus avec bus animés. |
 | Ponts et courbes | Les routes peuvent franchir l'eau (jusqu'à 450 m, 5 fois plus cher) et être courbes (départ, point de courbure, arrivée). |
-| Ville réelle | Nouveau mode : la vraie Annecy existe au départ (9 615 bâtiments réels, rues, écoles), population et emplois estimés depuis la surface des bâtiments ; eau, électricité et déchets achetés au réseau régional. |
+| Départs | 4 façons de commencer : terrain seul (rue à relier au bord de la carte), terrain + grands axes, vraies rues sans bâtiments, ville réelle complète. |
+| Cartes | Quartier (4 × 4 km) ou Ville (10 × 10 km, 37 641 bâtiments réels). Sur la grande carte, le territoire constructible s'agrandit à chaque palier (Ville à 10 000 habitants, Grande ville à 25 000). |
+| Évolution | Les vrais bâtiments se rénovent et se surélèvent quand le quartier est recherché ; les bâtiments construits par le joueur montent de niveau. |
+| Ville réelle | Mode : la vraie Annecy existe au départ (9 615 bâtiments réels, rues, écoles), population et emplois estimés depuis la surface des bâtiments ; eau, électricité et déchets achetés au réseau régional. |
 | Trafic | Heure de pointe calculée chaque mois : les rues saturées font baisser l'attrait de l'habitat (et aident les commerces). Le bus réduit le nombre de voitures. |
 | Vues (V) | Réseaux, attrait, trafic, services. |
 | Bac à sable | Argent illimité, tout débloqué. |
@@ -30,7 +33,7 @@
 | Sauvegarde | Automatique tous les 3 mois de jeu, F5, bouton « Continuer ». |
 
 ## Ce qui a été testé
-- **35 tests automatiques réussis (27 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
+- **37 tests automatiques réussis (29 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
 - **Une partie complète de 20 mois jouée par le « robot maire »** (`bench/Ville.Bench -- --robot`) :
   - la ville passe de 0 à environ 3 500 habitants ;
   - 3 paliers sont franchis ;

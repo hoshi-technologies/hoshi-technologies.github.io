@@ -27,6 +27,9 @@ public sealed class Reglages
     public List<ReglagesPalier> Paliers { get; set; } = new();
     public ReglagesRisques Risques { get; set; } = new();
     public ReglagesVilleReelle VilleReelle { get; set; } = new();
+    public ReglagesTerritoire Territoire { get; set; } = new();
+    public ReglagesEvolution EvolutionBatimentsReels { get; set; } = new();
+    public double ArgentDepartRoutesReelles { get; set; } = 400000;
 
     public static readonly JsonSerializerOptions Json = new()
     {
@@ -58,6 +61,19 @@ public sealed class ReglagesRoutes
     public Dictionary<string, double> CapaciteVehicules { get; set; } = new();
     public double PartTrajetsVoiture { get; set; } = 0.65;
     public double PartHeureDePointe { get; set; } = 0.35;
+}
+
+public sealed class ReglagesTerritoire
+{
+    public double[] RayonsParPalierM { get; set; } = Array.Empty<double>();
+}
+
+public sealed class ReglagesEvolution
+{
+    public int MoisMinEntreRenovations { get; set; } = 12;
+    public double DemandeMin { get; set; } = 15;
+    public double FacteurCapacite { get; set; } = 1.4;
+    public double HauteurAjouteeM { get; set; } = 6;
 }
 
 public sealed class ReglagesVilleReelle

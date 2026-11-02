@@ -14,6 +14,7 @@ public sealed partial class Partie
         var partie = new Partie(r, p, graine)
         {
             ModeVilleReelle = true,
+            Depart = ModeDepart.VilleReelle,
             ImpotHabitat = r.Demande.ImpotReference,
             ImpotCommerce = r.Demande.ImpotReference,
             ImpotActivites = r.Demande.ImpotReference,
@@ -31,7 +32,7 @@ public sealed partial class Partie
         return partie;
     }
 
-    private void ImporterRoutesReelles()
+    private void ImporterRoutesReelles(bool gratuites = false)
     {
         var correspondance = new Dictionary<int, int>();
         int Noeud(int idPaquet)
@@ -52,6 +53,7 @@ public sealed partial class Partie
             var trace = t.Trace.Select(c => new V2(c[0], c[1])).ToList();
             var e = Reseau.NouvelleArete(Noeud(t.A), Noeud(t.B), trace, g, departemental: g != "rue", nom: t.Nom);
             e.Pont = t.Pont;
+            e.Importee = gratuites && g == "rue";
             RasteriserRoute(e);
         }
     }

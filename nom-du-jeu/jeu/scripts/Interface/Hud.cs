@@ -358,13 +358,13 @@ public partial class Hud : Control
         if (p.Argent < 0) c.Add("Budget négatif : augmentez un peu les taxes (Budget) ou empruntez.");
         if (p.EauProduite > 0 && p.EauConsommee > p.EauProduite * 0.9) c.Add("L'eau va manquer : ajoutez un château d'eau ou une station de pompage.");
         if (p.ElecProduite > 0 && p.ElecConsommee > p.ElecProduite * 0.9) c.Add("L'électricité va manquer : ajoutez une centrale.");
-        if (A("centre_tri") && p.DechetsProduits > p.DechetsCapacite * 0.9) c.Add("Les déchets s'accumulent : construisez un centre de tri.");
+        if (A("centre_tri") && !p.ModeVilleReelle && p.DechetsProduits > p.DechetsCapacite * 0.9) c.Add("Les déchets s'accumulent : construisez un centre de tri.");
         if (p.Actifs > 150 && p.Chomeurs > p.Actifs * 0.1) c.Add($"{p.Chomeurs:N0} chômeurs : zonez des activités ou des commerces.");
         if (p.DemandeHabitat > 40 && !p.Parcelles.Values.Any(x => x.Zone == Zone.Habitat && x.Libre)) c.Add("Les gens veulent s'installer : zonez plus d'habitat.");
         if (p.DemandeCommerce > 40 && !p.Parcelles.Values.Any(x => x.Zone == Zone.Commerce && x.Libre)) c.Add("Les habitants manquent de commerces : zonez du commerce.");
         if (A("ecole") && p.Enfants > 60 && !Existe("ecole")) c.Add("Des enfants sans école : construisez une école.");
         if (A("centre_sante") && p.Population > p.R.Risques.PopulationSansSanteMax && !Existe("centre_sante")) c.Add("Pas de médecin : construisez un centre de santé.");
-        if (A("caserne_pompiers") && !Existe("caserne_pompiers") && p.Palier >= 2) c.Add("Risque d'incendie : construisez une caserne de pompiers.");
+        if (A("caserne_pompiers") && !p.ModeVilleReelle && !Existe("caserne_pompiers") && p.Palier >= 2) c.Add("Risque d'incendie : construisez une caserne de pompiers.");
         if (A("commissariat") && p.Population > p.R.Risques.PopulationSansPoliceMax && !Existe("commissariat")) c.Add("Insécurité : construisez un commissariat.");
         if (p.RueLaPlusChargee != null) c.Add($"Bouchons sur {p.RueLaPlusChargee} : une rue parallèle ou une ligne de bus aidera (vue trafic : V).");
         return c.Count == 0 ? "" : "\n\nCONSEILS DU MOMENT\n• " + string.Join("\n• ", c.Take(3));
@@ -381,7 +381,7 @@ public partial class Hud : Control
         string c(bool ok) => ok ? "[x]" : "[  ]";
         _objectifs.Text = !p.ModeVilleReelle && !(rue && hab && eau && elec && emplois)
             ? "PREMIERS PAS\n" +
-              $"{c(rue)} Tracer une rue reliée à un grand axe (gris clair)\n" +
+              $"{c(rue)} Tracer une rue reliée à un grand axe ou au bord de la carte\n" +
               $"{c(hab)} Zoner de l'habitat le long de la rue\n" +
               $"{c(eau)} Construire un château d'eau\n" +
               $"{c(elec)} Construire une centrale solaire\n" +

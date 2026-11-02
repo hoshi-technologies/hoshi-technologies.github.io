@@ -42,3 +42,15 @@ Commande : `dotnet run -c Release -- --reelle <paquet> <réglages> 12`.
 | Sauvegarde | 12 Mo en JSON, environ 3 Mo une fois compressée |
 
 Images (rendu logiciel) : `lot6_ville_reelle_ensemble.png`, `lot6_ville_reelle_quartier.png`.
+
+## Carte Ville (10 × 10 km) en mode Ville réelle
+
+| Mesure | Résultat |
+|---|---|
+| Paquet de données | 37 641 bâtiments, 44 099 tronçons, 13 Mo, préparé en 60 s |
+| Création de la partie | environ 5 s, 197 000 habitants estimés (**estimation**), 50 101 parcelles |
+| Jour de jeu ordinaire | 4 à 6 ms |
+| Fin de mois | 370 à 530 ms (« saccade » visible une fois par minute de jeu à vitesse normale). Avant optimisation : 1 400 ms |
+| Sauvegarde | 48 Mo en JSON (environ 10 Mo compressée) |
+
+Il reste à améliorer : faire les calculs de fin de mois en arrière-plan, et alléger la sauvegarde (ne pas réécrire les contours des bâtiments réels, qui sont déjà dans le paquet).

@@ -3,12 +3,18 @@
 1. Décompresser tout le dossier (clic droit > Extraire tout).
 2. Double-cliquer sur Prototype.exe.
    Si Windows affiche « Windows a protégé votre ordinateur » : « Informations complémentaires » > « Exécuter quand même ».
-3. « Nouvelle partie » (ou « Bac à sable » pour construire sans limite). Suivez les objectifs en haut à gauche. F1 : aide.
+3. Choisissez la carte (Quartier 4 km ou Ville 10 km), puis comment commencer :
+   - Terrain seul : la vraie géographie, aucune route (reliez votre première rue au bord de la carte)
+   - Terrain et grands axes réels
+   - Vraies rues sans bâtiments
+   - Ville réelle : Annecy telle qu'elle est
+   Suivez les objectifs en haut à gauche. F1 : aide.
 
 En bref :
 - Routes > Rue : cliquez sur un grand axe gris, puis plus loin. Clic droit pour arrêter. On peut franchir l'eau (pont, plus cher).
 - Zones > Habitat : maintenez le clic gauche le long de vos rues.
-- Menu « Ville réelle » : la vraie Annecy déjà construite, à gérer et transformer.
+- Sur la carte Ville (10 km), le territoire constructible (cercle jaune) s'agrandit à chaque palier.
+- Les vrais bâtiments évoluent : un quartier recherché se rénove et se surélève.
 - Eau & énergie : un château d'eau et une centrale solaire le long d'une rue.
 - Puis commerces et activités (emplois), école, santé, pompiers, police, déchets, parcs, bus...
 - V : vues d'information (réseaux, attrait, trafic, services). G : vraie ville d'Annecy en transparence.

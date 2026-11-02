@@ -55,7 +55,11 @@ if (args.Length > 0 && args[0] == "--reelle")
     for (int m = 0; m < mois; m++)
     {
         sw.Restart();
-        for (int j = 0; j < 30; j++) partie.AvancerJour();
+        var jours = new List<double>();
+        var sj = Stopwatch.StartNew();
+        for (int j = 0; j < 30; j++) { sj.Restart(); partie.AvancerJour(); jours.Add(sj.Elapsed.TotalMilliseconds); }
+        jours.Sort();
+        Console.WriteLine($"   jour médian {jours[15]:F1} ms, jour max (fin de mois) {jours[^1]:F0} ms : " + string.Join(", ", partie.ChronoFinDeMois.Select(kv => $"{kv.Key} {kv.Value:F0}")));
         var p = partie;
         Console.WriteLine($"mois {p.Mois,3} pop {p.Population,7} emplois {p.EmploisLocaux,6} chômeurs {p.Chomeurs,5} argent {p.Argent,12:N0} rec {p.RecettesMois,9:N0} dep {p.DepensesMois,9:N0} " +
             $"D {p.DemandeHabitat,4:F0}/{p.DemandeCommerce,4:F0}/{p.DemandeActivites,4:F0} bouchon {(p.Congestion.Count > 0 ? p.Congestion.Values.Max() : 0):F2} feux {p.Incendies} ({sw.ElapsedMilliseconds} ms)");

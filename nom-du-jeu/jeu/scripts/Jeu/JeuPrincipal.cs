@@ -39,6 +39,59 @@ public partial class JeuPrincipal : Node3D
     private const double JoursParSeconde = 0.5;   // vitesse normale : 1 mois = 60 s
     private static readonly int[] Multiplicateurs = { 0, 1, 2, 4 };
     private string _optionAuto = "";
+    private readonly List<Node3D> _decor = new();
+    private MeshInstance3D _territoire = null!;
+    private readonly ImmediateMesh _territoireMesh = new();
+    private double _rayonAffiche = -1;
+    private CanvasLayer _calque = null!;
+
+    /// <summary>Charge la carte d'une taille (quartier 4 km, ville 10 km) et reconstruit le décor.</summary>
+    private void ChargerCarte(string taille)
+    {
+        if (_paquet != null && _paquet.Manifest.Ville.Taille == taille) return;
+        _paquet = PaquetVille.Charger(System.IO.Path.Combine(Racine(), "donnees", "villes", $"fr-annecy_{taille}_v1"));
+        foreach (var n in _decor) n.QueueFree();
+        _decor.Clear();
+        var decor = new ConstructeurVille(_paquet);
+        _decor.Add(decor.ConstruireTerrain());
+        _decor.Add(decor.ConstruireEau());
+        foreach (var n in _decor) AddChild(n);
+        _fantome?.QueueFree();
+        _fantome = null;
+        if (_camera != null)
+        {
+            _camera.Demi = (float)_paquet.Manifest.Repere.DemiCoteM - 50;
+            _camera.Altitude = (x, z) => _paquet.Altitude(x, -z);
+        }
+    }
+
+    public static bool CarteDisponible(string taille) =>
+        System.IO.Directory.Exists(System.IO.Path.Combine(Racine(), "donnees", "villes", $"fr-annecy_{taille}_v1"));
+
+    private void DessinerTerritoire()
+    {
+        double r = _partie?.RayonConstructible ?? double.PositiveInfinity;
+        if (r == _rayonAffiche) return;
+        _rayonAffiche = r;
+        _territoireMesh.ClearSurfaces();
+        if (double.IsInfinity(r) || _partie == null) return;
+        _territoireMesh.SurfaceBegin(Mesh.PrimitiveType.Triangles);
+        int n = 180;
+        for (int i = 0; i < n; i++)
+        {
+            double a0 = Math.Tau * i / n, a1 = Math.Tau * (i + 1) / n;
+            var p0 = new V2(Math.Cos(a0) * r, Math.Sin(a0) * r); var p1 = new V2(Math.Cos(a1) * r, Math.Sin(a1) * r);
+            if (p0.Longueur > _partie.DemiCote * 1.4) continue;
+            var q0 = RenduVille.G(_partie, p0, 1); var q1 = RenduVille.G(_partie, p1, 1);
+            var col = new Color(1f, 0.95f, 0.6f, 0.75f);
+            foreach (var q in new[] { q0, q1, q1 + Vector3.Up * 8, q0, q1 + Vector3.Up * 8, q0 + Vector3.Up * 8 })
+            {
+                _territoireMesh.SurfaceSetColor(q.Y - Mathf.Min(q0.Y, q1.Y) > 4 ? col with { A = 0 } : col);
+                _territoireMesh.SurfaceAddVertex(q);
+            }
+        }
+        _territoireMesh.SurfaceEnd();
+    }
 
     private static string Racine()
     {
@@ -52,14 +105,11 @@ public partial class JeuPrincipal : Node3D
     {
         var racine = Racine();
         _reglages = Reglages.Charger(System.IO.Path.Combine(racine, "donnees", "reglages", "prototype.json"));
-        _paquet = PaquetVille.Charger(System.IO.Path.Combine(racine, "donnees", "villes", "fr-annecy_quartier_v1"));
         _dossierSauvegardes = ProjectSettings.GlobalizePath("user://sauvegardes");
         System.IO.Directory.CreateDirectory(_dossierSauvegardes);
 
         Ambiance();
-        var decor = new ConstructeurVille(_paquet);
-        AddChild(decor.ConstruireTerrain());
-        AddChild(decor.ConstruireEau());
+        ChargerCarte("quartier");
 
         _rendu = new RenduVille { Name = "RenduVille" };
         _trafic = new RenduTrafic { Name = "Trafic" };
@@ -70,6 +120,9 @@ public partial class JeuPrincipal : Node3D
         AddChild(_apercu);
 
         _camera = new CameraVille { Demi = (float)_paquet.Manifest.Repere.DemiCoteM - 50, Altitude = (x, z) => _paquet.Altitude(x, -z) };
+        _territoire = new MeshInstance3D { Mesh = _territoireMesh, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
+            MaterialOverride = new StandardMaterial3D { VertexColorUseAsAlbedo = true, ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, Transparency = BaseMaterial3D.TransparencyEnum.Alpha } };
+        AddChild(_territoire);
         AddChild(_camera);
         _camera.Cible = new Vector3(-700, 0, -390);
         _camera.Distance = 1100;
@@ -83,11 +136,15 @@ public partial class JeuPrincipal : Node3D
         _hud.CalqueBascule = BasculerFantome;
         _hud.Sauvegarder = () => Sauvegarder("rapide", true);
         _hud.VueSuivante = VueSuivante;
+        _calque = calque;
         _menu = Menu();
         calque.AddChild(_menu);
 
         foreach (var a in OS.GetCmdlineUserArgs())
+        {
             if (a.StartsWith("--auto=")) _optionAuto = a["--auto=".Length..];
+            if (a.StartsWith("--carte=")) ChargerCarte(a["--carte=".Length..]);
+        }
         if (_optionAuto != "") CallDeferred(nameof(ModeAuto));
     }
 
@@ -106,26 +163,45 @@ public partial class JeuPrincipal : Node3D
         titre.AddThemeFontSizeOverride("font_size", 44);
         v.AddChild(titre);
         v.AddChild(new Label { Text = "Prends les commandes de ta vraie ville.  —  Prototype de plaisir", HorizontalAlignment = HorizontalAlignment.Center });
+        // taille de la carte
+        var tailles = new HBoxContainer();
+        tailles.AddChild(new Label { Text = "Carte : " });
+        foreach (var (t, nom) in new[] { ("quartier", "Quartier (4 × 4 km)"), ("ville", "Ville (10 × 10 km)") })
+        {
+            if (!CarteDisponible(t)) continue;
+            var b = new Button { Text = nom, ToggleMode = true, ButtonPressed = _paquet.Manifest.Ville.Taille == t };
+            b.Pressed += () => { ChargerCarte(t); ReconstruireMenu(); };
+            tailles.AddChild(b);
+        }
+        v.AddChild(tailles);
         var q = _paquet.Manifest.Qualite;
         string Qv(string k) => q.TryGetProperty(k, out var e) ? e.ToString() : "?";
         var note = new Label
         {
-            Text = $"\nVille : {_paquet.Manifest.Ville.Nom} (zone de {_paquet.Manifest.Ville.CoteKm} × {_paquet.Manifest.Ville.CoteKm} km) — mode Fondation\n" +
+            Text = $"Ville : {_paquet.Manifest.Ville.Nom} (zone de {_paquet.Manifest.Ville.CoteKm} × {_paquet.Manifest.Ville.CoteKm} km)" +
+                   (_paquet.Manifest.Ville.CoteKm > 5 ? " — le territoire constructible s'agrandit à chaque palier\n" : "\n") +
                    $"Qualité des données : {Qv("note_sur_100")}/100\n" +
                    $"  • {Qv("batiments")} bâtiments réels ({Qv("pct_batiments_osm")} % cartographiés à la main), hauteurs réelles : {Qv("pct_hauteur_reelle")} % (le reste est estimé)\n" +
                    $"  • relief Copernicus 30 m (sol estimé), {Qv("km_routes_carrossables")} km de routes réelles\n" +
-                   "Vous partez de la vraie géographie et des grands axes réels. À vous de bâtir la ville.\n",
+                   (_paquet.Manifest.Ville.CoteKm > 5 ? "Grande carte : un PC récent est conseillé pour le mode « Ville réelle ».\n" : ""),
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
         };
         v.AddChild(note);
-        var nouvelle = new Button { Text = "Nouvelle partie", CustomMinimumSize = new Vector2(0, 44) };
-        nouvelle.Pressed += () => Commencer(null);
-        v.AddChild(nouvelle);
-        var reelle = new Button { Text = $"Ville réelle : {_paquet.Manifest.Ville.Nom} telle qu'elle est (population estimée)", CustomMinimumSize = new Vector2(0, 44) };
-        reelle.Pressed += () => Commencer(null, villeReelle: true);
-        v.AddChild(reelle);
-        var sable = new Button { Text = "Bac à sable (argent illimité, tout débloqué)", CustomMinimumSize = new Vector2(0, 36) };
-        sable.Pressed += () => Commencer(null, bacASable: true);
+        v.AddChild(new Label { Text = "Comment voulez-vous commencer ?" });
+        foreach (var (mode, texte) in new[]
+                 {
+                     (ModeDepart.TerrainSeul, "Terrain seul — la vraie géographie, aucune route"),
+                     (ModeDepart.GrandsAxes, "Terrain et grands axes réels — à vous de bâtir la ville"),
+                     (ModeDepart.RoutesReelles, "Vraies rues, sans bâtiments — urbanisez le vrai plan"),
+                     (ModeDepart.VilleReelle, $"Ville réelle — {_paquet.Manifest.Ville.Nom} telle qu'elle est (population estimée)"),
+                 })
+        {
+            var b = new Button { Text = texte, CustomMinimumSize = new Vector2(0, 40) };
+            b.Pressed += () => Commencer(null, mode);
+            v.AddChild(b);
+        }
+        var sable = new Button { Text = "Bac à sable (argent illimité, tout débloqué)", CustomMinimumSize = new Vector2(0, 34) };
+        sable.Pressed += () => Commencer(null, ModeDepart.GrandsAxes, bacASable: true);
         v.AddChild(sable);
         var auto = System.IO.Path.Combine(_dossierSauvegardes, "auto.json");
         var rapide = System.IO.Path.Combine(_dossierSauvegardes, "rapide.json");
@@ -147,19 +223,39 @@ public partial class JeuPrincipal : Node3D
         return fond;
     }
 
-    private void Commencer(string? sauvegarde, bool bacASable = false, bool villeReelle = false)
+    private void ReconstruireMenu()
+    {
+        var ancien = _menu;
+        _menu = Menu();
+        _calque.AddChild(_menu);
+        ancien.QueueFree();
+    }
+
+    private void Commencer(string? sauvegarde, ModeDepart mode = ModeDepart.GrandsAxes, bool bacASable = false)
     {
         try
         {
-            _partie = sauvegarde == null
-                ? villeReelle ? Partie.NouvelleVilleReelle(_reglages, _paquet, (ulong)DateTime.Now.Ticks) : (bacASable ? Partie.NouveauBacASable(_reglages, _paquet, (ulong)DateTime.Now.Ticks) : Partie.NouvelleFondation(_reglages, _paquet, (ulong)DateTime.Now.Ticks))
-                : Partie.Charger(Partie.LireFichier(sauvegarde), _reglages, _paquet);
+            if (sauvegarde != null)
+            {
+                var json = Partie.LireFichier(sauvegarde);
+                ChargerCarte(Partie.LireEntete(json).taille);
+                _partie = Partie.Charger(json, _reglages, _paquet);
+            }
+            else
+            {
+                ulong graine = (ulong)DateTime.Now.Ticks;
+                _partie = bacASable ? Partie.NouveauBacASable(_reglages, _paquet, graine) : Partie.Nouvelle(_reglages, _paquet, mode, graine);
+            }
         }
         catch (Exception ex)
         {
             GD.PrintErr(ex);
             _partie = Partie.NouvelleFondation(_reglages, _paquet, 1);
+            _hud.Toast("La sauvegarde n'a pas pu être chargée : nouvelle partie.", false);
         }
+        _rayonAffiche = -1;
+        _camera.Cible = new Vector3(-400, 0, -150);
+        _camera.Distance = _paquet.Manifest.Ville.CoteKm > 5 ? 2200 : 1100;
         _rendu.Initialiser(_partie);
         _trafic.Initialiser(_partie);
         _hud.Attacher(_partie);
@@ -215,6 +311,7 @@ public partial class JeuPrincipal : Node3D
         if (_partie.Mois >= _dernierMoisSauve + 3) { Sauvegarder("auto", false); _dernierMoisSauve = _partie.Mois; }
         _hud.OutilActif = _outil;
         _hud.MettreAJour(delta, _vitesse);
+        DessinerTerritoire();
         Survol();
     }
 
@@ -452,7 +549,7 @@ public partial class JeuPrincipal : Node3D
         V2 c;
         if (_optionAuto == "reelle")
         {
-            Commencer(null, villeReelle: true);
+            Commencer(null, ModeDepart.VilleReelle);
             for (int j = 0; j < 60; j++) _partie!.AvancerJour();
             c = new V2(-350, 150);
         }

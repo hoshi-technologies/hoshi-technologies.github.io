@@ -67,6 +67,40 @@ public class TestsPartie
     }
 
     [Fact]
+    public void ModesDeDepart()
+    {
+        var r = Fixtures.Reglages();
+        var terrain = Partie.Nouvelle(r, Fixtures.Annecy.Value, ModeDepart.TerrainSeul, 1);
+        Assert.Empty(terrain.Reseau.Aretes);
+        // une rue qui touche le bord de la carte relie la ville au monde
+        var bord = terrain.DemiCote - 10;
+        var ok = terrain.ConstruireRoute(new V2(-bord, -1500), new V2(-bord + 300, -1500), "rue");
+        Assert.True(ok.Ok, ok.Message);
+        Assert.Contains(terrain.Reseau.Noeuds.Values, n => n.Entree);
+        Assert.Contains(terrain.Parcelles.Values, p => terrain.ParcelleReliee(p));
+
+        var rues = Partie.Nouvelle(r, Fixtures.Annecy.Value, ModeDepart.RoutesReelles, 1);
+        Assert.True(rues.Reseau.Aretes.Count > 3000);
+        Assert.DoesNotContain(rues.Parcelles.Values, p => p.Batiment != null);
+        Assert.True(rues.Parcelles.Count > 3000, "des parcelles le long des vraies rues");
+        for (int j = 0; j < 30; j++) rues.AvancerJour();
+        Assert.True(rues.DetailDepenses.GetValueOrDefault("Entretien des routes") < 1000, "les vraies rues existantes ne coûtent pas d'entretien");
+        var q = Partie.Charger(rues.Sauvegarder(), r, Fixtures.Annecy.Value);
+        Assert.Equal(ModeDepart.RoutesReelles, q.Depart);
+    }
+
+    [Fact]
+    public void LesVraisBatimentsEvoluent()
+    {
+        var r = Fixtures.Reglages();
+        var p = Partie.NouvelleVilleReelle(r, Fixtures.Annecy.Value, 1);
+        double hauteurAvant = p.Parcelles.Values.Where(x => x.Contour != null).Sum(x => x.HauteurReelle);
+        for (int j = 0; j < 30 * 14; j++) p.AvancerJour();
+        double hauteurApres = p.Parcelles.Values.Where(x => x.Contour != null).Sum(x => x.HauteurReelle);
+        Assert.True(hauteurApres > hauteurAvant, "des bâtiments ont été surélevés");
+    }
+
+    [Fact]
     public void RouteCourbe()
     {
         var p = Nouvelle();
