@@ -20,6 +20,8 @@ public sealed class AreteRoute
     /// <summary>Grand axe réel importé : entretenu par le Département, non démolissable.</summary>
     public bool Departemental { get; set; }
     public string? Nom { get; set; }
+    /// <summary>Tronçon construit au-dessus de l'eau.</summary>
+    public bool Pont { get; set; }
     public double Longueur => Geo.LongueurPolyligne(Trace);
 }
 
@@ -87,6 +89,7 @@ public sealed class ReseauVille
         RetirerArete(e);
         var m1 = NouvelleArete(e.A, n.Id, t1, e.Gabarit, e.Departemental, e.Nom);
         var m2 = NouvelleArete(n.Id, e.B, t2, e.Gabarit, e.Departemental, e.Nom);
+        m1.Pont = m2.Pont = e.Pont;
         decoupes.Add(new Decoupe(e.Id, m1.Id, m2.Id));
         return n;
     }

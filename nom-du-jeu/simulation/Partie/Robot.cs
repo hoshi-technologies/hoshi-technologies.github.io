@@ -108,12 +108,25 @@ public sealed class Robot
             if (!(p.ServiceDisponible("centrale_gaz") && Service("centrale_gaz", _centre + new V2(_rayonQuartier, _rayonQuartier))))
                 Service("centrale_solaire", _centre + new V2(_rayonQuartier, 0));
         }
+        if (p.ServiceDisponible("centre_tri") && p.DechetsProduits > p.DechetsCapacite * 0.8) Service("centre_tri", _centre + new V2(-_rayonQuartier, _rayonQuartier));
+        foreach (var (type, seuil) in new[] { ("centre_sante", 1000), ("caserne_pompiers", 800), ("commissariat", 2500) })
+            if (p.ServiceDisponible(type) && p.Population > seuil && p.Parcelles.Values.Count(x => x.Service == type) < 1 + p.Population / 8000)
+                Service(type, _centre + new V2(60, -60));
         int ecoles = p.Parcelles.Values.Count(x => x.Service == "ecole");
         if (p.ServiceDisponible("ecole") && p.Enfants > ecoles * 280) Service("ecole", _centre + new V2(0, 50 - ecoles * 120));
         if (p.ServiceDisponible("parc") && p.Parcelles.Values.Count(x => x.Service == "parc") < p.Population / 1500 + 1) Service("parc", _centre + new V2(-50, 50));
         if (p.ServiceDisponible("arret_bus") && p.Arrets.Count < 4)
             foreach (var d in new[] { new V2(-150, -150), new V2(150, -150), new V2(150, 150), new V2(-150, 150) })
                 p.PlacerService("arret_bus", _centre + d);
+        // répondre à la demande : transformer des parcelles d'habitat libres en emplois
+        foreach (var (zone, demande) in new[] { (Zone.Activites, p.DemandeActivites), (Zone.Commerce, p.DemandeCommerce) })
+            if (demande > 40 && p.Parcelles.Values.Count(x => x.Zone == zone && x.Libre) < 4)
+                foreach (var x in p.Parcelles.Values.Where(x => x.Zone == Zone.Habitat && x.Libre)
+                             .OrderByDescending(x => V2.Distance(x.Centre, _centre)).Take(10).ToList())
+                    p.Zoner(x.Centre, 1, zone);
+        // budget serré : un peu plus d'impôts
+        if (p.Argent < 30000 && p.RecettesMois - p.DepensesMois < 3000 && p.ImpotHabitat < 0.13)
+            p.ReglerImpot(Zone.Habitat, p.ImpotHabitat + 0.01);
         // le quartier est plein : on l'agrandit
         int libres = p.Parcelles.Values.Count(x => x.Zone != Zone.Aucune && x.Libre);
         if (libres < 25 && p.Argent > 120000 && _rayonQuartier < 650)

@@ -81,6 +81,7 @@ public partial class JeuPrincipal : Node3D
         _hud.VitesseChoisie = v => _vitesse = v;
         _hud.CalqueBascule = BasculerFantome;
         _hud.Sauvegarder = () => Sauvegarder("rapide", true);
+        _hud.VueSuivante = VueSuivante;
         _menu = Menu();
         calque.AddChild(_menu);
 
@@ -119,6 +120,9 @@ public partial class JeuPrincipal : Node3D
         var nouvelle = new Button { Text = "Nouvelle partie", CustomMinimumSize = new Vector2(0, 44) };
         nouvelle.Pressed += () => Commencer(null);
         v.AddChild(nouvelle);
+        var sable = new Button { Text = "Bac à sable (argent illimité, tout débloqué)", CustomMinimumSize = new Vector2(0, 36) };
+        sable.Pressed += () => Commencer(null, bacASable: true);
+        v.AddChild(sable);
         var auto = System.IO.Path.Combine(_dossierSauvegardes, "auto.json");
         var rapide = System.IO.Path.Combine(_dossierSauvegardes, "rapide.json");
         var derniere = new[] { auto, rapide }.Where(System.IO.File.Exists).OrderByDescending(System.IO.File.GetLastWriteTimeUtc).FirstOrDefault();
@@ -139,12 +143,12 @@ public partial class JeuPrincipal : Node3D
         return fond;
     }
 
-    private void Commencer(string? sauvegarde)
+    private void Commencer(string? sauvegarde, bool bacASable = false)
     {
         try
         {
             _partie = sauvegarde == null
-                ? Partie.NouvelleFondation(_reglages, _paquet, (ulong)DateTime.Now.Ticks)
+                ? (bacASable ? Partie.NouveauBacASable(_reglages, _paquet, (ulong)DateTime.Now.Ticks) : Partie.NouvelleFondation(_reglages, _paquet, (ulong)DateTime.Now.Ticks))
                 : Partie.Charger(System.IO.File.ReadAllText(sauvegarde), _reglages, _paquet);
         }
         catch (Exception ex)
@@ -241,6 +245,9 @@ public partial class JeuPrincipal : Node3D
                 case Key.F1: _hud.BasculerAide(); break;
                 case Key.F5: Sauvegarder("rapide", true); break;
                 case Key.G: BasculerFantome(); break;
+                case Key.V: VueSuivante(); break;
+                case Key.Equal: case Key.Plus: case Key.KpAdd: if (k.CtrlPressed) _hud.TailleTexte(+2); break;
+                case Key.Minus: case Key.KpSubtract: if (k.CtrlPressed) _hud.TailleTexte(-2); break;
             }
         }
         if (_partie == null) return;
@@ -332,7 +339,9 @@ public partial class JeuPrincipal : Node3D
             : $"{Nom(b.Type)} niveau {b.Niveau}{(b.EnChantier ? " (en construction)" : "")} — " +
               (b.Type == Zone.Habitat ? $"{b.Occupants * partie.R.PersonnesParLogement:F0} habitants / {partie.Capacite(b) * partie.R.PersonnesParLogement:F0}" : $"{partie.CapaciteActive(b)} emplois") +
               $"\nEau : {(b.Eau ? "oui" : "NON")} · Électricité : {(b.Elec ? "oui" : "NON")} · Attrait {par.Attrait:F0}/100" +
-              (b.Type == Zone.Habitat ? $" · École : {b.Ecole * 100:F0} %" : "");
+              (b.Type == Zone.Habitat ? $"\nÉcole : {b.Ecole * 100:F0} % · Santé : {b.Sante * 100:F0} %" : "\n") +
+              $" · Déchets : {(b.Dechets ? "ramassés" : "NON")} · Pompiers : {(b.Pompiers ? "oui" : "non")} · Police : {(b.Police ? "oui" : "non")}" +
+              (partie.Congestion.TryGetValue(par.Arete, out var cg) ? $"\nTrafic de la rue : {cg * 100:F0} % de sa capacité" : "");
         _hud.Info(texte);
     }
 
@@ -368,6 +377,13 @@ public partial class JeuPrincipal : Node3D
             }
         }
         _apercuMesh.SurfaceEnd();
+    }
+
+    private void VueSuivante()
+    {
+        if (_partie == null) return;
+        _rendu.Vue = (RenduVille.Vues)(((int)_rendu.Vue + 1) % RenduVille.NomsVues.Length);
+        _hud.Toast(RenduVille.NomsVues[(int)_rendu.Vue] + "   (V pour changer)");
     }
 
     private void BasculerFantome()
@@ -408,19 +424,20 @@ public partial class JeuPrincipal : Node3D
         Commencer(null);
         var robot = new Robot(_partie!);
         robot.Demarrer();
-        int mois = 14;
+        int mois = 24;
         for (int m = 0; m < mois; m++)
         {
             robot.Decider();
             for (int j = 0; j < _reglages.JoursParMois; j++) _partie!.AvancerJour();
         }
         var c = robot.Centre;
-        var vues = new (string nom, float dist, float tangage, float lacet)[] { ("ensemble", 900, 0.75f, 0.6f), ("quartier", 260, 0.55f, 2.2f), ("rue", 7, 0.3f, 0.9f) };
+        var vues = new (string nom, float dist, float tangage, float lacet)[] { ("ensemble", 900, 0.75f, 0.6f), ("quartier", 260, 0.55f, 2.2f), ("rue", 7, 0.3f, 0.9f), ("trafic", 700, 1.1f, 0.6f), ("attrait", 700, 1.1f, 0.6f) };
         var dossier = ProjectSettings.GlobalizePath("user://");
         foreach (var (nom, dist, tangage, lacet) in vues)
         {
             _camera.Cible = new Vector3((float)c.X + (nom == "rue" ? 50 : 0), 0, (float)-c.Y);
             _camera.Distance = dist; _camera.Tangage = tangage; _camera.Lacet = lacet;
+            _rendu.Vue = nom == "trafic" ? RenduVille.Vues.Trafic : nom == "attrait" ? RenduVille.Vues.Attrait : RenduVille.Vues.Normale;
             _camera.Appliquer();
             for (int i = 0; i < 30; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"proto_{nom}.png"));

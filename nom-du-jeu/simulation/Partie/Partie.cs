@@ -17,6 +17,11 @@ public sealed class Batiment
     public bool Eau { get; set; }
     public bool Elec { get; set; }
     public double Ecole { get; set; }
+    // services recalculés (non sauvegardés)
+    public bool Dechets { get; set; } = true;
+    public double Sante { get; set; }
+    public bool Police { get; set; }
+    public bool Pompiers { get; set; }
     public bool EnChantier => JoursChantier > 0;
 }
 
@@ -92,6 +97,8 @@ public sealed partial class Partie
     public double ImpotCommerce { get; set; }
     public double ImpotActivites { get; set; }
     public int Palier { get; private set; }
+    /// <summary>Mode bac à sable : argent illimité, tout est débloqué.</summary>
+    public bool BacASable { get; set; }
 
     // indicateurs (recalculés chaque jour)
     public int Population { get; private set; }
@@ -139,6 +146,14 @@ public sealed partial class Partie
     }
 
     /// <summary>Nouvelle partie en mode Fondation : vraie géographie, grands axes réels, terrain vierge.</summary>
+    public static Partie NouveauBacASable(Reglages r, PaquetVille p, ulong graine = 1)
+    {
+        var partie = NouvelleFondation(r, p, graine);
+        partie.BacASable = true;
+        partie.Argent = 1_000_000_000;
+        return partie;
+    }
+
     public static Partie NouvelleFondation(Reglages r, PaquetVille p, ulong graine = 1)
     {
         var partie = new Partie(r, p, graine)
@@ -195,7 +210,7 @@ public sealed partial class Partie
         if (_cellulesRoute.Remove(areteId, out var cellules)) Grille.AjouterRoute(cellules, -1);
     }
 
-    public sealed record ApercuRoute(bool Ok, string Raison, double Cout, V2 A, V2 B, double Longueur);
+    public sealed record ApercuRoute(bool Ok, string Raison, double Cout, V2 A, V2 B, double Longueur, bool Pont = false);
 
     public ApercuRoute PrevoirRoute(V2 a, V2 b, string gabarit)
     {
@@ -208,18 +223,21 @@ public sealed partial class Partie
         if (gabarit is not ("rue" or "avenue")) raison = "Type de route inconnu.";
         else if (l < R.Routes.LongueurMinM) raison = "Route trop courte.";
         else if (!DansCarte(pa) || !DansCarte(pb)) raison = "Hors de la zone de jeu.";
-        else
+        double surEau = 0;
+        if (raison == null)
         {
             int n = Math.Max(2, (int)(l / 4));
             double zPrec = Paquet.Altitude(pa.X, pa.Y);
             for (int i = 1; i <= n && raison == null; i++)
             {
                 var p = pa + (pb - pa) * (i / (double)n);
-                if (Grille.Eau(p)) raison = "On ne peut pas construire sur l'eau (les ponts arriveront dans le jeu complet).";
                 double z = Paquet.Altitude(p.X, p.Y);
-                if (Math.Abs(z - zPrec) / (l / n) > R.Routes.PenteMax) raison = "Pente trop forte.";
+                if (Grille.Eau(p)) surEau += l / n;
+                else if (Math.Abs(z - zPrec) / (l / n) > R.Routes.PenteMax) raison = "Pente trop forte.";
                 zPrec = z;
             }
+            if (surEau > R.Routes.Pont.LongueurEauMaxM) raison = $"Pont trop long ({surEau:F0} m au-dessus de l'eau, maximum {R.Routes.Pont.LongueurEauMaxM:F0} m).";
+            cout = Math.Round((l + surEau * (R.Routes.Pont.CoutMultiplicateur - 1)) * R.Route(gabarit).CoutParM);
         }
         if (raison == null)
         {
@@ -227,8 +245,9 @@ public sealed partial class Partie
             if (Grille.ParcellesSous(couloir).Any(id => Parcelles.TryGetValue(id, out var x) && x.Service != null))
                 raison = "La route traverse un équipement public : démolissez-le d'abord.";
         }
+        if (BacASable) cout = 0;
         if (raison == null && cout > Argent) raison = "Pas assez d'argent.";
-        return new ApercuRoute(raison == null, raison ?? "", cout, pa, pb, l);
+        return new ApercuRoute(raison == null, raison ?? "", cout, pa, pb, l, surEau > 0);
     }
 
     public Resultat ConstruireRoute(V2 a, V2 b, string gabarit)
@@ -254,6 +273,7 @@ public sealed partial class Partie
         {
             if (V2.Distance(sequence[i].Pos, sequence[i + 1].Pos) < 0.5) continue;
             var e = Reseau.NouvelleArete(sequence[i].Id, sequence[i + 1].Id, new List<V2> { sequence[i].Pos, sequence[i + 1].Pos }, gabarit);
+            e.Pont = Enumerable.Range(1, 9).Any(k => Grille.Eau(sequence[i].Pos + (sequence[i + 1].Pos - sequence[i].Pos) * (k / 10.0)));
             RasteriserRoute(e);
             // une nouvelle route efface les parcelles qu'elle traverse
             foreach (var pid in Grille.ParcellesSous(_cellulesRoute[e.Id])) SupprimerParcelle(pid);
@@ -262,7 +282,7 @@ public sealed partial class Partie
         foreach (var e in nouvelles) GenererParcelles(e);
         Argent -= ap.Cout;
         _servicesAJour = false;
-        return new Resultat(true, $"Route construite ({ap.Longueur:F0} m).", ap.Cout);
+        return new Resultat(true, ap.Pont ? $"Pont construit ({ap.Longueur:F0} m)." : $"Route construite ({ap.Longueur:F0} m).", ap.Cout);
     }
 
     private NoeudRoute NoeudPour(V2 p, List<ReseauVille.Decoupe> decoupes)
@@ -394,14 +414,14 @@ public sealed partial class Partie
         return new Resultat(n > 0, n > 0 ? $"{n} parcelle(s) modifiée(s)." : "Aucune parcelle ici : il faut une rue à côté.");
     }
 
-    public bool ServiceDisponible(string type) => R.Services.TryGetValue(type, out var s) && s.Palier <= Palier;
+    public bool ServiceDisponible(string type) => R.Services.TryGetValue(type, out var s) && (BacASable || s.Palier <= Palier);
 
     public Resultat PlacerService(string type, V2 p)
     {
         if (!R.Services.TryGetValue(type, out var s)) return Resultat.Non("Service inconnu.");
-        if (s.Palier > Palier) return Resultat.Non($"Disponible au palier « {R.Paliers[s.Palier].Nom} ».");
+        if (!ServiceDisponible(type)) return Resultat.Non($"Disponible au palier « {R.Paliers[s.Palier].Nom} ».");
         if (type == "arret_bus") return PlacerArret(p, s);
-        if (s.Cout > Argent) return Resultat.Non("Pas assez d'argent.");
+        if (!BacASable && s.Cout > Argent) return Resultat.Non("Pas assez d'argent.");
         var par = ParcelleSous(p) ?? ParcellesProches(p, 30).Where(x => x.Libre).OrderBy(x => V2.Distance(x.Centre, p)).FirstOrDefault();
         if (par == null) return Resultat.Non("Placez-le le long d'une rue.");
         if (!par.Libre) return Resultat.Non("Ce terrain est déjà occupé.");
@@ -409,7 +429,7 @@ public sealed partial class Partie
             return Resultat.Non("La station de pompage doit être au bord de l'eau.");
         par.Service = type;
         par.Zone = Zone.Aucune;
-        Argent -= s.Cout;
+        if (!BacASable) Argent -= s.Cout;
         CarresModifies.Add(Carre(par.Centre));
         _servicesAJour = false;
         VersionServices++;
@@ -418,7 +438,7 @@ public sealed partial class Partie
 
     private Resultat PlacerArret(V2 p, ReglagesService s)
     {
-        if (s.Cout > Argent) return Resultat.Non("Pas assez d'argent.");
+        if (!BacASable && s.Cout > Argent) return Resultat.Non("Pas assez d'argent.");
         var (_, arete, point) = Reseau.Accrocher(p, 20);
         if (arete == null)
         {
@@ -430,7 +450,7 @@ public sealed partial class Partie
         if (Arrets.Values.Any(a => V2.Distance(a.Pos, point) < 60)) return Resultat.Non("Un arrêt existe déjà tout près.");
         var arr = new ArretBus { Id = _prochainArret++, Arete = arete.Id, Pos = point };
         Arrets[arr.Id] = arr;
-        Argent -= s.Cout;
+        if (!BacASable) Argent -= s.Cout;
         _servicesAJour = false;
         VersionServices++;
         return new Resultat(true, Arrets.Count >= 2 ? "Arrêt ajouté à la ligne de bus." : "Premier arrêt posé : ajoutez-en un deuxième pour créer la ligne.", s.Cout);

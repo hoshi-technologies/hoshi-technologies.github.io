@@ -25,6 +25,7 @@ public sealed class Reglages
     public double PollutionActivitesRayonM { get; set; }
     public int MoisSansServiceAvantDepart { get; set; }
     public List<ReglagesPalier> Paliers { get; set; } = new();
+    public ReglagesRisques Risques { get; set; } = new();
 
     public static readonly JsonSerializerOptions Json = new()
     {
@@ -52,6 +53,23 @@ public sealed class ReglagesRoutes
     public double AccrochageM { get; set; }
     public double LongueurMinM { get; set; }
     public List<string> AxesReelsImportes { get; set; } = new();
+    public ReglagesPont Pont { get; set; } = new();
+    public Dictionary<string, double> CapaciteVehicules { get; set; } = new();
+    public double PartTrajetsVoiture { get; set; } = 0.65;
+}
+
+public sealed class ReglagesPont
+{
+    public double CoutMultiplicateur { get; set; } = 5;
+    public double LongueurEauMaxM { get; set; } = 450;
+}
+
+public sealed class ReglagesRisques
+{
+    public double IncendieProbaMois { get; set; }
+    public double IncendieProbaAvecPompiers { get; set; }
+    public int PopulationSansPoliceMax { get; set; }
+    public int PopulationSansSanteMax { get; set; }
 }
 
 public sealed class ReglagesRoute
@@ -124,6 +142,8 @@ public sealed class ReglagesService
     public int Emplois { get; set; }
     public double DistanceEauMaxM { get; set; }
     public double PollutionRayonM { get; set; }
+    public double Dechets { get; set; }
+    public double Patients { get; set; }
     public int Palier { get; set; }
 }
 
@@ -139,6 +159,8 @@ public sealed class ReglagesConsommation
     public double EauParEmploi { get; set; }
     public double ElecParHabitant { get; set; }
     public double ElecParEmploi { get; set; }
+    public double DechetsParHabitant { get; set; }
+    public double DechetsParEmploi { get; set; }
 }
 
 public sealed class ReglagesPalier

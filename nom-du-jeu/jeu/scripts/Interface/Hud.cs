@@ -10,6 +10,15 @@ public partial class Hud : Control
     public Action<int>? VitesseChoisie;
     public Action? CalqueBascule;
     public Action? Sauvegarder;
+    public Action? VueSuivante;
+
+    /// <summary>Taille du texte (accessibilité) : Ctrl + / Ctrl -.</summary>
+    public void TailleTexte(int delta)
+    {
+        int t = Math.Clamp(Theme.DefaultFontSize + delta, 12, 26);
+        Theme.DefaultFontSize = t;
+        Toast($"Taille du texte : {t}");
+    }
 
     private Partie? _p;
     private Label _date = null!, _pop = null!, _argent = null!, _palier = null!, _emplois = null!, _info = null!, _toast = null!, _objectifs = null!;
@@ -112,7 +121,7 @@ public partial class Hud : Control
         ("routes", "Routes", new[] { ("rue", "Rue"), ("avenue", "Avenue") }),
         ("zones", "Zones", new[] { ("habitat", "Habitat"), ("commerce", "Commerce"), ("activites", "Activités"), ("dezoner", "Dézoner") }),
         ("reseaux", "Eau & énergie", new[] { ("chateau_eau", "Château d'eau"), ("pompage_lac", "Pompage (lac)"), ("centrale_solaire", "Centrale solaire"), ("centrale_gaz", "Centrale au gaz") }),
-        ("services", "Services", new[] { ("ecole", "École"), ("parc", "Parc"), ("arret_bus", "Arrêt de bus") }),
+        ("services", "Services", new[] { ("ecole", "École"), ("centre_sante", "Santé"), ("caserne_pompiers", "Pompiers"), ("commissariat", "Police"), ("centre_tri", "Déchets"), ("parc", "Parc"), ("arret_bus", "Arrêt de bus") }),
     };
 
     private void ConstruireBarreBas()
@@ -161,6 +170,9 @@ public partial class Hud : Control
         var budget = new Button { Text = "Budget", CustomMinimumSize = new Vector2(100, 38) };
         budget.Pressed += () => _budget.Visible = !_budget.Visible;
         h.AddChild(budget);
+        var vues = new Button { Text = "Vues", TooltipText = "Vues d'information : réseaux, attrait, trafic, services (V)", CustomMinimumSize = new Vector2(80, 38) };
+        vues.Pressed += () => VueSuivante?.Invoke();
+        h.AddChild(vues);
         var calque = new Button { Text = "Ville réelle", TooltipText = "Afficher/masquer la vraie ville en transparence (G)", CustomMinimumSize = new Vector2(110, 38) };
         calque.Pressed += () => CalqueBascule?.Invoke();
         h.AddChild(calque);
@@ -248,7 +260,8 @@ public partial class Hud : Control
                    "Zones : maintenez le clic gauche et peignez le long des rues.\n" +
                    "Services : cliquez sur un terrain libre le long d'une rue.\n\n" +
                    "Temps : Espace = pause, 1 / 2 / 3 = vitesses        G : vraie ville en transparence\n" +
-                   "F5 : sauvegarder        Échap : annuler l'outil\n\n" +
+                   "F5 : sauvegarder        Échap : annuler l'outil        V : vues d'information\n" +
+                   "Ctrl + / Ctrl - : taille du texte\n\n" +
                    "Pour que la ville grandisse : une rue reliée à un grand axe, des zones, de l'eau et de l'électricité.\n" +
                    "Ce jeu est une fiction inspirée de données réelles. Ce n'est pas une prédiction.",
         });
@@ -335,6 +348,27 @@ public partial class Hud : Control
         }
     }
 
+    /// <summary>Tutoriel continu : les 3 problèmes les plus urgents, avec la solution.</summary>
+    private static string Conseils(Partie p)
+    {
+        var c = new List<string>();
+        bool A(string s) => p.ServiceDisponible(s);
+        bool Existe(string s) => p.Parcelles.Values.Any(x => x.Service == s);
+        if (p.Argent < 0) c.Add("Budget négatif : augmentez un peu les taxes (Budget) ou empruntez.");
+        if (p.EauProduite > 0 && p.EauConsommee > p.EauProduite * 0.9) c.Add("L'eau va manquer : ajoutez un château d'eau ou une station de pompage.");
+        if (p.ElecProduite > 0 && p.ElecConsommee > p.ElecProduite * 0.9) c.Add("L'électricité va manquer : ajoutez une centrale.");
+        if (A("centre_tri") && p.DechetsProduits > p.DechetsCapacite * 0.9) c.Add("Les déchets s'accumulent : construisez un centre de tri.");
+        if (p.Actifs > 150 && p.Chomeurs > p.Actifs * 0.1) c.Add($"{p.Chomeurs:N0} chômeurs : zonez des activités ou des commerces.");
+        if (p.DemandeHabitat > 40 && !p.Parcelles.Values.Any(x => x.Zone == Zone.Habitat && x.Libre)) c.Add("Les gens veulent s'installer : zonez plus d'habitat.");
+        if (p.DemandeCommerce > 40 && !p.Parcelles.Values.Any(x => x.Zone == Zone.Commerce && x.Libre)) c.Add("Les habitants manquent de commerces : zonez du commerce.");
+        if (A("ecole") && p.Enfants > 60 && !Existe("ecole")) c.Add("Des enfants sans école : construisez une école.");
+        if (A("centre_sante") && p.Population > p.R.Risques.PopulationSansSanteMax && !Existe("centre_sante")) c.Add("Pas de médecin : construisez un centre de santé.");
+        if (A("caserne_pompiers") && !Existe("caserne_pompiers") && p.Palier >= 2) c.Add("Risque d'incendie : construisez une caserne de pompiers.");
+        if (A("commissariat") && p.Population > p.R.Risques.PopulationSansPoliceMax && !Existe("commissariat")) c.Add("Insécurité : construisez un commissariat.");
+        if (p.RueLaPlusChargee != null) c.Add($"Bouchons sur {p.RueLaPlusChargee} : une rue parallèle ou une ligne de bus aidera (vue trafic : V).");
+        return c.Count == 0 ? "" : "\n\nCONSEILS DU MOMENT\n• " + string.Join("\n• ", c.Take(3));
+    }
+
     private void MettreAJourObjectifs()
     {
         var p = _p!;
@@ -351,8 +385,8 @@ public partial class Hud : Control
               $"{c(eau)} Construire un château d'eau\n" +
               $"{c(elec)} Construire une centrale solaire\n" +
               $"{c(emplois)} Zoner des commerces ou des activités (emplois)"
-            : suivant != null
+            : (suivant != null
                 ? $"PROCHAIN PALIER : {suivant.Nom}\n{p.Population:N0} / {suivant.Population:N0} habitants"
-                : "Tous les paliers du prototype sont atteints. Bravo !";
+                : "Tous les paliers sont atteints. Bravo !") + Conseils(p);
     }
 }

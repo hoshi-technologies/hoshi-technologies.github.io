@@ -1,4 +1,4 @@
-# Prototype de plaisir (lot 5)
+# Version de test : prototype (lot 5) + début du socle (lot 6)
 
 **But : savoir si le jeu donne envie de continuer à jouer.** Ce n'est pas encore le jeu, il n'y a ni sons ni graphismes définitifs.
 
@@ -14,7 +14,13 @@
 | Zones | Habitat, commerce et activités, peintes au pinceau sur les parcelles créées le long des rues. |
 | Croissance | Bâtiments en chantier puis construits, 3 niveaux (maison, petit collectif, immeuble), emménagements progressifs. |
 | Réseaux | Eau (château d'eau, pompage dans le lac) et électricité (solaire, gaz), distribuées par les rues reliées. |
-| Services | École (places limitées, rayon d'action), parc, ligne de bus avec bus animés. |
+| Services | École et centre de santé (places limitées, rayon d'action), pompiers (incendies réels à partir du palier Village), police (insécurité au-delà de 3 000 hab.), centre de tri des déchets, parc, ligne de bus avec bus animés. |
+| Ponts | Les routes peuvent franchir l'eau (jusqu'à 450 m, 5 fois plus cher). |
+| Trafic | Heure de pointe calculée chaque mois : les rues saturées font baisser l'attrait de l'habitat (et aident les commerces). Le bus réduit le nombre de voitures. |
+| Vues (V) | Réseaux, attrait, trafic, services. |
+| Bac à sable | Argent illimité, tout débloqué. |
+| Tutoriel | « Premiers pas », puis « Conseils du moment » qui suivent les problèmes de la ville. |
+| Accessibilité | Taille du texte réglable (Ctrl + / Ctrl -), clavier AZERTY et QWERTY. |
 | Économie | Emplois et chômage, demande pour chaque zone, 3 taxes, entretien, emprunts, budget détaillé. |
 | Attrait | Vue sur l'eau, parcs, bus, école ; nuisances des activités, de la centrale au gaz et des grands axes. |
 | Paliers | Hameau, Bourg (300 hab.), Village (1 200), Petite ville (3 500), avec de nouveaux outils à chaque fois. |
@@ -23,7 +29,7 @@
 | Sauvegarde | Automatique tous les 3 mois de jeu, F5, bouton « Continuer ». |
 
 ## Ce qui a été testé
-- **29 tests automatiques réussis (21 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
+- **32 tests automatiques réussis (24 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
 - **Une partie complète de 20 mois jouée par le « robot maire »** (`bench/Ville.Bench -- --robot`) :
   - la ville passe de 0 à environ 3 500 habitants ;
   - 3 paliers sont franchis ;
@@ -41,9 +47,9 @@
 ## Limites connues (volontaires pour le prototype)
 - Ni ponts, ni courbes, ni sens uniques.
 - Pas de sons ni de musique, et des graphismes simples (boîtes et toits).
-- Le trafic est décoratif : les bouchons n'ont pas encore d'effet sur la ville.
+- Les voitures affichées sont un échantillon ; le calcul des bouchons est séparé.
 - Une seule ligne de bus.
-- Un léger ralentissement possible une fois par mois de jeu, au recalcul des trajets des voitures.
+- Le calcul de l'heure de pointe (une fois par mois de jeu) peut provoquer une très courte pause sur un PC lent.
 
 ## Questions pour le testeur (à remplir après 20 minutes)
 1. Avais-tu envie de continuer après 20 minutes ? (oui / non / un peu)

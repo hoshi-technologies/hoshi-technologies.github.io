@@ -41,9 +41,60 @@ public class TestsPartie
     {
         var p = Nouvelle();
         // centre du lac d'Annecy dans ce paquet (est de la zone)
-        var r = p.ConstruireRoute(new V2(1200, -600), new V2(1500, -600), "rue");
+        var r = p.ConstruireRoute(new V2(700, -600), new V2(1950, -600), "rue");
         Assert.False(r.Ok);
-        Assert.Contains("eau", r.Message);
+        Assert.Contains("Pont trop long", r.Message);
+    }
+
+    [Fact]
+    public void PontSurLaRiviereCouteDavantage()
+    {
+        var p = Nouvelle();
+        // cherche une traversée courte d'un cours d'eau (moins de 450 m d'eau)
+        V2? depart = null;
+        for (double x = -1900; x < 1900 && depart == null; x += 40)
+            for (double y = -1900; y < 1900 && depart == null; y += 40)
+            {
+                var a = new V2(x, y); var b = new V2(x + 120, y);
+                if (!p.Grille.Eau(a) && !p.Grille.Eau(b) && p.Grille.Eau(new V2(x + 60, y)))
+                {
+                    var ap = p.PrevoirRoute(a, b, "rue");
+                    if (ap.Ok && ap.Pont) depart = a;
+                }
+            }
+        Assert.NotNull(depart);
+        var apercu = p.PrevoirRoute(depart!.Value, depart.Value + new V2(120, 0), "rue");
+        Assert.True(apercu.Cout > apercu.Longueur * p.R.Route("rue").CoutParM, "un pont coûte plus cher qu'une rue");
+        var r = p.ConstruireRoute(depart.Value, depart.Value + new V2(120, 0), "rue");
+        Assert.True(r.Ok, r.Message);
+        Assert.Contains(p.Reseau.Aretes.Values, e => e.Pont);
+        var q = Partie.Charger(p.Sauvegarder(), Fixtures.Reglages(), Fixtures.Annecy.Value);
+        Assert.Contains(q.Reseau.Aretes.Values, e => e.Pont);
+    }
+
+    [Fact]
+    public void BacASableGratuitEtToutDebloque()
+    {
+        var p = Partie.NouveauBacASable(Fixtures.Reglages(), Fixtures.Annecy.Value, 1);
+        double avant = p.Argent;
+        new Robot(p).Demarrer();
+        Assert.Equal(avant, p.Argent);
+        Assert.True(p.ServiceDisponible("commissariat"));
+    }
+
+    [Fact]
+    public void ServicesDuSocleEtBouchons()
+    {
+        var p = Nouvelle();
+        var r = new Robot(p);
+        r.Demarrer();
+        r.Jouer(26);
+        Assert.True(p.Palier >= 2);
+        var services = string.Join(",", p.Parcelles.Values.Where(x => x.Service != null).Select(x => x.Service).Distinct());
+        Assert.True(services.Contains("centre_tri") && services.Contains("caserne_pompiers"), services + " | " + string.Join(" / ", r.Journal.TakeLast(8)));
+        Assert.True(p.DechetsCapacite > 0);
+        Assert.NotEmpty(p.Congestion);
+        Assert.All(p.Congestion.Values, c => Assert.True(c >= 0 && !double.IsNaN(c)));
     }
 
     [Fact]

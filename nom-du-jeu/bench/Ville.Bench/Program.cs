@@ -20,7 +20,7 @@ if (args.Length > 0 && args[0] == "--robot")
     robot.Jouer(mois, p => Console.WriteLine(
         $"mois {p.Mois,3} pop {p.Population,6} emplois {p.EmploisLocaux,5} chômeurs {p.Chomeurs,4} argent {p.Argent,10:N0} " +
         $"rec {p.RecettesMois,7:N0} dep {p.DepensesMois,7:N0} D(h/c/a) {p.DemandeHabitat,4:F0}/{p.DemandeCommerce,4:F0}/{p.DemandeActivites,4:F0} " +
-        $"eau {p.EauConsommee,6:F0}/{p.EauProduite,6:F0} élec {p.ElecConsommee,6:F0}/{p.ElecProduite,6:F0} palier {p.Palier} bât {p.Parcelles.Values.Count(x => x.Batiment != null)}"));
+        $"eau {p.EauConsommee,6:F0}/{p.EauProduite,6:F0} élec {p.ElecConsommee,6:F0}/{p.ElecProduite,6:F0} palier {p.Palier} bât {p.Parcelles.Values.Count(x => x.Batiment != null)} déch {p.DechetsProduits:F0}/{p.DechetsCapacite:F0} feux {p.Incendies} bouchon {(p.Congestion.Count > 0 ? p.Congestion.Values.Max() : 0):F2}"));
     if (args.Length > 4) { partie.SauvegarderFichier(args[4]); Console.WriteLine("Sauvegarde écrite : " + args[4]); }
     foreach (var l in robot.Journal) Console.WriteLine("  " + l);
     foreach (var m in partie.Messages) Console.WriteLine($"  [j{m.Jour} {m.Type}] {m.Texte}");

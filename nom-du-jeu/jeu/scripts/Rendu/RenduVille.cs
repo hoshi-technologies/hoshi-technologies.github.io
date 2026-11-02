@@ -17,6 +17,43 @@ public partial class RenduVille : Node3D
     private readonly StandardMaterial3D _matBatiments = Maillage.Materiau(0.9f);
     private readonly StandardMaterial3D _matSol = Maillage.Materiau(1f, doubleFace: true);
     private bool _parcellesVides;
+    private int _moisVue = -1;
+
+    public enum Vues { Normale, Reseaux, Attrait, Trafic, Securite }
+    private Vues _vue = Vues.Normale;
+    public static readonly string[] NomsVues = { "Vue normale", "Vue : eau, électricité, déchets", "Vue : attrait des terrains", "Vue : trafic à l'heure de pointe", "Vue : santé, école, pompiers, police" };
+
+    public Vues Vue
+    {
+        get => _vue;
+        set
+        {
+            if (_vue == value) return;
+            _vue = value;
+            _versionReseau = -1;
+            foreach (var par in _p.Parcelles.Values) _p.CarresModifies.Add(Partie.Carre(par.Centre));
+        }
+    }
+
+    /// <summary>Couleur d'une parcelle dans la vue d'information, ou null en vue normale.</summary>
+    private Color? CouleurVue(Parcelle p)
+    {
+        var b = p.Batiment;
+        Color Echelle(double t) => new Color(0.85f, 0.25f, 0.20f).Lerp(new Color(0.25f, 0.80f, 0.35f), (float)Math.Clamp(t, 0, 1));
+        switch (_vue)
+        {
+            case Vues.Reseaux:
+                if (b == null) return p.Zone == Zone.Aucune ? null : new Color(0.7f, 0.7f, 0.7f);
+                return b.Eau && b.Elec && b.Dechets ? new Color(0.25f, 0.75f, 0.95f) : !b.Eau || !b.Elec ? new Color(0.9f, 0.2f, 0.2f) : new Color(0.95f, 0.65f, 0.15f);
+            case Vues.Attrait:
+                return p.Zone == Zone.Aucune ? null : Echelle(p.Attrait / 80.0);
+            case Vues.Securite:
+                if (b == null || b.Type != Zone.Habitat) return p.Zone == Zone.Aucune ? null : new Color(0.7f, 0.7f, 0.7f);
+                return Echelle(((b.Ecole >= 0.8 ? 1 : 0) + (b.Sante >= 0.8 ? 1 : 0) + (b.Pompiers ? 1 : 0) + (b.Police ? 1 : 0)) / 4.0);
+            default:
+                return null;
+        }
+    }
 
     public static Vector3 G(Partie p, V2 q, double dz = 0) => new((float)q.X, p.Paquet.Altitude(q.X, q.Y) + (float)dz, (float)-q.Y);
 
@@ -48,6 +85,12 @@ public partial class RenduVille : Node3D
     public override void _Process(double delta)
     {
         if (_p == null) return;
+        if (_vue != Vues.Normale && _moisVue != _p.Mois)
+        {
+            _moisVue = _p.Mois;
+            _versionReseau = -1;
+            if (_vue != Vues.Trafic) foreach (var par in _p.Parcelles.Values) _p.CarresModifies.Add(Partie.Carre(par.Centre));
+        }
         if (_versionReseau != _p.Reseau.Version || _versionServices != _p.VersionServices)
         {
             _versionReseau = _p.Reseau.Version;
@@ -84,6 +127,18 @@ public partial class RenduVille : Node3D
         {
             float l = (float)_p.R.Route(e.Gabarit).LargeurM / 2;
             var col = e.Departemental ? BitumeAxe : Bitume;
+            if (_vue == Vues.Trafic)
+            {
+                double c = _p.Congestion.GetValueOrDefault(e.Id);
+                col = c < 0.01 ? new Color(0.35f, 0.35f, 0.38f) : new Color(0.20f, 0.75f, 0.30f).Lerp(new Color(0.95f, 0.75f, 0.10f), (float)Math.Clamp(c, 0, 1))
+                      .Lerp(new Color(0.90f, 0.15f, 0.10f), (float)Math.Clamp(c - 1, 0, 1));
+            }
+            if (e.Pont)
+                for (int i = 0; i + 1 < e.Trace.Count; i++)
+                {
+                    Garde(m, e.Trace[i], e.Trace[i + 1], l + 1.4f);
+                    Garde(m, e.Trace[i], e.Trace[i + 1], -(l + 1.4f));
+                }
             for (int i = 0; i + 1 < e.Trace.Count; i++)
                 Ruban(m, e.Trace[i], e.Trace[i + 1], l + 1.2f, 0.18, Trottoir);
             for (int i = 0; i + 1 < e.Trace.Count; i++)
@@ -117,6 +172,26 @@ public partial class RenduVille : Node3D
             var p0 = a + d * (i / (double)k);
             var p1 = a + d * ((i + 1) / (double)k);
             m.Quad(G(_p, p0 + n, dz), G(_p, p1 + n, dz), G(_p, p1 - n, dz), G(_p, p0 - n, dz), Vector3.Up, col);
+        }
+    }
+
+    /// <summary>Garde-corps d'un pont (petit muret sur un côté).</summary>
+    private void Garde(Maillage m, V2 a, V2 b, float decalage)
+    {
+        var d = b - a;
+        double l = d.Longueur;
+        if (l < 0.01) return;
+        var n = d.Perp * (decalage / l);
+        var p0 = G(_p, a + n, 0.3); var p1 = G(_p, b + n, 0.3);
+        var nn = new Vector3((float)n.X, 0, (float)-n.Y).Normalized();
+        m.Quad(p0, p1, p1 + Vector3.Up * 1.1f, p0 + Vector3.Up * 1.1f, nn, new Color(0.78f, 0.76f, 0.72f));
+        m.Quad(p1, p0, p0 + Vector3.Up * 1.1f, p1 + Vector3.Up * 1.1f, -nn, new Color(0.78f, 0.76f, 0.72f));
+        // piles
+        int k = (int)(l / 35);
+        for (int i = 1; i <= k; i++)
+        {
+            var q = G(_p, a + d * (i / (double)(k + 1)), 0);
+            m.Boite(q, Vector3.Right, 1.2f, 1.2f, q.Y - 6, q.Y + 0.2f, new Color(0.65f, 0.63f, 0.60f));
         }
     }
 
@@ -188,6 +263,7 @@ public partial class RenduVille : Node3D
             var col = p.Service != null ? new Color(0.62f, 0.66f, 0.55f) : CouleurZone(p.Zone);
             if (p.Batiment != null && !p.Batiment.EnChantier) col = col.Lerp(new Color(0.55f, 0.62f, 0.45f), 0.6f);
             if (p.Zone == Zone.Aucune && p.Service == null) col = new Color(1, 1, 1);
+            if (CouleurVue(p) is { } cv) col = cv;
             var coins = new[] { new V2(-w, -prof), new V2(w, -prof), new V2(w, prof), new V2(-w, prof) }
                 .Select(o => G(_p, p.Centre + p.Dir * o.X + p.Normale * o.Y, 0.22)).ToArray();
             sol.Quad(coins[0], coins[1], coins[2], coins[3], Vector3.Up, col);
@@ -200,6 +276,12 @@ public partial class RenduVille : Node3D
         var v = new Vector3((float)p.Normale.X, 0, (float)-p.Normale.Y);
         var rnd = new Random(p.Variante);
         float h = (float)_p.Hauteur(b);
+        if (CouleurVue(p) is { } teinte)
+        {
+            // vue d'information : bâtiment simplifié, coloré selon l'indicateur
+            bat.Boite(c - v * 1.5f, u, w - 1, prof - 3, y0, y0 + h, teinte, teinte.Lightened(0.2f));
+            return;
+        }
         if (b.EnChantier && b.Niveau == 1)
         {
             float avancement = 1 - b.JoursChantier / (float)_p.R.JoursConstruction;
@@ -287,6 +369,23 @@ public partial class RenduVille : Node3D
                 m.Boite(c - v * 5, u, 7, 3.5f, y0, y0 + 7, new Color(0.96f, 0.88f, 0.70f), new Color(0.72f, 0.35f, 0.25f));
                 m.Boite(c + u * 4.5f + v * 2, u, 2.5f, 5, y0, y0 + 7, new Color(0.96f, 0.88f, 0.70f), new Color(0.72f, 0.35f, 0.25f));
                 m.Boite(c - u * 2 + v * 6, u, 4, 3, y0, y0 + 0.3f, new Color(0.75f, 0.45f, 0.30f)); // cour
+                break;
+            case "centre_tri":
+                m.Boite(c + v * 2, u, 7, 6, y0, y0 + 7, new Color(0.62f, 0.70f, 0.58f), new Color(0.40f, 0.50f, 0.40f));
+                for (int k = -1; k <= 1; k++) m.Boite(c - v * 7 + u * (k * 4.5f), u, 1.8f, 1.2f, y0, y0 + 1.6f, new[] { new Color(0.2f, 0.55f, 0.25f), new Color(0.95f, 0.8f, 0.2f), new Color(0.3f, 0.45f, 0.8f) }[k + 1]);
+                break;
+            case "centre_sante":
+                m.Boite(c, u, 7, 7, y0, y0 + 10, new Color(0.95f, 0.96f, 0.97f), new Color(0.75f, 0.78f, 0.80f));
+                m.Boite(c - v * 7.2f, u, 1.6f, 0.3f, y0 + 6, y0 + 9.2f, new Color(0.15f, 0.65f, 0.35f)); // croix verte
+                m.Boite(c - v * 7.2f, u, 0.5f, 0.3f, y0 + 4.8f, y0 + 10.4f, new Color(0.15f, 0.65f, 0.35f));
+                break;
+            case "caserne_pompiers":
+                m.Boite(c, u, 7, 6, y0, y0 + 7, new Color(0.80f, 0.22f, 0.18f), new Color(0.45f, 0.45f, 0.48f));
+                m.Boite(c + u * 5 + v * 5, u, 1.5f, 1.5f, y0, y0 + 14, new Color(0.80f, 0.22f, 0.18f)); // tour de séchage
+                break;
+            case "commissariat":
+                m.Boite(c, u, 7, 6, y0, y0 + 8, new Color(0.85f, 0.87f, 0.92f), new Color(0.20f, 0.28f, 0.55f));
+                m.Boite(c - v * 6.2f, u, 3f, 0.3f, y0 + 6, y0 + 7.2f, new Color(0.20f, 0.28f, 0.55f));
                 break;
             case "parc":
                 var rnd = new Random(p.Variante);

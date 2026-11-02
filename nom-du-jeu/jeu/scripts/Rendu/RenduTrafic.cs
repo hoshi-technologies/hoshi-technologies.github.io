@@ -42,7 +42,12 @@ public partial class RenduTrafic : Node3D
     public override void _Process(double delta)
     {
         if (_p == null) return;
-        if (_versionReseau != _p.Reseau.Version || _mois != _p.Mois || Math.Abs(_p.Population - _popPrecedente) > Math.Max(200, _popPrecedente / 5))
+        if (_calcul != null && _calcul.IsCompleted)
+        {
+            if (_calcul.IsCompletedSuccessfully) Installer(_calcul.Result);
+            _calcul = null;
+        }
+        if (_calcul == null && (_versionReseau != _p.Reseau.Version || _mois != _p.Mois || Math.Abs(_p.Population - _popPrecedente) > Math.Max(200, _popPrecedente / 5)))
             Reconstruire();
         float dt = (float)delta * Vitesse;
         if (_sim != null && _sim.NbVehicules > 0 && dt > 0)
@@ -66,6 +71,8 @@ public partial class RenduTrafic : Node3D
         AnimerBus(dt);
     }
 
+    private System.Threading.Tasks.Task<SimTrafic?>? _calcul;
+
     private void Reconstruire()
     {
         _versionReseau = _p.Reseau.Version;
@@ -73,7 +80,15 @@ public partial class RenduTrafic : Node3D
         _popPrecedente = _p.Population;
         int n = Math.Min(MaxVoitures, _p.Population / 4);
         var paires = n > 0 ? _p.Deplacements(n) : new List<(int, int)>();
-        _sim = paires.Count > 0 ? new SimTrafic(_p.Reseau.Graphe(_p.R), paires, (ulong)_p.Jour) : null;
+        var graphe = _p.Reseau.Graphe(_p.R);
+        ulong graine = (ulong)_p.Jour;
+        // le calcul des trajets se fait en arrière-plan : pas de saccade à l'écran
+        _calcul = System.Threading.Tasks.Task.Run(() => paires.Count > 0 ? new SimTrafic(graphe, paires, graine) : (SimTrafic?)null);
+    }
+
+    private void Installer(SimTrafic? sim)
+    {
+        _sim = sim;
         int nb = _sim?.NbVehicules ?? 0;
         _voitures.InstanceCount = nb;
         _tampon = new float[nb * 16]; // 12 nombres pour la position/rotation + 4 pour la couleur

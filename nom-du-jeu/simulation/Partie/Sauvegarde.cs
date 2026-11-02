@@ -29,10 +29,12 @@ public sealed class SauvegardeDto
     public List<MessageVille> Messages { get; set; } = new();
     public List<PointMois> Historique { get; set; } = new();
     public Dictionary<string, int> DernierMessage { get; set; } = new();
+    // ajoutés après la v1 (champs facultatifs : les anciennes sauvegardes restent lisibles)
+    public bool BacASable { get; set; }
 }
 
 public sealed record NoeudDto(int Id, double X, double Y, bool Entree);
-public sealed record AreteDto(int Id, int A, int B, double[] Trace, string Gabarit, bool Departemental, string? Nom);
+public sealed record AreteDto(int Id, int A, int B, double[] Trace, string Gabarit, bool Departemental, string? Nom, bool Pont = false);
 public sealed record ArretDto(int Id, int Arete, double X, double Y);
 public sealed record BatimentDto(Zone Type, int Niveau, double Occupants, int JoursChantier, int MoisDepuisNiveau, int MoisSansService);
 public sealed record ParcelleDto(int Id, int Arete, double[] Geo, Zone Zone, string? Service, double Attrait, int Variante, BatimentDto? Batiment);
@@ -48,7 +50,7 @@ public sealed partial class Partie
         ProchainNoeud = Reseau.ProchainNoeud, ProchaineArete = Reseau.ProchaineArete,
         ProchaineParcelle = _prochaineParcelle, ProchainArret = _prochainArret,
         Noeuds = Reseau.Noeuds.Values.Select(n => new NoeudDto(n.Id, n.Pos.X, n.Pos.Y, n.Entree)).ToList(),
-        Aretes = Reseau.Aretes.Values.Select(e => new AreteDto(e.Id, e.A, e.B, e.Trace.SelectMany(p => new[] { p.X, p.Y }).ToArray(), e.Gabarit, e.Departemental, e.Nom)).ToList(),
+        Aretes = Reseau.Aretes.Values.Select(e => new AreteDto(e.Id, e.A, e.B, e.Trace.SelectMany(p => new[] { p.X, p.Y }).ToArray(), e.Gabarit, e.Departemental, e.Nom, e.Pont)).ToList(),
         Parcelles = Parcelles.Values.Select(p => new ParcelleDto(p.Id, p.Arete,
             new[] { p.Centre.X, p.Centre.Y, p.Dir.X, p.Dir.Y, p.Normale.X, p.Normale.Y }, p.Zone, p.Service, p.Attrait, p.Variante,
             p.Batiment == null ? null : new BatimentDto(p.Batiment.Type, p.Batiment.Niveau, p.Batiment.Occupants, p.Batiment.JoursChantier, p.Batiment.MoisDepuisNiveau, p.Batiment.MoisSansService))).ToList(),
@@ -57,6 +59,7 @@ public sealed partial class Partie
         Messages = Messages.TakeLast(50).ToList(),
         Historique = Historique.ToList(),
         DernierMessage = new Dictionary<string, int>(_dernierMessage),
+        BacASable = BacASable,
     };
 
     public string Sauvegarder() => JsonSerializer.Serialize(VersDto(), Reglages.Json);
@@ -76,7 +79,7 @@ public sealed partial class Partie
         var p = new Partie(r, paquet, 1)
         {
             Jour = dto.Jour, Argent = dto.Argent, ImpotHabitat = dto.ImpotHabitat, ImpotCommerce = dto.ImpotCommerce,
-            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier,
+            ImpotActivites = dto.ImpotActivites, Palier = dto.Palier, BacASable = dto.BacASable,
         };
         p._alea.Etat = dto.Alea;
         foreach (var n in dto.Noeuds) p.Reseau.RestaurerNoeud(new NoeudRoute { Id = n.Id, Pos = new V2(n.X, n.Y), Entree = n.Entree });
@@ -84,7 +87,7 @@ public sealed partial class Partie
         {
             var trace = new List<V2>();
             for (int i = 0; i + 1 < e.Trace.Length; i += 2) trace.Add(new V2(e.Trace[i], e.Trace[i + 1]));
-            var a = new AreteRoute { Id = e.Id, A = e.A, B = e.B, Trace = trace, Gabarit = e.Gabarit, Departemental = e.Departemental, Nom = e.Nom };
+            var a = new AreteRoute { Id = e.Id, A = e.A, B = e.B, Trace = trace, Gabarit = e.Gabarit, Departemental = e.Departemental, Nom = e.Nom, Pont = e.Pont };
             p.Reseau.RestaurerArete(a);
             p.RasteriserRoute(a);
         }

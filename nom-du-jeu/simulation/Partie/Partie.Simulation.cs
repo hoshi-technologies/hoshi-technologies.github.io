@@ -98,18 +98,20 @@ public sealed partial class Partie
         _servicesAJour = true;
         var prodEau = new Dictionary<int, double>();
         var prodElec = new Dictionary<int, double>();
-        double totalEau = 0, totalElec = 0;
+        var prodDechets = new Dictionary<int, double>();
+        double totalEau = 0, totalElec = 0, totalDechets = 0;
         foreach (var p in Parcelles.Values)
         {
             if (p.Service == null) continue;
             var s = R.Services[p.Service];
-            if (s.Eau <= 0 && s.Electricite <= 0) continue;
+            if (s.Eau <= 0 && s.Electricite <= 0 && s.Dechets <= 0) continue;
             int n = NoeudParcelle(p);
             if (n < 0) continue;
             int c = Reseau.Composante(n, R);
             prodEau[c] = prodEau.GetValueOrDefault(c) + s.Eau;
             prodElec[c] = prodElec.GetValueOrDefault(c) + s.Electricite;
-            totalEau += s.Eau; totalElec += s.Electricite;
+            prodDechets[c] = prodDechets.GetValueOrDefault(c) + s.Dechets;
+            totalEau += s.Eau; totalElec += s.Electricite; totalDechets += s.Dechets;
         }
 
         // population et emplois
@@ -135,7 +137,9 @@ public sealed partial class Partie
         // distribution de l'eau et de l'électricité, bâtiment par bâtiment (ordre stable)
         var consEau = new Dictionary<int, double>();
         var consElec = new Dictionary<int, double>();
-        double totalConsEau = 0, totalConsElec = 0;
+        var consDechets = new Dictionary<int, double>();
+        double totalConsEau = 0, totalConsElec = 0, totalConsDechets = 0;
+        bool dechetsActifs = Palier >= 1 && !BacASable;
         foreach (var p in Parcelles.Values)
         {
             var b = p.Batiment;
@@ -150,12 +154,17 @@ public sealed partial class Partie
             b.Elec = c >= 0 && ul <= prodElec.GetValueOrDefault(c) + 1e-6;
             if (b.Eau) consEau[c] = ue;
             if (b.Elec) consElec[c] = ul;
-            totalConsEau += ce; totalConsElec += cl;
+            double cd = occ * (b.Type == Zone.Habitat ? R.Consommation.DechetsParHabitant : R.Consommation.DechetsParEmploi);
+            double ud = consDechets.GetValueOrDefault(c) + cd;
+            b.Dechets = !dechetsActifs || (c >= 0 && ud <= prodDechets.GetValueOrDefault(c) + 1e-6);
+            if (b.Dechets && c >= 0) consDechets[c] = ud;
+            totalConsEau += ce; totalConsElec += cl; totalConsDechets += cd;
         }
         _resteParComposante.Clear();
         foreach (var c in prodEau.Keys)
             _resteParComposante[c] = (prodEau[c] - consEau.GetValueOrDefault(c), prodElec.GetValueOrDefault(c) - consElec.GetValueOrDefault(c));
         EauProduite = totalEau; EauConsommee = totalConsEau;
+        DechetsCapacite = totalDechets; DechetsProduits = totalConsDechets;
         ElecProduite = totalElec; ElecConsommee = totalConsElec;
 
         // demande
@@ -174,6 +183,79 @@ public sealed partial class Partie
     }
 
     private int LigneBusVersion = -1;
+    public double DechetsCapacite { get; private set; }
+    public double DechetsProduits { get; private set; }
+
+    /// <summary>Taux d'occupation des routes à l'heure de pointe (identifiant d'arête → charge / capacité).</summary>
+    public Dictionary<int, double> Congestion { get; } = new();
+    public string? RueLaPlusChargee { get; private set; }
+    public int Incendies { get; private set; }
+
+    /// <summary>
+    /// Heure de pointe : un échantillon de trajets domicile-travail est réparti sur le réseau
+    /// (plus court chemin), puis ramené au nombre réel de voitures.
+    /// </summary>
+    private void CalculerCongestion()
+    {
+        Congestion.Clear();
+        RueLaPlusChargee = null;
+        if (Population < 50) return;
+        var trajets = Deplacements(1200);
+        if (trajets.Count == 0) return;
+        var g = Reseau.Graphe(R);
+        double habitantsBus = 0, habitantsTotal = 0;
+        foreach (var p in Parcelles.Values)
+            if (p.Batiment is { Type: Zone.Habitat } b)
+            {
+                habitantsTotal += b.Occupants;
+                if (Arrets.Count >= 2 && Arrets.Values.Any(a => V2.Distance(a.Pos, p.Centre) <= R.Services["arret_bus"].RayonM)) habitantsBus += b.Occupants;
+            }
+        double partBus = habitantsTotal > 0 ? 0.3 * habitantsBus / habitantsTotal : 0;
+        double echelle = Actifs * R.Routes.PartTrajetsVoiture * (1 - partBus) / trajets.Count;
+        var chemins = new int[trajets.Count][];
+        Parallel.For(0, trajets.Count, () => new Ville.Reseau.EspaceCalcul(),
+            (i, _, es) => { chemins[i] = g.Chemin(trajets[i].depart, trajets[i].arrivee, es); return es; }, _ => { });
+        var charge = new Dictionary<int, double>();
+        foreach (var c in chemins)
+            foreach (var arc in c)
+            {
+                int e = g.TronconArc(arc);
+                charge[e] = charge.GetValueOrDefault(e) + echelle;
+            }
+        double pire = 0;
+        foreach (var (e, ch) in charge.OrderBy(kv => kv.Key))
+        {
+            if (!Reseau.Aretes.TryGetValue(e, out var ar)) continue;
+            double ratio = ch / R.Routes.CapaciteVehicules.GetValueOrDefault(ar.Gabarit, 500);
+            Congestion[e] = ratio;
+            if (ratio > pire) { pire = ratio; RueLaPlusChargee = ar.Nom ?? (ar.Departemental ? "un grand axe" : "une de vos rues"); }
+        }
+        if (pire < 1) RueLaPlusChargee = null;
+    }
+
+    private void IncendiesDuMois(List<V2> casernes)
+    {
+        Incendies = 0;
+        if (Palier < 2 || BacASable) return; // ce risque apparaît avec le palier Village, en même temps que les pompiers
+        int maitrises = 0;
+        double rayon = R.Services["caserne_pompiers"].RayonM;
+        foreach (var p in Parcelles.Values)
+        {
+            var b = p.Batiment;
+            if (b == null || b.EnChantier) continue;
+            bool couvert = casernes.Any(c => V2.Distance(c, p.Centre) <= rayon);
+            double proba = couvert ? R.Risques.IncendieProbaAvecPompiers : R.Risques.IncendieProbaMois;
+            if (_alea.Reel() >= proba) { if (couvert && _alea.Reel() < proba * 5) maitrises++; continue; }
+            p.Batiment = null;
+            Incendies++;
+            CarresModifies.Add(Carre(p.Centre));
+        }
+        if (Incendies > 0)
+            Message("alerte", Incendies == 1 ? "Le journal local : « Un incendie a détruit un bâtiment. Les pompiers étaient trop loin. »"
+                                             : $"Le journal local : « {Incendies} incendies ce mois-ci. Le quartier réclame une caserne de pompiers. »");
+        else if (maitrises > 0)
+            MessageLimite("pompiers_ok", 180, "info", "Le journal local : « Départ de feu maîtrisé en quelques minutes grâce à la caserne. »");
+    }
 
     private void CalculerLigneBus()
     {
@@ -198,8 +280,10 @@ public sealed partial class Partie
     private void FinDeMois()
     {
         MettreAJourServices();
+        CalculerCongestion();
         CalculerAttrait();
         NiveauxEtDeparts();
+        IncendiesDuMois(Parcelles.Values.Where(p => p.Service == "caserne_pompiers").Select(p => p.Centre).ToList());
         Budget();
         MettreAJourServices();
         Paliers();
@@ -247,10 +331,42 @@ public sealed partial class Partie
             }
         }
 
+        // santé : places limitées, les plus proches d'abord (comme l'école)
+        foreach (var p in Parcelles.Values) if (p.Batiment != null) p.Batiment.Sante = 0;
+        foreach (var cs in Parcelles.Values.Where(p => p.Service == "centre_sante"))
+        {
+            var s = R.Services["centre_sante"];
+            double places = s.Patients;
+            foreach (var p in Parcelles.Values.Where(p => p.Batiment is { Type: Zone.Habitat } && V2.Distance(p.Centre, cs.Centre) <= s.RayonM)
+                         .OrderBy(p => V2.Distance(p.Centre, cs.Centre)).ThenBy(p => p.Id))
+            {
+                var b = p.Batiment!;
+                double habitants = b.Occupants * R.PersonnesParLogement * (1 - b.Sante);
+                if (habitants <= 0 || places <= 0) continue;
+                double pris = Math.Min(places, habitants);
+                places -= pris;
+                b.Sante = Math.Min(1, b.Sante + pris / Math.Max(b.Occupants * R.PersonnesParLogement, 1e-9));
+            }
+        }
+        var commissariats = Parcelles.Values.Where(p => p.Service == "commissariat").Select(p => p.Centre).ToList();
+        var casernes = Parcelles.Values.Where(p => p.Service == "caserne_pompiers").Select(p => p.Centre).ToList();
+        bool santeExigee = Population > R.Risques.PopulationSansSanteMax && !BacASable;
+        bool policeExigee = Population > R.Risques.PopulationSansPoliceMax && !BacASable;
+
         foreach (var p in Parcelles.Values)
         {
             if (p.Zone == Zone.Aucune) continue;
             double a = 40;
+            if (p.Batiment is { } bb)
+            {
+                bb.Police = commissariats.Any(c => V2.Distance(c, p.Centre) <= R.Services["commissariat"].RayonM);
+                bb.Pompiers = casernes.Any(c => V2.Distance(c, p.Centre) <= R.Services["caserne_pompiers"].RayonM);
+                if (!bb.Dechets) a -= 12;
+                if (p.Zone == Zone.Habitat) a += bb.Sante >= 0.8 ? 6 : santeExigee ? -6 : 0;
+                a += bb.Police ? 4 : policeExigee ? -8 : 0;
+            }
+            if (Congestion.TryGetValue(p.Arete, out var bouchon) && bouchon > 1)
+                a += p.Zone == Zone.Habitat ? -Math.Min(15, 10 * (bouchon - 1)) : p.Zone == Zone.Commerce ? Math.Min(8, 5 * bouchon) : -Math.Min(10, 6 * (bouchon - 1));
             double dEau = Grille.DistanceEau(p.Centre);
             if (dEau < 300) a += 14 * (1 - dEau / 300);                       // vue sur l'eau
             if (Reseau.Aretes.TryGetValue(p.Arete, out var e) && e.Gabarit is "avenue" or "voie_rapide")
@@ -380,6 +496,14 @@ public sealed partial class Partie
             MessageLimite("commerce", 90, "habitant", $"{Habitant()} : « Il faut prendre la voiture pour acheter du pain ! »");
         if (Enfants > 120 && Parcelles.Values.Any(p => p.Batiment is { Type: Zone.Habitat, Ecole: < 0.5 } b && b.Occupants > 2))
             MessageLimite("ecole", 90, "habitant", $"{Habitant()} : « Nos enfants n'ont pas de place à l'école près de chez nous. »");
+        if (DechetsProduits > DechetsCapacite + 1 && Palier >= 1 && !BacASable)
+            MessageLimite("dechets", 90, "habitant", $"{Habitant()} : « Les poubelles ne sont plus ramassées dans ma rue ! » (centre de tri saturé ou absent)");
+        if (Population > R.Risques.PopulationSansSanteMax && !Parcelles.Values.Any(p => p.Service == "centre_sante") && !BacASable)
+            MessageLimite("sante", 120, "habitant", $"{Habitant()} : « Il faut attendre trois semaines pour voir un médecin. »");
+        if (Population > R.Risques.PopulationSansPoliceMax && !Parcelles.Values.Any(p => p.Service == "commissariat") && !BacASable)
+            MessageLimite("police", 120, "habitant", $"{Habitant()} : « Des vols de vélos toutes les nuits, et pas de commissariat. »");
+        if (RueLaPlusChargee != null)
+            MessageLimite("bouchons", 120, "habitant", $"{Habitant()} : « Tous les matins, c'est bouché sur {RueLaPlusChargee}. »");
         if (ImpotHabitat > 0.15)
             MessageLimite("impots", 120, "habitant", $"{Habitant()} : « Avec ces impôts, je pense déménager. »");
         if (Argent < 0)
