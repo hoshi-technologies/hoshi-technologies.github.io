@@ -2,12 +2,19 @@ name: Programme PMU (Hoshi Turf)
 
 # Récupère automatiquement les courses, partants, cotes et arrivées
 # et les publie dans hippique/data/ pour la page Hoshi Turf.
+#
+# Fonctionnement normal : une boucle (job « loop », scripts/run-loop.sh) qui se relance
+# elle-même toutes les ~5 h 40. Les horaires ci-dessous ne servent qu'à la redémarrer
+# si elle s'est arrêtée (GitHub ne garantit pas les horaires planifiés).
 on:
   schedule:
-    - cron: '7 5-21 * * *' # passage complet toutes les heures, de 6 h à 23 h (heure de Paris, environ)
-    - cron: '17,27,37,47,57 8-21 * * *' # cotes des courses proches, toutes les 10 min de 9 h à 23 h
+    - cron: '23 * * * *'
   workflow_dispatch:
     inputs:
+      loop:
+        description: "Boucle de mise à jour continue (fonctionnement normal)"
+        type: boolean
+        default: false
       backfill:
         description: "Nombre de journées passées à récupérer (0 = fonctionnement normal)"
         default: '0'
@@ -22,14 +29,32 @@ on:
 
 permissions:
   contents: write
-  actions: read # lire l'état du passage précédent (notifications de panne)
-
-concurrency:
-  group: pmu-programme
-  cancel-in-progress: false
+  actions: write # relancer la boucle et lire l'état des passages
 
 jobs:
+  loop:
+    if: ${{ github.event_name == 'schedule' || inputs.loop }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Tests du moteur
+        run: node --test tests/*.test.mjs
+      - name: Boucle de mise à jour
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'hoshi-turf-b12tj5jfgndm' }}
+        run: scripts/run-loop.sh
+
+  # Passage unique lancé à la main : historique (backfill), diagnostic, notification de test.
   fetch:
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.loop }}
+    concurrency:
+      group: pmu-programme-manuel
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -44,14 +69,9 @@ jobs:
         run: node scripts/pmu-probe.mjs
       - name: Récupérer le programme
         if: ${{ !inputs.probe }}
-        run: |
-          if [ "${{ github.event.schedule }}" = "17,27,37,47,57 8-21 * * *" ]; then
-            node scripts/pmu-fetch.mjs --quick
-          else
-            node scripts/pmu-fetch.mjs --backfill "${{ inputs.backfill || '0' }}"
-          fi
+        run: node scripts/pmu-fetch.mjs --backfill "${{ inputs.backfill || '0' }}"
       - name: Calibrer le modèle (une fois par jour)
-        if: ${{ !inputs.probe && github.event.schedule != '17,27,37,47,57 8-21 * * *' }}
+        if: ${{ !inputs.probe }}
         run: node scripts/calibrate.mjs
       - name: Alertes (paris validés)
         if: ${{ !inputs.probe }}
@@ -71,7 +91,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Hoshi Turf : programme PMU du $(TZ=Europe/Paris date +'%d/%m/%Y %Hh%M')"
           for i in 1 2 3; do
-            git pull --rebase --autostash && git push && break
+            git pull --rebase -X theirs --autostash && git push && break
             sleep 5
           done
       # Prévient sur le téléphone quand la tâche tombe en panne (une seule fois), puis quand elle repart.
