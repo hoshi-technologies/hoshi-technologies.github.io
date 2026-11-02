@@ -541,6 +541,9 @@
           display: none;
         }
       }
+      .oth.alert-row .nm {
+        white-space: normal;
+      }
       .oth.np {
         opacity: 0.45;
       }
@@ -690,6 +693,7 @@
         <section class="card hero" id="sHero"></section>
         <section class="card" id="sPick"></section>
         <section class="card" id="sAdvice"></section>
+        <section class="card" id="sAlerts"></section>
       </div>
 
       <div id="expert" class="hide">
@@ -2138,7 +2142,19 @@
             adv.bets.filter(function (b) {
               return b.stakeCalc >= 1;
             });
-          if (playable && playable.length) {
+          var raceAlert =
+            au &&
+            todaysAlerts().filter(function (x) {
+              return x.date === au.date && x.r == au.r && x.c == au.c;
+            })[0];
+          if (raceAlert && !finished)
+            c +=
+              '<div class="ico">🔔</div><div><p class="lead">Alerte : ' +
+              esc(alertText(raceAlert)) +
+              '</p><p class="hint">Envoyée à ' +
+              new Date(raceAlert.sentAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) +
+              '. Vérifiez la cote actuelle avant de jouer : si elle a baissé, le pari peut ne plus valoir le coup.</p></div>';
+          else if (playable && playable.length) {
             var b = playable[0];
             c +=
               '<div class="ico">✅</div><div><p class="lead">Jouer ' +
@@ -2197,6 +2213,150 @@
         setInterval(function () {
           if (!document.hidden) renderSimple();
         }, 60000);
+
+        // ---------------- Alertes ----------------
+        var alertsData = null;
+        store.seenAlerts = store.seenAlerts || {};
+        function loadAlerts() {
+          return getJson('data/alerts.json')
+            .then(function (d) {
+              alertsData = d;
+            })
+            .catch(function () {
+              alertsData = null;
+            })
+            .then(function () {
+              renderAlerts();
+              notifyNewAlerts();
+            });
+        }
+        function todaysAlerts() {
+          var today = parisIso(0);
+          return ((alertsData && alertsData.alerts) || []).filter(function (x) {
+            return x.date === today;
+          });
+        }
+        function alertText(x) {
+          return (
+            'Jouer ' +
+            (x.type === 'g' ? 'gagnant' : 'placé') +
+            ' n°' +
+            x.num +
+            ' ' +
+            x.nom +
+            ' · cote ' +
+            String(x.cote).replace('.', ',') +
+            ' · ' +
+            Math.round(x.p * 100) +
+            ' % de chances · mise ' +
+            (x.stakePct * 100).toFixed(1).replace('.', ',') +
+            ' % de la bankroll'
+          );
+        }
+        function notifyNewAlerts() {
+          var list = todaysAlerts();
+          var fresh = list.filter(function (x) {
+            return !store.seenAlerts[x.key];
+          });
+          if (!fresh.length) return;
+          var can = store.notif && 'Notification' in window && Notification.permission === 'granted';
+          fresh.forEach(function (x) {
+            if (can) {
+              try {
+                new Notification('Hoshi Turf · R' + x.r + 'C' + x.c + ' ' + fmtHour(x.heure) + ' ' + x.hippodrome, { body: alertText(x), tag: x.key });
+              } catch (e) {}
+            }
+            store.seenAlerts[x.key] = 1;
+          });
+          save(store);
+        }
+        function renderAlerts() {
+          var d = alertsData;
+          var list = todaysAlerts();
+          var html = '<h2>🔔 Alertes</h2>';
+          if (list.length) {
+            html += '<div class="others">';
+            list
+              .slice()
+              .reverse()
+              .forEach(function (x) {
+                var past = x.heure < Date.now();
+                html +=
+                  '<div class="oth alert-row" style="grid-template-columns: auto minmax(0,1fr);cursor:pointer' +
+                  (past ? ';opacity:.55' : '') +
+                  '" data-alert-r="' +
+                  x.r +
+                  '" data-alert-c="' +
+                  x.c +
+                  '"><span class="tag accent">R' +
+                  x.r +
+                  'C' +
+                  x.c +
+                  ' · ' +
+                  fmtHour(x.heure) +
+                  '</span><span class="nm">' +
+                  esc(x.hippodrome) +
+                  ' — ' +
+                  esc(alertText(x)) +
+                  '</span></div>';
+              });
+            html += '</div><p class="hint">Vérifiez toujours la cote juste avant le départ : si elle a baissé, le pari peut ne plus valoir le coup.</p>';
+          } else if (d && d.strategy) {
+            html +=
+              '<p>Aucune alerte pour le moment aujourd\'hui. Les cotes des courses proches sont vérifiées toutes les 10 minutes ; une alerte part dès qu\'un pari correspond à la stratégie validée (' +
+              esc(d.strategy.label) +
+              ').</p>';
+          } else {
+            html +=
+              '<p>Pas d\'alerte possible pour l\'instant : aucune façon de jouer n\'a encore prouvé, sur les courses passées, qu\'elle bat la commission du PMU. Le calcul est refait chaque jour avec les nouveaux résultats ; dès qu\'une stratégie sera validée, les alertes partiront toutes seules.</p>';
+          }
+          var perm = 'Notification' in window ? Notification.permission : 'unsupported';
+          html += '<div class="row" style="margin-top:10px">';
+          if (perm === 'unsupported') html += '<span class="hint" style="margin:0">Ce navigateur ne gère pas les notifications.</span>';
+          else if (store.notif && perm === 'granted')
+            html += '<button id="btnNotif" class="ghost">Notifications activées sur cet appareil ✓ (désactiver)</button>';
+          else html += '<button id="btnNotif" class="primary">Activer les notifications sur cet appareil</button>';
+          html += '</div><p class="hint">Les notifications du navigateur n\'arrivent que lorsque cette page est ouverte.</p>';
+          html +=
+            '<details style="margin-top:6px"><summary>Recevoir les alertes sur votre téléphone, même appli fermée</summary><ol class="hint" style="padding-left:18px">' +
+            '<li>Installez l\'application gratuite <b>ntfy</b> (Android ou iPhone).</li>' +
+            '<li>Touchez « + » et abonnez-vous à un nom de sujet secret de votre choix, par exemple <code>hoshi-turf-7k2p9</code> (évitez un nom facile à deviner).</li>' +
+            '<li>Sur GitHub, dans le dépôt : <i>Settings → Secrets and variables → Actions → New repository secret</i>, nom <code>NTFY_TOPIC</code>, valeur = ce nom de sujet.</li>' +
+            '<li>Pour tester : <i>Actions → Programme PMU → Run workflow</i> en cochant « Envoyer une notification de test ».</li></ol></details>';
+          $('sAlerts').innerHTML = html;
+        }
+        $('sAlerts').addEventListener('click', function (e) {
+          if (e.target.id === 'btnNotif') {
+            if (store.notif && Notification.permission === 'granted') {
+              store.notif = false;
+              save(store);
+              renderAlerts();
+              return;
+            }
+            Notification.requestPermission().then(function (p) {
+              store.notif = p === 'granted';
+              // Les alertes déjà affichées ne sont pas renotifiées.
+              todaysAlerts().forEach(function (x) {
+                store.seenAlerts[x.key] = 1;
+              });
+              save(store);
+              renderAlerts();
+            });
+            return;
+          }
+          var row = e.target.closest('[data-alert-r]');
+          if (!row) return;
+          var go = function () {
+            selectCourse(row.dataset.alertR, row.dataset.alertC);
+          };
+          if ($('progDate').value !== parisIso(0)) {
+            $('progDate').value = parisIso(0);
+            loadDay(parisIso(0)).then(go);
+          } else go();
+        });
+        setInterval(function () {
+          if (!document.hidden) loadAlerts();
+        }, 5 * 60000);
         store.bet = Object.assign({ bank: 100, kelly: 0.25, max: 2, edge: '', stop: 10, types: 'gp' }, store.bet || {});
         store.journal = store.journal || [];
         function money(x) {
@@ -2836,6 +2996,7 @@
         render();
         initProgram();
         settleJournal();
+        loadAlerts();
       })();
     </script>
   </body>

@@ -616,6 +616,42 @@
     return out;
   }
 
+  /**
+   * Stratégie de paris validée par la simulation (ROI positif même après retrait de deux
+   * erreurs-types), ou null. C'est la seule condition pour conseiller une vraie mise.
+   */
+  function validatedStrategy(calibration) {
+    var bt = calibration && calibration.backtest;
+    if (!bt) return null;
+    var ok = bt.strategies
+      .filter((x) => x.validated && x.id.indexOf('val_') === 0)
+      .sort((a, b) => b.roi - a.roi);
+    return ok[0] || null;
+  }
+
+  /** Paris « valeur » d'une course analysée : probabilité × cote ≥ seuil. */
+  function valueBets(analysis, calibration, opts) {
+    opts = opts || {};
+    var edge = opts.minEdge || 1.15,
+      types = opts.types || 'gp',
+      out = [];
+    if (!analysis || analysis.error || !analysis.market) return out;
+    var coefs = calibration && calibration.placeOdds;
+    analysis.runners.forEach(function (x) {
+      if (x.confidence < 0.5) return;
+      var cote = num(x.runner.cote);
+      if (!(cote > 1)) return;
+      if (types.indexOf('g') >= 0 && x.pWin >= 0.03 && x.pWin * cote >= edge)
+        out.push({ x: x, type: 'g', p: x.pWin, o: cote, ev: x.pWin * cote, est: false });
+      if (types.indexOf('p') >= 0 && analysis.placesPayees) {
+        var oP = estimatePlaceOdds(cote, analysis.placesPayees, coefs);
+        if (oP && x.pPlace * oP >= edge) out.push({ x: x, type: 'p', p: x.pPlace, o: oP, ev: x.pPlace * oP, est: true });
+      }
+    });
+    out.forEach((b) => (b.kelly = kelly(b.p, b.o)));
+    return out.sort((a, b) => b.ev - a.ev);
+  }
+
   /** Taux de victoire (%) lissé d'un jockey/entraîneur à partir de [courses, victoires, places]. */
   function statRate(st) {
     if (!st || st[0] < 3) return null;
@@ -624,6 +660,8 @@
 
   var api = {
     statRate: statRate,
+    validatedStrategy: validatedStrategy,
+    valueBets: valueBets,
     featureVector: featureVector,
     learnedProbs: learnedProbs,
     disciplineGroup: disciplineGroup,
