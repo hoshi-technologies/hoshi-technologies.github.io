@@ -300,5 +300,41 @@
     "facteur_capacite": 1.4,
     "hauteur_ajoutee_m": 6
   },
-  "argent_depart_routes_reelles": 400000
+  "argent_depart_routes_reelles": 400000,
+  "vraie_gestion": {
+    "_note": "Module optionnel. Usure en fraction par mois (1/300 = usée en 25 ans).",
+    "usure_routes_par_mois": 0.0033,
+    "usure_services_par_mois": 0.0042,
+    "seuil_degradation": 0.7,
+    "cout_renovation_route_par_m": 25,
+    "part_cout_renovation_service": 0.4,
+    "dotation_par_habitant": 1.6,
+    "variation_dotation": 0.12,
+    "attentes_par_palier": 2.5,
+    "evenements_proba_mois": 0.12,
+    "difficultes": {
+      "decouverte": {
+        "nom": "Découverte",
+        "couts": 0.7,
+        "evenements": 0.5,
+        "dotation": 1.2
+      },
+      "realiste": {
+        "nom": "Réaliste",
+        "couts": 1.0,
+        "evenements": 1.0,
+        "dotation": 1.0
+      },
+      "crise": {
+        "nom": "Crise",
+        "couts": 1.3,
+        "evenements": 1.8,
+        "dotation": 0.8
+      }
+    },
+    "cout_administration_par_habitant": 2.0,
+    "hausse_administration_par_palier": 0.15,
+    "reserves_max_en_mois_de_recettes": 12,
+    "impot_juge_raisonnable": 0.06
+  }
 }

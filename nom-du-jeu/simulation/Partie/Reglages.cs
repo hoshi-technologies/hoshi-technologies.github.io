@@ -31,6 +31,10 @@ public sealed class Reglages
     public ReglagesEvolution EvolutionBatimentsReels { get; set; } = new();
     public double ArgentDepartRoutesReelles { get; set; } = 400000;
 
+    /// <summary>Sections propres aux modules (ex. « vraie_gestion »), lues par chaque module.</summary>
+    [System.Text.Json.Serialization.JsonExtensionData]
+    public Dictionary<string, JsonElement> Extra { get; set; } = new();
+
     public static readonly JsonSerializerOptions Json = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,

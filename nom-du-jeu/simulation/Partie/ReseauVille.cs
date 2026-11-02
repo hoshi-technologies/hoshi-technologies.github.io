@@ -118,6 +118,20 @@ public sealed class ReseauVille
     }
 
     private readonly Dictionary<int, int> _degre = new();
+    /// <summary>Arête la plus proche (sans s'arrêter aux carrefours), à moins de rayon mètres.</summary>
+    public AreteRoute? AreteProche(V2 p, double rayon)
+    {
+        AreteRoute? eb = null; double de = rayon;
+        foreach (var e in Aretes.Values)
+            for (int i = 0; i + 1 < e.Trace.Count; i++)
+            {
+                Geo.Projection(p, e.Trace[i], e.Trace[i + 1], out var q);
+                double d = V2.Distance(p, q);
+                if (d < de) { de = d; eb = e; }
+            }
+        return eb;
+    }
+
     public int Degre(int noeud) => _degre.TryGetValue(noeud, out var d) ? d : 0;
 
     private void RetirerArete(AreteRoute e)

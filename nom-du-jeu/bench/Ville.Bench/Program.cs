@@ -11,8 +11,9 @@ if (args.Length > 0 && args[0] == "--vieillir")
     // Vieillissement artificiel : 3 000 mois de jeu = 50 heures à vitesse normale (1 mois = 1 minute)
     var reglages = Ville.Coeur.Reglages.Charger(args[2]);
     var paquet = PaquetVille.Charger(args[1]);
-    int mois = args.Length > 3 ? int.Parse(args[3]) : 3000;
+    int mois = args.Length > 3 && int.TryParse(args[3], out var mm) ? mm : 3000;
     var partie = Ville.Coeur.Partie.NouvelleFondation(reglages, paquet, 7);
+    if (args.Contains("--gestion")) partie.Modules.Add(new Ville.Gestion.VraieGestion(reglages, args.Contains("--crise") ? "crise" : "realiste"));
     var robot = new Ville.Coeur.Robot(partie);
     robot.Demarrer();
     var total = Stopwatch.StartNew();

@@ -35,6 +35,9 @@ public sealed class SauvegardeDto
     public ModeDepart Depart { get; set; } = ModeDepart.GrandsAxes;
     /// <summary>Taille de la carte (quartier, ville…) : choisit le bon paquet au chargement.</summary>
     public string Taille { get; set; } = "quartier";
+    public Dictionary<string, JsonElement> Modules { get; set; } = new();
+    public List<Decision> Decisions { get; set; } = new();
+    public int ProchaineDecision { get; set; }
 }
 
 public sealed record NoeudDto(int Id, double X, double Y, bool Entree);
@@ -68,6 +71,9 @@ public sealed partial class Partie
         ModeVilleReelle = ModeVilleReelle,
         Depart = Depart,
         Taille = Paquet.Manifest.Ville.Taille,
+        Modules = Modules.ToDictionary(m => m.Id, m => m.Sauvegarder()),
+        Decisions = Decisions.ToList(),
+        ProchaineDecision = _prochaineDecision,
     };
 
     public string Sauvegarder() => JsonSerializer.Serialize(VersDto(), Reglages.Json);
@@ -143,6 +149,10 @@ public sealed partial class Partie
         p.Messages.AddRange(dto.Messages);
         p.Historique.AddRange(dto.Historique);
         foreach (var (k, v) in dto.DernierMessage) p._dernierMessage[k] = v;
+        foreach (var (id, etat) in dto.Modules)
+            if (FabriquesModules.TryGetValue(id, out var fab)) { var m = fab(r); m.Restaurer(etat); p.Modules.Add(m); }
+        p.Decisions.AddRange(dto.Decisions);
+        p._prochaineDecision = dto.ProchaineDecision;
         p.MettreAJourServices();
         // recalcule les couvertures (école, santé…) sans toucher à l'attrait sauvegardé
         var attraits = p.Parcelles.Values.ToDictionary(x => x.Id, x => x.Attrait);

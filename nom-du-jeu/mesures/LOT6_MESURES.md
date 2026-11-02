@@ -54,3 +54,16 @@ Images (rendu logiciel) : `lot6_ville_reelle_ensemble.png`, `lot6_ville_reelle_q
 | Sauvegarde | 48 Mo en JSON (environ 10 Mo compressée) |
 
 Il reste à améliorer : faire les calculs de fin de mois en arrière-plan, et alléger la sauvegarde (ne pas réécrire les contours des bâtiments réels, qui sont déjà dans le paquet).
+
+## Vraie gestion : le même test de 50 heures (module activé, difficulté Réaliste)
+
+Journal : `lot12_vieillissement_50h_vraie_gestion.log`.
+
+| | Sans vraie gestion | Avec vraie gestion |
+|---|---|---|
+| Argent après 50 h | 337 millions €, et toujours en hausse | entre 0,05 et 3,5 millions €, il monte et redescend |
+| Population | bloquée à 18 900 dès 4 h | 30 000 à 4 h, puis 40 000 à 50 h, toujours en croissance |
+| Calcul | 1,1 ms par jour de jeu | 1,2 ms par jour de jeu |
+| Sauvegarde et rechargement | identiques | identiques |
+
+Le robot rénove, répond aux événements et baisse les impôts quand les réserves sont trop grosses. **La fin de partie redevient une suite de choix** au lieu d'un compte en banque qui gonfle. Il reste à le confirmer par un vrai joueur.

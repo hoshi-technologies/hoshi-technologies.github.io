@@ -98,6 +98,15 @@ public sealed class Robot
     public void Decider()
     {
         var p = _p;
+        // module de vraie gestion : rénover le plus urgent, répondre aux événements
+        var vg = p.Module<Ville.Gestion.VraieGestion>();
+        if (vg != null)
+        {
+            double budget = Math.Max(0, p.Argent - 40000) * 0.5;
+            if (budget > 0) vg.RenoverUrgent(p, budget);
+        }
+        foreach (var d in p.Decisions.ToList())
+            p.Repondre(d.Id, d.Parametres.GetValueOrDefault("cout") <= p.Argent * 0.3 ? 0 : 1);
         if (p.EauConsommee > p.EauProduite * 0.75)
         {
             if (!(p.ServiceDisponible("pompage_lac") && Service("pompage_lac", BordDeLEau())))
@@ -124,6 +133,8 @@ public sealed class Robot
                 foreach (var x in p.Parcelles.Values.Where(x => x.Zone == Zone.Habitat && x.Libre)
                              .OrderByDescending(x => V2.Distance(x.Centre, _centre)).Take(10).ToList())
                     p.Zoner(x.Centre, 1, zone);
+        // trop de réserves : baisser les impôts pour attirer des habitants
+        if (p.Argent > 8 * Math.Max(p.RecettesMois, 1) && p.ImpotHabitat > 0.05) p.ReglerImpot(Zone.Habitat, p.ImpotHabitat - 0.005);
         // budget serré : un peu plus d'impôts
         if (p.Argent < 30000 && p.RecettesMois - p.DepensesMois < 3000 && p.ImpotHabitat < 0.13)
             p.ReglerImpot(Zone.Habitat, p.ImpotHabitat + 0.01);

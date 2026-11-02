@@ -167,6 +167,10 @@ public partial class Hud : Control
         demolir.Pressed += () => OutilChoisi?.Invoke(OutilActif == "demolir" ? "" : "demolir");
         _boutonsOutils["demolir"] = demolir;
         h.AddChild(demolir);
+        var renover = new Button { Text = "Rénover", TooltipText = "Rénover une rue ou un équipement usé (vraie gestion)", CustomMinimumSize = new Vector2(90, 38), ToggleMode = true };
+        renover.Pressed += () => OutilChoisi?.Invoke(OutilActif == "renover" ? "" : "renover");
+        _boutonsOutils["renover"] = renover;
+        h.AddChild(renover);
         var budget = new Button { Text = "Budget", CustomMinimumSize = new Vector2(100, 38) };
         budget.Pressed += () => _budget.Visible = !_budget.Visible;
         h.AddChild(budget);
@@ -239,7 +243,15 @@ public partial class Hud : Control
         emprunt.Pressed += () => { if (_p != null) Toast(_p.Emprunter()); };
         var fermer = new Button { Text = "Fermer" };
         fermer.Pressed += () => _budget.Visible = false;
-        h2.AddChild(emprunt); h2.AddChild(fermer);
+        var urgent = new Button { Text = "Rénover le plus urgent", TooltipText = "Dépense jusqu'à 30 % de la trésorerie pour rénover les rues et équipements les plus usés" };
+        urgent.Pressed += () =>
+        {
+            var g = _p?.Module<Ville.Gestion.VraieGestion>();
+            if (_p == null || g == null) { Toast("Module « vraie gestion » désactivé.", false); return; }
+            double d = g.RenoverUrgent(_p, Math.Max(0, _p.Argent * 0.3));
+            Toast(d > 0 ? $"Rénovations : {d:N0} €" : "Rien d'urgent à rénover (ou pas assez d'argent).", d > 0);
+        };
+        h2.AddChild(emprunt); h2.AddChild(urgent); h2.AddChild(fermer);
         v.AddChild(h2);
         AddChild(_budget);
     }
@@ -270,6 +282,37 @@ public partial class Hud : Control
     }
 
     public void BasculerAide() => _aide.Visible = !_aide.Visible;
+
+    private PanelContainer? _fenetreDecision;
+    public bool DecisionAffichee => _fenetreDecision != null;
+
+    /// <summary>Fenêtre d'événement : le maire doit choisir.</summary>
+    public void AfficherDecision(Decision d, Action<int> repondre)
+    {
+        _fenetreDecision?.QueueFree();
+        var pc = Panneau();
+        pc.SetAnchorsPreset(LayoutPreset.Center);
+        pc.Position = new Vector2(-280, -150);
+        pc.CustomMinimumSize = new Vector2(560, 0);
+        var v = new VBoxContainer();
+        v.AddThemeConstantOverride("separation", 10);
+        var titre = new Label { Text = d.Titre, HorizontalAlignment = HorizontalAlignment.Center };
+        titre.AddThemeFontSizeOverride("font_size", 22);
+        titre.AddThemeColorOverride("font_color", new Color(1f, 0.85f, 0.5f));
+        v.AddChild(titre);
+        v.AddChild(new Label { Text = d.Texte, AutowrapMode = TextServer.AutowrapMode.WordSmart, CustomMinimumSize = new Vector2(520, 0) });
+        for (int i = 0; i < d.Choix.Count; i++)
+        {
+            int c = i;
+            var b = new Button { Text = d.Choix[i], CustomMinimumSize = new Vector2(0, 38) };
+            b.Pressed += () => { _fenetreDecision?.QueueFree(); _fenetreDecision = null; repondre(c); };
+            v.AddChild(b);
+        }
+        v.AddChild(new Label { Text = "(le temps est en pause)", HorizontalAlignment = HorizontalAlignment.Center });
+        pc.AddChild(v);
+        AddChild(pc);
+        _fenetreDecision = pc;
+    }
 
     public void Toast(Resultat r) => Toast(r.Message, r.Ok);
 
@@ -324,6 +367,11 @@ public partial class Hud : Control
         foreach (var (k, v) in p.DetailDepenses) t.AppendLine($"  − {k} : {v:N0} €");
         t.AppendLine($"  = Solde : {p.RecettesMois - p.DepensesMois:N0} €");
         t.AppendLine($"\nEau : {p.EauConsommee:N0} / {p.EauProduite:N0}    Électricité : {p.ElecConsommee:N0} / {p.ElecProduite:N0}");
+        if (p.Module<Ville.Gestion.VraieGestion>() is { } g)
+        {
+            int usees = p.Reseau.Aretes.Values.Count(e => !e.Departemental && g.UsureRoute(e.Id) > g.Seuil);
+            t.AppendLine($"Difficulté : {g.NomDifficulte} · Rues en mauvais état : {usees} · Événements vécus : {g.E.Evenements}");
+        }
         if (p.Emprunts.Count > 0) t.AppendLine($"Emprunts : {p.Emprunts.Count} ({p.Emprunts.Sum(e => e.Restant):N0} € restant à rembourser)");
         _budgetDetail.Text = t.ToString();
     }

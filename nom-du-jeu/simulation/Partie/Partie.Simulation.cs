@@ -122,10 +122,12 @@ public sealed partial class Partie
             if (s.Eau <= 0 && s.Electricite <= 0 && s.Dechets <= 0) continue;
             var (n, c, _) = Infos(p);
             if (n < 0) continue;
-            prodEau[c] = prodEau.GetValueOrDefault(c) + s.Eau;
-            prodElec[c] = prodElec.GetValueOrDefault(c) + s.Electricite;
-            prodDechets[c] = prodDechets.GetValueOrDefault(c) + s.Dechets;
-            totalEau += s.Eau; totalElec += s.Electricite; totalDechets += s.Dechets;
+            double f = 1;
+            foreach (var m in Modules) f *= m.FacteurProduction(this, p);
+            prodEau[c] = prodEau.GetValueOrDefault(c) + s.Eau * f;
+            prodElec[c] = prodElec.GetValueOrDefault(c) + s.Electricite * f;
+            prodDechets[c] = prodDechets.GetValueOrDefault(c) + s.Dechets * f;
+            totalEau += s.Eau * f; totalElec += s.Electricite * f; totalDechets += s.Dechets * f;
         }
 
         // population et emplois
@@ -313,6 +315,7 @@ public sealed partial class Partie
         Etape("niveaux", NiveauxEtDeparts);
         Etape("incendies", () => IncendiesDuMois(Parcelles.Values.Where(p => p.Service == "caserne_pompiers").Select(p => p.Centre).ToList()));
         Etape("budget", Budget);
+        foreach (var m in Modules) Etape("module_" + m.Id, () => m.FinDeMois(this));
         Etape("services2", MettreAJourServices);
         Paliers();
         Etape("messages", MessagesDuMois);
@@ -440,6 +443,7 @@ public sealed partial class Partie
                 if (!p.Batiment.Eau || !p.Batiment.Elec) a -= 25;
             }
             if (p.Zone == Zone.Commerce) a += Math.Min(15, Population / 200.0);
+            foreach (var m in Modules) a = m.ModifierAttrait(this, p, a);
             p.Attrait = Math.Clamp(a, 0, 100);
         }
     }

@@ -40,6 +40,9 @@ public partial class JeuPrincipal : Node3D
     private static readonly int[] Multiplicateurs = { 0, 1, 2, 4 };
     private string _optionAuto = "";
     private readonly List<Node3D> _decor = new();
+    private bool _vraieGestion = true;
+    private string _difficulte = "realiste";
+    private int _vitesseAvantDecision = 1;
     private MeshInstance3D _territoire = null!;
     private readonly ImmediateMesh _territoireMesh = new();
     private double _rayonAffiche = -1;
@@ -187,6 +190,17 @@ public partial class JeuPrincipal : Node3D
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
         };
         v.AddChild(note);
+        var options = new HBoxContainer();
+        var gestion = new CheckBox { Text = "Vraie gestion (usure, dotations, événements)", ButtonPressed = _vraieGestion };
+        gestion.Toggled += on => _vraieGestion = on;
+        options.AddChild(gestion);
+        var diff = new OptionButton();
+        foreach (var (id, nom) in new[] { ("decouverte", "Découverte"), ("realiste", "Réaliste"), ("crise", "Crise") }) diff.AddItem(nom);
+        diff.Selected = Array.IndexOf(new[] { "decouverte", "realiste", "crise" }, _difficulte);
+        diff.ItemSelected += i => _difficulte = new[] { "decouverte", "realiste", "crise" }[i];
+        options.AddChild(new Label { Text = "   Difficulté :" });
+        options.AddChild(diff);
+        v.AddChild(options);
         v.AddChild(new Label { Text = "Comment voulez-vous commencer ?" });
         foreach (var (mode, texte) in new[]
                  {
@@ -245,6 +259,7 @@ public partial class JeuPrincipal : Node3D
             {
                 ulong graine = (ulong)DateTime.Now.Ticks;
                 _partie = bacASable ? Partie.NouveauBacASable(_reglages, _paquet, graine) : Partie.Nouvelle(_reglages, _paquet, mode, graine);
+                if (_vraieGestion && !bacASable) _partie.Modules.Add(new Ville.Gestion.VraieGestion(_reglages, _difficulte));
             }
         }
         catch (Exception ex)
@@ -310,6 +325,14 @@ public partial class JeuPrincipal : Node3D
         _trafic.Vitesse = Multiplicateurs[_vitesse];
         if (_partie.Mois >= _dernierMoisSauve + 3) { Sauvegarder("auto", false); _dernierMoisSauve = _partie.Mois; }
         _hud.OutilActif = _outil;
+        // une décision attend le maire : pause et fenêtre
+        if (_partie.Decisions.Count > 0 && !_hud.DecisionAffichee)
+        {
+            _vitesseAvantDecision = Math.Max(1, _vitesse);
+            _vitesse = 0;
+            var d = _partie.Decisions[0];
+            _hud.AfficherDecision(d, c => { _partie?.Repondre(d.Id, c); _vitesse = _vitesseAvantDecision; });
+        }
         _hud.MettreAJour(delta, _vitesse);
         DessinerTerritoire();
         Survol();
@@ -403,6 +426,10 @@ public partial class JeuPrincipal : Node3D
             case "demolir":
                 _hud.Toast(partie.Demolir(p));
                 return;
+            case "renover":
+                if (partie.Module<Ville.Gestion.VraieGestion>() is { } vg) _hud.Toast(vg.Renover(partie, p));
+                else _hud.Toast("Le module « vraie gestion » n'est pas activé dans cette partie.", false);
+                return;
             case "":
                 return;
             default:
@@ -465,7 +492,8 @@ public partial class JeuPrincipal : Node3D
               $"\nEau : {(b.Eau ? "oui" : "NON")} · Électricité : {(b.Elec ? "oui" : "NON")} · Attrait {par.Attrait:F0}/100" +
               (b.Type == Zone.Habitat ? $"\nÉcole : {b.Ecole * 100:F0} % · Santé : {b.Sante * 100:F0} %" : "\n") +
               $" · Déchets : {(b.Dechets ? "ramassés" : "NON")} · Pompiers : {(b.Pompiers ? "oui" : "non")} · Police : {(b.Police ? "oui" : "non")}" +
-              (partie.Congestion.TryGetValue(par.Arete, out var cg) ? $"\nTrafic de la rue : {cg * 100:F0} % de sa capacité" : "");
+              (partie.Congestion.TryGetValue(par.Arete, out var cg) ? $"\nTrafic de la rue : {cg * 100:F0} % de sa capacité" : "") +
+              (partie.Module<Ville.Gestion.VraieGestion>() is { } gu ? $" · Usure de la rue : {gu.UsureRoute(par.Arete) * 100:F0} %" : "");
         _hud.Info(texte);
     }
 
@@ -575,6 +603,15 @@ public partial class JeuPrincipal : Node3D
             _camera.Appliquer();
             for (int i = 0; i < 30; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_{nom}.png"));
+        }
+        if (_partie!.Module<Ville.Gestion.VraieGestion>() != null)
+        {
+            _rendu.Vue = RenduVille.Vues.Normale;
+            _partie.Proposer(Ville.Gestion.VraieGestion.Identifiant, "tempete", "Tempête sur la commune",
+                "Une violente tempête a arraché des arbres et abîmé plusieurs rues. Les services techniques attendent vos ordres.",
+                new[] { "Réparer tout de suite (31 000 €)", "Réparer plus tard (les rues restent abîmées)" }, new() { ["cout"] = 31000 });
+            for (int i = 0; i < 20; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(dossier, $"{_optionAuto}_decision.png"));
         }
         GD.Print($"AUTO population={_partie!.Population} argent={_partie.Argent:F0} palier={_partie.Palier} batiments={_partie.Parcelles.Values.Count(p => p.Batiment != null)}");
         GetTree().Quit();

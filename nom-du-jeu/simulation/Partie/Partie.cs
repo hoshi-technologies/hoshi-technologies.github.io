@@ -588,7 +588,7 @@ public sealed partial class Partie
             if (service) VersionServices++;
             return new Resultat(true, service ? "Service démoli." : "Bâtiment démoli.");
         }
-        var (_, arete, _) = Reseau.Accrocher(p, 8);
+        var arete = Reseau.AreteProche(p, 8);
         if (arete == null) return Resultat.Non("Rien à démolir ici.");
         if (arete.Departemental) return Resultat.Non("C'est un grand axe départemental : la commune ne peut pas le démolir.");
         if (_parcellesParArete.Remove(arete.Id, out var liste))

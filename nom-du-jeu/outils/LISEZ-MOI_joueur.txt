@@ -8,6 +8,8 @@
    - Terrain et grands axes réels
    - Vraies rues sans bâtiments
    - Ville réelle : Annecy telle qu'elle est
+   Option « Vraie gestion » (conseillée) : les rues s'usent, l'État revoit sa dotation, des événements demandent vos décisions.
+   Difficulté : Découverte, Réaliste ou Crise.
    Suivez les objectifs en haut à gauche. F1 : aide.
 
 En bref :

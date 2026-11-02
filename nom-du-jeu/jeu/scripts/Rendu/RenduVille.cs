@@ -19,9 +19,9 @@ public partial class RenduVille : Node3D
     private bool _parcellesVides;
     private int _moisVue = -1;
 
-    public enum Vues { Normale, Reseaux, Attrait, Trafic, Securite }
+    public enum Vues { Normale, Reseaux, Attrait, Trafic, Securite, Usure }
     private Vues _vue = Vues.Normale;
-    public static readonly string[] NomsVues = { "Vue normale", "Vue : eau, électricité, déchets", "Vue : attrait des terrains", "Vue : trafic à l'heure de pointe", "Vue : santé, école, pompiers, police" };
+    public static readonly string[] NomsVues = { "Vue normale", "Vue : eau, électricité, déchets", "Vue : attrait des terrains", "Vue : trafic à l'heure de pointe", "Vue : santé, école, pompiers, police", "Vue : usure des rues et équipements" };
 
     public Vues Vue
     {
@@ -47,6 +47,10 @@ public partial class RenduVille : Node3D
                 return b.Eau && b.Elec && b.Dechets ? new Color(0.25f, 0.75f, 0.95f) : !b.Eau || !b.Elec ? new Color(0.9f, 0.2f, 0.2f) : new Color(0.95f, 0.65f, 0.15f);
             case Vues.Attrait:
                 return p.Zone == Zone.Aucune ? null : Echelle(p.Attrait / 80.0);
+            case Vues.Usure:
+                if (p.Service is { } sv && sv != "existant" && _p.Module<Ville.Gestion.VraieGestion>() is { } gv)
+                    return Echelle(1 - gv.UsureService(p.Id));
+                return p.Zone == Zone.Aucune ? null : new Color(0.75f, 0.75f, 0.75f);
             case Vues.Securite:
                 if (b == null || b.Type != Zone.Habitat) return p.Zone == Zone.Aucune ? null : new Color(0.7f, 0.7f, 0.7f);
                 return Echelle(((b.Ecole >= 0.8 ? 1 : 0) + (b.Sante >= 0.8 ? 1 : 0) + (b.Pompiers ? 1 : 0) + (b.Police ? 1 : 0)) / 4.0);
@@ -127,6 +131,12 @@ public partial class RenduVille : Node3D
         {
             float l = (float)_p.R.Route(e.Gabarit).LargeurM / 2;
             var col = e.Departemental ? BitumeAxe : Bitume;
+            if (_vue == Vues.Usure && !e.Departemental && _p.Module<Ville.Gestion.VraieGestion>() is { } g)
+            {
+                double u = g.UsureRoute(e.Id);
+                col = new Color(0.20f, 0.75f, 0.30f).Lerp(new Color(0.95f, 0.75f, 0.10f), (float)Math.Clamp(u / g.Seuil, 0, 1))
+                      .Lerp(new Color(0.90f, 0.15f, 0.10f), (float)Math.Clamp((u - g.Seuil) / (1 - g.Seuil), 0, 1));
+            }
             if (_vue == Vues.Trafic)
             {
                 double c = _p.Congestion.GetValueOrDefault(e.Id);
