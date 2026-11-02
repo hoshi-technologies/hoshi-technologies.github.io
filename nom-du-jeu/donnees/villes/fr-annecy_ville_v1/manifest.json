@@ -1,8 +1,10 @@
 {
  "empreintes_sha256": {
   "CREDITS_DONNEES.txt": "c65ac998512c013873c98e2dd264bcacd95f245469b0be40ffc46adb70b1f5dc",
-  "batiments.json.gz": "bed249461daf677ea9b9737a4ac5c06fb7cd11e2e081269d09a7bb047651c08c",
+  "batiments.json.gz": "994a8d9a3e4a8ee5944c3b1171e1679e7bd628c46666eb284aabeec752624b15",
   "eau.json.gz": "025a20f98e22a81a816ffaf2a0504e55bea8808b799972bcc6e4ad411f6e7d01",
+  "mobilier.json.gz": "5227336afd5dea0d9fe7f9960560b35a665169cc4b3a7858a41fec723d128445",
+  "nature.json.gz": "3b1bdc6e03d32fcd2f9090e6e516db85aeed1d50c6855f5da9a5f6d3e2b1cda5",
   "relief.f32": "8ebff4220ac82201bc0a89fad8d24ac06b4db259f8e35d2bbfbdf9bb3d83cfa0",
   "routes.json.gz": "ed2d069d20538c6d314b8ee427382e8f972310bc642086e0010dfb329bbac1b3",
   "sols.json.gz": "57885c52e04b0e265f32a614d1c11ff68efeee301da501468f67357ab59f3edf"

@@ -30,6 +30,7 @@ public sealed class GrilleOccupation
     public bool Eau(int i, int j) => _eau[j * N + i];
     public bool Eau(V2 p) { var (i, j) = Cellule(p); return DansCarte(i, j) && _eau[j * N + i]; }
     public int Parcelle(int i, int j) => _parcelle[j * N + i];
+    public bool Route(int i, int j) => _routes[j * N + i] > 0;
 
     /// <summary>Remplit les cellules dont le centre est dans le polygone (balayage ligne par ligne).</summary>
     public void PolygoneEau(IReadOnlyList<V2> poly, IReadOnlyList<IReadOnlyList<V2>>? trous = null)

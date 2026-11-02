@@ -98,7 +98,7 @@ def test_deterministe(cache):
     a = json.load(open(os.path.join(construire_dans(cache, "s1"), "manifest.json")))
     b = json.load(open(os.path.join(construire_dans(cache, "s2"), "manifest.json")))
     assert a["empreintes_sha256"] == b["empreintes_sha256"]
-    assert len(a["empreintes_sha256"]) == 6
+    assert len(a["empreintes_sha256"]) == 8
 
 
 def test_manifest_et_credits(cache):

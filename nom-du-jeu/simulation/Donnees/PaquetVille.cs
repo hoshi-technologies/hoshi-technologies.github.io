@@ -41,7 +41,26 @@ public sealed record Batiment(
     [property: JsonPropertyName("usage")] string Usage,
     [property: JsonPropertyName("estime")] string[] Estime,
     [property: JsonPropertyName("source")] string Source,
-    [property: JsonPropertyName("surface_m2")] double SurfaceM2);
+    [property: JsonPropertyName("surface_m2")] double SurfaceM2,
+    [property: JsonPropertyName("toit_forme")] string? ToitForme = null,
+    [property: JsonPropertyName("toit_couleur")] string? ToitCouleur = null,
+    [property: JsonPropertyName("toit_materiau")] string? ToitMateriau = null,
+    [property: JsonPropertyName("facade_couleur")] string? FacadeCouleur = null,
+    [property: JsonPropertyName("facade_materiau")] string? FacadeMateriau = null);
+
+public sealed record Bois(
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("classe")] string? Classe,
+    [property: JsonPropertyName("contour")] double[][] Contour);
+
+public sealed record Nature(
+    [property: JsonPropertyName("arbres")] double[][] Arbres,
+    [property: JsonPropertyName("bois")] Bois[] Bois);
+
+public sealed record Mobilier(
+    [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("x")] double X,
+    [property: JsonPropertyName("y")] double Y);
 
 public sealed record Noeud(
     [property: JsonPropertyName("id")] int Id,
@@ -88,6 +107,9 @@ public sealed class PaquetVille
     public required Routes Routes { get; init; }
     public required Eau Eau { get; init; }
     public required Surface[] Sols { get; init; }
+    /// <summary>Arbres isolés et bois (facultatif : absent des paquets plus anciens).</summary>
+    public Nature Nature { get; init; } = new(Array.Empty<double[]>(), Array.Empty<Bois>());
+    public Mobilier[] Mobilier { get; init; } = Array.Empty<Mobilier>();
     /// <summary>Altitudes, ligne 0 = nord, colonne 0 = ouest.</summary>
     public required float[] Relief { get; init; }
 
@@ -115,6 +137,8 @@ public sealed class PaquetVille
             Routes = LireGz<Routes>(dossier, "routes.json.gz"),
             Eau = LireGz<Eau>(dossier, "eau.json.gz"),
             Sols = LireGz<Surface[]>(dossier, "sols.json.gz"),
+            Nature = File.Exists(Path.Combine(dossier, "nature.json.gz")) ? LireGz<Nature>(dossier, "nature.json.gz") : new(Array.Empty<double[]>(), Array.Empty<Bois>()),
+            Mobilier = File.Exists(Path.Combine(dossier, "mobilier.json.gz")) ? LireGz<Mobilier[]>(dossier, "mobilier.json.gz") : Array.Empty<Mobilier>(),
             Relief = relief,
         };
     }

@@ -167,6 +167,9 @@ def traiter_batiments(table, proj, cadre, regles):
                 "estime": [k for k, v in (("hauteur", h_estimee), ("usage", u_estime)) if v],
                 "source": "osm" if cle_src == "source_osm" else ("detection_ia" if cle_src == "source_detection_ia" else "autre"),
                 "surface_m2": round(surface, 1),
+                **{cle: cols[col][i] for cle, col in (("toit_forme", "roof_shape"), ("toit_couleur", "roof_color"), ("toit_materiau", "roof_material"),
+                                                   ("facade_couleur", "facade_color"), ("facade_materiau", "facade_material"))
+                   if col in cols and cols[col][i]},
             })
     out.sort(key=lambda b: (b["id"], b["contour"][0]))
     return out, stats
@@ -247,6 +250,47 @@ def traiter_surfaces(table, proj, cadre, surface_min):
     surfaces.sort(key=lambda s: (s["id"], s["contour"][0]))
     traits.sort(key=lambda s: (s["id"], s["trace"][0]))
     return surfaces, traits
+
+
+# --- Nature (arbres isolés, bois) et mobilier urbain -----------------------------------------
+CLASSES_BOIS = {"forest", "wood", "tree_row", "scrub"}
+MOBILIER = {"street_lamp": "lampadaire", "bench": "banc", "waste_basket": "poubelle", "bus_stop": "arret_bus",
+            "drinking_water": "fontaine", "fountain": "fontaine", "bicycle_parking": "velos", "recycling": "recyclage"}
+
+
+def traiter_nature(table, proj, cadre):
+    arbres, bois = [], []
+    if table is None or table.num_rows == 0:
+        return {"arbres": arbres, "bois": bois}
+    cols = table.to_pydict()
+    geoms = proj.vers_local(shapely.from_wkb(cols["geometry"]))
+    for i, ident in enumerate(cols["id"]):
+        g = geoms[i]
+        classe = cols["class"][i]
+        if g.geom_type == "Point" and classe == "tree" and cadre.contains(g):
+            arbres.append([round(g.x, 1), round(g.y, 1)])
+        elif classe in CLASSES_BOIS:
+            for p in polygones(g.intersection(cadre)):
+                if p.area >= 400:
+                    bois.append({"id": ident, "classe": classe, "contour": arrondi(np.asarray(p.exterior.coords)[:-1])})
+    arbres.sort()
+    bois.sort(key=lambda b: (b["id"], b["contour"][0]))
+    return {"arbres": arbres, "bois": bois}
+
+
+def traiter_mobilier(table, proj, cadre):
+    out = []
+    if table is None or table.num_rows == 0:
+        return out
+    cols = table.to_pydict()
+    geoms = proj.vers_local(shapely.from_wkb(cols["geometry"]))
+    for i in range(len(cols["id"])):
+        g = geoms[i]
+        t = MOBILIER.get(cols["class"][i] or "")
+        if t and g.geom_type == "Point" and cadre.contains(g):
+            out.append({"type": t, "x": round(g.x, 1), "y": round(g.y, 1)})
+    out.sort(key=lambda m: (m["type"], m["x"], m["y"]))
+    return out
 
 
 # --- Relief --------------------------------------------------------------------------------
@@ -354,6 +398,8 @@ def construire(fichier_ville, cache, sortie):
     noeuds, troncons = traiter_routes(lire_table(dossier, "routes"), proj, cadre)
     eaux, cours_eau = traiter_surfaces(lire_table(dossier, "eau"), proj, cadre, 25)
     sols, _ = traiter_surfaces(lire_table(dossier, "sols"), proj, cadre, 100)
+    nature = traiter_nature(lire_table(dossier, "nature"), proj, cadre)
+    mobilier = traiter_mobilier(lire_table(dossier, "mobilier"), proj, cadre)
     relief, n_relief = construire_relief(dossier, bb, proj, cote_m, eaux, regles)
 
     # Population : estimation à partir de la surface habitable (affichée comme estimation)
@@ -396,6 +442,8 @@ def construire(fichier_ville, cache, sortie):
     ecrire_json_gz(os.path.join(dest, "routes.json.gz"), {"noeuds": noeuds, "troncons": troncons})
     ecrire_json_gz(os.path.join(dest, "eau.json.gz"), {"surfaces": eaux, "cours": cours_eau})
     ecrire_json_gz(os.path.join(dest, "sols.json.gz"), sols)
+    ecrire_json_gz(os.path.join(dest, "nature.json.gz"), nature)
+    ecrire_json_gz(os.path.join(dest, "mobilier.json.gz"), mobilier)
     open(os.path.join(dest, "relief.f32"), "wb").write(relief.astype("<f4").tobytes())
     open(os.path.join(dest, "CREDITS_DONNEES.txt"), "w", encoding="utf-8").write(
         CREDITS.format(release=extraction["release_overture"]))

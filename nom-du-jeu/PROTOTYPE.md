@@ -19,6 +19,7 @@
 | Départs | 4 façons de commencer : terrain seul (rue à relier au bord de la carte), terrain + grands axes, vraies rues sans bâtiments, ville réelle complète. |
 | Cartes | Quartier (4 × 4 km) ou Ville (10 × 10 km, 37 641 bâtiments réels). Sur la grande carte, le territoire constructible s'agrandit à chaque palier (Ville à 10 000 habitants, Grande ville à 25 000). |
 | Évolution | Les vrais bâtiments se rénovent et se surélèvent quand le quartier est recherché ; les bâtiments construits par le joueur montent de niveau. |
+| Graphismes | Véhicules (voitures, camionnettes, camions, bus), vedettes et voiliers sur le lac, piétons sur les trottoirs, arbres (4 822 vrais arbres isolés + bois réels comme la forêt du Semnoz), lampadaires et bancs réels le long des rues. Tout est fabriqué par le code du jeu (aucune licence tierce) ; registre : conception/REGISTRE_ASSETS.md. |
 | Vraie gestion (module activable) | Usure des rues et équipements (outil Rénover, « Rénover le plus urgent », vue Usure), dotation de l'État revue chaque année, frais de personnel croissants avec la taille, réserves excessives pénalisées (plus de dotation, habitants qui réclament une baisse d'impôts), habitants plus exigeants à chaque palier, événements avec décision (tempête, fermeture d'entreprise, pénurie de médecins, projet immobilier, canicule). Difficultés : Découverte, Réaliste, Crise. |
 | Ville réelle | Mode : la vraie Annecy existe au départ (9 615 bâtiments réels, rues, écoles), population et emplois estimés depuis la surface des bâtiments ; eau, électricité et déchets achetés au réseau régional. |
 | Trafic | Heure de pointe calculée chaque mois : les rues saturées font baisser l'attrait de l'habitat (et aident les commerces). Le bus réduit le nombre de voitures. |
@@ -34,7 +35,7 @@
 | Sauvegarde | Automatique tous les 3 mois de jeu, F5, bouton « Continuer ». |
 
 ## Ce qui a été testé
-- **42 tests automatiques réussis (34 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
+- **43 tests automatiques réussis (35 en C#, 8 en Python) :** simulation, budget, sauvegarde, compatibilité, données, réseau routier.
 - **Une partie complète de 20 mois jouée par le « robot maire »** (`bench/Ville.Bench -- --robot`) :
   - la ville passe de 0 à environ 3 500 habitants ;
   - 3 paliers sont franchis ;

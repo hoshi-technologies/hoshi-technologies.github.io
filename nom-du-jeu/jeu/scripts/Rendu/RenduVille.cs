@@ -17,6 +17,7 @@ public partial class RenduVille : Node3D
     private readonly StandardMaterial3D _matBatiments = Maillage.Materiau(0.9f);
     private readonly StandardMaterial3D _matSol = Maillage.Materiau(1f, doubleFace: true);
     private bool _parcellesVides;
+    public RenduNature? Nature { get; set; }
     private int _moisVue = -1;
 
     public enum Vues { Normale, Reseaux, Attrait, Trafic, Securite, Usure }
@@ -115,7 +116,7 @@ public partial class RenduVille : Node3D
                 if (!parCarre.TryGetValue(c, out var l)) parCarre[c] = l = new List<Parcelle>();
                 l.Add(par);
             }
-            foreach (var c in aFaire) ReconstruireCarre(c, parCarre.GetValueOrDefault(c));
+            foreach (var c in aFaire) { ReconstruireCarre(c, parCarre.GetValueOrDefault(c)); Nature?.Signaler(c); }
         }
     }
 

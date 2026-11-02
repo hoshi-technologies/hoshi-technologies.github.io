@@ -21,11 +21,14 @@ import pyarrow.parquet as pq
 RELEASE_OVERTURE = "2026-10-21.0"
 THEMES = {
     "batiments": ("theme=buildings/type=building",
-                  ["id", "geometry", "bbox", "sources", "height", "num_floors", "class", "subtype", "names"]),
+                  ["id", "geometry", "bbox", "sources", "height", "num_floors", "class", "subtype", "names",
+                   "roof_shape", "roof_color", "facade_color", "facade_material", "roof_material", "roof_height"]),
     "routes": ("theme=transportation/type=segment",
                ["id", "geometry", "bbox", "subtype", "class", "names", "connectors", "road_flags"]),
     "eau": ("theme=base/type=water", ["id", "geometry", "bbox", "subtype", "class", "names"]),
     "sols": ("theme=base/type=land_use", ["id", "geometry", "bbox", "subtype", "class"]),
+    "nature": ("theme=base/type=land", ["id", "geometry", "bbox", "subtype", "class"]),
+    "mobilier": ("theme=base/type=infrastructure", ["id", "geometry", "bbox", "subtype", "class"]),
 }
 MARGE = 1.15  # on télécharge un peu plus large que la zone, puis on découpe proprement
 

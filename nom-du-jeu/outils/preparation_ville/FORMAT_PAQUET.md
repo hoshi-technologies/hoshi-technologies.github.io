@@ -6,10 +6,12 @@ Il est produit par `construire.py` et lu par le jeu.
 | Fichier | Contenu |
 |---|---|
 | `manifest.json` | Identité de la ville, repère, relief, sources, qualité, estimations, empreintes SHA-256 |
-| `batiments.json.gz` | Liste de bâtiments : `contour` (polygone), `hauteur_m`, `etages`, `usage`, `source`, `estime` (liste de ce qui est estimé) |
+| `batiments.json.gz` | Liste de bâtiments : `contour` (polygone), `hauteur_m`, `etages`, `usage`, `source`, `estime` (liste de ce qui est estimé), et quand ils existent `toit_forme`, `toit_couleur`, `toit_materiau`, `facade_couleur`, `facade_materiau` |
 | `routes.json.gz` | Graphe : `noeuds` (carrefours, `x`, `y`) et `troncons` (`a`, `b` = nœuds, `gabarit`, `nom`, `pont`, `tunnel`, `trace`) |
 | `eau.json.gz` | `surfaces` (lacs, rivières larges) et `cours` (ruisseaux en lignes) |
 | `sols.json.gz` | Occupation du sol (parcs, forêts, cultures, etc.) |
+| `nature.json.gz` | `arbres` (points x, y des arbres isolés) et `bois` (contours des bois et forêts) |
+| `mobilier.json.gz` | Mobilier urbain réel : `type` (lampadaire, banc, poubelle, arret_bus, fontaine, velos, recyclage), `x`, `y` |
 | `relief.f32` | Grille d'altitudes, float32 little-endian, ligne 0 = nord, colonne 0 = ouest, pas de 10 m |
 | `CREDITS_DONNEES.txt` | Mentions obligatoires des sources et licence ODbL |
 | `apercu.png` | Image de contrôle pour la vérification humaine (non incluse dans les empreintes) |
