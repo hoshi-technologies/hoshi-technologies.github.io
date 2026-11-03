@@ -1,9 +1,0 @@
-{
-  "settings": {
-    "label": { "label": "Teks butang", "info": "Biarkan kosong untuk menggunakan tajuk yang ditetapkan dalam apl." },
-    "position": { "label": "Kedudukan", "app": "Tetapan apl", "right": "Bawah kanan", "left": "Bawah kiri" },
-    "guest_text": { "label": "Mesej untuk pelawat yang belum log masuk", "info": "Biarkan kosong untuk menggunakan mesej lalai yang telah diterjemahkan." }
-  },
-  "card": { "name": "Kad kesetiaan", "heading": "Tajuk", "max_width": "Lebar maksimum" },
-  "product": { "name": "Mata produk", "text": "Teks tersuai", "text_info": "Pilihan. {points} dan {name} akan digantikan. Biarkan kosong untuk teks lalai yang telah diterjemahkan." }
-}

@@ -1,9 +1,0 @@
-{
-  "settings": {
-    "label": { "label": "Teks tombol", "info": "Biarkan kosong untuk menggunakan judul yang diatur di aplikasi." },
-    "position": { "label": "Posisi", "app": "Pengaturan aplikasi", "right": "Kanan bawah", "left": "Kiri bawah" },
-    "guest_text": { "label": "Pesan untuk pengunjung yang belum masuk", "info": "Biarkan kosong untuk menggunakan pesan default yang telah diterjemahkan." }
-  },
-  "card": { "name": "Kartu loyalitas", "heading": "Judul", "max_width": "Lebar maksimum" },
-  "product": { "name": "Poin produk", "text": "Teks kustom", "text_info": "Opsional. {points} dan {name} akan diganti. Biarkan kosong untuk teks default yang telah diterjemahkan." }
-}

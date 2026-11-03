@@ -1,9 +1,0 @@
-{
-  "settings": {
-    "label": { "label": "Text der Schaltfläche", "info": "Leer lassen, um den in der App festgelegten Titel zu verwenden." },
-    "position": { "label": "Position", "app": "App-Einstellung", "right": "Unten rechts", "left": "Unten links" },
-    "guest_text": { "label": "Nachricht für abgemeldete Besucher", "info": "Leer lassen, um die übersetzte Standardnachricht zu verwenden." }
-  },
-  "card": { "name": "Treuekarte", "heading": "Überschrift", "max_width": "Maximale Breite" },
-  "product": { "name": "Produktpunkte", "text": "Eigener Text", "text_info": "Optional. {points} und {name} werden ersetzt. Leer lassen für den übersetzten Standardtext." }
-}

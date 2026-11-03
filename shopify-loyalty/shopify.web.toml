@@ -1,8 +1,0 @@
-name = "Hoshi Club"
-roles = ["frontend", "backend"]
-webhooks_path = "/webhooks/app/uninstalled"
-
-[commands]
-# Génère le client Prisma et prépare la base D1 locale avant de lancer le Worker local
-predev = "npx prisma generate && npx wrangler d1 migrations apply DB --local"
-dev = "npx react-router dev"

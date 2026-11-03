@@ -1,9 +1,0 @@
-{
-  "settings": {
-    "label": { "label": "Texto del botón", "info": "Déjalo vacío para usar el título configurado en la app." },
-    "position": { "label": "Posición", "app": "Configuración de la app", "right": "Abajo a la derecha", "left": "Abajo a la izquierda" },
-    "guest_text": { "label": "Mensaje para visitantes sin sesión iniciada", "info": "Déjalo vacío para usar el mensaje predeterminado traducido." }
-  },
-  "card": { "name": "Tarjeta de fidelidad", "heading": "Encabezado", "max_width": "Ancho máximo" },
-  "product": { "name": "Puntos del producto", "text": "Texto personalizado", "text_info": "Opcional. {points} y {name} se reemplazan. Déjalo vacío para usar el texto predeterminado traducido." }
-}

@@ -1,9 +1,0 @@
-{
-  "settings": {
-    "label": { "label": "Texte du bouton", "info": "Laissez vide pour utiliser le titre défini dans l'application." },
-    "position": { "label": "Position", "app": "Réglage de l'application", "right": "En bas à droite", "left": "En bas à gauche" },
-    "guest_text": { "label": "Message pour les visiteurs non connectés", "info": "Laissez vide pour utiliser le message par défaut traduit." }
-  },
-  "card": { "name": "Carte fidélité", "heading": "Titre", "max_width": "Largeur maximale" },
-  "product": { "name": "Points produit", "text": "Texte personnalisé", "text_info": "Facultatif. {points} et {name} sont remplacés. Laissez vide pour le texte par défaut traduit." }
-}

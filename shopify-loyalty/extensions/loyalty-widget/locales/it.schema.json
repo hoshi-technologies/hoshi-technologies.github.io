@@ -1,9 +1,0 @@
-{
-  "settings": {
-    "label": { "label": "Testo del pulsante", "info": "Lascia vuoto per usare il titolo impostato nell'app." },
-    "position": { "label": "Posizione", "app": "Impostazione dell'app", "right": "In basso a destra", "left": "In basso a sinistra" },
-    "guest_text": { "label": "Messaggio per i visitatori non connessi", "info": "Lascia vuoto per usare il messaggio predefinito tradotto." }
-  },
-  "card": { "name": "Carta fedeltà", "heading": "Titolo", "max_width": "Larghezza massima" },
-  "product": { "name": "Punti prodotto", "text": "Testo personalizzato", "text_info": "Facoltativo. {points} e {name} vengono sostituiti. Lascia vuoto per il testo predefinito tradotto." }
-}
