@@ -95,7 +95,7 @@ jobs:
         run: node --test tests/*.test.mjs
       - name: Diagnostic API
         if: ${{ inputs.probe }}
-        run: node scripts/sports.mjs --backfill 120
+        run: node scripts/pmu-probe.mjs
       - name: Récupérer le programme
         if: ${{ !inputs.probe }}
         run: node scripts/pmu-fetch.mjs --backfill "${{ inputs.backfill || '0' }}"
