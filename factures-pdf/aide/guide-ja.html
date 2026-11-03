@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – ユーザーガイド</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">ユーザーガイド</span><a href="faq-ja.html">よくある質問</a></nav></div>
+  <h1>ユーザーガイド</h1>
+  <p class="lead">アプリの使い方を、ステップごとにすべてご説明します。</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <strong>日本語</strong> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">印刷またはPDFとして保存</button></p>
+  <section class="card"><h2>目次</h2><ol class="toc"><li><a href="#install">アプリをインストールする</a></li><li><a href="#company">会社情報を入力する</a></li><li><a href="#look">請求書をカスタマイズして確認する</a></li><li><a href="#sending">請求書の送信タイミングと方法を選ぶ</a></li><li><a href="#shopify-link">Shopifyの注文確認メールに請求書のリンクを追加する（任意）</a></li><li><a href="#daily">請求書を日々管理する</a></li><li><a href="#numbering">番号と言語</a></li><li><a href="#facturx">Factur-X：電子請求書</a></li><li><a href="#billing">プランを管理する</a></li><li><a href="#best-practices">おすすめの使い方</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>アプリをインストールする</span></h2>
+  <p>インストールは1分で完了し、ストアや注文が変更されることはありません。</p>
+  <ol class="steps"><li>Shopify App Storeでアプリのページを開き、「インストール」をクリックします。</li><li>注文へのアクセスを許可します。アプリは請求書を作成するために注文を読み取り、注文には請求書のリンクという1つの情報だけを保存します。それ以外は何も変更しません。</li><li>アプリはShopify管理画面の アプリ › Hoshi Factures で開きます。ストア名、住所、メールアドレスはすでに入力されています。</li><li>「ホーム」タブで「はじめに」のリストに沿って進めてください。3つのステップが完了すると、リストは表示されなくなります。</li></ol>
+  <div class="tip"><b>ヒント:</b> 無料プラン（月 10 件の請求書）から始められ、クレジットカードは不要です。</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>会社情報を入力する</span></h2>
+  <p>これらの情報はすべての請求書に記載されます。有効な請求書に必須の情報です。</p>
+  <ol class="steps"><li>「設定」タブを開き、「会社情報」カードを表示します。</li><li>最も早い方法（フランスの会社の場合）：「自動入力」でSIRET（または会社名と市区町村）を入力し、「検索」、「使用」の順にクリックします。会社名、本社所在地、SIRET、法人形態、VAT番号が公式の登録簿から取得されます。「Shopifyの情報を使用」をクリックすることもできます。</li><li>会社名とメールアドレスを確認します。お客様からの返信はこのアドレスに届き、請求書のコピーもこのアドレスで受け取ります。</li><li>住所を複数行で入力し、郵便番号と市区町村は同じ行に入力します（例：「69002 Lyon」）。その後、国を選択します。</li><li>事業者登録番号（フランスではSIRET）とVAT番号を入力します。</li><li>付加価値税免除の小規模事業者の場合：付加価値税免除のオプションにチェックを入れます。請求書から付加価値税が表示されなくなり、法定記載事項が追加されます。</li><li>「その他の会社情報」を開き、法人形態と資本金、商業登記簿、電話番号、ウェブサイト、販売しているもの（物品、サービス、またはその両方）を入力します。</li><li>画面下部に表示されるバーの「保存」をクリックします。</li></ol>
+  <div class="tip"><b>ヒント:</b> 最初の請求書を会計士にご確認いただいてください。事業に固有の記載事項をよく把握しています。</div><div class="tip"><b>ヒント:</b> 付加価値税が免除されている場合は、Shopifyがお客様に税金を請求していないこともご確認ください（設定 › 税金と関税）。</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>請求書をカスタマイズして確認する</span></h2>
+  <p>請求書をブランドに合ったデザインにし、最初の注文の前に仕上がりを確認しましょう。</p>
+  <ol class="steps"><li>Shopifyで コンテンツ › ファイル を開き、ロゴ（PNGまたはJPEG）をアップロードして、そのリンクをコピーします。</li><li>設定 › 外観 で、「ロゴのURL」にリンクを貼り付け、メインカラーを選択します。</li><li>必要に応じて、法定記載事項とお礼のメッセージを編集します。空欄の場合は、お客様の言語に自動で翻訳されます。</li><li>「PDFをプレビュー」をクリックすると、現在の設定（未保存の設定も含む）でサンプルの請求書がダウンロードされます。</li><li>仕上がりに問題がなければ保存します。</li></ol>
+  <div class="tip"><b>ヒント:</b> 設定は以降の請求書にのみ適用されます。発行済みの請求書が変わることはありません。</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>請求書の送信タイミングと方法を選ぶ</span></h2>
+  <p>既定では、注文の支払い完了時に請求書が作成され、すぐにお客様へメールで送信されます。</p>
+  <ol class="steps"><li>設定 › 仕組み で、請求書を作成するタイミングを選択します：注文の支払いが完了したとき（推奨）、または注文が確定した時点。</li><li>「お客様が請求書を受け取る方法」で、次のいずれかを選択します：PDFを添付したメール（推奨、設定不要）、注文ページに「請求書をダウンロード」ボタンを表示するメール1通のみ（コード不要：3クリックで有効化）、またはShopifyの確認メールに直接リンクを表示するメール1通のみ（初回のみコードを貼り付け）。設定画面で手順をご案内します。</li><li>「すべての請求書のコピーを自分にも送信する」にチェックを入れると、各請求書を受け取ってアーカイブを作成できます。</li><li>メールをカスタマイズするには、「お客様へのメール」を開きます。件名と本文には変数 {{first_name}}、{{name}}、{{invoice_number}}、{{order}}、{{shop}} を使用できます。</li></ol>
+  <div class="tip"><b>ヒント:</b> Shopifyでは、Shopify自身のメールに添付ファイルを含めることはできません。請求書は、ストアの名義で送信される別のメールで届きます。</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Shopifyの注文確認メールに請求書のリンクを追加する（任意）</span></h2>
+  <p>お客様は、ストアからの通常の確認メールからも請求書を取得できます。</p>
+  <ol class="steps"><li>「設定」で「Shopifyの注文確認メール内のリンク」を開き、「コードをコピー」をクリックします。</li><li>Shopifyで 設定 › 通知 › お客様への通知 › 注文確認 に移動し、「コードを編集」をクリックします。</li><li>ボタンを表示したい場所（例：注文概要の直後）にコードを貼り付けます。</li><li>「プレビュー」をクリックして確認し、「保存」をクリックします。</li></ol>
+  <div class="tip"><b>ヒント:</b> お客様が支払い前にクリックした場合は、請求書が数分後に利用可能になることを案内するページが表示されます。</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>請求書を日々管理する</span></h2>
+  <p>「ホーム」タブには、最近の請求書が送信ステータスとともに一覧表示されます。</p>
+  <ol class="steps"><li>各行には、番号、注文、お客様、日付、合計、メールのステータスが表示されます。</li><li>「送信済み」：お客様が請求書を受け取りました。「未送信」：自動送信がオフになっています。「失敗」：ステータスにカーソルを合わせると原因が表示されます。</li><li>「PDF」をクリックすると請求書をダウンロードでき、「再送信」をクリックするとお客様に再度送信できます。</li><li>Factur-Xバッジは、請求書に電子請求書用のデータも含まれていることを示します。</li></ol>
+  <div class="tip"><b>ヒント:</b> 送信に失敗した場合は、Shopifyの注文でお客様のメールアドレスを確認し、迷惑メールフォルダを確認するようお客様にご依頼ください。</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>番号と言語</span></h2>
+  <p>法律の定めに従い、番号は欠番なく連続し、お客様はそれぞれご自身の言語で請求書を受け取ります。</p>
+  <ol class="steps"><li>設定 › 番号と言語 で、番号のプレフィックスを選択します（既定は「F-」、つまり F-2026-00001）。</li><li>すでに別のツールで請求書を発行している場合は、次の番号を指定します。番号は増やすことはできますが、減らすことはできません。</li><li>請求書の言語を選択します：お客様の言語（フランス語、英語、ドイツ語、スペイン語、イタリア語、オランダ語、ポルトガル語 (ブラジル)、チェコ語、デンマーク語、フィンランド語、ノルウェー語(ブークモール)、ポーランド語、ポルトガル語 (イベリア半島)、スウェーデン語、トルコ語、マレー語）または固定の言語。</li><li>「お客様の言語」を選択した場合は、お客様の言語が利用できないときに使用する代替言語も選択します。</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X：電子請求書</span></h2>
+  <p>Factur-Xでは、PDFに請求書データも含まれ、会計ソフトや電子請求書プラットフォームで読み取ることができます。フランスでは2026～2027年から、企業間取引で電子請求書が義務化されます。</p>
+  <ol class="steps"><li>設定 › Factur-X を開きます。このオプションは既定でオンになっています。</li><li>「Factur-Xは一時停止中です」と表示された場合は、不足している情報（多くの場合、住所、国、VAT番号）を入力して保存します。</li><li>インジケーターが ✓ に変わると、以降の請求書はすべてFactur-X形式になります。お客様にとっての変化はありません。</li></ol>
+  <div class="tip"><b>ヒント:</b> 会計士は、これらの請求書を会計ソフトに直接取り込むことができます。</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>プランを管理する</span></h2>
+  <p>無料プラン：月 10 件の請求書。エッセンシャル：月額 $7.90 で 200 件の請求書。無制限：月額 $12.90。有料プランには 7 日間の無料体験があります。</p>
+  <ol class="steps"><li>「プラン」タブ（および「ホーム」）に、今月使用した請求書の件数が表示されます。カウンターは毎月1日にリセットされます。</li><li>プランを変更するには、「選択」をクリックしてShopifyのページで承認します。料金はShopifyのご利用料金に加算されます。</li><li>上限に達すると、新しい注文は保留となり、メールでお知らせします。アップグレード後に、「ホーム」で「請求書を作成する」をクリックしてください。</li><li>無料プランに戻すには、「解約」をクリックします。</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>おすすめの使い方</span></h2>
+  <p>安心して経理を行うための、いくつかの習慣をご紹介します。</p>
+  <ol class="steps"><li>設定後にテスト注文を行い（Shopify Paymentsのテストモードを使用）、受け取った請求書を確認します。</li><li>請求書は10年間保存してください。メールのコピーを保管するか、毎月ダウンロードします。請求書はアンインストールの48時間後にアプリから削除されます。</li><li>発行済みの請求書は変更できません。誤りや返金があった場合は、会計ツールでクレジットノートを発行してください。</li><li>ご不明な点がある場合は、「ヘルプ」タブのFAQをご覧ください。</li></ol>
+  
+</section>
+  <footer>その他のご質問は、<a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a> までメールでお問い合わせください。</footer>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Uživatelská příručka</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">Uživatelská příručka</span><a href="faq-cs.html">Časté dotazy</a></nav></div>
+  <h1>Uživatelská příručka</h1>
+  <p class="lead">Vše, co potřebujete vědět o používání aplikace, krok za krokem.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <strong>Čeština</strong> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">Vytisknout nebo uložit jako PDF</button></p>
+  <section class="card"><h2>Obsah</h2><ol class="toc"><li><a href="#install">Instalace aplikace</a></li><li><a href="#company">Vyplnění údajů o firmě</a></li><li><a href="#look">Přizpůsobení a kontrola faktury</a></li><li><a href="#sending">Kdy a jak se faktury odesílají</a></li><li><a href="#shopify-link">Přidání odkazu na fakturu do potvrzení objednávky Shopify (volitelné)</a></li><li><a href="#daily">Každodenní přehled faktur</a></li><li><a href="#numbering">Číslování a jazyky</a></li><li><a href="#facturx">Factur-X: elektronická fakturace</a></li><li><a href="#billing">Správa tarifu</a></li><li><a href="#best-practices">Osvědčené postupy</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Instalace aplikace</span></h2>
+  <p>Instalace trvá minutu a nemění váš obchod ani vaše objednávky.</p>
+  <ol class="steps"><li>V Shopify App Store otevřete stránku aplikace a klikněte na „Instalovat“.</li><li>Povolte přístup ke svým objednávkám: aplikace je čte, aby mohla vytvářet faktury, a ukládá k nim jen jednu věc, odkaz na fakturu. Nic jiného nemění.</li><li>Aplikace se otevře ve vaší administraci Shopify v nabídce Aplikace › Hoshi Factures. Název, adresa a e-mail vašeho obchodu jsou již vyplněné.</li><li>Na kartě Domů postupujte podle seznamu „Začínáme“: zmizí, jakmile dokončíte všechny tři kroky.</li></ol>
+  <div class="tip"><b>Tip:</b> Začínáte s tarifem Zdarma (10 faktur měsíčně), bez platební karty.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Vyplnění údajů o firmě</span></h2>
+  <p>Tyto údaje se zobrazují na každé faktuře. Jsou nutné pro platnou fakturu.</p>
+  <ol class="steps"><li>Otevřete kartu Nastavení, oddíl „Vaše firma“.</li><li>Nejrychlejší způsob (francouzské firmy): v části „Automatické vyplnění“ zadejte svůj SIRET (nebo název firmy a město), klikněte na „Hledat“ a poté na „Použít“. Obchodní firma, adresa sídla, SIRET, právní forma a DIČ se převezmou z oficiálního rejstříku. Můžete také kliknout na „Převzít údaje ze Shopify“.</li><li>Zkontrolujte obchodní firmu a e-mail: na tuto adresu vám zákazníci odpovídají a chodí na ni kopie faktur.</li><li>Zadejte adresu na několik řádků, s PSČ a městem na stejném řádku (např. „69002 Lyon“), a vyberte zemi.</li><li>Zadejte identifikační číslo firmy (ve Francii SIRET) a DIČ.</li><li>Malá firma osvobozená od DPH: zaškrtněte možnost osvobození od DPH. DPH z faktur zmizí a přidá se zákonná doložka.</li><li>Otevřete „Další údaje o firmě“ pro právní formu a základní kapitál, obchodní rejstřík, telefon, web a to, co prodáváte (zboží, služby nebo obojí).</li><li>Klikněte na „Uložit“ v liště, která se zobrazí v dolní části obrazovky.</li></ol>
+  <div class="tip"><b>Tip:</b> Nechte první fakturu zkontrolovat svým účetním: zná náležitosti specifické pro vaše podnikání.</div><div class="tip"><b>Tip:</b> Pokud jste osvobozeni od DPH, ověřte také, že Shopify vašim zákazníkům neúčtuje daně (Nastavení › Daně a cla).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Přizpůsobení a kontrola faktury</span></h2>
+  <p>Dejte fakturám vzhled své značky a před první objednávkou si výsledek zkontrolujte.</p>
+  <ol class="steps"><li>V Shopify otevřete Obsah › Soubory, nahrajte své logo (PNG nebo JPEG) a zkopírujte jeho odkaz.</li><li>V Nastavení › Vzhled vložte odkaz do pole „Adresa loga“ a zvolte hlavní barvu.</li><li>V případě potřeby upravte údaje v zápatí faktury a poděkování. Pokud je necháte prázdné, automaticky se přeloží do jazyka zákazníka.</li><li>Klikněte na „Náhled PDF“: stáhne se ukázková faktura s vaším nastavením, i neuloženým.</li><li>Až budete s výsledkem spokojeni, uložte.</li></ol>
+  <div class="tip"><b>Tip:</b> Nastavení platí jen pro další faktury: vystavená faktura se nikdy nemění.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Kdy a jak se faktury odesílají</span></h2>
+  <p>Ve výchozím nastavení se faktura vytvoří po zaplacení objednávky a ihned se odešle zákazníkovi e-mailem.</p>
+  <ol class="steps"><li>V Nastavení › Jak to funguje zvolte, kdy se má faktura vytvořit: po zaplacení objednávky (doporučeno) nebo ihned po jejím zadání.</li><li>V části „Jak vaši zákazníci dostanou fakturu“ zvolte: e-mail s PDF v příloze (doporučeno, bez nastavování); jediný e-mail s tlačítkem „Stáhnout fakturu“ na stránce objednávky (bez kódu: zapnutí na 3 kliknutí); nebo jediný e-mail s odkazem přímo v potvrzení od Shopify (jednou vložit kód). Nastavení vás provede krok za krokem.</li><li>Zaškrtněte „Posílat mi kopii každé faktury“, abyste dostávali každou fakturu a vytvářeli si archiv.</li><li>Chcete-li e-mail přizpůsobit, otevřete „E-mail zákazníkovi“: předmět a zpráva podporují proměnné {{first_name}}, {{name}}, {{invoice_number}}, {{order}} a {{shop}}.</li></ol>
+  <div class="tip"><b>Tip:</b> Shopify neumožňuje přílohy ve svých e-mailech: faktura odchází v samostatném e-mailu odeslaném jménem vašeho obchodu.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Přidání odkazu na fakturu do potvrzení objednávky Shopify (volitelné)</span></h2>
+  <p>Vaši zákazníci mohou fakturu získat také z obvyklého potvrzovacího e-mailu vašeho obchodu.</p>
+  <ol class="steps"><li>V Nastavení otevřete „Odkaz v e-mailu s potvrzením objednávky Shopify“ a klikněte na „Kopírovat kód“.</li><li>V Shopify přejděte do Nastavení › Oznámení › Oznámení pro zákazníky › Potvrzení objednávky a klikněte na „Upravit kód“.</li><li>Vložte kód tam, kde se má tlačítko zobrazit, například hned za souhrn objednávky.</li><li>Klikněte na „Náhled“ pro kontrolu a poté na „Uložit“.</li></ol>
+  <div class="tip"><b>Tip:</b> Pokud zákazník klikne před zaplacením, stránka mu oznámí, že faktura bude k dispozici za několik minut.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Každodenní přehled faktur</span></h2>
+  <p>Karta Domů zobrazuje poslední faktury se stavem jejich odeslání.</p>
+  <ol class="steps"><li>Každý řádek ukazuje číslo, objednávku, zákazníka, datum, celkovou částku a stav e-mailu.</li><li>„Odesláno“: zákazník fakturu obdržel. „Neodesláno“: automatické odesílání je vypnuté. „Selhalo“: najeďte myší na stav a zobrazí se příčina.</li><li>Kliknutím na „PDF“ fakturu stáhnete, kliknutím na „Odeslat znovu“ ji zákazníkovi pošlete znovu.</li><li>Odznak Factur-X znamená, že faktura obsahuje také data pro elektronickou fakturaci.</li></ol>
+  <div class="tip"><b>Tip:</b> Pokud odeslání selhalo, zkontrolujte adresu zákazníka v objednávce Shopify a požádejte ho, aby se podíval do složky se spamem.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Číslování a jazyky</span></h2>
+  <p>Čísla na sebe navazují bez mezer, jak vyžaduje zákon, a každý zákazník dostane fakturu ve svém jazyce.</p>
+  <ol class="steps"><li>V Nastavení › Číslování a jazyk zvolte předponu čísel (výchozí „F-“, tj. F-2026-00001).</li><li>Pokud jste už vystavovali faktury v jiném nástroji, nastavte další číslo: lze ho zvýšit, nikdy však snížit.</li><li>Zvolte jazyk faktur: jazyk zákazníka (francouzština, angličtina, němčina, španělština, italština, nizozemština, portugalština (Brazílie), čeština, dánština, finština, norština (bokmål), polština, portugalština (Evropa), švédština, turečtina a malajština) nebo jeden pevný jazyk.</li><li>Při volbě „Jazyk zákazníka“ zvolte také záložní jazyk, který se použije, když jazyk zákazníka není k dispozici.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: elektronická fakturace</span></h2>
+  <p>S formátem Factur-X obsahuje PDF také data faktury, čitelná účetními programy a platformami pro elektronickou fakturaci, která je ve Francii mezi firmami povinná od let 2026–2027.</p>
+  <ol class="steps"><li>Otevřete Nastavení › Factur-X: možnost je ve výchozím stavu zapnutá.</li><li>Pokud se zobrazí „Factur-X pozastaven“, doplňte chybějící údaj (často adresu, zemi nebo DIČ) a uložte.</li><li>Když se indikátor změní na ✓, všechny další faktury jsou ve formátu Factur-X, beze změny pro vaše zákazníky.</li></ol>
+  <div class="tip"><b>Tip:</b> Váš účetní může tyto faktury importovat přímo do svého programu.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Správa tarifu</span></h2>
+  <p>Tarif Zdarma: 10 faktur měsíčně. Essential: 200 faktur za 7,90 US$ měsíčně. Neomezený: 12,90 US$ měsíčně. U placených tarifů 7 dní zkušebního období zdarma.</p>
+  <ol class="steps"><li>Karta Tarif (a Domů) ukazuje, kolik faktur jste tento měsíc využili. Počítadlo se vynuluje 1. den každého měsíce.</li><li>Chcete-li změnit tarif, klikněte na „Zvolit“ a potvrďte na stránce Shopify: částka se připočte k vašemu vyúčtování Shopify.</li><li>Pokud je dosažen limit, nové objednávky se pozastaví a dostanete upozornění e-mailem. Po přechodu na vyšší tarif klikněte na kartě Domů na „Vygenerovat jejich faktury“.</li><li>Chcete-li se vrátit k tarifu Zdarma, klikněte na „Zrušit“.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Osvědčené postupy</span></h2>
+  <p>Několik návyků, díky nimž bude vaše účetnictví bez starostí.</p>
+  <ol class="steps"><li>Po nastavení zadejte testovací objednávku (v testovacím režimu Shopify Payments) a zkontrolujte fakturu, kterou obdržíte.</li><li>Uchovávejte faktury 10 let: uschovejte si kopii z e-mailu nebo je každý měsíc stahujte. Z aplikace se mažou 48 hodin po odinstalování.</li><li>Vystavenou fakturu nelze změnit: v případě chyby nebo refundace vystavte dobropis ve svém účetním programu.</li><li>Máte dotaz? Podívejte se do častých dotazů na kartě Nápověda.</li></ol>
+  
+</section>
+  <footer>Máte jiný dotaz? Napište nám na <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>.</footer>
+</main>
+
+</body>
+</html>

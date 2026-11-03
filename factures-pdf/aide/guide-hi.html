@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – उपयोगकर्ता गाइड</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">उपयोगकर्ता गाइड</span><a href="faq-hi.html">अक्सर पूछे जाने वाले सवाल</a></nav></div>
+  <h1>उपयोगकर्ता गाइड</h1>
+  <p class="lead">ऐप इस्तेमाल करने के लिए आपको जो कुछ जानना है, चरण-दर-चरण।</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <strong>हिन्दी</strong> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">प्रिंट करें या PDF के रूप में सेव करें</button></p>
+  <section class="card"><h2>विषय-सूची</h2><ol class="toc"><li><a href="#install">ऐप इंस्टॉल करें</a></li><li><a href="#company">अपने व्यवसाय की जानकारी जोड़ें</a></li><li><a href="#look">इनवॉइस को कस्टमाइज़ करें और जांचें</a></li><li><a href="#sending">चुनें कि इनवॉइस कब और कैसे भेजे जाएं</a></li><li><a href="#shopify-link">Shopify ऑर्डर पुष्टि में इनवॉइस लिंक जोड़ें (वैकल्पिक)</a></li><li><a href="#daily">अपने इनवॉइस पर रोज़ नज़र रखें</a></li><li><a href="#numbering">क्रमांकन और भाषाएं</a></li><li><a href="#facturx">Factur-X: ई-इनवॉइसिंग</a></li><li><a href="#billing">अपना प्लान मैनेज करें</a></li><li><a href="#best-practices">अच्छी आदतें</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>ऐप इंस्टॉल करें</span></h2>
+  <p>इंस्टॉलेशन में एक मिनट लगता है और इससे न आपका स्टोर बदलता है, न आपके ऑर्डर।</p>
+  <ol class="steps"><li>Shopify App Store पर ऐप का पेज खोलें और “इंस्टॉल करें” पर क्लिक करें।</li><li>अपने ऑर्डर तक एक्सेस की अनुमति दें: ऐप इनवॉइस बनाने के लिए उन्हें पढ़ता है और उन पर केवल एक चीज़ सेव करता है, इनवॉइस का लिंक। यह और कुछ नहीं बदलता।</li><li>ऐप आपके Shopify एडमिन में, ऐप्स › Hoshi Factures के अंतर्गत खुलता है। आपके स्टोर का नाम, पता और ईमेल पहले से भरे होते हैं।</li><li>होम टैब पर, “शुरुआत करें” सूची का पालन करें: तीनों चरण पूरे होने पर यह गायब हो जाती है।</li></ol>
+  <div class="tip"><b>सुझाव:</b> आप फ्री प्लान (प्रति माह 10 इनवॉइस) से शुरू करते हैं, किसी क्रेडिट कार्ड की ज़रूरत नहीं।</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>अपने व्यवसाय की जानकारी जोड़ें</span></h2>
+  <p>यह जानकारी हर इनवॉइस पर दिखती है। एक मान्य इनवॉइस के लिए यह आवश्यक है।</p>
+  <ol class="steps"><li>सेटिंग टैब में, “आपका व्यवसाय” कार्ड खोलें।</li><li>सबसे तेज़ तरीका (फ़्रांसीसी कंपनियां): “ऑटो-फ़िल” में, अपना SIRET (या कंपनी का नाम और शहर) टाइप करें, “खोजें” और फिर “इस्तेमाल करें” पर क्लिक करें। कंपनी का नाम, मुख्य कार्यालय का पता, SIRET, कानूनी स्वरूप और VAT नंबर आधिकारिक रजिस्टर से लिए जाते हैं। आप “Shopify की जानकारी इस्तेमाल करें” पर भी क्लिक कर सकते हैं।</li><li>कंपनी का नाम और ईमेल जांचें: ग्राहक इसी पते पर जवाब देते हैं और आपको इनवॉइस की कॉपी भी यहीं मिलती हैं।</li><li>पता कई लाइनों में दर्ज करें, पिन कोड और शहर एक ही लाइन में (उदा. “69002 Lyon”), फिर देश चुनें।</li><li>अपना कंपनी पंजीकरण नंबर (फ़्रांस में SIRET) और VAT नंबर दर्ज करें।</li><li>VAT से छूट प्राप्त छोटा व्यवसाय: VAT छूट विकल्प पर टिक करें। इनवॉइस से VAT हट जाता है और कानूनी सूचना जुड़ जाती है।</li><li>कानूनी स्वरूप और शेयर पूंजी, व्यापार रजिस्टर, फ़ोन, वेबसाइट और आप क्या बेचते हैं (वस्तुएं, सेवाएं या दोनों) के लिए “व्यवसाय की अधिक जानकारी” खोलें।</li><li>स्क्रीन के नीचे दिखने वाली बार में “सेव करें” पर क्लिक करें।</li></ol>
+  <div class="tip"><b>सुझाव:</b> पहला इनवॉइस अपने अकाउंटेंट से जंचवाएं: वे आपके व्यवसाय से जुड़े खास विवरण जानते हैं।</div><div class="tip"><b>सुझाव:</b> अगर आपको VAT से छूट प्राप्त है, तो यह भी सुनिश्चित करें कि Shopify आपके ग्राहकों से टैक्स नहीं ले रहा है (सेटिंग › टैक्स और शुल्क)।</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>इनवॉइस को कस्टमाइज़ करें और जांचें</span></h2>
+  <p>अपने इनवॉइस को अपने ब्रांड का रूप दें, फिर पहले ऑर्डर से पहले परिणाम जांचें।</p>
+  <ol class="steps"><li>Shopify में, कॉन्टेंट › फ़ाइलें खोलें, अपना लोगो (PNG या JPEG) अपलोड करें और उसका लिंक कॉपी करें।</li><li>सेटिंग › रूप-रंग में, लिंक को “लोगो URL” में पेस्ट करें और मुख्य रंग चुनें।</li><li>ज़रूरत हो तो कानूनी सूचना और धन्यवाद संदेश बदलें। खाली छोड़ने पर, उनका ग्राहक की भाषा में अपने-आप अनुवाद हो जाता है।</li><li>“PDF प्रीव्यू” पर क्लिक करें: आपकी सेटिंग के साथ, बिना सेव की गई सेटिंग सहित, एक नमूना इनवॉइस डाउनलोड होता है।</li><li>परिणाम से संतुष्ट होने पर सेव करें।</li></ol>
+  <div class="tip"><b>सुझाव:</b> सेटिंग केवल अगले इनवॉइस पर लागू होती हैं: जारी किया गया इनवॉइस कभी नहीं बदलता।</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>चुनें कि इनवॉइस कब और कैसे भेजे जाएं</span></h2>
+  <p>डिफ़ॉल्ट रूप से, ऑर्डर का भुगतान होने पर इनवॉइस बनता है और तुरंत ग्राहक को ईमेल किया जाता है।</p>
+  <ol class="steps"><li>सेटिंग › यह कैसे काम करता है में, चुनें कि इनवॉइस कब बनाना है: जब ऑर्डर का भुगतान हो जाए (सुझाया गया) या जैसे ही ऑर्डर दिया जाए।</li><li>“आपके ग्राहकों को इनवॉइस कैसे मिलता है” में, चुनें: PDF संलग्न एक ईमेल (सुझाया गया, कोई सेटअप नहीं); ऑर्डर पेज पर “इनवॉइस डाउनलोड करें” बटन के साथ सिर्फ़ एक ईमेल (कोई कोड नहीं: चालू करने के लिए 3 क्लिक); या Shopify की पुष्टि में ही लिंक के साथ सिर्फ़ एक ईमेल (एक बार कोड पेस्ट करें)। सेटिंग आपको चरण-दर-चरण मार्गदर्शन देती हैं।</li><li>हर इनवॉइस पाने और अपना संग्रह बनाने के लिए “हर इनवॉइस की एक कॉपी मुझे भेजें” पर टिक करें।</li><li>ईमेल को कस्टमाइज़ करने के लिए, “ग्राहक को ईमेल” खोलें: विषय और संदेश में {{first_name}}, {{name}}, {{invoice_number}}, {{order}} और {{shop}} वेरिएबल इस्तेमाल किए जा सकते हैं।</li></ol>
+  <div class="tip"><b>सुझाव:</b> Shopify अपने ईमेल में अटैचमेंट की अनुमति नहीं देता: इनवॉइस एक अलग ईमेल में जाता है, जो आपके स्टोर की ओर से भेजा जाता है।</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Shopify ऑर्डर पुष्टि में इनवॉइस लिंक जोड़ें (वैकल्पिक)</span></h2>
+  <p>आपके ग्राहक अपने स्टोर के सामान्य पुष्टि ईमेल से भी अपना इनवॉइस पा सकते हैं।</p>
+  <ol class="steps"><li>सेटिंग में, “Shopify ऑर्डर पुष्टि ईमेल में लिंक” खोलें और “कोड कॉपी करें” पर क्लिक करें।</li><li>Shopify में, सेटिंग › सूचनाएं › ग्राहक सूचनाएं › ऑर्डर की पुष्टि पर जाएं, फिर “कोड संपादित करें” पर क्लिक करें।</li><li>कोड को वहां पेस्ट करें जहां बटन दिखना चाहिए, उदाहरण के लिए ऑर्डर सारांश के ठीक बाद।</li><li>जांचने के लिए “प्रीव्यू” पर क्लिक करें, फिर “सेव करें” पर क्लिक करें।</li></ol>
+  <div class="tip"><b>सुझाव:</b> अगर ग्राहक भुगतान से पहले क्लिक करता है, तो एक पेज उन्हें बताता है कि इनवॉइस कुछ मिनटों में उपलब्ध होगा।</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>अपने इनवॉइस पर रोज़ नज़र रखें</span></h2>
+  <p>होम टैब में हाल के इनवॉइस उनकी भेजने की स्थिति के साथ दिखाए जाते हैं।</p>
+  <ol class="steps"><li>हर पंक्ति में नंबर, ऑर्डर, ग्राहक, तारीख, कुल और ईमेल की स्थिति दिखती है।</li><li>“भेजा गया”: ग्राहक को इनवॉइस मिल गया। “नहीं भेजा गया”: अपने-आप भेजना बंद है। “विफल”: कारण देखने के लिए स्थिति पर माउस ले जाएं।</li><li>इनवॉइस डाउनलोड करने के लिए “PDF” पर, या ग्राहक को फिर से भेजने के लिए “फिर से भेजें” पर क्लिक करें।</li><li>Factur-X बैज का मतलब है कि इनवॉइस में ई-इनवॉइसिंग के लिए डेटा भी है।</li></ol>
+  <div class="tip"><b>सुझाव:</b> अगर भेजना विफल हुआ, तो Shopify ऑर्डर पर ग्राहक का पता जांचें और उनसे अपना स्पैम फ़ोल्डर देखने को कहें।</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>क्रमांकन और भाषाएं</span></h2>
+  <p>कानून के अनुसार, नंबर बिना किसी अंतराल के क्रम से आते हैं, और हर ग्राहक को इनवॉइस उनकी भाषा में मिलता है।</p>
+  <ol class="steps"><li>सेटिंग › क्रमांकन और भाषा में, नंबर प्रीफ़िक्स चुनें (डिफ़ॉल्ट “F-”, यानी F-2026-00001)।</li><li>अगर आप पहले किसी दूसरे टूल से इनवॉइस जारी कर चुके हैं, तो अगला नंबर सेट करें: इसे बढ़ाया जा सकता है, लेकिन कभी घटाया नहीं जा सकता।</li><li>इनवॉइस की भाषा चुनें: ग्राहक की भाषा (फ़्रेंच, अंग्रेज़ी, जर्मन, स्पेनिश, इतालवी, डच, ब्राज़ीली पुर्तगाली, चेक, डेनिश, फ़िनिश, नॉर्वेजियाई बोकमाल, पोलिश, यूरोपीय पुर्तगाली, स्वीडिश, तुर्की, और मलय) या एक निश्चित भाषा।</li><li>“ग्राहक की भाषा” के साथ, वह वैकल्पिक भाषा भी चुनें जो ग्राहक की भाषा उपलब्ध न होने पर इस्तेमाल होगी।</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: ई-इनवॉइसिंग</span></h2>
+  <p>Factur-X के साथ, PDF में इनवॉइस का डेटा भी होता है, जिसे अकाउंटिंग सॉफ़्टवेयर और ई-इनवॉइसिंग प्लेटफ़ॉर्म पढ़ सकते हैं, जो फ़्रांस में 2026–2027 से व्यवसायों के बीच अनिवार्य हो रहे हैं।</p>
+  <ol class="steps"><li>सेटिंग › Factur-X खोलें: यह विकल्प डिफ़ॉल्ट रूप से चालू है।</li><li>अगर “Factur-X रुका हुआ है” दिखे, तो छूटी हुई जानकारी (अक्सर पता, देश या VAT नंबर) भरें और सेव करें।</li><li>जब संकेतक ✓ में बदल जाए, तो आगे के सभी इनवॉइस Factur-X फ़ॉर्मेट में होते हैं, और आपके ग्राहकों के लिए कुछ नहीं बदलता।</li></ol>
+  <div class="tip"><b>सुझाव:</b> आपके अकाउंटेंट इन इनवॉइस को सीधे अपने सॉफ़्टवेयर में इम्पोर्ट कर सकते हैं।</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>अपना प्लान मैनेज करें</span></h2>
+  <p>फ्री प्लान: प्रति माह 10 इनवॉइस। एसेंशियल: $7.90 प्रति माह में 200 इनवॉइस। अनलिमिटेड: $12.90 प्रति माह। पेड प्लान पर 7 दिन का फ्री ट्रायल।</p>
+  <ol class="steps"><li>प्लान टैब (और होम) दिखाता है कि आपने इस महीने कितने इनवॉइस इस्तेमाल किए। काउंटर हर महीने की 1 तारीख को रीसेट होता है।</li><li>प्लान बदलने के लिए, “चुनें” पर क्लिक करें, फिर Shopify पेज पर स्वीकृत करें: राशि आपके Shopify बिल में जुड़ जाती है।</li><li>सीमा पूरी होने पर, नए ऑर्डर होल्ड पर रख दिए जाते हैं और आपको ईमेल से सूचित किया जाता है। अपग्रेड करने के बाद, होम पर “उनके इनवॉइस जनरेट करें” पर क्लिक करें।</li><li>फ्री प्लान पर वापस जाने के लिए, “रद्द करें” पर क्लिक करें।</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>अच्छी आदतें</span></h2>
+  <p>अपने अकाउंटिंग को तनाव-मुक्त रखने के लिए कुछ आदतें।</p>
+  <ol class="steps"><li>सेटअप के बाद एक टेस्ट ऑर्डर दें (Shopify Payments के टेस्ट मोड का इस्तेमाल करके) और मिला हुआ इनवॉइस जांचें।</li><li>अपने इनवॉइस 10 साल तक रखें: ईमेल की कॉपी रखें या हर महीने उन्हें डाउनलोड करें। अनइंस्टॉल करने के 48 घंटे बाद वे ऐप से हटा दिए जाते हैं।</li><li>जारी किया गया इनवॉइस बदला नहीं जा सकता: गलती या रिफ़ंड की स्थिति में, अपने अकाउंटिंग टूल से क्रेडिट नोट जारी करें।</li><li>कोई सवाल? सहायता टैब में FAQ देखें।</li></ol>
+  
+</section>
+  <footer>कोई और सवाल? हमें <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a> पर ईमेल करें।</footer>
+</main>
+
+</body>
+</html>

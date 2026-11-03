@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – よくある質問</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><a href="guide-ja.html">ユーザーガイド</a><span aria-current="page">よくある質問</span></nav></div>
+  <h1>よくある質問</h1>
+  <div class="langs"><a href="faq-fr.html" hreflang="fr">Français</a> · <a href="faq-en.html" hreflang="en">English</a> · <a href="faq-de.html" hreflang="de">Deutsch</a> · <a href="faq-es.html" hreflang="es">Español</a> · <a href="faq-it.html" hreflang="it">Italiano</a> · <a href="faq-nl.html" hreflang="nl">Nederlands</a> · <a href="faq-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="faq-cs.html" hreflang="cs">Čeština</a> · <a href="faq-da.html" hreflang="da">Dansk</a> · <a href="faq-fi.html" hreflang="fi">Suomi</a> · <a href="faq-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="faq-pl.html" hreflang="pl">Polski</a> · <a href="faq-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="faq-sv.html" hreflang="sv">Svenska</a> · <a href="faq-tr.html" hreflang="tr">Türkçe</a> · <a href="faq-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="faq-hi.html" hreflang="hi">हिन्दी</a> · <a href="faq-th.html" hreflang="th">ไทย</a> · <strong>日本語</strong> · <a href="faq-ko.html" hreflang="ko">한국어</a> · <a href="faq-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="faq-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <input type="search" id="q" placeholder="質問を検索…" aria-label="質問を検索…">
+  <div id="faq"><section><h2>はじめに</h2><details><summary>どのように始めればよいですか？</summary><p>「設定」タブを開き、会社情報（会社名、住所、事業者登録番号、VAT番号）を入力して保存してください。これだけで、次の注文から請求書が自動で作成され、お客様にメールで送信されます。「PDFをプレビュー」ボタンで仕上がりを確認できます。</p></details><details><summary>会社情報を自動で入力できますか？</summary><p>はい。インストール時に、アプリはShopifyからストア名、法定住所、メールアドレス、電話番号を取得します。Shopifyは事業者登録番号やVAT番号を把握していないため、フランスの会社の場合は、設定 › 自動入力 でSIRETまたは会社名を入力すると、公式の企業登録簿から残りの情報を補完できます。内容を確認してから保存してください。</p></details><details><summary>請求書はいつ作成されますか？</summary><p>既定では、注文の支払いが完了した時点で作成されます（カード決済の場合は即時）。注文が確定した時点で作成するよう設定することもできますが、その場合、後でキャンセルされた注文にはクレジットノート（返金用の請求書）の発行が必要になります。</p></details><details><summary>お客様は請求書を自動で受け取りますか？</summary><p>はい。PDFの請求書を添付したメールがお客様に送信されます。メールはストアの名義で送信され、お客様が返信すると、会社のメールアドレスに届きます。自動送信は設定でオフにできます。</p></details><details><summary>Shopifyの注文確認メールに請求書が含まれないのはなぜですか？</summary><p>Shopifyでは、アプリがShopify自身のメールに添付ファイルを追加したり、内容を編集したりすることはできません。メールを1通だけにするには、2つの方法があります。注文ページの「請求書をダウンロード」ボタン（お客様がShopifyのメールで「ご注文を確認する」をクリック。コード不要、初回のみ3クリックで有効化）、または確認メールに直接リンクを表示する方法（初回のみコードを貼り付け）です。アプリの設定画面で手順をご案内します。</p></details><details><summary>請求書のコピーを受け取るにはどうすればよいですか？</summary><p>「すべての請求書のコピーを自分にも送信する」にチェックを入れると、各請求書が会社のメールアドレスにも送信されます。また、すべての請求書は「ホーム」タブからダウンロードできます。</p></details></section><section><h2>請求書と法的要件</h2><details><summary>請求書は法令に準拠していますか？</summary><p>請求書には、フランスおよびEUで必要な記載事項が含まれています：固有の番号、日付、販売者の名称と登録番号、VAT番号、品目の明細、VAT率と税額、合計額、支払い遅延時の条件。会社情報をすべて入力し、お客様の状況をよく知る会計士にテンプレートをご確認いただいてください。</p></details><details><summary>番号はどのように付けられますか？</summary><p>法律の定めに従い、番号は欠番や重複なく連続して付けられます（例：F-2026-00001、F-2026-00002…）。すでに請求書を発行している場合は、設定で次の番号を指定してください。番号は増やすことはできますが、減らすことはできません。</p></details><details><summary>付加価値税を請求しない小規模事業者です。</summary><p>設定で付加価値税免除のオプションにチェックを入れてください。請求書から付加価値税が表示されなくなり、フランスの法定記載事項 « TVA non applicable, art. 293 B du CGI » が追加されます。また、Shopifyがお客様に税金を請求していないこともご確認ください（設定 › 税金と関税）。</p></details><details><summary>請求書を編集・削除できますか？</summary><p>いいえ。発行済みの請求書は変更してはならないと法律で定められています。誤りがある場合や注文が返金された場合は、クレジットノートを発行する必要があります。クレジットノートの自動発行は今後のバージョンで対応予定です。それまでは、お使いの会計ツールで作成してください。</p></details><details><summary>請求書はどのくらいの期間保存されますか？</summary><p>アプリがインストールされている限り、アプリ内で利用できます。フランスの法律では10年間の保存が義務付けられています。メールで受け取ったコピーを保管するか、定期的にダウンロードしてください。アプリをアンインストールすると、Shopifyの要請により、48時間後にデータが削除されます。</p></details></section><section><h2>Factur-Xと電子請求書</h2><details><summary>Factur-Xとは何ですか？</summary><p>請求書データを会計ソフトで読み取れるファイルとして含んだPDFです。電子請求書プラットフォームで受け付けられる形式で、フランスでは企業間取引での電子請求書が義務化されます。すべての企業は2026年9月から電子請求書を受け取れる必要があり、発行については2026年9月（大企業・中堅企業）または2027年9月（中小企業・零細企業）から義務化されます。消費者向けの販売はこの義務の対象外です。お客様には通常のPDFとして表示されるため、何も変わりません。</p></details><details><summary>「Factur-Xは一時停止中です」と表示されるのはなぜですか？</summary><p>Factur-Xに必要な情報が不足しています。不足している項目はメッセージの横に表示されます（多くの場合、VAT番号または国）。入力して保存すると、以降の請求書はFactur-X形式になります。それまでは、通常のPDFとして作成されます。</p></details></section><section><h2>言語</h2><details><summary>請求書とメールは何語で作成されますか？</summary><p>請求書がお客様の言語に対応している場合は、その言語で作成されます：フランス語、英語、ドイツ語、スペイン語、イタリア語、オランダ語、ポルトガル語 (ブラジル)、チェコ語、デンマーク語、フィンランド語、ノルウェー語(ブークモール)、ポーランド語、ポルトガル語 (イベリア半島)、スウェーデン語、トルコ語、マレー語。対応していない場合は、選択した代替言語で作成されます。すべての請求書を1つの言語に固定することもできます。アプリ自体は22言語に対応しています。</p></details><details><summary>テキストをカスタマイズできますか？</summary><p>はい。メールの件名と本文、請求書下部の法定記載事項、お礼のメッセージをカスタマイズできます。空欄の場合は請求書の言語に自動で翻訳されます。カスタムテキストは、言語にかかわらずそのまま使用されます。</p></details></section><section><h2>プランと請求</h2><details><summary>料金はいくらですか？</summary><p>無料プランでは、月に 10 件の請求書を作成できます。エッセンシャルプラン（月額 $7.90）では 200 件、無制限プラン（月額 $12.90）では上限がありません。有料プランには 7 日間の無料体験があり、料金はShopifyのご利用料金とあわせてShopifyから請求されます。</p></details><details><summary>月間上限に達するとどうなりますか？</summary><p>新しい注文は保留となり、メールでお知らせします。アップグレードした時点、または翌月の初めに「請求書を作成する」をクリックしてください。注文が失われることはありません。カウンターは毎月1日にリセットされます。</p></details><details><summary>プランの変更や解約はどうすればよいですか？</summary><p>「プラン」タブで、プランを選択してShopifyのページで承認するか、「解約」をクリックして無料プランに戻します。アプリをアンインストールした場合も、サブスクリプションは終了します。</p></details></section><section><h2>トラブルシューティング</h2><details><summary>お客様に請求書が届いていません。</summary><p>「ホーム」タブで「メール」列をご確認ください。「失敗」は問題が発生したことを示します（カーソルを合わせると詳細が表示されます）。お客様のメールアドレスを確認し、迷惑メールフォルダを確認するようお客様にご依頼のうえ、「再送信」をクリックしてください。PDFをダウンロードして、ご自身で送信することもできます。</p></details><details><summary>ロゴが表示されません。</summary><p>ロゴは、httpsで公開されたPNGまたはJPEG画像である必要があります。最も簡単な方法は、Shopifyにアップロードし（コンテンツ › ファイル）、そのリンクをコピーして設定に貼り付けることです。プレビューで確認してください。</p></details><details><summary>私のデータやお客様のデータはどのように扱われますか？</summary><p>アプリは注文を読み取るのみで変更はできず、請求書に必要な情報（お客様の氏名、住所、メールアドレス、品目）のみを保存します。データが販売または共有されることはありません。Shopifyから送られる削除リクエスト（GDPR）は自動で処理されます。</p></details><details><summary>サポートへの問い合わせ方法を教えてください。</summary><p>ストア名を添えて、hoshi.technologies@gmail.com までメールでお問い合わせください。通常、1営業日以内にご返信いたします。</p></details></section></div>
+  <p class="empty" id="empty" hidden>検索に一致する質問はありません。</p>
+  <footer>その他のご質問は、<a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a> までメールでお問い合わせください。</footer>
+</main>
+<script>
+  const q = document.getElementById('q');
+  const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  q.addEventListener('input', () => {
+    const words = norm(q.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of document.querySelectorAll('details')) {
+      const hit = words.every((w) => norm(d.textContent).includes(w));
+      d.hidden = !hit;
+      d.open = hit && words.length > 0;
+      shown += hit;
+    }
+    for (const s of document.querySelectorAll('#faq section')) s.hidden = !s.querySelector('details:not([hidden])');
+    document.getElementById('empty').hidden = shown > 0;
+  });
+</script>
+</body>
+</html>

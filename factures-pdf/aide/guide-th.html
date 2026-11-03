@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – คู่มือการใช้งาน</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">คู่มือการใช้งาน</span><a href="faq-th.html">คำถามที่พบบ่อย</a></nav></div>
+  <h1>คู่มือการใช้งาน</h1>
+  <p class="lead">ทุกสิ่งที่คุณต้องรู้เพื่อใช้แอปนี้ ทีละขั้นตอน</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <strong>ไทย</strong> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">พิมพ์หรือบันทึกเป็น PDF</button></p>
+  <section class="card"><h2>สารบัญ</h2><ol class="toc"><li><a href="#install">ติดตั้งแอป</a></li><li><a href="#company">กรอกข้อมูลธุรกิจของคุณ</a></li><li><a href="#look">ปรับแต่งและตรวจสอบใบแจ้งหนี้</a></li><li><a href="#sending">เลือกเวลาและวิธีส่งใบแจ้งหนี้</a></li><li><a href="#shopify-link">เพิ่มลิงก์ใบแจ้งหนี้ในอีเมลยืนยันคำสั่งซื้อของ Shopify (ไม่บังคับ)</a></li><li><a href="#daily">ติดตามใบแจ้งหนี้ในแต่ละวัน</a></li><li><a href="#numbering">การกำหนดเลขที่และภาษา</a></li><li><a href="#facturx">Factur-X: ใบแจ้งหนี้อิเล็กทรอนิกส์</a></li><li><a href="#billing">จัดการแพ็กเกจของคุณ</a></li><li><a href="#best-practices">แนวทางปฏิบัติที่ดี</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>ติดตั้งแอป</span></h2>
+  <p>การติดตั้งใช้เวลาเพียงหนึ่งนาที และไม่เปลี่ยนแปลงทั้งร้านค้าและคำสั่งซื้อของคุณ</p>
+  <ol class="steps"><li>ใน Shopify App Store ให้เปิดหน้าของแอปแล้วคลิก “ติดตั้ง”</li><li>อนุญาตให้เข้าถึงคำสั่งซื้อของคุณ: แอปจะอ่านคำสั่งซื้อเพื่อออกใบแจ้งหนี้ และบันทึกข้อมูลลงในคำสั่งซื้อเพียงอย่างเดียว คือลิงก์ใบแจ้งหนี้ แอปจะไม่เปลี่ยนแปลงสิ่งอื่นใด</li><li>แอปจะเปิดขึ้นในส่วนผู้ดูแล Shopify ของคุณ ที่เมนู แอป › Hoshi Factures ชื่อ ที่อยู่ และอีเมลของร้านค้าคุณถูกกรอกไว้ล่วงหน้าแล้ว</li><li>ในแท็บหน้าแรก ให้ทำตามรายการ “เริ่มต้นใช้งาน” รายการนี้จะหายไปเมื่อทำครบทั้งสามขั้นตอน</li></ol>
+  <div class="tip"><b>เคล็ดลับ:</b> คุณจะเริ่มต้นด้วยแพ็กเกจฟรี (10 ใบต่อเดือน) โดยไม่ต้องใช้บัตรเครดิต</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>กรอกข้อมูลธุรกิจของคุณ</span></h2>
+  <p>ข้อมูลเหล่านี้จะแสดงบนใบแจ้งหนี้ทุกใบ และจำเป็นต่อการออกใบแจ้งหนี้ที่ถูกต้อง</p>
+  <ol class="steps"><li>เปิดแท็บการตั้งค่า การ์ด “ธุรกิจของคุณ”</li><li>วิธีที่เร็วที่สุด (บริษัทฝรั่งเศส): ใน “กรอกข้อมูลอัตโนมัติ” ให้พิมพ์ SIRET ของคุณ (หรือชื่อบริษัทและเมือง) คลิก “ค้นหา” แล้วคลิก “ใช้” ระบบจะดึงชื่อบริษัท ที่อยู่สำนักงานใหญ่ SIRET รูปแบบนิติบุคคล และเลขทะเบียนภาษีมูลค่าเพิ่มจากทะเบียนทางการ คุณยังสามารถคลิก “ใช้ข้อมูลจาก Shopify” ได้ด้วย</li><li>ตรวจสอบชื่อบริษัทและอีเมล: ลูกค้าจะตอบกลับมาที่อีเมลนี้ และคุณจะได้รับสำเนาใบแจ้งหนี้ที่อีเมลนี้</li><li>กรอกที่อยู่หลายบรรทัด โดยให้รหัสไปรษณีย์และเมืองอยู่ในบรรทัดเดียวกัน (เช่น “69002 Lyon”) แล้วเลือกประเทศ</li><li>กรอกเลขทะเบียนบริษัท (ในฝรั่งเศสคือ SIRET) และเลขทะเบียนภาษีมูลค่าเพิ่มสหภาพยุโรป</li><li>ธุรกิจขนาดเล็กที่ได้รับยกเว้นภาษีมูลค่าเพิ่ม: เลือกตัวเลือกยกเว้นภาษีมูลค่าเพิ่ม ภาษีมูลค่าเพิ่มจะหายไปจากใบแจ้งหนี้ และจะมีการเพิ่มข้อความทางกฎหมาย</li><li>เปิด “ข้อมูลธุรกิจเพิ่มเติม” เพื่อกรอกรูปแบบนิติบุคคลและทุนจดทะเบียน ทะเบียนการค้า โทรศัพท์ เว็บไซต์ และประเภทการขาย (สินค้า บริการ หรือทั้งสองอย่าง)</li><li>คลิก “บันทึก” ในแถบที่ปรากฏขึ้นที่ด้านล่างของหน้าจอ</li></ol>
+  <div class="tip"><b>เคล็ดลับ:</b> ให้นักบัญชีของคุณตรวจสอบใบแจ้งหนี้ใบแรก: นักบัญชีทราบดีว่าธุรกิจของคุณต้องมีรายการใดบ้าง</div><div class="tip"><b>เคล็ดลับ:</b> หากคุณได้รับยกเว้นภาษีมูลค่าเพิ่ม โปรดตรวจสอบด้วยว่า Shopify ไม่ได้เรียกเก็บภาษีจากลูกค้าของคุณ (การตั้งค่า › ภาษีและอากร)</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>ปรับแต่งและตรวจสอบใบแจ้งหนี้</span></h2>
+  <p>ทำให้ใบแจ้งหนี้มีรูปลักษณ์ตามแบรนด์ของคุณ แล้วตรวจสอบผลลัพธ์ก่อนคำสั่งซื้อแรก</p>
+  <ol class="steps"><li>ใน Shopify ให้เปิด เนื้อหา › ไฟล์ อัปโหลดโลโก้ของคุณ (PNG หรือ JPEG) แล้วคัดลอกลิงก์</li><li>ใน การตั้งค่า › รูปลักษณ์ ให้วางลิงก์ใน “URL ของโลโก้” แล้วเลือกสีหลัก</li><li>หากต้องการ ให้แก้ไขข้อความทางกฎหมายท้ายใบแจ้งหนี้และข้อความขอบคุณ หากเว้นว่างไว้ ข้อความจะถูกแปลเป็นภาษาของลูกค้าโดยอัตโนมัติ</li><li>คลิก “ดูตัวอย่าง PDF”: ระบบจะดาวน์โหลดใบแจ้งหนี้ตัวอย่างตามการตั้งค่าของคุณ แม้ยังไม่ได้บันทึกก็ตาม</li><li>บันทึกเมื่อพอใจกับผลลัพธ์</li></ol>
+  <div class="tip"><b>เคล็ดลับ:</b> การตั้งค่าจะมีผลกับใบแจ้งหนี้ถัดไปเท่านั้น: ใบแจ้งหนี้ที่ออกแล้วจะไม่มีการเปลี่ยนแปลง</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>เลือกเวลาและวิธีส่งใบแจ้งหนี้</span></h2>
+  <p>โดยค่าเริ่มต้น ระบบจะสร้างใบแจ้งหนี้เมื่อคำสั่งซื้อได้รับการชำระเงิน และส่งให้ลูกค้าทางอีเมลทันที</p>
+  <ol class="steps"><li>ใน การตั้งค่า › วิธีการทำงาน ให้เลือกเวลาสร้างใบแจ้งหนี้: เมื่อคำสั่งซื้อได้รับการชำระเงิน (แนะนำ) หรือทันทีที่มีการสั่งซื้อ</li><li>ใน “ลูกค้าของคุณได้รับใบแจ้งหนี้อย่างไร” ให้เลือก: อีเมลที่แนบ PDF (แนะนำ ไม่ต้องตั้งค่า) อีเมลฉบับเดียวพร้อมปุ่ม “ดาวน์โหลดใบแจ้งหนี้ของฉัน” ในหน้าคำสั่งซื้อ (ไม่ต้องใช้โค้ด: เปิดใช้ด้วย 3 คลิก) หรืออีเมลฉบับเดียวที่มีลิงก์อยู่ในอีเมลยืนยันของ Shopify โดยตรง (วางโค้ดเพียงครั้งเดียว) การตั้งค่าจะแนะนำคุณทีละขั้นตอน</li><li>เลือก “ส่งสำเนาใบแจ้งหนี้ทุกใบให้ฉัน” เพื่อรับใบแจ้งหนี้ทุกใบและจัดเก็บเป็นเอกสาร</li><li>หากต้องการปรับแต่งอีเมล ให้เปิด “อีเมลถึงลูกค้า”: หัวเรื่องและข้อความรองรับตัวแปร {{first_name}}, {{name}}, {{invoice_number}}, {{order}} และ {{shop}}</li></ol>
+  <div class="tip"><b>เคล็ดลับ:</b> Shopify ไม่อนุญาตให้แนบไฟล์ในอีเมลของ Shopify เอง: ใบแจ้งหนี้จึงถูกส่งในอีเมลแยกต่างหากในนามร้านค้าของคุณ</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>เพิ่มลิงก์ใบแจ้งหนี้ในอีเมลยืนยันคำสั่งซื้อของ Shopify (ไม่บังคับ)</span></h2>
+  <p>ลูกค้าของคุณยังสามารถรับใบแจ้งหนี้ได้จากอีเมลยืนยันตามปกติของร้านค้าคุณ</p>
+  <ol class="steps"><li>ในการตั้งค่า ให้เปิด “ลิงก์ในอีเมลยืนยันคำสั่งซื้อของ Shopify” แล้วคลิก “คัดลอกโค้ด”</li><li>ใน Shopify ให้ไปที่ การตั้งค่า › การแจ้งเตือน › การแจ้งเตือนลูกค้า › การยืนยันคำสั่งซื้อ แล้วคลิก “แก้ไขโค้ด”</li><li>วางโค้ดในตำแหน่งที่ต้องการให้ปุ่มแสดง เช่น ต่อจากสรุปคำสั่งซื้อ</li><li>คลิก “แสดงตัวอย่าง” เพื่อตรวจสอบ แล้วคลิก “บันทึก”</li></ol>
+  <div class="tip"><b>เคล็ดลับ:</b> หากลูกค้าคลิกก่อนชำระเงิน จะมีหน้าแจ้งว่าใบแจ้งหนี้จะพร้อมใช้งานในอีกไม่กี่นาที</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>ติดตามใบแจ้งหนี้ในแต่ละวัน</span></h2>
+  <p>แท็บหน้าแรกแสดงรายการใบแจ้งหนี้ล่าสุดที่ออกแล้ว พร้อมสถานะการส่ง</p>
+  <ol class="steps"><li>แต่ละแถวแสดงเลขที่ คำสั่งซื้อ ลูกค้า วันที่ ยอดรวม และสถานะอีเมล</li><li>“ส่งแล้ว”: ลูกค้าได้รับใบแจ้งหนี้แล้ว “ยังไม่ส่ง”: ปิดการส่งอัตโนมัติอยู่ “ล้มเหลว”: วางเมาส์เหนือสถานะเพื่อดูสาเหตุ</li><li>คลิก “PDF” เพื่อดาวน์โหลดใบแจ้งหนี้ หรือคลิก “ส่งอีกครั้ง” เพื่อส่งให้ลูกค้าใหม่</li><li>ป้าย Factur-X แสดงว่าใบแจ้งหนี้นั้นมีข้อมูลสำหรับใบแจ้งหนี้อิเล็กทรอนิกส์ด้วย</li></ol>
+  <div class="tip"><b>เคล็ดลับ:</b> หากส่งไม่สำเร็จ ให้ตรวจสอบอีเมลของลูกค้าในคำสั่งซื้อบน Shopify และขอให้ลูกค้าดูในโฟลเดอร์จดหมายขยะ</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>การกำหนดเลขที่และภาษา</span></h2>
+  <p>เลขที่จะเรียงต่อกันโดยไม่มีการเว้นตามที่กฎหมายกำหนด และลูกค้าแต่ละรายจะได้รับใบแจ้งหนี้ในภาษาของตนเอง</p>
+  <ol class="steps"><li>ใน การตั้งค่า › การกำหนดเลขที่และภาษา ให้เลือกคำนำหน้าเลขที่ (ค่าเริ่มต้นคือ “F-” เช่น F-2026-00001)</li><li>หากคุณเคยออกใบแจ้งหนี้ด้วยเครื่องมืออื่นมาก่อน ให้ระบุเลขที่ถัดไป: เลขที่นี้เพิ่มขึ้นได้แต่ลดลงไม่ได้</li><li>เลือกภาษาของใบแจ้งหนี้: ภาษาของลูกค้า (ฝรั่งเศส อังกฤษ เยอรมัน สเปน อิตาลี ดัตช์ โปรตุเกส - บราซิล เช็ก เดนมาร์ก ฟินแลนด์ นอร์เวย์บุคมอล โปแลนด์ โปรตุเกส - ยุโรป สวีเดน ตุรกี และมาเลย์) หรือภาษาเดียวที่กำหนด</li><li>เมื่อเลือก “ภาษาของลูกค้า” ให้เลือกภาษาสำรองที่จะใช้เมื่อไม่มีภาษาของลูกค้าด้วย</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: ใบแจ้งหนี้อิเล็กทรอนิกส์</span></h2>
+  <p>เมื่อใช้ Factur-X ไฟล์ PDF จะมีข้อมูลใบแจ้งหนี้อยู่ด้วย ซึ่งซอฟต์แวร์บัญชีและแพลตฟอร์มใบแจ้งหนี้อิเล็กทรอนิกส์อ่านได้ โดยแพลตฟอร์มเหล่านี้จะเป็นข้อบังคับระหว่างธุรกิจในฝรั่งเศสตั้งแต่ปี 2026–2027</p>
+  <ol class="steps"><li>เปิด การตั้งค่า › Factur-X: ตัวเลือกนี้เปิดใช้อยู่โดยค่าเริ่มต้น</li><li>หากมีข้อความ “Factur-X หยุดชั่วคราว” ให้กรอกข้อมูลที่ระบุ (มักเป็นที่อยู่ ประเทศ หรือเลขทะเบียนภาษีมูลค่าเพิ่ม) แล้วบันทึก</li><li>เมื่อสัญลักษณ์เปลี่ยนเป็น ✓ ใบแจ้งหนี้ทั้งหมดหลังจากนั้นจะอยู่ในรูปแบบ Factur-X โดยไม่มีอะไรเปลี่ยนแปลงสำหรับลูกค้าของคุณ</li></ol>
+  <div class="tip"><b>เคล็ดลับ:</b> นักบัญชีของคุณสามารถนำเข้าใบแจ้งหนี้เหล่านี้ไปยังซอฟต์แวร์ของตนได้โดยตรง</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>จัดการแพ็กเกจของคุณ</span></h2>
+  <p>แพ็กเกจฟรี: 10 ใบต่อเดือน แพ็กเกจพื้นฐาน: 200 ใบ ในราคา US$7.90 ต่อเดือน แพ็กเกจไม่จำกัด: US$12.90 ต่อเดือน แพ็กเกจแบบชำระเงินทดลองใช้ฟรี 7 วัน</p>
+  <ol class="steps"><li>แท็บแพ็กเกจ (และหน้าแรก) แสดงจำนวนใบแจ้งหนี้ที่ใช้ไปในเดือนนี้ ตัวนับจะเริ่มต้นใหม่ที่ศูนย์ในวันที่ 1 ของทุกเดือน</li><li>หากต้องการเปลี่ยนแพ็กเกจ ให้คลิก “เลือก” แล้วยืนยันในหน้าของ Shopify: ค่าบริการจะถูกรวมไว้ในบิล Shopify ของคุณ</li><li>หากใช้ครบขีดจำกัด คำสั่งซื้อใหม่จะถูกพักไว้ และคุณจะได้รับแจ้งทางอีเมล หลังจากอัปเกรดเป็นแพ็กเกจที่สูงขึ้น ให้คลิก “สร้างใบแจ้งหนี้ของคำสั่งซื้อเหล่านี้” ในหน้าแรก</li><li>หากต้องการกลับไปใช้แพ็กเกจฟรี ให้คลิก “ยกเลิกการสมัคร”</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>แนวทางปฏิบัติที่ดี</span></h2>
+  <p>นิสัยง่ายๆ ที่ช่วยให้คุณจัดการบัญชีได้อย่างสบายใจ</p>
+  <ol class="steps"><li>หลังตั้งค่าเสร็จ ให้ลองสั่งซื้อทดสอบ (โดยใช้โหมดทดสอบของ Shopify Payments) แล้วตรวจสอบใบแจ้งหนี้ที่ได้รับ</li><li>เก็บรักษาใบแจ้งหนี้ไว้ 10 ปี: เก็บสำเนาที่ได้รับทางอีเมลหรือดาวน์โหลดทุกเดือน ใบแจ้งหนี้จะถูกลบออกจากแอป 48 ชั่วโมงหลังถอนการติดตั้ง</li><li>ใบแจ้งหนี้ที่ออกแล้วแก้ไขไม่ได้: หากมีข้อผิดพลาดหรือมีการคืนเงิน ให้ออกใบลดหนี้ด้วยเครื่องมือบัญชีของคุณ</li><li>มีคำถามไหม ดูคำถามที่พบบ่อยในแท็บความช่วยเหลือ</li></ol>
+  
+</section>
+  <footer>มีคำถามอื่นไหม ส่งอีเมลถึงเราที่ <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a></footer>
+</main>
+
+</body>
+</html>

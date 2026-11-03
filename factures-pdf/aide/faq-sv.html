@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Vanliga frågor</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><a href="guide-sv.html">Användarguide</a><span aria-current="page">Vanliga frågor</span></nav></div>
+  <h1>Vanliga frågor</h1>
+  <div class="langs"><a href="faq-fr.html" hreflang="fr">Français</a> · <a href="faq-en.html" hreflang="en">English</a> · <a href="faq-de.html" hreflang="de">Deutsch</a> · <a href="faq-es.html" hreflang="es">Español</a> · <a href="faq-it.html" hreflang="it">Italiano</a> · <a href="faq-nl.html" hreflang="nl">Nederlands</a> · <a href="faq-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="faq-cs.html" hreflang="cs">Čeština</a> · <a href="faq-da.html" hreflang="da">Dansk</a> · <a href="faq-fi.html" hreflang="fi">Suomi</a> · <a href="faq-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="faq-pl.html" hreflang="pl">Polski</a> · <a href="faq-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <strong>Svenska</strong> · <a href="faq-tr.html" hreflang="tr">Türkçe</a> · <a href="faq-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="faq-hi.html" hreflang="hi">हिन्दी</a> · <a href="faq-th.html" hreflang="th">ไทย</a> · <a href="faq-ja.html" hreflang="ja">日本語</a> · <a href="faq-ko.html" hreflang="ko">한국어</a> · <a href="faq-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="faq-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <input type="search" id="q" placeholder="Sök efter en fråga …" aria-label="Sök efter en fråga …">
+  <div id="faq"><section><h2>Kom igång</h2><details><summary>Hur kommer jag igång?</summary><p>Öppna fliken Inställningar, fyll i ditt företags uppgifter (namn, adress, organisationsnummer och momsregistreringsnummer) och spara. Klart: från och med nästa beställning skapas fakturan och skickas automatiskt till kunden via e-post. Använd knappen ”Förhandsgranska PDF” för att se hur den ser ut.</p></details><details><summary>Kan mina företagsuppgifter fyllas i automatiskt?</summary><p>Ja. Vid installationen hämtar appen butikens namn, juridiska adress, e-post och telefon från Shopify. Shopify känner inte till ditt organisationsnummer eller momsregistreringsnummer: för franska företag kan du under Inställningar › Automatisk ifyllning ange ditt SIRET eller företagsnamn för att fylla i resten från det officiella företagsregistret. Kontrollera och spara.</p></details><details><summary>När skapas fakturan?</summary><p>Som standard så snart beställningen är betald (omedelbart vid kortbetalning). Du kan välja att skapa den så snart beställningen har lagts, men en beställning som avbryts i efterhand kräver då en kreditfaktura.</p></details><details><summary>Får min kund fakturan automatiskt?</summary><p>Ja: kunden får ett e-postmeddelande med fakturan bifogad som PDF. Det skickas för din butiks räkning, och svar går till ditt företags e-postadress. Du kan stänga av automatiskt utskick i inställningarna.</p></details><details><summary>Varför finns fakturan inte i Shopifys orderbekräftelse?</summary><p>Shopify låter inte appar bifoga filer i eller ändra Shopifys egna e-postmeddelanden. För att bara skicka ett enda e-postmeddelande finns två alternativ: knappen ”Ladda ner faktura” på ordersidan (kunden klickar på ”Visa din beställning” i Shopifys e-postmeddelande; ingen kod, 3 klick för att aktivera den en gång), eller en länk direkt i bekräftelsemejlet (klistra in en kod en gång). Appens inställningar guidar dig steg för steg.</p></details><details><summary>Hur får jag en kopia av mina fakturor?</summary><p>Markera ”Skicka mig en kopia av varje faktura”: varje faktura skickas då även till ditt företags e-postadress. Alla fakturor kan dessutom laddas ner från fliken Start.</p></details></section><section><h2>Fakturor och lagkrav</h2><details><summary>Uppfyller mina fakturor kraven?</summary><p>Fakturorna innehåller de uppgifter som krävs i Frankrike och EU: unikt nummer, datum, säljarens identitet och organisationsnummer, momsregistreringsnummer, artikeluppgifter, momssatser och momsbelopp, summor samt villkor vid försenad betalning. Fyll i alla dina företagsuppgifter och låt din redovisningskonsult, som känner till din situation, granska mallen.</p></details><details><summary>Hur fungerar numreringen?</summary><p>Numren följer på varandra utan luckor eller dubbletter (t.ex. F-2026-00001, F-2026-00002 …), som lagen kräver. Om du redan har utfärdat fakturor anger du nästa nummer i inställningarna: det kan ökas men aldrig minskas.</p></details><details><summary>Jag har ett småföretag som inte tar ut moms.</summary><p>Markera alternativet för momsbefrielse i inställningarna: momsen försvinner från fakturan och den franska lagstadgade texten « TVA non applicable, art. 293 B du CGI » läggs till. Kontrollera också att Shopify inte tar ut skatt av dina kunder (Inställningar › Skatter och tullavgifter).</p></details><details><summary>Kan jag ändra eller radera en faktura?</summary><p>Nej: en utfärdad faktura får aldrig ändras, det är ett lagkrav. Om den innehåller ett fel eller beställningen återbetalas måste en kreditfaktura utfärdas. Automatiska kreditfakturor kommer i en framtida version; till dess kan du skapa den i ditt bokföringsprogram.</p></details><details><summary>Hur länge sparas mina fakturor?</summary><p>De finns tillgängliga i appen så länge den är installerad. Fransk lag kräver att de sparas i 10 år: behåll kopian du får via e-post eller ladda ner dem regelbundet. Om du avinstallerar appen ber Shopify oss att radera dina data 48 timmar senare.</p></details></section><section><h2>Factur-X och e-fakturering</h2><details><summary>Vad är Factur-X?</summary><p>Det är en PDF som även innehåller fakturadata i en fil som bokföringsprogram kan läsa. Formatet godtas av plattformarna för e-fakturering, som blir obligatoriska mellan företag i Frankrike: alla måste kunna ta emot e-fakturor från september 2026, och utfärda dem från september 2026 (stora och medelstora företag) eller september 2027 (små och medelstora företag samt mikroföretag). Försäljning till konsumenter omfattas inte av denna skyldighet. Dina kunder ser en vanlig PDF: inget ändras för dem.</p></details><details><summary>Varför står det ”Factur-X är pausat”?</summary><p>En uppgift som Factur-X kräver saknas och visas bredvid meddelandet (ofta momsregistreringsnumret eller landet). Fyll i den och spara: nästa fakturor blir i Factur-X-format. Under tiden skapas de som vanliga PDF-filer.</p></details></section><section><h2>Språk</h2><details><summary>Vilket språk är fakturor och e-post på?</summary><p>På kundens språk, om fakturor finns på det språket: franska, engelska, tyska, spanska, italienska, nederländska, brasiliansk portugisiska, tjeckiska, danska, finska, norskt bokmål, polska, europeisk portugisiska, svenska, turkiska och malajiska. Annars på det reservspråk du väljer. Du kan också bestämma ett språk för alla fakturor. Själva appen finns på 22 språk.</p></details><details><summary>Kan jag anpassa texterna?</summary><p>Ja: e-postmeddelandets ämne och text, den lagstadgade informationen längst ner på fakturan och tackmeddelandet. Lämnas de tomma översätts de automatiskt till fakturans språk; en egen text används som den är, oavsett språk.</p></details></section><section><h2>Abonnemang och betalning</h2><details><summary>Vad kostar det?</summary><p>Gratisabonnemanget omfattar 10 fakturor per månad. Abonnemanget Bas (7,90 US$ per månad) omfattar 200, och abonnemanget Obegränsat (12,90 US$ per månad) har ingen gräns. Betalda abonnemang har 7 dagars kostnadsfri provperiod och debiteras av Shopify, tillsammans med ditt Shopify-abonnemang.</p></details><details><summary>Vad händer när jag når månadsgränsen?</summary><p>Nya beställningar sätts i kö och du meddelas via e-post. Så snart du uppgraderar, eller i början av nästa månad, klickar du på ”Generera deras fakturor”: ingen beställning går förlorad. Räknaren nollställs den 1:a varje månad.</p></details><details><summary>Hur byter jag abonnemang eller säger upp?</summary><p>I fliken Abonnemang: välj ett abonnemang och godkänn det på Shopify-sidan, eller klicka på ”Säg upp” för att gå tillbaka till gratisabonnemanget. Om du avinstallerar appen avslutas även abonnemanget.</p></details></section><section><h2>Felsökning</h2><details><summary>En kund har inte fått sin faktura.</summary><p>Titta på kolumnen E-post i fliken Start: ”Misslyckades” betyder att ett problem uppstod (håll muspekaren över för detaljer). Kontrollera kundens adress och be kunden titta i skräpposten, och klicka sedan på ”Skicka igen”. Du kan också ladda ner PDF:en och skicka den själv.</p></details><details><summary>Min logotyp visas inte.</summary><p>Logotypen måste vara en PNG- eller JPEG-bild som är tillgänglig via https. Enklast är att ladda upp den till Shopify (Innehåll › Filer), kopiera länken och klistra in den i inställningarna. Använd förhandsgranskningen för att kontrollera.</p></details><details><summary>Vad händer med mina och mina kunders data?</summary><p>Appen läser dina beställningar utan att kunna ändra dem och sparar bara det som fakturan behöver (kundens namn, adress, e-post och artiklar). Uppgifterna säljs eller delas aldrig. Begäran om radering som skickas av Shopify (GDPR) hanteras automatiskt.</p></details><details><summary>Hur kontaktar jag supporten?</summary><p>Skriv till oss på hoshi.technologies@gmail.com och ange namnet på din butik. Vi svarar vanligtvis inom en arbetsdag.</p></details></section></div>
+  <p class="empty" id="empty" hidden>Ingen fråga matchar din sökning.</p>
+  <footer>Har du en annan fråga? Skriv till oss på <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>.</footer>
+</main>
+<script>
+  const q = document.getElementById('q');
+  const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  q.addEventListener('input', () => {
+    const words = norm(q.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of document.querySelectorAll('details')) {
+      const hit = words.every((w) => norm(d.textContent).includes(w));
+      d.hidden = !hit;
+      d.open = hit && words.length > 0;
+      shown += hit;
+    }
+    for (const s of document.querySelectorAll('#faq section')) s.hidden = !s.querySelector('details:not([hidden])');
+    document.getElementById('empty').hidden = shown > 0;
+  });
+</script>
+</body>
+</html>

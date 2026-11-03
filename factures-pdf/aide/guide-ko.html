@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – 사용자 가이드</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">사용자 가이드</span><a href="faq-ko.html">자주 묻는 질문</a></nav></div>
+  <h1>사용자 가이드</h1>
+  <p class="lead">앱 사용에 필요한 모든 내용을 단계별로 안내합니다.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <strong>한국어</strong> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">인쇄 또는 PDF로 저장</button></p>
+  <section class="card"><h2>목차</h2><ol class="toc"><li><a href="#install">앱 설치하기</a></li><li><a href="#company">비즈니스 정보 입력하기</a></li><li><a href="#look">인보이스 사용자 지정 및 확인하기</a></li><li><a href="#sending">인보이스 발송 시점 및 방법 선택하기</a></li><li><a href="#shopify-link">Shopify 주문 확인 이메일에 인보이스 링크 추가하기(선택 사항)</a></li><li><a href="#daily">인보이스 일상적으로 관리하기</a></li><li><a href="#numbering">번호 및 언어</a></li><li><a href="#facturx">Factur-X: 전자 인보이스</a></li><li><a href="#billing">요금제 관리하기</a></li><li><a href="#best-practices">권장 사항</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>앱 설치하기</span></h2>
+  <p>설치는 1분이면 끝나며, 스토어나 주문은 변경되지 않습니다.</p>
+  <ol class="steps"><li>Shopify App Store에서 앱 페이지를 열고 “설치”를 클릭하세요.</li><li>주문에 대한 액세스를 허용하세요. 앱은 인보이스를 생성하기 위해 주문을 읽으며, 주문에는 인보이스 링크라는 한 가지 정보만 저장합니다. 그 외에는 아무것도 변경하지 않습니다.</li><li>앱은 Shopify 관리자의 앱 › Hoshi Factures에서 열립니다. 스토어 이름, 주소, 이메일은 이미 입력되어 있습니다.</li><li>홈 탭에서 “시작하기” 목록을 따라 진행하세요. 세 단계를 모두 마치면 목록이 사라집니다.</li></ol>
+  <div class="tip"><b>팁:</b> 무료 요금제(월 10건의 인보이스)로 시작하며, 신용카드는 필요하지 않습니다.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>비즈니스 정보 입력하기</span></h2>
+  <p>이 정보는 모든 인보이스에 표시됩니다. 유효한 인보이스를 위해 반드시 필요합니다.</p>
+  <ol class="steps"><li>설정 탭에서 “비즈니스 정보” 카드를 여세요.</li><li>가장 빠른 방법(프랑스 회사): “자동 입력”에 SIRET(또는 회사명과 도시)을 입력하고 “검색”, “사용”을 차례로 클릭하세요. 회사명, 본사 주소, SIRET, 법인 형태, VAT 번호를 공식 등록부에서 가져옵니다. “Shopify 정보 사용”을 클릭할 수도 있습니다.</li><li>회사명과 이메일을 확인하세요. 고객의 회신이 이 주소로 오며, 인보이스 사본도 이 주소로 받게 됩니다.</li><li>주소를 여러 줄로 입력하되, 우편번호와 도시는 같은 줄에 입력한 후(예: “69002 Lyon”) 국가를 선택하세요.</li><li>사업자 등록번호(프랑스에서는 SIRET)와 VAT 번호를 입력하세요.</li><li>부가가치세 면세 소규모 사업자: 부가가치세 면세 옵션을 선택하세요. 인보이스에서 부가가치세가 사라지고 법적 고지가 추가됩니다.</li><li>“추가 비즈니스 정보”를 열어 법인 형태 및 자본금, 상업 등기부, 전화번호, 웹사이트, 판매 품목(재화, 서비스 또는 둘 다)을 입력하세요.</li><li>화면 하단에 나타나는 바에서 “저장”을 클릭하세요.</li></ol>
+  <div class="tip"><b>팁:</b> 첫 인보이스를 담당 회계사에게 확인받으세요. 회계사는 귀하의 비즈니스에 해당하는 기재 사항을 잘 알고 있습니다.</div><div class="tip"><b>팁:</b> 부가가치세 면세 사업자라면 Shopify가 고객에게 세금을 부과하지 않는지도 확인하세요(설정 › 세금 및 관세).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>인보이스 사용자 지정 및 확인하기</span></h2>
+  <p>인보이스에 브랜드의 개성을 입힌 후, 첫 주문 전에 결과를 확인하세요.</p>
+  <ol class="steps"><li>Shopify에서 콘텐츠 › 파일을 열고 로고(PNG 또는 JPEG)를 업로드한 후 링크를 복사하세요.</li><li>설정 › 디자인에서 “로고 URL”에 링크를 붙여넣고 기본 색상을 선택하세요.</li><li>필요하면 법적 고지와 감사 메시지를 수정하세요. 비워 두면 고객의 언어로 자동 번역됩니다.</li><li>“PDF 미리보기”를 클릭하세요. 저장하지 않은 설정을 포함한 현재 설정으로 샘플 인보이스가 다운로드됩니다.</li><li>결과가 마음에 들면 저장하세요.</li></ol>
+  <div class="tip"><b>팁:</b> 설정은 이후 인보이스에만 적용됩니다. 이미 발행된 인보이스는 절대 변경되지 않습니다.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>인보이스 발송 시점 및 방법 선택하기</span></h2>
+  <p>기본적으로 인보이스는 주문 결제 시 생성되어 즉시 고객에게 이메일로 발송됩니다.</p>
+  <ol class="steps"><li>설정 › 작동 방식에서 인보이스 생성 시점을 선택하세요: 주문 결제가 완료되었을 때(권장) 또는 주문이 접수되는 즉시.</li><li>“고객이 인보이스를 받는 방법”에서 다음 중 하나를 선택하세요: PDF가 첨부된 이메일(권장, 설정 불필요), 주문 페이지에 “인보이스 다운로드” 버튼이 표시되는 이메일 한 통(코드 불필요: 3번 클릭으로 활성화), 또는 Shopify 확인 이메일에 바로 링크가 표시되는 이메일 한 통(최초 1회 코드 붙여넣기). 설정에서 단계별로 안내해 드립니다.</li><li>“모든 인보이스의 사본을 나에게도 발송”을 선택하면 각 인보이스를 받아 보관 자료를 만들 수 있습니다.</li><li>이메일을 사용자 지정하려면 “고객에게 보내는 이메일”을 여세요. 제목과 메시지에는 {{first_name}}, {{name}}, {{invoice_number}}, {{order}}, {{shop}} 변수를 사용할 수 있습니다.</li></ol>
+  <div class="tip"><b>팁:</b> Shopify는 자체 이메일에 첨부 파일을 허용하지 않습니다. 인보이스는 스토어 이름으로 발송되는 별도의 이메일로 전달됩니다.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Shopify 주문 확인 이메일에 인보이스 링크 추가하기(선택 사항)</span></h2>
+  <p>고객은 스토어의 일반 확인 이메일에서도 인보이스를 받을 수 있습니다.</p>
+  <ol class="steps"><li>설정에서 “Shopify 주문 확인 이메일의 링크”를 열고 “코드 복사”를 클릭하세요.</li><li>Shopify에서 설정 › 알림 › 고객 알림 › 주문 확인으로 이동한 후 “코드 편집”을 클릭하세요.</li><li>버튼이 표시될 위치(예: 주문 요약 바로 다음)에 코드를 붙여넣으세요.</li><li>“미리보기”를 클릭하여 확인한 후 “저장”을 클릭하세요.</li></ol>
+  <div class="tip"><b>팁:</b> 고객이 결제 전에 클릭하면, 인보이스가 몇 분 후에 제공된다는 안내 페이지가 표시됩니다.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>인보이스 일상적으로 관리하기</span></h2>
+  <p>홈 탭에는 최근 인보이스가 발송 상태와 함께 표시됩니다.</p>
+  <ol class="steps"><li>각 행에는 번호, 주문, 고객, 날짜, 합계, 이메일 상태가 표시됩니다.</li><li>“발송됨”: 고객이 인보이스를 받았습니다. “발송 안 됨”: 자동 발송이 꺼져 있습니다. “실패”: 상태에 마우스를 올리면 원인을 확인할 수 있습니다.</li><li>“PDF”를 클릭하면 인보이스를 다운로드할 수 있고, “재발송”을 클릭하면 고객에게 다시 보낼 수 있습니다.</li><li>Factur-X 배지는 인보이스에 전자 인보이스용 데이터도 포함되어 있음을 의미합니다.</li></ol>
+  <div class="tip"><b>팁:</b> 발송에 실패한 경우 Shopify 주문에서 고객의 이메일 주소를 확인하고 스팸함을 확인해 달라고 요청하세요.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>번호 및 언어</span></h2>
+  <p>법에서 요구하는 대로 번호는 누락 없이 연속으로 매겨지며, 각 고객은 자신의 언어로 인보이스를 받습니다.</p>
+  <ol class="steps"><li>설정 › 번호 및 언어에서 번호 접두사를 선택하세요(기본값 “F-”, 즉 F-2026-00001).</li><li>이미 다른 도구로 인보이스를 발행한 적이 있다면 다음 번호를 지정하세요. 번호는 늘릴 수 있지만 줄일 수는 없습니다.</li><li>인보이스 언어를 선택하세요: 고객의 언어(프랑스어, 영어, 독일어, 스페인어, 이탈리아어, 네덜란드어, 포르투갈어(브라질), 체코어, 덴마크어, 핀란드어, 노르웨이어(보크말), 폴란드어, 포르투갈어(유럽), 스웨덴어, 튀르키예어 및 말레이어) 또는 하나의 고정 언어.</li><li>“고객의 언어”를 선택한 경우, 고객의 언어를 사용할 수 없을 때 사용할 대체 언어도 선택하세요.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: 전자 인보이스</span></h2>
+  <p>Factur-X를 사용하면 PDF에 인보이스 데이터도 포함되어 회계 소프트웨어와 전자 인보이스 플랫폼에서 읽을 수 있습니다. 프랑스에서는 2026~2027년부터 기업 간 거래에 전자 인보이스가 의무화됩니다.</p>
+  <ol class="steps"><li>설정 › Factur-X를 여세요. 이 옵션은 기본적으로 켜져 있습니다.</li><li>“Factur-X 일시 중지됨”이 표시되면 누락된 정보(주로 주소, 국가 또는 VAT 번호)를 입력하고 저장하세요.</li><li>표시기가 ✓로 바뀌면 이후의 모든 인보이스가 Factur-X 형식으로 생성되며, 고객에게는 달라지는 점이 없습니다.</li></ol>
+  <div class="tip"><b>팁:</b> 담당 회계사가 이 인보이스를 회계 소프트웨어로 바로 가져올 수 있습니다.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>요금제 관리하기</span></h2>
+  <p>무료 요금제: 월 10건의 인보이스. 에센셜: 월 US$7.90에 200건의 인보이스. 무제한: 월 US$12.90. 유료 요금제는 7일 무료 체험이 제공됩니다.</p>
+  <ol class="steps"><li>요금제 탭(및 홈)에 이번 달 사용한 인보이스 수가 표시됩니다. 카운터는 매월 1일에 초기화됩니다.</li><li>요금제를 변경하려면 “선택”을 클릭한 후 Shopify 페이지에서 승인하세요. 요금은 Shopify 청구서에 추가됩니다.</li><li>한도에 도달하면 새 주문은 보류되며 이메일로 알림을 받게 됩니다. 업그레이드한 후 홈에서 “인보이스 생성”을 클릭하세요.</li><li>무료 요금제로 돌아가려면 “해지”를 클릭하세요.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>권장 사항</span></h2>
+  <p>걱정 없는 회계 관리를 위한 몇 가지 습관입니다.</p>
+  <ol class="steps"><li>설정을 마친 후 테스트 주문을 넣고(Shopify Payments 테스트 모드 사용) 받은 인보이스를 확인하세요.</li><li>인보이스는 10년간 보관하세요. 이메일 사본을 보관하거나 매월 다운로드하세요. 앱을 제거하면 48시간 후에 인보이스가 앱에서 삭제됩니다.</li><li>발행된 인보이스는 변경할 수 없습니다. 오류나 환불이 있는 경우 회계 도구로 대변 메모를 발행하세요.</li><li>궁금한 점이 있으신가요? 도움말 탭의 FAQ를 확인하세요.</li></ol>
+  
+</section>
+  <footer>다른 질문이 있으신가요? <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>(으)로 이메일을 보내 주세요.</footer>
+</main>
+
+</body>
+</html>

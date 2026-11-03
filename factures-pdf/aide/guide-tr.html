@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Kullanım kılavuzu</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">Kullanım kılavuzu</span><a href="faq-tr.html">Sıkça sorulan sorular</a></nav></div>
+  <h1>Kullanım kılavuzu</h1>
+  <p class="lead">Uygulamayı kullanmak için bilmeniz gereken her şey, adım adım.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <strong>Türkçe</strong> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">Yazdır veya PDF olarak kaydet</button></p>
+  <section class="card"><h2>İçindekiler</h2><ol class="toc"><li><a href="#install">Uygulamayı yükleyin</a></li><li><a href="#company">İşletme bilgilerinizi girin</a></li><li><a href="#look">Faturayı özelleştirin ve kontrol edin</a></li><li><a href="#sending">Faturaların ne zaman ve nasıl gönderileceğini seçin</a></li><li><a href="#shopify-link">Fatura bağlantısını Shopify sipariş onayına ekleyin (isteğe bağlı)</a></li><li><a href="#daily">Faturalarınızı günlük olarak takip edin</a></li><li><a href="#numbering">Numaralandırma ve diller</a></li><li><a href="#facturx">Factur-X: e-fatura</a></li><li><a href="#billing">Aboneliğinizi yönetin</a></li><li><a href="#best-practices">İyi uygulamalar</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Uygulamayı yükleyin</span></h2>
+  <p>Kurulum bir dakika sürer ve ne mağazanızı ne de siparişlerinizi değiştirir.</p>
+  <ol class="steps"><li>Shopify App Store&#39;da uygulamanın sayfasını açın ve “Yükle”ye tıklayın.</li><li>Siparişlerinize erişim izni verin: uygulama, faturaları oluşturmak için siparişleri okur ve bunlara yalnızca tek bir bilgi, fatura bağlantısını kaydeder. Başka hiçbir şeyi değiştirmez.</li><li>Uygulama, Shopify yöneticinizde Uygulamalar › Hoshi Factures altında açılır. Mağazanızın adı, adresi ve e-posta adresi önceden doldurulmuştur.</li><li>Ana sayfa sekmesinde “Başlarken” listesini izleyin: üç adım tamamlandığında liste kaybolur.</li></ol>
+  <div class="tip"><b>İpucu:</b> Kredi kartı gerekmeden Ücretsiz planla (ayda 10 fatura) başlarsınız.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>İşletme bilgilerinizi girin</span></h2>
+  <p>Bu bilgiler her faturada yer alır. Geçerli bir fatura için zorunludur.</p>
+  <ol class="steps"><li>Ayarlar sekmesini açın, “İşletmeniz” kartına gidin.</li><li>En hızlı yol (Fransız şirketleri): “Otomatik doldurma” bölümünde SIRET&#39;inizi (veya şirket adını ve şehri) yazın, “Ara”ya ve ardından “Kullan”a tıklayın. Ticari unvan, merkez adresi, SIRET, hukuki yapı ve KDV numarası resmî sicilden alınır. “Shopify bilgilerini kullan”a da tıklayabilirsiniz.</li><li>Ticari unvanı ve e-posta adresini kontrol edin: müşterileriniz bu adrese yanıt verir ve fatura kopyalarını bu adreste alırsınız.</li><li>Adresi birkaç satır hâlinde, posta kodu ve şehir aynı satırda olacak şekilde girin (ör. “69002 Lyon”), ardından ülkeyi seçin.</li><li>SIRET&#39;i ve AB KDV numarasını girin.</li><li>KDV&#39;den muaf küçük işletme: KDV muafiyeti seçeneğini işaretleyin. KDV faturalardan kalkar ve yasal ibare eklenir.</li><li>Hukuki yapı ve sermaye, ticaret sicili, telefon, web sitesi ve satış türü (mallar, hizmetler veya her ikisi) için “Ek bilgiler”i açın.</li><li>Ekranın altında beliren çubukta “Kaydet”e tıklayın.</li></ol>
+  <div class="tip"><b>İpucu:</b> İlk faturayı mali müşavirinize onaylatın: faaliyetinize özgü zorunlu bilgileri bilir.</div><div class="tip"><b>İpucu:</b> KDV&#39;den muafsanız Shopify&#39;ın müşterilerinizden vergi almadığından da emin olun (Ayarlar › Vergiler ve gümrük vergileri).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Faturayı özelleştirin ve kontrol edin</span></h2>
+  <p>Faturalarınıza markanızın görünümünü verin, ardından sonucu ilk siparişten önce kontrol edin.</p>
+  <ol class="steps"><li>Shopify&#39;da İçerik › Dosyalar&#39;ı açın, logonuzu (PNG veya JPEG) yükleyin ve bağlantısını kopyalayın.</li><li>Ayarlar › Görünüm bölümünde bu bağlantıyı “Logo URL&#39;si” alanına yapıştırın ve ana rengi seçin.</li><li>Gerekirse faturanın altındaki yasal bilgileri ve teşekkür mesajını düzenleyin. Boş bırakılırsa otomatik olarak müşterinin diline çevrilir.</li><li>“PDF önizlemesi”ne tıklayın: ayarlarınızla, kaydedilmemiş olsalar bile, örnek bir fatura indirilir.</li><li>Sonuçtan memnun kaldığınızda kaydedin.</li></ol>
+  <div class="tip"><b>İpucu:</b> Ayarlar yalnızca sonraki faturalara uygulanır: düzenlenmiş bir fatura asla değişmez.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Faturaların ne zaman ve nasıl gönderileceğini seçin</span></h2>
+  <p>Varsayılan olarak fatura, sipariş ödendiğinde oluşturulur ve hemen müşteriye e-postayla gönderilir.</p>
+  <ol class="steps"><li>Ayarlar › İşleyiş bölümünde faturanın ne zaman oluşturulacağını seçin: sipariş ödendiğinde (önerilen) veya sipariş verilir verilmez.</li><li>“Müşterileriniz faturalarını nasıl alır” bölümünde şunlardan birini seçin: PDF&#39;nin ekli olduğu bir e-posta (önerilen, ayar gerekmez); sipariş sayfasında “Faturamı indir” düğmesi bulunan tek bir e-posta (kod gerekmez: etkinleştirmek için 3 tıklama); veya bağlantının doğrudan Shopify onayında yer aldığı tek bir e-posta (bir kez yapıştırılacak bir kod). Ayarlar size adım adım yol gösterir.</li><li>Her faturayı almak ve arşivinizi oluşturmak için “Her faturanın bir kopyasını bana gönder” seçeneğini işaretleyin.</li><li>E-postayı özelleştirmek için “Müşteriye gönderilen e-posta”yı açın: konu ve mesajda {{first_name}}, {{name}}, {{invoice_number}}, {{order}} ve {{shop}} değişkenleri kullanılabilir.</li></ol>
+  <div class="tip"><b>İpucu:</b> Shopify kendi e-postalarında eke izin vermez: fatura, mağazanız adına gönderilen ayrı bir e-postayla gider.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Fatura bağlantısını Shopify sipariş onayına ekleyin (isteğe bağlı)</span></h2>
+  <p>Müşterileriniz faturalarına mağazanızın her zamanki onay e-postasından da ulaşabilir.</p>
+  <ol class="steps"><li>Ayarlar&#39;da “Shopify onay e-postasındaki bağlantı” bölümünü açın ve “Kodu kopyala”ya tıklayın.</li><li>Shopify&#39;da Ayarlar › Bildirimler › Müşteri bildirimleri › Sipariş onayı&#39;na gidin, ardından “Kodu düzenle”ye tıklayın.</li><li>Kodu, düğmenin görünmesini istediğiniz yere yapıştırın; örneğin sipariş özetinin hemen arkasına.</li><li>Kontrol etmek için “Önizle”ye, ardından “Kaydet”e tıklayın.</li></ol>
+  <div class="tip"><b>İpucu:</b> Müşteri ödemeden önce tıklarsa, bir sayfa faturanın birkaç dakika içinde hazır olacağını bildirir.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Faturalarınızı günlük olarak takip edin</span></h2>
+  <p>Ana sayfa sekmesi, son düzenlenen faturaları gönderim durumlarıyla birlikte listeler.</p>
+  <ol class="steps"><li>Her satırda numara, sipariş, müşteri, tarih, toplam ve e-posta durumu gösterilir.</li><li>“Gönderildi”: müşteri faturayı aldı. “Gönderilmedi”: otomatik gönderim kapalı. “Başarısız”: nedenini görmek için fareyle durumun üzerine gelin.</li><li>Bir faturayı indirmek için “PDF”ye, müşteriye yeniden göndermek için “Yeniden gönder”e tıklayın.</li><li>Factur-X rozeti, faturanın e-fatura verilerini de içerdiğini gösterir.</li></ol>
+  <div class="tip"><b>İpucu:</b> Gönderim başarısız olursa Shopify siparişindeki müşteri adresini kontrol edin ve müşteriden spam klasörüne bakmasını isteyin.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Numaralandırma ve diller</span></h2>
+  <p>Numaralar, yasanın gerektirdiği şekilde boşluksuz birbirini izler ve her müşteri faturasını kendi dilinde alır.</p>
+  <ol class="steps"><li>Ayarlar › Numaralandırma ve dil bölümünde numara ön ekini seçin (varsayılan “F-”, yani F-2026-00001).</li><li>Daha önce başka bir araçla fatura düzenlediyseniz sonraki numarayı belirtin: numara artabilir ancak asla azalamaz.</li><li>Fatura dilini seçin: müşterinin dili (Fransızca, İngilizce, Almanca, İspanyolca, İtalyanca, Felemenkçe, Brezilya Portekizcesi, Çekçe, Danca, Fince, Norveççe Bokmål, Lehçe, Avrupa Portekizcesi, İsveççe, Türkçe ve Malayca) veya tek bir sabit dil.</li><li>“Müşterinin dili” seçeneğiyle, müşterinin dili mevcut olmadığında kullanılacak yedek dili de seçin.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: e-fatura</span></h2>
+  <p>Factur-X ile PDF, fatura verilerini de içerir; bu veriler muhasebe yazılımlarınca ve Fransa&#39;da 2026–2027&#39;den itibaren işletmeler arasında zorunlu hâle gelen e-fatura platformlarınca okunabilir.</p>
+  <ol class="steps"><li>Ayarlar › Factur-X&#39;i açın: seçenek varsayılan olarak etkindir.</li><li>“Factur-X duraklatıldı” mesajı görüntülenirse belirtilen bilgiyi (çoğu zaman adres, ülke veya KDV numarası) tamamlayın ve kaydedin.</li><li>Gösterge ✓ olduğunda sonraki tüm faturalar, müşterileriniz için hiçbir şey değişmeden Factur-X biçiminde olur.</li></ol>
+  <div class="tip"><b>İpucu:</b> Mali müşaviriniz bu faturaları doğrudan kendi yazılımına aktarabilir.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Aboneliğinizi yönetin</span></h2>
+  <p>Ücretsiz plan: ayda 10 fatura. Temel: ayda $7,90 karşılığında 200 fatura. Sınırsız: ayda $12,90. Ücretli planlarda 7 gün ücretsiz deneme.</p>
+  <ol class="steps"><li>Abonelik sekmesi (ve Ana sayfa) bu ay kullanılan fatura sayısını gösterir. Sayaç her ayın 1&#39;inde sıfırlanır.</li><li>Planı değiştirmek için “Seç”e tıklayın ve Shopify sayfasında onaylayın: tutar Shopify faturanıza eklenir.</li><li>Sınıra ulaşılırsa yeni siparişler beklemeye alınır ve e-postayla bilgilendirilirsiniz. Daha üst bir plana geçtikten sonra Ana sayfada “Faturalarını oluştur”a tıklayın.</li><li>Ücretsiz plana dönmek için “İptal et”e tıklayın.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>İyi uygulamalar</span></h2>
+  <p>Muhasebenizde içiniz rahat olsun diye birkaç alışkanlık.</p>
+  <ol class="steps"><li>Kurulumdan sonra bir test siparişi verin (Shopify Payments test moduyla) ve gelen faturayı kontrol edin.</li><li>Faturalarınızı 10 yıl saklayın: e-postayla gelen kopyayı saklayın veya faturaları her ay indirin. Faturalar, uygulama kaldırıldıktan 48 saat sonra uygulamadan silinir.</li><li>Düzenlenmiş bir fatura değiştirilemez: hata veya iade durumunda muhasebe aracınızla bir iade faturası düzenleyin.</li><li>Bir sorunuz mu var? Yardım sekmesindeki SSS&#39;ye göz atın.</li></ol>
+  
+</section>
+  <footer>Başka bir sorunuz mu var? <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a> adresinden bize yazın.</footer>
+</main>
+
+</body>
+</html>

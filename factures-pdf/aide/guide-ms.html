@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Panduan pengguna</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">Panduan pengguna</span><a href="faq-ms.html">Soalan lazim</a></nav></div>
+  <h1>Panduan pengguna</h1>
+  <p class="lead">Semua yang perlu anda ketahui untuk menggunakan apl ini, langkah demi langkah.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <strong>Bahasa Melayu</strong> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">Cetak atau simpan sebagai PDF</button></p>
+  <section class="card"><h2>Kandungan</h2><ol class="toc"><li><a href="#install">Pasang apl</a></li><li><a href="#company">Masukkan butiran perniagaan anda</a></li><li><a href="#look">Sesuaikan dan semak invois</a></li><li><a href="#sending">Pilih bila dan cara invois dihantar</a></li><li><a href="#shopify-link">Tambah pautan invois pada pengesahan pesanan Shopify (pilihan)</a></li><li><a href="#daily">Jejaki invois anda setiap hari</a></li><li><a href="#numbering">Penomboran dan bahasa</a></li><li><a href="#facturx">Factur-X: e-invois</a></li><li><a href="#billing">Urus langganan anda</a></li><li><a href="#best-practices">Amalan baik</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Pasang apl</span></h2>
+  <p>Pemasangan mengambil masa seminit dan tidak mengubah kedai mahupun pesanan anda.</p>
+  <ol class="steps"><li>Di Shopify App Store, buka halaman apl dan klik “Pasang”.</li><li>Benarkan akses kepada pesanan anda: apl membacanya untuk membuat invois dan hanya merekodkan satu maklumat padanya, iaitu pautan invois. Apl tidak mengubah apa-apa yang lain.</li><li>Apl dibuka dalam pentadbir Shopify anda, di bawah Apl › Hoshi Factures. Nama, alamat dan e-mel kedai anda sudah pun diisikan.</li><li>Pada tab Laman utama, ikuti senarai “Bermula”: senarai itu hilang setelah ketiga-tiga langkah selesai.</li></ol>
+  <div class="tip"><b>Petua:</b> Anda bermula dengan pelan Percuma (10 invois sebulan), tanpa kad kredit.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Masukkan butiran perniagaan anda</span></h2>
+  <p>Butiran ini dipaparkan pada setiap invois. Ia wajib untuk invois yang sah.</p>
+  <ol class="steps"><li>Buka tab Tetapan, kad “Perniagaan anda”.</li><li>Cara paling pantas (syarikat Perancis): dalam “Isi automatik”, taipkan SIRET anda (atau nama syarikat dan bandar), klik “Cari” kemudian “Guna”. Nama syarikat, alamat ibu pejabat, SIRET, bentuk undang-undang dan nombor VAT diambil daripada daftar rasmi. Anda juga boleh klik “Guna butiran Shopify”.</li><li>Semak nama syarikat dan e-mel: pelanggan anda membalas ke alamat ini dan anda menerima salinan invois di sini.</li><li>Masukkan alamat dalam beberapa baris, dengan poskod dan bandar pada baris yang sama (cth. “69002 Lyon”), kemudian pilih negara.</li><li>Masukkan SIRET dan nombor VAT intra-EU.</li><li>Perniagaan kecil yang dikecualikan VAT: tandakan pilihan pengecualian VAT. VAT hilang daripada invois dan notis undang-undang ditambah.</li><li>Buka “Maklumat tambahan” untuk bentuk undang-undang dan modal saham, daftar perdagangan, telefon, laman web dan jenis jualan (barangan, perkhidmatan atau kedua-duanya).</li><li>Klik “Simpan” pada bar yang muncul di bahagian bawah skrin.</li></ol>
+  <div class="tip"><b>Petua:</b> Minta akauntan anda menyemak invois pertama: mereka mengetahui butiran khusus bagi perniagaan anda.</div><div class="tip"><b>Petua:</b> Jika anda dikecualikan VAT, pastikan juga Shopify tidak mengenakan cukai kepada pelanggan anda (Tetapan › Cukai dan duti).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Sesuaikan dan semak invois</span></h2>
+  <p>Berikan invois anda rupa jenama anda, kemudian semak hasilnya sebelum pesanan pertama.</p>
+  <ol class="steps"><li>Dalam Shopify, buka Kandungan › Fail, muat naik logo anda (PNG atau JPEG) dan salin pautannya.</li><li>Dalam Tetapan › Rupa, tampal pautan itu dalam “URL logo” dan pilih warna utama.</li><li>Jika perlu, edit notis undang-undang di bahagian bawah invois dan mesej terima kasih. Jika dibiarkan kosong, teks ini diterjemahkan secara automatik ke dalam bahasa pelanggan.</li><li>Klik “Pratonton PDF”: invois contoh dimuat turun dengan tetapan anda, walaupun tetapan itu belum disimpan.</li><li>Simpan apabila anda berpuas hati dengan hasilnya.</li></ol>
+  <div class="tip"><b>Petua:</b> Tetapan hanya terpakai pada invois seterusnya: invois yang telah dikeluarkan tidak sekali-kali berubah.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Pilih bila dan cara invois dihantar</span></h2>
+  <p>Secara lalai, invois dibuat apabila pesanan dibayar dan terus dihantar kepada pelanggan melalui e-mel.</p>
+  <ol class="steps"><li>Dalam Tetapan › Cara ia berfungsi, pilih bila invois dibuat: apabila pesanan dibayar (disyorkan) atau sebaik sahaja pesanan dibuat.</li><li>Di bawah “Cara pelanggan anda menerima invois”, pilih: e-mel dengan PDF dilampirkan (disyorkan, tiada persediaan); satu e-mel sahaja dengan butang “Muat turun invois saya” pada halaman pesanan (tanpa kod: 3 klik untuk mengaktifkannya); atau satu e-mel sahaja dengan pautan terus dalam pengesahan Shopify (kod untuk ditampal sekali). Tetapan membimbing anda langkah demi langkah.</li><li>Tandakan “Hantar salinan setiap invois kepada saya” untuk menerima setiap invois dan membina arkib anda.</li><li>Untuk menyesuaikan e-mel, buka “E-mel kepada pelanggan”: subjek dan mesej menerima pemboleh ubah {{first_name}}, {{name}}, {{invoice_number}}, {{order}} dan {{shop}}.</li></ol>
+  <div class="tip"><b>Petua:</b> Shopify tidak membenarkan lampiran dalam e-melnya sendiri: invois dihantar dalam e-mel berasingan, bagi pihak kedai anda.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Tambah pautan invois pada pengesahan pesanan Shopify (pilihan)</span></h2>
+  <p>Pelanggan anda juga boleh mendapatkan invois daripada e-mel pengesahan biasa kedai anda.</p>
+  <ol class="steps"><li>Dalam Tetapan, buka “Pautan dalam e-mel pengesahan Shopify” dan klik “Salin kod”.</li><li>Dalam Shopify, pergi ke Tetapan › Pemberitahuan › Pemberitahuan pelanggan › Pengesahan pesanan, kemudian “Edit kod”.</li><li>Tampal kod di tempat butang patut dipaparkan, contohnya betul-betul selepas ringkasan pesanan.</li><li>Klik “Pratonton” untuk menyemak, kemudian “Simpan”.</li></ol>
+  <div class="tip"><b>Petua:</b> Jika pelanggan klik sebelum pembayaran, satu halaman memaklumkan bahawa invois akan tersedia dalam beberapa minit.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Jejaki invois anda setiap hari</span></h2>
+  <p>Tab Laman utama menyenaraikan invois terkini yang dikeluarkan, berserta status penghantarannya.</p>
+  <ol class="steps"><li>Setiap baris menunjukkan nombor, pesanan, pelanggan, tarikh, jumlah dan status e-mel.</li><li>“Dihantar”: pelanggan telah menerima invois. “Tidak dihantar”: penghantaran automatik dimatikan. “Gagal”: halakan tetikus pada status untuk melihat puncanya.</li><li>Klik “PDF” untuk memuat turun invois, atau “Hantar semula” untuk menghantarnya sekali lagi kepada pelanggan.</li><li>Lencana Factur-X menunjukkan bahawa invois turut mengandungi data untuk e-invois.</li></ol>
+  <div class="tip"><b>Petua:</b> Jika penghantaran gagal, semak alamat pelanggan pada pesanan Shopify dan minta mereka melihat folder spam.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Penomboran dan bahasa</span></h2>
+  <p>Nombor mengikut turutan tanpa jurang, seperti yang dikehendaki oleh undang-undang, dan setiap pelanggan menerima invois dalam bahasanya.</p>
+  <ol class="steps"><li>Dalam Tetapan › Penomboran dan bahasa, pilih awalan nombor (lalai “F-”, iaitu F-2026-00001).</li><li>Jika anda sudah mengeluarkan invois dengan alat lain, tetapkan nombor seterusnya: nombor itu boleh dinaikkan tetapi tidak boleh diturunkan.</li><li>Pilih bahasa invois: bahasa pelanggan (Perancis, Inggeris, Jerman, Sepanyol, Itali, Belanda, Portugis Brazil, Czech, Denmark, Finland, Bokmal Norway, Poland, Portugis Eropah, Sweden, Turki dan Melayu) atau satu bahasa tetap.</li><li>Dengan “Bahasa pelanggan”, pilih juga bahasa sandaran yang digunakan jika bahasa pelanggan tidak tersedia.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: e-invois</span></h2>
+  <p>Dengan Factur-X, PDF turut mengandungi data invois, yang boleh dibaca oleh perisian perakaunan dan platform e-invois, yang menjadi wajib antara perniagaan di Perancis mulai 2026–2027.</p>
+  <ol class="steps"><li>Buka Tetapan › Factur-X: pilihan ini dihidupkan secara lalai.</li><li>Jika mesej “Factur-X dijeda” dipaparkan, lengkapkan butiran yang dinyatakan (selalunya alamat, negara atau nombor VAT) dan simpan.</li><li>Apabila penunjuk bertukar kepada ✓, semua invois seterusnya dalam format Factur-X, tanpa sebarang perubahan bagi pelanggan anda.</li></ol>
+  <div class="tip"><b>Petua:</b> Akauntan anda boleh mengimport invois ini terus ke dalam perisian mereka.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Urus langganan anda</span></h2>
+  <p>Pelan Percuma: 10 invois sebulan. Asas: 200 invois untuk USD 7.90 sebulan. Tanpa had: USD 12.90 sebulan. Percubaan percuma 7 hari bagi pelan berbayar.</p>
+  <ol class="steps"><li>Tab Langganan (dan Laman utama) menunjukkan bilangan invois yang digunakan bulan ini. Pembilang ditetapkan semula pada 1hb setiap bulan.</li><li>Untuk menukar pelan, klik “Pilih” kemudian sahkan pada halaman Shopify: amaun ditambah pada bil Shopify anda.</li><li>Jika had dicapai, pesanan baharu ditangguhkan dan anda dimaklumkan melalui e-mel. Selepas naik taraf, klik “Jana invoisnya” pada Laman utama.</li><li>Untuk kembali ke pelan Percuma, klik “Batalkan”.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Amalan baik</span></h2>
+  <p>Beberapa tabiat untuk memastikan perakaunan anda bebas tekanan.</p>
+  <ol class="steps"><li>Buat pesanan ujian selepas persediaan (menggunakan mod ujian Shopify Payments) dan semak invois yang anda terima.</li><li>Simpan invois anda selama 10 tahun: simpan salinan e-mel atau muat turun invois setiap bulan. Invois dipadamkan daripada apl 48 jam selepas penyahpasangan.</li><li>Invois yang telah dikeluarkan tidak boleh diubah: sekiranya terdapat kesilapan atau bayaran balik, keluarkan nota kredit dengan alat perakaunan anda.</li><li>Ada soalan? Rujuk Soalan Lazim dalam tab Bantuan.</li></ol>
+  
+</section>
+  <footer>Ada soalan lain? E-mel kami di <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>.</footer>
+</main>
+
+</body>
+</html>

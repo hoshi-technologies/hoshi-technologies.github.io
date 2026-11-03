@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Käyttöopas</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">Käyttöopas</span><a href="faq-fi.html">Usein kysytyt kysymykset</a></nav></div>
+  <h1>Käyttöopas</h1>
+  <p class="lead">Kaikki, mitä sinun tarvitsee tietää sovelluksen käytöstä, vaihe vaiheelta.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <strong>Suomi</strong> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">Tulosta tai tallenna PDF-muodossa</button></p>
+  <section class="card"><h2>Sisällys</h2><ol class="toc"><li><a href="#install">Asenna sovellus</a></li><li><a href="#company">Anna yrityksesi tiedot</a></li><li><a href="#look">Mukauta ja tarkista lasku</a></li><li><a href="#sending">Valitse, milloin ja miten laskut lähetetään</a></li><li><a href="#shopify-link">Lisää laskun linkki Shopifyn tilausvahvistukseen (valinnainen)</a></li><li><a href="#daily">Seuraa laskujasi päivittäin</a></li><li><a href="#numbering">Numerointi ja kielet</a></li><li><a href="#facturx">Factur-X: sähköinen laskutus</a></li><li><a href="#billing">Hallitse pakettiasi</a></li><li><a href="#best-practices">Hyvät käytännöt</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Asenna sovellus</span></h2>
+  <p>Asennus vie minuutin eikä muuta kauppaasi tai tilauksiasi.</p>
+  <ol class="steps"><li>Avaa sovelluksen sivu Shopify App Storessa ja napsauta ”Asenna”.</li><li>Hyväksy pääsy tilauksiisi: sovellus lukee niitä laskujen luomista varten ja tallentaa niihin vain yhden asian, laskun linkin. Se ei muuta mitään muuta.</li><li>Sovellus avautuu Shopify-hallintapaneelissasi kohdassa Sovellukset › Hoshi Factures. Kauppasi nimi, osoite ja sähköposti on jo täytetty.</li><li>Seuraa Etusivu-välilehdellä ”Aloitus”-luetteloa: se katoaa, kun kaikki kolme vaihetta on tehty.</li></ol>
+  <div class="tip"><b>Vinkki:</b> Aloitat Ilmainen-paketilla (10 laskua kuukaudessa), maksukorttia ei tarvita.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Anna yrityksesi tiedot</span></h2>
+  <p>Nämä tiedot näkyvät jokaisessa laskussa. Ne vaaditaan pätevään laskuun.</p>
+  <ol class="steps"><li>Avaa Asetukset-välilehti, kortti ”Yrityksesi”.</li><li>Nopein tapa (ranskalaiset yritykset): kirjoita kohtaan ”Automaattinen täyttö” SIRET-numerosi (tai yrityksen nimi ja kaupunki), napsauta ”Hae” ja sitten ”Käytä”. Toiminimi, pääkonttorin osoite, SIRET, yhtiömuoto ja ALV-tunniste haetaan virallisesta rekisteristä. Voit myös napsauttaa ”Käytä Shopifyn tietoja”.</li><li>Tarkista toiminimi ja sähköposti: asiakkaat vastaavat tähän osoitteeseen, ja saat laskujen kopiot sinne.</li><li>Kirjoita osoite usealle riville niin, että postinumero ja kaupunki ovat samalla rivillä (esim. ”69002 Lyon”), ja valitse sitten maa.</li><li>Anna yrityksesi rekisterinumero (Ranskassa SIRET) ja ALV-tunniste.</li><li>Arvonlisäverosta vapautettu pienyritys: valitse arvonlisäverovapautus. ALV poistuu laskuista, ja lakisääteinen merkintä lisätään.</li><li>Avaa ”Lisätietoja yrityksestä”, jos haluat lisätä yhtiömuodon ja osakepääoman, kaupparekisterin, puhelinnumeron, verkkosivuston ja tiedon siitä, mitä myyt (tavaroita, palveluja vai molempia).</li><li>Napsauta ”Tallenna” näytön alaosaan ilmestyvässä palkissa.</li></ol>
+  <div class="tip"><b>Vinkki:</b> Tarkistuta ensimmäinen lasku kirjanpitäjälläsi: hän tuntee yrityksesi toimintaan liittyvät erityisvaatimukset.</div><div class="tip"><b>Vinkki:</b> Jos olet vapautettu arvonlisäverosta, varmista myös, ettei Shopify peri asiakkailtasi veroja (Asetukset › Verot ja tullit).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Mukauta ja tarkista lasku</span></h2>
+  <p>Anna laskuillesi brändisi ilme ja tarkista tulos ennen ensimmäistä tilausta.</p>
+  <ol class="steps"><li>Avaa Shopifyssa Sisältö › Tiedostot, lataa logosi (PNG tai JPEG) ja kopioi sen linkki.</li><li>Liitä linkki kohdassa Asetukset › Ulkoasu kenttään ”Logon osoite” ja valitse pääväri.</li><li>Muokkaa tarvittaessa laskun alaosan merkintöjä ja kiitosviestiä. Tyhjiksi jätettyinä ne käännetään automaattisesti asiakkaan kielelle.</li><li>Napsauta ”Esikatsele PDF”: esimerkkilasku ladataan asetuksillasi, myös tallentamattomilla.</li><li>Tallenna, kun olet tyytyväinen tulokseen.</li></ol>
+  <div class="tip"><b>Vinkki:</b> Asetukset koskevat vain seuraavia laskuja: jo laadittu lasku ei koskaan muutu.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Valitse, milloin ja miten laskut lähetetään</span></h2>
+  <p>Oletuksena lasku luodaan, kun tilaus on maksettu, ja lähetetään asiakkaalle heti sähköpostitse.</p>
+  <ol class="steps"><li>Valitse kohdassa Asetukset › Toimintaperiaate, milloin lasku luodaan: kun tilaus on maksettu (suositus) tai heti kun se on tehty.</li><li>Valitse kohdassa ”Näin asiakkaasi saavat laskunsa”: sähköposti, jonka liitteenä on PDF (suositus, ei määrityksiä); yksi sähköposti, jossa on ”Lataa lasku” -painike tilaussivulla (ei koodia: käyttöönotto 3 napsautuksella); tai yksi sähköposti, jossa linkki on suoraan Shopifyn vahvistuksessa (koodi liitetään kerran). Asetukset opastavat sinua vaihe vaiheelta.</li><li>Valitse ”Lähetä minulle kopio jokaisesta laskusta”, niin saat jokaisen laskun ja voit koota arkistosi.</li><li>Jos haluat mukauttaa sähköpostia, avaa ”Sähköposti asiakkaalle”: aiheessa ja viestissä voi käyttää muuttujia {{first_name}}, {{name}}, {{invoice_number}}, {{order}} ja {{shop}}.</li></ol>
+  <div class="tip"><b>Vinkki:</b> Shopify ei salli liitteitä omissa sähköposteissaan: lasku lähtee erillisessä sähköpostissa kauppasi nimissä.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Lisää laskun linkki Shopifyn tilausvahvistukseen (valinnainen)</span></h2>
+  <p>Asiakkaasi voivat saada laskunsa myös kauppasi tavallisesta vahvistussähköpostista.</p>
+  <ol class="steps"><li>Avaa Asetuksissa ”Linkki Shopifyn tilausvahvistussähköpostissa” ja napsauta ”Kopioi koodi”.</li><li>Siirry Shopifyssa kohtaan Asetukset › Ilmoitukset › Asiakasilmoitukset › Tilausvahvistus ja napsauta sitten ”Muokkaa koodia”.</li><li>Liitä koodi kohtaan, jossa painikkeen pitäisi näkyä, esimerkiksi heti tilauksen yhteenvedon jälkeen.</li><li>Tarkista napsauttamalla ”Esikatselu” ja napsauta sitten ”Tallenna”.</li></ol>
+  <div class="tip"><b>Vinkki:</b> Jos asiakas napsauttaa linkkiä ennen maksua, sivu kertoo hänelle, että lasku on saatavilla muutaman minuutin kuluttua.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Seuraa laskujasi päivittäin</span></h2>
+  <p>Etusivu-välilehdellä näkyvät viimeisimmät laskut ja niiden lähetystila.</p>
+  <ol class="steps"><li>Jokaisella rivillä näkyy numero, tilaus, asiakas, päivämäärä, loppusumma ja sähköpostin tila.</li><li>”Lähetetty”: asiakas on saanut laskun. ”Ei lähetetty”: automaattinen lähetys on pois käytöstä. ”Epäonnistui”: vie hiiri tilan päälle nähdäksesi syyn.</li><li>Napsauta ”PDF” ladataksesi laskun tai ”Lähetä uudelleen” lähettääksesi sen asiakkaalle uudelleen.</li><li>Factur-X-merkki tarkoittaa, että lasku sisältää myös sähköisen laskutuksen tiedot.</li></ol>
+  <div class="tip"><b>Vinkki:</b> Jos lähetys epäonnistui, tarkista asiakkaan osoite Shopify-tilauksesta ja pyydä häntä katsomaan roskapostikansionsa.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Numerointi ja kielet</span></h2>
+  <p>Numerot seuraavat toisiaan ilman aukkoja, kuten laki edellyttää, ja jokainen asiakas saa laskun omalla kielellään.</p>
+  <ol class="steps"><li>Valitse kohdassa Asetukset › Numerointi ja kieli numeroiden etuliite (oletus ”F-”, eli F-2026-00001).</li><li>Jos olet jo laatinut laskuja toisella työkalulla, aseta seuraava numero: sitä voi kasvattaa mutta ei koskaan pienentää.</li><li>Valitse laskujen kieli: asiakkaan kieli (ranska, englanti, saksa, espanja, italia, hollanti, brasilianportugali, tšekki, tanska, suomi, norjan bokmål, puola, euroopanportugali, ruotsi, turkki ja malaiji) tai yksi kiinteä kieli.</li><li>Jos valitset ”Asiakkaan kieli”, valitse myös varakieli, jota käytetään, kun asiakkaan kieli ei ole saatavilla.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: sähköinen laskutus</span></h2>
+  <p>Factur-X-muodossa PDF sisältää myös laskun tiedot, joita kirjanpito-ohjelmat ja sähköisen laskutuksen alustat pystyvät lukemaan; sähköinen laskutus tulee Ranskassa pakolliseksi yritysten välillä vuosina 2026–2027.</p>
+  <ol class="steps"><li>Avaa Asetukset › Factur-X: vaihtoehto on oletuksena käytössä.</li><li>Jos näkyy ”Factur-X keskeytetty”, täydennä puuttuva tieto (usein osoite, maa tai ALV-tunniste) ja tallenna.</li><li>Kun ilmaisin muuttuu merkiksi ✓, kaikki seuraavat laskut ovat Factur-X-muodossa, eikä asiakkaillesi muutu mikään.</li></ol>
+  <div class="tip"><b>Vinkki:</b> Kirjanpitäjäsi voi tuoda nämä laskut suoraan ohjelmaansa.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Hallitse pakettiasi</span></h2>
+  <p>Ilmainen-paketti: 10 laskua kuukaudessa. Essential: 200 laskua hintaan 7,90 $ kuukaudessa. Rajaton: 12,90 $ kuukaudessa. Maksullisissa paketeissa 7 päivän ilmainen kokeilu.</p>
+  <ol class="steps"><li>Paketti-välilehdellä (ja Etusivulla) näkyy, montako laskua olet käyttänyt tässä kuussa. Laskuri nollautuu jokaisen kuun 1. päivänä.</li><li>Vaihda pakettia napsauttamalla ”Valitse” ja hyväksymällä Shopifyn sivulla: summa lisätään Shopify-laskuusi.</li><li>Jos raja täyttyy, uudet tilaukset asetetaan odottamaan ja saat ilmoituksen sähköpostitse. Kun olet vaihtanut suurempaan pakettiin, napsauta Etusivulla ”Luo niiden laskut”.</li><li>Palaa Ilmainen-pakettiin napsauttamalla ”Peruuta”.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Hyvät käytännöt</span></h2>
+  <p>Muutama tapa, joilla kirjanpitosi pysyy huolettomana.</p>
+  <ol class="steps"><li>Tee käyttöönoton jälkeen testitilaus (Shopify Paymentsin testitilassa) ja tarkista saamasi lasku.</li><li>Säilytä laskusi 10 vuotta: säilytä sähköpostikopio tai lataa ne joka kuukausi. Ne poistetaan sovelluksesta 48 tuntia asennuksen poistamisen jälkeen.</li><li>Laadittua laskua ei voi muuttaa: virheen tai hyvityksen sattuessa laadi hyvityslasku kirjanpito-ohjelmallasi.</li><li>Kysyttävää? Katso usein kysytyt kysymykset Ohje-välilehdeltä.</li></ol>
+  
+</section>
+  <footer>Onko sinulla muuta kysyttävää? Kirjoita meille osoitteeseen <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>.</footer>
+</main>
+
+</body>
+</html>

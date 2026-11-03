@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – अक्सर पूछे जाने वाले सवाल</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><a href="guide-hi.html">उपयोगकर्ता गाइड</a><span aria-current="page">अक्सर पूछे जाने वाले सवाल</span></nav></div>
+  <h1>अक्सर पूछे जाने वाले सवाल</h1>
+  <div class="langs"><a href="faq-fr.html" hreflang="fr">Français</a> · <a href="faq-en.html" hreflang="en">English</a> · <a href="faq-de.html" hreflang="de">Deutsch</a> · <a href="faq-es.html" hreflang="es">Español</a> · <a href="faq-it.html" hreflang="it">Italiano</a> · <a href="faq-nl.html" hreflang="nl">Nederlands</a> · <a href="faq-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="faq-cs.html" hreflang="cs">Čeština</a> · <a href="faq-da.html" hreflang="da">Dansk</a> · <a href="faq-fi.html" hreflang="fi">Suomi</a> · <a href="faq-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="faq-pl.html" hreflang="pl">Polski</a> · <a href="faq-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="faq-sv.html" hreflang="sv">Svenska</a> · <a href="faq-tr.html" hreflang="tr">Türkçe</a> · <a href="faq-ms.html" hreflang="ms">Bahasa Melayu</a> · <strong>हिन्दी</strong> · <a href="faq-th.html" hreflang="th">ไทย</a> · <a href="faq-ja.html" hreflang="ja">日本語</a> · <a href="faq-ko.html" hreflang="ko">한국어</a> · <a href="faq-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="faq-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <input type="search" id="q" placeholder="कोई सवाल खोजें…" aria-label="कोई सवाल खोजें…">
+  <div id="faq"><section><h2>शुरुआत करें</h2><details><summary>मैं शुरुआत कैसे करूं?</summary><p>सेटिंग टैब खोलें, अपने व्यवसाय की जानकारी (नाम, पता, पंजीकरण और VAT नंबर) भरें और सेव करें। बस इतना ही: अगले ऑर्डर से, इनवॉइस अपने-आप बनकर ग्राहक को ईमेल हो जाता है। यह कैसा दिखता है, यह जांचने के लिए “PDF प्रीव्यू” बटन का इस्तेमाल करें।</p></details><details><summary>क्या मेरे व्यवसाय की जानकारी अपने-आप भरी जा सकती है?</summary><p>हां। इंस्टॉल होने पर, ऐप Shopify से आपके स्टोर का नाम, कानूनी पता, ईमेल और फ़ोन ले लेता है। Shopify को आपका पंजीकरण या VAT नंबर पता नहीं होता: फ़्रांसीसी कंपनियों के लिए, सेटिंग › ऑटो-फ़िल में अपना SIRET या कंपनी का नाम टाइप करें, ताकि बाकी जानकारी आधिकारिक व्यवसाय रजिस्टर से भर जाए। जांचें, फिर सेव करें।</p></details><details><summary>इनवॉइस कब बनता है?</summary><p>डिफ़ॉल्ट रूप से, जैसे ही ऑर्डर का भुगतान होता है (कार्ड भुगतान के लिए तुरंत)। आप इसे ऑर्डर दिए जाते ही बनाने का विकल्प भी चुन सकते हैं, लेकिन तब बाद में रद्द किए गए ऑर्डर के लिए क्रेडिट नोट जारी करना होगा।</p></details><details><summary>क्या मेरे ग्राहक को इनवॉइस अपने-आप मिलता है?</summary><p>हां: उन्हें PDF इनवॉइस संलग्न एक ईमेल मिलता है। यह आपके स्टोर की ओर से भेजा जाता है, और जवाब आपके व्यवसाय के ईमेल पते पर आते हैं। आप सेटिंग में अपने-आप भेजना बंद कर सकते हैं।</p></details><details><summary>Shopify के ऑर्डर पुष्टि ईमेल में इनवॉइस क्यों नहीं होता?</summary><p>Shopify ऐप्स को अपने ईमेल में अटैचमेंट जोड़ने या उन्हें बदलने की अनुमति नहीं देता। सिर्फ़ एक ईमेल भेजने के लिए दो विकल्प हैं: ऑर्डर पेज पर “इनवॉइस डाउनलोड करें” बटन (ग्राहक Shopify ईमेल में “अपना ऑर्डर देखें” पर क्लिक करता है; कोई कोड नहीं, एक बार चालू करने के लिए 3 क्लिक), या पुष्टि ईमेल में ही एक लिंक (एक बार कोड पेस्ट करें)। ऐप की सेटिंग आपको चरण-दर-चरण मार्गदर्शन देती हैं।</p></details><details><summary>मुझे अपने इनवॉइस की कॉपी कैसे मिलेगी?</summary><p>“हर इनवॉइस की एक कॉपी मुझे भेजें” पर टिक करें: हर इनवॉइस आपके व्यवसाय के ईमेल पते पर भी भेजा जाता है। सभी इनवॉइस होम टैब से डाउनलोड भी किए जा सकते हैं।</p></details></section><section><h2>इनवॉइस और कानूनी आवश्यकताएं</h2><details><summary>क्या मेरे इनवॉइस नियमों के अनुरूप हैं?</summary><p>इनवॉइस में फ़्रांस और EU में आवश्यक विवरण शामिल होते हैं: यूनिक नंबर, तारीखें, विक्रेता की पहचान और पंजीकरण नंबर, VAT नंबर, आइटम का विवरण, VAT दरें और राशियां, कुल योग, विलंबित भुगतान की शर्तें। अपने व्यवसाय की सारी जानकारी भरें और टेम्पलेट को अपने अकाउंटेंट से जंचवाएं, जो आपकी स्थिति को जानते हैं।</p></details><details><summary>क्रमांकन कैसे काम करता है?</summary><p>कानून के अनुसार, नंबर बिना किसी अंतराल या दोहराव के क्रम से आते हैं (उदा. F-2026-00001, F-2026-00002…)। अगर आप पहले से इनवॉइस जारी कर चुके हैं, तो सेटिंग में अगला नंबर सेट करें: इसे बढ़ाया जा सकता है, लेकिन कभी घटाया नहीं जा सकता।</p></details><details><summary>मैं एक छोटा व्यवसाय हूं जो VAT नहीं लेता।</summary><p>सेटिंग में VAT छूट विकल्प पर टिक करें: इनवॉइस से VAT हट जाता है और फ़्रांसीसी कानूनी सूचना « TVA non applicable, art. 293 B du CGI » जुड़ जाती है। यह भी सुनिश्चित करें कि Shopify आपके ग्राहकों से टैक्स नहीं ले रहा है (सेटिंग › टैक्स और शुल्क)।</p></details><details><summary>क्या मैं किसी इनवॉइस को बदल या हटा सकता हूं?</summary><p>नहीं: जारी किया गया इनवॉइस कभी नहीं बदलना चाहिए, यह एक कानूनी आवश्यकता है। अगर उसमें कोई गलती है या ऑर्डर रिफ़ंड हुआ है, तो क्रेडिट नोट जारी करना होगा। अपने-आप बनने वाले क्रेडिट नोट आगामी संस्करण में आ रहे हैं; तब तक, इसे अपने अकाउंटिंग टूल से बनाएं।</p></details><details><summary>मेरे इनवॉइस कितने समय तक रखे जाते हैं?</summary><p>जब तक ऐप इंस्टॉल है, वे ऐप में उपलब्ध रहते हैं। फ़्रांसीसी कानून के अनुसार इन्हें 10 साल तक रखना ज़रूरी है: ईमेल से मिली कॉपी रखें या इन्हें नियमित रूप से डाउनलोड करें। अगर आप ऐप अनइंस्टॉल करते हैं, तो Shopify हमसे 48 घंटे बाद आपका डेटा हटाने को कहता है।</p></details></section><section><h2>Factur-X और ई-इनवॉइसिंग</h2><details><summary>Factur-X क्या है?</summary><p>यह एक PDF है जिसमें इनवॉइस का डेटा एक ऐसी फ़ाइल में भी होता है जिसे अकाउंटिंग सॉफ़्टवेयर पढ़ सकता है। इसे ई-इनवॉइसिंग प्लेटफ़ॉर्म स्वीकार करते हैं, जो फ़्रांस में व्यवसायों के बीच अनिवार्य हो रहे हैं: सितंबर 2026 से सभी को ई-इनवॉइस प्राप्त करने में सक्षम होना होगा, और उन्हें जारी करना सितंबर 2026 (बड़ी और मध्यम आकार की कंपनियां) या सितंबर 2027 (SME और सूक्ष्म व्यवसाय) से अनिवार्य होगा। उपभोक्ताओं को की गई बिक्री इस दायित्व में शामिल नहीं है। आपके ग्राहकों को एक सामान्य PDF दिखता है: उनके लिए कुछ नहीं बदलता।</p></details><details><summary>“Factur-X रुका हुआ है” क्यों दिखता है?</summary><p>Factur-X के लिए आवश्यक कोई जानकारी नहीं है, जो संदेश के बगल में दिखाई गई है (अक्सर VAT नंबर या देश)। उसे भरें और सेव करें: अगले इनवॉइस Factur-X फ़ॉर्मेट में होंगे। तब तक, वे सामान्य PDF के रूप में बनते हैं।</p></details></section><section><h2>भाषाएं</h2><details><summary>इनवॉइस और ईमेल किस भाषा में होते हैं?</summary><p>आपके ग्राहक की भाषा में, यदि उस भाषा में इनवॉइस उपलब्ध हैं: फ़्रेंच, अंग्रेज़ी, जर्मन, स्पेनिश, इतालवी, डच, ब्राज़ीली पुर्तगाली, चेक, डेनिश, फ़िनिश, नॉर्वेजियाई बोकमाल, पोलिश, यूरोपीय पुर्तगाली, स्वीडिश, तुर्की, और मलय। अन्यथा, आपकी चुनी हुई वैकल्पिक भाषा में। आप सभी इनवॉइस के लिए एक ही भाषा भी तय कर सकते हैं। ऐप स्वयं 22 भाषाओं में उपलब्ध है।</p></details><details><summary>क्या मैं टेक्स्ट कस्टमाइज़ कर सकता हूं?</summary><p>हां: ईमेल का विषय और संदेश, इनवॉइस के नीचे की कानूनी सूचना और धन्यवाद संदेश। खाली छोड़ने पर, उनका इनवॉइस की भाषा में अपने-आप अनुवाद हो जाता है; कस्टम टेक्स्ट भाषा चाहे जो भी हो, जैसा है वैसा ही इस्तेमाल होता है।</p></details></section><section><h2>प्लान और बिलिंग</h2><details><summary>इसकी कीमत कितनी है?</summary><p>फ्री प्लान में प्रति माह 10 इनवॉइस शामिल हैं। एसेंशियल प्लान ($7.90 प्रति माह) में 200 शामिल हैं, और अनलिमिटेड प्लान ($12.90 प्रति माह) में कोई सीमा नहीं है। पेड प्लान के साथ 7 दिन का फ्री ट्रायल मिलता है और इनका बिल Shopify आपके Shopify सब्सक्रिप्शन के साथ भेजता है।</p></details><details><summary>मासिक सीमा पूरी होने पर क्या होता है?</summary><p>नए ऑर्डर होल्ड पर रख दिए जाते हैं और आपको ईमेल से सूचित किया जाता है। जैसे ही आप अपग्रेड करें, या अगले महीने की शुरुआत में, “उनके इनवॉइस जनरेट करें” पर क्लिक करें: कोई ऑर्डर नहीं छूटता। काउंटर हर महीने की 1 तारीख को रीसेट होता है।</p></details><details><summary>मैं प्लान कैसे बदलूं या रद्द करूं?</summary><p>प्लान टैब में: कोई प्लान चुनें और Shopify पेज पर उसे स्वीकृत करें, या फ्री प्लान पर वापस जाने के लिए “रद्द करें” पर क्लिक करें। ऐप अनइंस्टॉल करने से भी सब्सक्रिप्शन समाप्त हो जाता है।</p></details></section><section><h2>समस्या निवारण</h2><details><summary>किसी ग्राहक को उनका इनवॉइस नहीं मिला।</summary><p>होम टैब में, ईमेल कॉलम देखें: “विफल” का मतलब है कि कोई समस्या हुई (विवरण के लिए उस पर माउस ले जाएं)। ग्राहक का पता जांचें और उनसे अपना स्पैम फ़ोल्डर देखने को कहें, फिर “फिर से भेजें” पर क्लिक करें। आप PDF डाउनलोड करके खुद भी भेज सकते हैं।</p></details><details><summary>मेरा लोगो नहीं दिख रहा।</summary><p>लोगो https पर उपलब्ध PNG या JPEG इमेज होना चाहिए। सबसे आसान तरीका: इसे Shopify में अपलोड करें (कॉन्टेंट › फ़ाइलें), इसका लिंक कॉपी करें और सेटिंग में पेस्ट करें। जांचने के लिए प्रीव्यू का इस्तेमाल करें।</p></details><details><summary>मेरे डेटा और मेरे ग्राहकों के डेटा का क्या होता है?</summary><p>ऐप आपके ऑर्डर पढ़ता है, लेकिन उन्हें बदल नहीं सकता, और केवल वही रखता है जो इनवॉइस के लिए ज़रूरी है (ग्राहक का नाम, पता, ईमेल, आइटम)। डेटा कभी बेचा या साझा नहीं किया जाता। Shopify द्वारा भेजे गए डेटा हटाने के अनुरोध (GDPR) अपने-आप संभाले जाते हैं।</p></details><details><summary>मैं सपोर्ट से कैसे संपर्क करूं?</summary><p>अपने स्टोर के नाम के साथ हमें hoshi.technologies@gmail.com पर ईमेल करें। हम आमतौर पर एक कार्यदिवस के भीतर जवाब देते हैं।</p></details></section></div>
+  <p class="empty" id="empty" hidden>आपकी खोज से कोई सवाल मेल नहीं खाता।</p>
+  <footer>कोई और सवाल? हमें <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a> पर ईमेल करें।</footer>
+</main>
+<script>
+  const q = document.getElementById('q');
+  const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  q.addEventListener('input', () => {
+    const words = norm(q.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of document.querySelectorAll('details')) {
+      const hit = words.every((w) => norm(d.textContent).includes(w));
+      d.hidden = !hit;
+      d.open = hit && words.length > 0;
+      shown += hit;
+    }
+    for (const s of document.querySelectorAll('#faq section')) s.hidden = !s.querySelector('details:not([hidden])');
+    document.getElementById('empty').hidden = shown > 0;
+  });
+</script>
+</body>
+</html>
