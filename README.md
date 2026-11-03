@@ -117,3 +117,8 @@ relais toutes les ~5 h 40. La tâche planifiée horaire ne sert qu'à redémarre
   saisir la cote de son bookmaker pour chaque issue. La cote vue au moins 15 min avant le match est enregistrée.
 - **Pronostics figés** dans les 3 h avant le début, jamais modifiés ensuite, et suivis dans le bilan de chaque sport.
 - Historique : `node scripts/sports.mjs --backfill 365` (ou *Run workflow* avec `backfill`).
+- **Étude sur l'historique (football)** : `scripts/sports-history.mjs` télécharge les saisons depuis 2019-20 des
+  5 grands championnats sur football-data.co.uk, avec les cotes Bet365 avant match. Il rejoue chaque match avant
+  qu'il soit joué (Elo), règle la part des cotes dans la combinaison, puis choisit et confirme des stratégies
+  « valeur » sur trois périodes, comme pour les courses. Le résultat (`foot-history.json`) s'affiche dans le bilan du
+  football, et la part des cotes retenue sert à combiner modèle et cotes dans la page. Calcul au plus une fois par jour.

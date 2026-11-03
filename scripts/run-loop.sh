@@ -73,6 +73,7 @@ while :; do
     node scripts/calibrate.mjs || ok=0
     # Sports : une panne de la source sportive ne doit pas bloquer les courses hippiques.
     node scripts/sports.mjs || echo "Sports : récupération en échec (sans effet sur les courses)."
+    node scripts/sports-history.mjs || echo "Sports : étude historique en échec."
     last_full=$now
   else
     echo "::group::Cotes des courses proches $(TZ=Europe/Paris date +%H:%M)"

@@ -3386,8 +3386,16 @@
           if (!keepScroll) window.scrollTo(0, 0);
           renderSport();
         }
+        var sportHist = {};
         function loadSport(sp) {
           if (!sportData[sp]) $('spMatches').innerHTML = '<p class="muted">Chargement…</p>';
+          if (sp === 'foot')
+            getJson('data/sports/foot-history.json')
+              .then(function (h) {
+                sportHist.foot = h;
+                renderSport();
+              })
+              .catch(function () {});
           return getJson('data/sports/' + sp + '.json')
             .then(function (d) {
               sportData[sp] = d;
@@ -3487,7 +3495,9 @@
                 return o[k] > 1;
               }) && SP.impliedProbs(o);
             var fewGames = e.games && Math.min(e.games[0], e.games[1]) < 10;
-            var p = pm && ip ? SP.blend(pm, ip, fewGames ? 0.8 : 0.5) : pm;
+            var hA = sp === 'foot' && sportHist.foot && sportHist.foot.alpha != null ? sportHist.foot.alpha : 0.5;
+            var alphaUsed = fewGames ? Math.max(0.8, hA) : hA;
+            var p = pm && ip ? SP.blend(pm, ip, alphaUsed) : pm;
             var outs = [['h', e.home.name + (cfg.individual ? '' : ' (dom.)'), e.ratings ? e.ratings[0] : null]];
             if (cfg.draws) outs.push(['d', 'Match nul', null]);
             outs.push(['a', e.away.name, e.ratings ? e.ratings[1] : null]);
@@ -3557,7 +3567,9 @@
             if (pm && ip)
               html +=
                 '<p class="hint" style="margin:4px 0 0">Chances = modèle Elo combiné aux cotes (' +
-                (fewGames ? '80 % cotes, car peu de matchs connus' : 'moitié-moitié') +
+                Math.round(alphaUsed * 100) +
+                ' % cotes' +
+                (fewGames ? ', car peu de matchs connus' : sp === 'foot' && sportHist.foot ? ', part réglée sur l\'historique' : '') +
                 '). Modèle seul : ' +
                 need
                   .map(function (k) {
@@ -3646,6 +3658,70 @@
                   '</small></div>'
                 : '') +
               '</div>';
+          }
+          var H = sp === 'foot' && sportHist.foot;
+          if (H && H.confirmation) {
+            var c = H.confirmation;
+            var fd = function (x) {
+              return new Date(x + 'T12:00:00').toLocaleDateString('fr-FR');
+            };
+            html +=
+              '<h2 style="margin-top:16px">📚 Étude sur ' +
+              H.seasons +
+              ' saisons avec les vraies cotes</h2><p class="hint" style="margin-top:-6px">' +
+              H.matches.toLocaleString('fr-FR') +
+              ' matchs des 5 grands championnats. Source : ' +
+              esc(H.source) +
+              '. Chaque match est prévu avant d\'être joué. Réglages sur la 1re moitié, stratégie choisie sur le 3e quart, confirmée sur les ' +
+              H.periods.confirmation.matches.toLocaleString('fr-FR') +
+              ' matchs les plus récents (depuis le ' +
+              fd(H.periods.confirmation.from) +
+              ').</p>';
+            html +=
+              '<div class="kpis"><div class="kpi"><small>Favori du modèle gagnant</small><strong>' +
+              pctS(c.modelOnly.favWon) +
+              '</strong></div><div class="kpi"><small>Favori du bookmaker</small><strong>' +
+              pctS(c.marketOnly.marketFavWon) +
+              '</strong></div><div class="kpi"><small>Précision (plus bas = mieux)</small><strong>' +
+              c.blend.logLoss.toFixed(3).replace('.', ',') +
+              '</strong><br><small>modèle ' +
+              c.modelOnly.logLoss.toFixed(3).replace('.', ',') +
+              ' · cotes ' +
+              c.marketOnly.logLoss.toFixed(3).replace('.', ',') +
+              '</small></div><div class="kpi"><small>Part des cotes retenue</small><strong>' +
+              Math.round(H.alpha * 100) +
+              ' %</strong></div></div>';
+            html +=
+              '<div class="scroll"><table><thead><tr><th>Stratégie (mise 1 €)</th><th>Choix</th><th>Paris</th><th>Confirmation</th><th></th></tr></thead><tbody>' +
+              H.strategies
+                .map(function (x) {
+                  return (
+                    '<tr' +
+                    (x.chosen ? ' style="font-weight:700"' : '') +
+                    '><td>' +
+                    esc(x.label) +
+                    (x.chosen ? ' <span class="tag">choisie</span>' : '') +
+                    '</td><td>' +
+                    (x.betsSelection ? (x.roiSelection >= 0 ? '+' : '') + (x.roiSelection * 100).toFixed(1) + ' %' : '—') +
+                    '</td><td>' +
+                    x.bets +
+                    '</td><td><span class="pill ' +
+                    (x.validated ? 'good' : x.roi >= 0 ? 'mid' : 'bad') +
+                    '">' +
+                    (x.bets ? (x.roi >= 0 ? '+' : '') + (x.roi * 100).toFixed(1) + ' %' : '—') +
+                    '</span>' +
+                    (x.bets ? ' <span class="muted">± ' + (x.roiSE * 200).toFixed(0) + '</span>' : '') +
+                    '</td><td>' +
+                    (x.validated ? '✔' : '') +
+                    '</td></tr>'
+                  );
+                })
+                .join('') +
+              '</tbody></table></div><p class="hint">' +
+              (H.validated
+                ? 'Une stratégie reste rentable sur la période de confirmation, au-delà de la marge de hasard. Prudence : les cotes françaises sont souvent moins généreuses.'
+                : 'Aucune stratégie ne bat durablement la marge des bookmakers sur l\'historique : le modèle sert à comprendre les matchs, pas à garantir un gain.') +
+              '</p>';
           }
           html += '<h2 style="margin-top:16px">Fiabilité du modèle sur l\'historique</h2>';
           if (r.matches) {

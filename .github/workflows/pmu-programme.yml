@@ -106,6 +106,10 @@ jobs:
         if: ${{ !inputs.probe }}
         continue-on-error: true
         run: node scripts/sports.mjs --backfill "${{ inputs.backfill || '0' }}"
+      - name: Sports, étude de l'historique (football)
+        if: ${{ !inputs.probe }}
+        continue-on-error: true
+        run: node scripts/sports-history.mjs
       - name: Alertes (paris validés)
         if: ${{ !inputs.probe }}
         env:
