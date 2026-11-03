@@ -95,7 +95,7 @@ jobs:
         run: node --test tests/*.test.mjs
       - name: Diagnostic API
         if: ${{ inputs.probe }}
-        run: node scripts/sports-probe.mjs
+        run: node scripts/pmu-probe.mjs
       - name: Récupérer le programme
         if: ${{ !inputs.probe }}
         run: node scripts/pmu-fetch.mjs --backfill "${{ inputs.backfill || '0' }}"
@@ -106,6 +106,10 @@ jobs:
         if: ${{ !inputs.probe }}
         continue-on-error: true
         run: node scripts/sports.mjs --backfill "${{ inputs.backfill || '0' }}"
+      - name: Sports, étude de l'historique (football)
+        if: ${{ !inputs.probe }}
+        continue-on-error: true
+        run: node scripts/sports-history.mjs
       - name: Alertes (paris validés)
         if: ${{ !inputs.probe }}
         env:
