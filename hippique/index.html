@@ -1136,6 +1136,7 @@
         <section class="card hero" id="sHero"></section>
         <section class="card" id="sPick"></section>
         <section class="card" id="sAdvice"></section>
+        <section class="card" id="sCombo"></section>
       </div>
       </div>
 
@@ -2829,6 +2830,7 @@
           if (!a || a.error) {
             $('sPick').innerHTML = '<p class="muted">' + (a && a.error ? esc(a.error) : 'Choisissez une course ci-dessus.') + '</p>';
             $('sAdvice').innerHTML = '';
+            renderCombo();
             return;
           }
           var np = a.placesPayees || 3;
@@ -3142,6 +3144,7 @@
               pct(val.topWinRate) +
               ' du temps. Détails en mode expert.</p>';
           $('sAdvice').innerHTML = c;
+          renderCombo();
         }
         setInterval(function () {
           if (!document.hidden) renderSimple();
@@ -3862,6 +3865,131 @@
         setInterval(function () {
           if (!document.hidden && store.sport !== 'hippique') loadSport(store.sport);
         }, 5 * 60000);
+
+
+        // ---------------- Paris combinés ----------------
+        var comboCache = { key: null, res: null };
+        store.comboBet = store.comboBet || 'duo4';
+        store.comboStake = store.comboStake || 1;
+        function renderCombo() {
+          var el = $('sCombo');
+          var a = lastAnalysis;
+          if (!el) return;
+          if (!a || a.error || a.runners.length < 4) {
+            el.innerHTML = '';
+            el.style.display = 'none';
+            return;
+          }
+          el.style.display = '';
+          var pw = a.runners.map((x) => x.pWin);
+          var key = (state.race && state.race.name) + '|' + pw.map((x) => x.toFixed(4)).join(',');
+          if (comboCache.key !== key) {
+            comboCache = { key: key, res: T.comboAnalysis(pw, { placeDiscount: a.settings.placeDiscount, simulations: 20000 }) };
+          }
+          var res = comboCache.res || [];
+          var cur = res.filter((r) => r.key === store.comboBet)[0] || res[0];
+          if (!cur) {
+            el.innerHTML = '';
+            return;
+          }
+          var num = function (i) {
+            return a.runners[i].runner.num;
+          };
+          var nom = function (i) {
+            return a.runners[i].runner.nom;
+          };
+          var badge = function (i) {
+            return '<span class="num-badge" title="' + esc(nom(i)) + '">' + esc(num(i)) + '</span>';
+          };
+          var stake = parseFloat(store.comboStake) || 1;
+          // Arrivée réelle (course terminée)
+          var arr = a.runners
+            .filter((x) => x.runner.arrivee)
+            .sort((x, y) => x.runner.arrivee - y.runner.arrivee)
+            .map((x) => String(x.runner.num));
+          var won = function (idx) {
+            if (arr.length < cur.depth) return null;
+            var firstD = arr.slice(0, cur.depth);
+            var h = idx.filter((i) => firstD.indexOf(String(num(i))) >= 0).length;
+            return h >= Math.min(cur.size, cur.need || cur.size);
+          };
+          var html =
+            '<h2>🎟️ Paris combinés</h2><p class="hint" style="margin:-6px 0 10px">Chances calculées par 20 000 simulations de l\'arrivée avec notre modèle. Les noms varient selon l\'opérateur (PMU, Betclic…) : vérifiez la règle exacte du pari.</p>';
+          html +=
+            '<div class="chips" style="margin-bottom:8px">' +
+            res
+              .map(function (r) {
+                return '<button class="chip' + (r.key === cur.key ? ' on' : '') + '" data-cbet="' + r.key + '">' + esc(r.label) + '</button>';
+              })
+              .join('') +
+            '</div>';
+          html += '<p style="margin:4px 0 10px"><b>' + esc(cur.label) + '</b> : trouver ' + esc(cur.rule) + '.</p>';
+          // Meilleures combinaisons
+          html += '<div class="dayhead" style="margin-top:4px">Combinaisons les plus probables</div><div class="others">';
+          cur.best.forEach(function (b) {
+            var w = won(b.idx);
+            html +=
+              '<div class="oth" style="grid-template-columns:auto minmax(0,1fr) auto"><span>' +
+              b.idx.map(badge).join(' ') +
+              '</span><span class="nm muted">' +
+              esc(b.idx.map(nom).join(' · ')) +
+              '</span><span class="pcs">' +
+              (b.p >= 0.1 ? Math.round(b.p * 100) : (b.p * 100).toFixed(1).replace('.', ',')) +
+              ' %' +
+              (w === true ? ' <span class="ok-mark">✓</span>' : w === false ? ' <span class="ko-mark">✗</span>' : '') +
+              '</span></div>';
+          });
+          html += '</div>';
+          // Formules champ réduit
+          html +=
+            '<div class="row" style="margin:14px 0 6px;align-items:center"><div class="dayhead" style="margin:0;flex:1">Formules avec nos meilleurs chevaux</div><div class="chips" style="margin:0">' +
+            [0.5, 1, 1.5, 2]
+              .map(function (v) {
+                return '<button class="chip' + (stake === v ? ' on' : '') + '" data-cstake="' + v + '">' + String(v).replace('.', ',') + ' €</button>';
+              })
+              .join('') +
+            '</div></div>';
+          html +=
+            '<div class="scroll"><table><thead><tr><th>Chevaux</th><th>Combinaisons</th><th>Coût</th><th title="Chances d\'avoir au moins une combinaison gagnante">Chances</th><th>Sélection</th></tr></thead><tbody>';
+          cur.formulas.forEach(function (f) {
+            var w = won(f.idx);
+            html +=
+              '<tr><td><b>' +
+              f.k +
+              '</b></td><td>' +
+              f.combos +
+              '</td><td>' +
+              money(f.combos * stake) +
+              '</td><td><b>' +
+              Math.round(f.p * 100) +
+              ' %</b>' +
+              (w === true ? ' <span class="ok-mark">✓</span>' : w === false ? ' <span class="ko-mark">✗</span>' : '') +
+              '</td><td>' +
+              f.idx.map(badge).join(' ') +
+              '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+          html +=
+            '<p class="hint">Coût = nombre de combinaisons × mise par combinaison (' +
+            money(stake) +
+            '). « Chances » = probabilité qu\'au moins une de vos combinaisons soit gagnante. Le rapport, lui, n\'est connu qu\'après la course : il dépend des mises de tous les joueurs, et il est faible quand les favoris arrivent. Plus de chevaux = plus de chances, mais un coût qui grimpe vite et souvent un gain inférieur à la mise.</p>';
+          el.innerHTML = html;
+        }
+        $('sCombo').addEventListener('click', function (e) {
+          var b = e.target.closest('[data-cbet]');
+          if (b) {
+            store.comboBet = b.dataset.cbet;
+            save(store);
+            renderCombo();
+            return;
+          }
+          var st = e.target.closest('[data-cstake]');
+          if (st) {
+            store.comboStake = parseFloat(st.dataset.cstake);
+            save(store);
+            renderCombo();
+          }
+        });
 
         // ---------------- Quinté+ ----------------
         function findQuinte(day) {

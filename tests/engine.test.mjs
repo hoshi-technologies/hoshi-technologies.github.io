@@ -190,3 +190,18 @@ test('Quinté+ : chances cohérentes', () => {
   close(q.combines[0].pDesordre, q.p.desordre, 1e-12);
   assert.equal(T.quinteAnalysis([0.5, 0.3, 0.2]), null);
 });
+
+test('paris combinés : chances cohérentes', () => {
+  const a = T.analyzeRace(race(12), { simulations: 0 });
+  const pw = a.runners.map((x) => x.pWin);
+  const res = T.comboAnalysis(pw, { placeDiscount: a.settings.placeDiscount, simulations: 20000 });
+  const by = Object.fromEntries(res.map((r) => [r.key, r]));
+  // Chaque arrivée a exactement 1 couplé gagnant, 3 couplés placés, 6 « 2 sur 4 », 1 trio, 1 quatrio.
+  for (const r of res) for (let i = 1; i < r.formulas.length; i++) assert.ok(r.formulas[i].p >= r.formulas[i - 1].p - 1e-12);
+  assert.ok(by.couple_p.best[0].p >= by.couple_g.best[0].p, 'le couplé placé est plus facile que le couplé gagnant');
+  assert.ok(by.duo4.best[0].p >= by.couple_p.best[0].p, 'le 2 sur 4 est plus facile que le couplé placé');
+  assert.ok(by.trio.best[0].p >= by.quatrio.best[0].p);
+  assert.equal(by.duo4.formulas[2].combos, 6); // 4 chevaux : C(4,2)
+  assert.equal(by.trio.formulas[0].combos, 1);
+  close(by.couple_g.formulas[0].p, by.couple_g.best.find((b) => b.idx.join() === by.couple_g.formulas[0].idx.slice().sort((x, y) => x - y).join())?.p ?? by.couple_g.formulas[0].p, 0.02);
+});
