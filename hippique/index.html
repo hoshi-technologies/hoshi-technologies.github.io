@@ -546,7 +546,7 @@
         .oth > .bar {
           display: none;
         }
-        .oth.head > span:nth-child(3) {
+        .oth.head:not(.v) > span:nth-child(3) {
           display: none;
         }
       }
@@ -642,6 +642,12 @@
       }
       .brace-res {
         margin-left: auto;
+      }
+      .oth.v {
+        grid-template-columns: 30px minmax(0, 1fr) 46px 62px 52px;
+      }
+      .oth.v .nm small {
+        font-size: 11px;
       }
       .oth.alert-row .nm {
         white-space: normal;
@@ -894,8 +900,8 @@
         #btnProgRefresh {
           display: none;
         }
-        #btnProgNext {
-          grid-column: 1 / -1;
+        #progControls {
+          align-items: end;
         }
       }
       input[type='file'] {
@@ -970,6 +976,16 @@
             <select id="progFilter">
               <option value="fr">Courses en France</option>
               <option value="all">Toutes les courses</option>
+            </select>
+          </label>
+          <label class="f"
+            >Partants
+            <select id="progSize">
+              <option value="">Toutes les tailles</option>
+              <option value="-8">8 maximum</option>
+              <option value="-10">10 maximum</option>
+              <option value="-12">12 maximum</option>
+              <option value="13">13 et plus</option>
             </select>
           </label>
           <button id="btnProgNext" class="primary">Prochaine course</button>
@@ -1750,11 +1766,22 @@
             (o.hasOdds ? '' : ' <span class="muted">(sans cotes pour l\'instant)</span>')
           );
         }
+        // Filtre par taille de peloton (nombre de partants, non-partants exclus).
+        function nPartantsOf(c) {
+          return c.partants && c.partants.length ? c.partants.filter((p) => !p.nonPartant).length : c.nPartants || 0;
+        }
+        function sizeOk(c) {
+          var v = store.progSize || '';
+          if (!v) return true;
+          var n = nPartantsOf(c),
+            k = parseInt(v, 10);
+          return k < 0 ? n <= -k : n >= k;
+        }
         function renderOpportunities() {
           var fr = $('progFilter').value === 'fr';
           var list = Object.keys(prog.opps || {})
             .map((k) => prog.opps[k])
-            .filter((o) => o.kind && (!fr || !o.reu.pays || o.reu.pays === 'FRA'))
+            .filter((o) => o.kind && sizeOk(o.course) && (!fr || !o.reu.pays || o.reu.pays === 'FRA'))
             .sort((a, b) => (a.course.heure || 0) - (b.course.heure || 0));
           if (!prog.day) return '';
           var opt = function (vals, cur, fmt) {
@@ -1778,7 +1805,7 @@
             fallback = true;
             list = Object.keys(prog.opps || {})
               .map((k) => prog.opps[k])
-              .filter((o) => !fr || !o.reu.pays || o.reu.pays === 'FRA')
+              .filter((o) => sizeOk(o.course) && (!fr || !o.reu.pays || o.reu.pays === 'FRA'))
               .sort((a, b) => b.pTop - a.pTop)
               .slice(0, 5)
               .map((o) => Object.assign({}, o, { kind: 'solid' }))
@@ -1848,7 +1875,7 @@
               b.dataset.mode === 'jouer'
                 ? Object.keys(prog.opps || {}).filter(function (k) {
                     var o = prog.opps[k];
-                    return o.kind && (!frOnly || !o.reu.pays || o.reu.pays === 'FRA');
+                    return o.kind && sizeOk(o.course) && (!frOnly || !o.reu.pays || o.reu.pays === 'FRA');
                   }).length
                 : null;
             b.classList.toggle('on', b.dataset.mode === store.progMode);
@@ -1888,7 +1915,9 @@
               })
               .join('') +
             '</div><div class="crs">' +
+            (cur.courses.filter(sizeOk).length ? '' : '<span class="muted">Aucune course de cette taille dans cette réunion.</span>') +
             cur.courses
+              .filter(sizeOk)
               .map(function (c) {
                 var on = prog.sel && prog.sel.date === prog.day.date && prog.sel.r == cur.r && prog.sel.c == c.c;
                 var opp = prog.opps && prog.opps[cur.r + '-' + c.c];
@@ -2078,14 +2107,14 @@
           if (store.progMode === 'jouer' && prog.opps) {
             Object.keys(prog.opps).forEach(function (k) {
               var o = prog.opps[k];
-              if (!o.kind || !o.course.heure || o.course.heure < now - 5 * 60000) return;
+              if (!o.kind || !sizeOk(o.course) || !o.course.heure || o.course.heure < now - 5 * 60000) return;
               if (!best || o.course.heure < best.heure) best = { r: o.reu.r, c: o.course.c, heure: o.course.heure };
             });
             if (best) return best;
           }
           visibleReunions().forEach(function (r) {
             r.courses.forEach(function (c) {
-              if (!c.heure || c.arrivee || c.heure < now - 5 * 60000) return;
+              if (!c.heure || c.arrivee || c.heure < now - 5 * 60000 || !sizeOk(c)) return;
               if (!best || c.heure < best.heure) best = { r: r.r, c: c.c, heure: c.heure };
             });
           });
@@ -2107,6 +2136,12 @@
           loadDay(this.value);
         };
         $('progFilter').onchange = renderProgram;
+        $('progSize').value = store.progSize || '';
+        $('progSize').onchange = function () {
+          store.progSize = this.value;
+          save(store);
+          renderProgram();
+        };
         $('btnProgRefresh').onclick = function () {
           refreshCurrent(false);
         };
@@ -2661,8 +2696,61 @@
             return x.runner.arrivee && x.runner.arrivee <= np;
           };
 
-          // Podium
-          var html = '<h2>Notre pronostic</h2><p class="hint" style="margin:-6px 0 12px">Chances de finir ' + placeTxt + ' (pari placé).</p>';
+          // Rapport placé estimé et « valeur » (ce que rapporte en moyenne 1 € misé placé).
+          var coefs = calibration && calibration.placeOdds;
+          a.runners.forEach(function (x) {
+            var cv = parseFloat(String(x.frozenCote || x.runner.cote || '').replace(',', '.'));
+            x._oP = a.placesPayees && cv > 1 ? T.estimatePlaceOdds(cv, a.placesPayees, coefs) : null;
+            x._ev = x._oP ? pp(x) * x._oP : null;
+          });
+          var fmtO = function (o) {
+            return o ? o.toFixed(2).replace('.', ',') + ' €' : '—';
+          };
+          var evPill = function (ev) {
+            if (ev == null) return '<span class="muted">—</span>';
+            return '<span class="pill ' + (ev >= 1.05 ? 'good' : ev >= 0.95 ? 'mid' : 'bad') + '">' + ev.toFixed(2).replace('.', ',') + '</span>';
+          };
+
+          var html = '';
+          // Meilleur rapport chances / cote
+          var cand = a.runners.filter(function (x) {
+            return x._ev != null && pp(x) >= 0.15;
+          });
+          if (cand.length) {
+            var best = cand.reduce(function (b, x) {
+              return x._ev > b._ev ? x : b;
+            });
+            var verdict =
+              best._ev >= 1.05
+                ? ['good', 'Sa cote paie plus que ses chances : c\'est le meilleur rapport de la course.']
+                : best._ev >= 0.95
+                  ? ['mid', 'Payé à peu près à son juste prix : pas d\'avantage net.']
+                  : ['bad', 'Même le meilleur paie moins que ses chances : aucun placé intéressant dans cette course.'];
+            html +=
+              '<div class="kpi" style="margin-bottom:14px;border:1px solid var(--line)"><small>💡 Meilleur rapport chances / cote (placé)</small>' +
+              '<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><span class="num-badge" style="min-width:34px;height:34px;font-size:16px">' +
+              esc(best.runner.num) +
+              '</span><b style="font-size:16px">' +
+              esc(best.runner.nom) +
+              '</b></div><div class="bday-stats"><span>Placé <b>' +
+              Math.round(pp(best) * 100) +
+              ' %</b></span><span>Rapport estimé <b>' +
+              fmtO(best._oP) +
+              '</b></span><span>Valeur ' +
+              evPill(best._ev) +
+              '</span></div><p class="hint" style="margin:6px 0 0"><span class="pill ' +
+              verdict[0] +
+              '" style="padding:0 6px">' +
+              (best._ev >= 1.05 ? '✓' : best._ev >= 0.95 ? '≈' : '✗') +
+              '</span> ' +
+              verdict[1] +
+              ' Valeur = chances × rapport : au-dessus de 1, le pari rapporte en moyenne plus qu\'il ne coûte.</p></div>';
+          } else if (!a.market) {
+            html += '<p class="hint" style="margin:0 0 12px">💡 Le meilleur rapport chances / cote s\'affichera dès que les cotes seront publiées.</p>';
+          }
+
+          // Podium (les 3 plus sûrs pour le placé)
+          html += '<h2>Notre pronostic</h2><p class="hint" style="margin:-6px 0 12px">Chances de finir ' + placeTxt + ' (pari placé).</p>';
           html += '<div class="podium">';
           list.slice(0, 3).forEach(function (x, k) {
             var p = pp(x);
@@ -2689,13 +2777,13 @@
               Math.max(3, p * 100) +
               '%;background:' +
               colorP(p) +
-              '"></i></div><div class="foot"><span>Gagnant ' +
-              pct(x.pWin) +
-              '</span><span>Cote ' +
+              '"></i></div><div class="foot"><span>Cote ' +
               esc(cote) +
-              '</span><span>Note ' +
-              x.note.toFixed(1) +
-              '/20</span></div>' +
+              '</span><span>Placé ≈ ' +
+              fmtO(x._oP) +
+              '</span><span>Valeur ' +
+              evPill(x._ev) +
+              '</span></div>' +
               (hasArr
                 ? '<div style="margin-top:8px">' +
                   (isPlaced(x)
@@ -2707,29 +2795,44 @@
           });
           html += '</div>';
 
-          // Autres partants
-          if (list.length > 3) {
-            html += '<div class="others"><div class="oth head"><span>N°</span><span>Cheval</span><span></span><span style="text-align:right">Placé</span><span style="text-align:right">Cote</span></div>';
-            list.slice(3).forEach(function (x) {
-              var p = pp(x);
-              html +=
-                '<div class="oth"><span class="num-badge">' +
-                esc(x.runner.num) +
-                '</span><span class="nm">' +
-                esc(x.runner.nom) +
-                (hasArr && x.runner.arrivee ? (isPlaced(x) ? ' <span class="ok-mark">✓</span>' : '') : '') +
-                '</span><div class="bar"><i style="width:' +
-                Math.max(2, p * 100) +
-                '%;background:' +
-                colorP(p) +
-                '"></i></div><span class="pcs">' +
-                Math.round(p * 100) +
-                ' %</span><span class="ct">' +
-                esc(x.frozenCote || x.runner.cote ? String(x.frozenCote || x.runner.cote).replace('.', ',') : '—') +
-                '</span></div>';
-            });
-            html += '</div>';
-          }
+          // Tous les chevaux : chances, rapport estimé, valeur (tri au choix)
+          var sortBy = store.pickSort === 'ev' ? 'ev' : 'p';
+          var all = a.runners.slice().sort(function (x, y) {
+            return sortBy === 'ev' ? (y._ev || 0) - (x._ev || 0) : pp(y) - pp(x);
+          });
+          html +=
+            '<div class="row" style="margin:16px 0 4px;align-items:center"><h2 style="margin:0;flex:1">Tous les chevaux</h2><div class="chips" style="margin:0">' +
+            '<button class="chip' +
+            (sortBy === 'p' ? ' on' : '') +
+            '" data-psort="p">Par chances</button><button class="chip' +
+            (sortBy === 'ev' ? ' on' : '') +
+            '" data-psort="ev">Par valeur</button></div></div>';
+          html +=
+            '<div class="others"><div class="oth v head"><span>N°</span><span>Cheval</span><span style="text-align:right">Placé</span><span style="text-align:right" title="Rapport placé estimé pour 1 €">Rapport</span><span style="text-align:right" title="Chances × rapport">Valeur</span></div>';
+          all.forEach(function (x) {
+            var p = pp(x);
+            html +=
+              '<div class="oth v"><span class="num-badge">' +
+              esc(x.runner.num) +
+              '</span><span class="nm">' +
+              esc(x.runner.nom) +
+              (hasArr && x.runner.arrivee ? (isPlaced(x) ? ' <span class="ok-mark">✓</span>' : '') : '') +
+              '<br><small class="muted">cote ' +
+              esc(x.frozenCote || x.runner.cote ? String(x.frozenCote || x.runner.cote).replace('.', ',') : '—') +
+              '</small></span><span class="pcs" style="color:' +
+              colorP(p) +
+              '">' +
+              Math.round(p * 100) +
+              ' %</span><span class="ct">' +
+              fmtO(x._oP) +
+              '</span><span style="text-align:right">' +
+              evPill(x._ev) +
+              '</span></div>';
+          });
+          html += '</div>';
+          if (a.placesPayees && a.market)
+            html +=
+              '<p class="hint">Rapport placé <b>estimé</b> à partir de la cote gagnant (le vrai rapport n\'est connu qu\'après la course). Valeur = chances × rapport : 1 = juste prix, au-dessus = intéressant. La commission du PMU fait que la plupart des valeurs sont sous 1.</p>';
           var nps = (race.runners || []).filter((r) => r.nonPartant);
           if (nps.length)
             html +=
@@ -2830,6 +2933,13 @@
         setInterval(function () {
           if (!document.hidden) renderSimple();
         }, 60000);
+        $('sPick').addEventListener('click', function (e) {
+          var b = e.target.closest('[data-psort]');
+          if (!b) return;
+          store.pickSort = b.dataset.psort;
+          save(store);
+          renderSimple();
+        });
 
 
         // ---------------- Bilan des pronostics ----------------
