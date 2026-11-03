@@ -1,0 +1,599 @@
+{
+  "nav": {
+    "dashboard": "Oversikt",
+    "members": "Medlemmer",
+    "rewards": "Belønninger",
+    "tiers": "Kundenivåer",
+    "settings": "Innstillinger"
+  },
+  "common": {
+    "edit": "Rediger",
+    "active": "Aktiv",
+    "paused": "Satt på pause",
+    "customer": "Kunde",
+    "type": "Type",
+    "detail": "Detaljer",
+    "points": "Poeng",
+    "date": "Dato",
+    "anonymousCustomer": "Anonym kunde",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "delete": "Slett",
+    "status": "Status",
+    "actions": "Handlinger",
+    "change": "Endre",
+    "optional": "valgfritt",
+    "color": "Farge"
+  },
+  "dashboard": {
+    "title": "Oversikt",
+    "manageRewards": "Administrer belønninger",
+    "pausedTitle": "Programmet er satt på pause",
+    "pausedText": "Kundene dine tjener ikke lenger poeng og kan ikke løse inn belønninger.",
+    "reactivate": "Slå det på igjen",
+    "campaignTitle": "Pågående kampanje: {pointsName} ×{multiplier}",
+    "campaignUntil": "Til og med {date}.",
+    "campaignNoEnd": "Ingen sluttdato.",
+    "welcome": "Velkommen til Hoshi Club",
+    "summary": "{amount} brukt = {points} {pointsName} · {signup} {pointsName} ved registrering",
+    "stats": {
+      "members": "Medlemmer",
+      "newMembers_one": "+{count} de siste 30 dagene",
+      "newMembers_other": "+{count} de siste 30 dagene",
+      "pointsEarned": "{pointsName} tildelt",
+      "pointsSpent": "{pointsName} innløst",
+      "rewardsClaimed": "Innløste belønninger",
+      "rewardsUsed_one": "{count} brukt i en bestilling",
+      "rewardsUsed_other": "{count} brukt i bestillinger",
+      "rewardRevenue": "Inntekter fra belønninger",
+      "rewardRevenueHint": "Bestillinger lagt inn med en lojalitetskode",
+      "referrals": "Vervede kunder",
+      "pendingReferrals_one": "{count} ventende invitasjon",
+      "pendingReferrals_other": "{count} ventende invitasjoner",
+      "referralRevenue": "Inntekter fra verving",
+      "referralRevenueHint": "Første bestillinger fra vervede venner"
+    },
+    "chartTitle": "{pointsName} opptjent per dag (siste 30 dager)",
+    "chartAria": "{total} {unit} opptjent de siste 30 dagene",
+    "recentActivity": "Nylig aktivitet",
+    "noActivity": "Ingen aktivitet ennå. Poeng vises her etter den første bestillingen eller registreringen.",
+    "gettingStarted": "Kom i gang",
+    "steps": {
+      "enableTitle": "Slå på programmet",
+      "enableText": "Kundene dine tjener poeng så snart programmet er aktivt.",
+      "rewardsTitle": "Tilby belønninger",
+      "rewardsText": "Rabatter kundene dine kan låse opp med poengene sine.",
+      "tiersTitle": "Konfigurer kundenivåene dine",
+      "tiersText": "Bronse, Sølv, Gull eller nivåer kun for inviterte, med automatiske rabatter.",
+      "widgetTitle": "Vis widgeten i butikken din",
+      "widgetText": "Slå på «Hoshi Club» i temaredigeringsprogrammet (Appinnbygginger).",
+      "widgetAction": "Åpne temaredigeringsprogrammet"
+    },
+    "howItWorks": "Hvordan fungerer det?",
+    "how": {
+      "signup": "En kunde oppretter en konto: velkomstbonus.",
+      "orders": "Hver betalte bestilling gir poeng.",
+      "tiers": "Jo mer de samler, desto høyere nivå (eller du tildeler et).",
+      "discounts": "Hvert nivå kan gi en automatisk rabatt i kassen.",
+      "rewards": "I widgeten bytter de poeng mot en personlig rabattkode.",
+      "more": "De tjener også poeng ved å verve venner, på bursdagen sin og ved å følge deg på sosiale medier."
+    }
+  },
+  "member": {
+    "viewCustomer": "Vis kunde",
+    "tierSaved": "Nivået er oppdatert",
+    "codeCreated": "Kode opprettet: {code}",
+    "pointsAdded": "Poeng lagt til",
+    "pointsRemoved": "Poeng fjernet",
+    "errors": {
+      "points": "Angi et antall poeng"
+    },
+    "available": "Tilgjengelig saldo",
+    "tier": "Nivå",
+    "tierAssigned": "Nivå (tildelt)",
+    "noTier": "Ingen",
+    "lifetimeAndOrders": "{lifetime} totalt · {orders}",
+    "toNextTier": "{points} {pointsName} igjen til {tier}",
+    "history": "Poenghistorikk",
+    "noHistory": "Ingen aktivitet ennå.",
+    "codes": "Opptjente rabattkoder",
+    "code": "Kode",
+    "codeUsed": "Brukt",
+    "codeAvailable": "Tilgjengelig",
+    "adjust": "Juster saldo",
+    "adjustAction": "Handling",
+    "addPoints": "Legg til poeng",
+    "removePoints": "Fjern poeng",
+    "pointsCount": "Antall poeng",
+    "reason": "Årsak (vises i historikken)",
+    "reasonPlaceholder": "Kompensasjon",
+    "confirm": "Bekreft",
+    "giftReward": "Gi en belønning",
+    "giftRewardText": "Oppretter en personlig kode og trekker kundens poeng.",
+    "generateCode": "Generer kode",
+    "info": "Informasjon",
+    "birthday": "Bursdag: {date}",
+    "notProvided": "ikke oppgitt",
+    "referralCode": "Vervekode: {code}",
+    "referrals": "Vervinger: {converted} konvertert av {invited} inviterte",
+    "expiresAt": "Poengene er gyldige til og med {date}",
+    "tierSection": "Kundenivå",
+    "tierLocked": "Låst nivå: det endres ikke lenger med poeng.",
+    "tierAuto": "Automatisk: for øyeblikket {tier}, endres med {pointsName}.",
+    "applyTier": "Bruk nivå",
+    "perks": "Fordeler for {tier}",
+    "noPerks": "Ingen fordeler er definert for dette nivået.",
+    "shopifyTag": "Shopify-etikett: {tag}",
+    "danger": "Faresone",
+    "confirmRemove": "Vil du fjerne denne kunden fra programmet? Saldoen og historikken blir slettet.",
+    "remove": "Fjern fra programmet"
+  },
+  "members": {
+    "title": "Medlemmer",
+    "add": "Legg til en kunde",
+    "importAll": "Importer alle kundene mine",
+    "joined": "{name} er med i programmet",
+    "tierUpdated": "Nivået til {name} er oppdatert",
+    "imported_one": "{count} kunde importert",
+    "imported_other": "{count} kunder importert",
+    "allImported": "Alle kundene dine er allerede medlemmer",
+    "search": "Søk",
+    "searchPlaceholder": "Navn eller e-post",
+    "tier": "Nivå",
+    "allTiers": "Alle nivåer",
+    "sort": "Sorter",
+    "sortPoints": "Flest poeng",
+    "sortRecent": "Nyeste",
+    "email": "E-post",
+    "balance": "Saldo",
+    "lifetime": "Totalt",
+    "orders": "Bestillinger",
+    "assigned": "Tildelt",
+    "noResults": "Ingen medlemmer samsvarer med søket ditt.",
+    "empty": "Ingen medlemmer ennå. Legg til en kunde eller importer alle kundene dine.",
+    "total_one": "{count} medlem",
+    "total_other": "{count} medlemmer"
+  },
+  "addMember": {
+    "title": "Legg til en kunde i programmet",
+    "search": "Søk etter en Shopify-kunde",
+    "searchPlaceholder": "Navn, e-post eller telefon",
+    "searching": "Søker",
+    "noResults": "Fant ingen kunder.",
+    "noEmail": "Ingen e-post",
+    "orders_one": "{count} bestilling",
+    "orders_other": "{count} bestillinger",
+    "alreadyMember": "Allerede medlem",
+    "choose": "Velg",
+    "tierLabel": "Kundenivå",
+    "tierDetails": "«Automatisk»: nivået endres med poengene. Ellers låses det valgte nivået.",
+    "autoTier": "Automatisk (basert på {pointsName})",
+    "invitationTier": "{name} (kun for inviterte)",
+    "welcomeBonus": "Gi velkomstbonusen ({points} {pointsName})",
+    "update": "Oppdater",
+    "submit": "Legg til i programmet"
+  },
+  "program": {
+    "title": "Programinnstillinger",
+    "saved": "Innstillingene er lagret",
+    "pointsNameFallback": "poeng",
+    "status": {
+      "title": "Status",
+      "label": "Lojalitetsprogrammet er aktivt",
+      "details": "Slå det av for å sette programmet på pause uten at kundene mister poengene sine."
+    },
+    "earn": {
+      "title": "Opptjening av poeng",
+      "pointsName": "Navn på poengene",
+      "pointsNameDetails": "F.eks. poeng, stjerner, mynter …",
+      "perUnit": "Poeng per brukt {currency}",
+      "perUnitDetails": "Eksempel: en bestilling på {amount} gir {points} {pointsName} (før nivåmultiplikator).",
+      "signup": "Velkomstbonus",
+      "signupDetails": "Gis når kunden oppretter en konto.",
+      "firstOrder": "Bonus for første bestilling",
+      "firstOrderDetails": "I tillegg til poengene for bestillingen."
+    },
+    "birthday": {
+      "title": "Bursdag 🎂",
+      "label": "Poeng på bursdagen",
+      "details": "Kundene oppgir datoen sin i widgeten. For å unngå misbruk må datoen lagres minst 30 dager i forveien. 0 = av."
+    },
+    "referral": {
+      "title": "Verving 🤝",
+      "enable": "Slå på verving",
+      "enableDetails": "Hvert medlem får en personlig lenke. Vennen mottar en velkomstkode; den som verver, tjener poeng når vennen legger inn sin første bestilling.",
+      "referrerPoints": "Poeng til den som verver",
+      "friendGift": "Gave til vennen",
+      "value": "Verdi",
+      "minimum": "Minstekjøp (valgfritt)"
+    },
+    "social": {
+      "title": "Sosiale medier 📣",
+      "intro": "Legg til sidene dine: widgeten oppfordrer kundene til å følge deg i bytte mot {pointsName} (én gang per nettverk).",
+      "points": "Poeng per nettverk som følges"
+    },
+    "bonus": {
+      "title": "Bonuspoengkampanje 🔥",
+      "intro": "Multipliser opptjente {pointsName} i en periode (salg, høytider, lanseringer …). Et banner vises i widgeten under kampanjen.",
+      "multiplier": "Multiplikator",
+      "none": "Ingen kampanje",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "Start (valgfritt)",
+      "end": "Slutt (valgfritt)",
+      "message": "Bannermelding",
+      "messageDetails": "La feltet stå tomt for å vise en oversatt standardmelding.",
+      "messagePlaceholder": "Black Friday: {pointsName} ×{multiplier}!"
+    },
+    "expiration": {
+      "title": "Utløp av poeng ⏳",
+      "label": "Poengene utløper etter",
+      "details": "Hvert kjøp, hver innløsning eller opptjening av poeng utsetter datoen. En utløpsdato motiverer kundene til å komme tilbake.",
+      "never": "Aldri",
+      "months_one": "{count} måned uten aktivitet",
+      "months_other": "{count} måneder uten aktivitet"
+    },
+    "widget": {
+      "title": "Widgetens utseende",
+      "languageNote": "Widgeten vises automatisk på butikkens språk (36 språk støttes).",
+      "widgetTitle": "Widgettittel",
+      "widgetTitleDetails": "La feltet stå tomt for å bruke den oversatte standardtittelen på alle språk.",
+      "defaultTitle": "Mine belønninger",
+      "color": "Hovedfarge",
+      "colorOption": "Farge {color}",
+      "customColor": "Egendefinert farge",
+      "position": "Knappens plassering",
+      "right": "Nederst til høyre",
+      "left": "Nederst til venstre"
+    },
+    "preview": "Forhåndsvisning",
+    "previewTier": "Sølvnivå",
+    "previewRedeem": "Løs inn"
+  },
+  "landing": {
+    "tagline": "Det enkleste lojalitetsprogrammet for Shopify-butikken din: poeng, VIP-nivåer med automatiske rabatter, verving og belønninger med noen få klikk.",
+    "pricing": "{price}/måned · alt inkludert · {days} dagers gratis prøveperiode",
+    "shopDomain": "Butikkens domene",
+    "install": "Installer",
+    "login": "Logg inn",
+    "installFromStore": "Installer Hoshi Club fra Shopify App Store.",
+    "errors": {
+      "missingShop": "Angi butikkens domene",
+      "invalidShop": "Dette butikkdomenet er ikke gyldig"
+    },
+    "features": {
+      "points": {
+        "title": "Automatiske poeng.",
+        "text": "Kundene tjener poeng på hver bestilling, uten teknisk oppsett."
+      },
+      "tiers": {
+        "title": "VIP-nivåer.",
+        "text": "Bronse, Sølv, Gull eller nivåer kun for inviterte, med automatiske rabatter og poengmultiplikatorer for de beste kundene dine."
+      },
+      "referrals": {
+        "title": "Verving og bonuser.",
+        "text": "Verveprogram, bursdagsbelønninger, følging på sosiale medier og kampanjer med doble poeng."
+      },
+      "widget": {
+        "title": "Elegant widget.",
+        "text": "En flytende knapp i butikkens farger for å se og løse inn poeng."
+      },
+      "languages": {
+        "title": "36 språk.",
+        "text": "Appen og widgeten snakker ditt språk og kundenes språk."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "Personvernerklæring",
+    "supportLink": "Hjelp og kontakt",
+    "language": "Språk",
+    "privacy": {
+      "title": "Personvernerklæring",
+      "updated": "Hoshi Club, utgitt av Hoshi Technologies. Sist oppdatert: {date}.",
+      "intro": "Hoshi Club («appen») lar Shopify-forhandlere tilby kundene sine et lojalitetsprogram. Denne erklæringen forklarer hvilke data appen behandler, hvorfor og hvordan.",
+      "collectedTitle": "Innsamlede data",
+      "collected": {
+        "store": {
+          "label": "Butikkdata:",
+          "text": "butikkens domene og tilgangstokener som Shopify gir ved installasjonen."
+        },
+        "members": {
+          "label": "Medlemsdata:",
+          "text": "Shopify-kunde-ID, fornavn, etternavn, e-postadresse, antall bestillinger, poengsaldo og -historikk, lojalitetsnivå, opptjente rabattkoder, bursdag (dag og måned, hvis kunden oppgir den) og vervekode."
+        },
+        "referrals": {
+          "label": "Vervedata:",
+          "text": "e-postadresse som den inviterte personen oppgir for å motta velkomstkoden sin."
+        },
+        "orders": {
+          "label": "Bestillingsdata:",
+          "text": "ID, delsum og totalsum for betalte bestillinger og brukte rabattkoder, kun for å beregne poeng."
+        }
+      },
+      "noPayment": "Appen samler ikke inn betalingsdata og bruker ingen reklamecookies.",
+      "useTitle": "Hvordan dataene brukes",
+      "use": "Dataene brukes kun til å drive butikkens lojalitetsprogram: beregne og vise poeng, tildele nivåer og tilhørende fordeler, opprette rabattkoder, håndtere verving og vise statistikk til forhandleren. De blir aldri solgt, leid ut eller delt med tredjeparter for markedsføringsformål.",
+      "hostingTitle": "Lagring og databehandlere",
+      "hosting": "Dataene lagres hos Cloudflare (Cloudflare Workers og D1). Shopify leverer butikk- og kundedata via sine API-er. Disse leverandørene opptrer som databehandlere og bruker sine egne sikkerhetstiltak.",
+      "retentionTitle": "Oppbevaring og sletting",
+      "retention": {
+        "installed": "Dataene oppbevares så lenge appen er installert.",
+        "customerRedact": "Når en kunde ber om det (via Shopify), slettes dataene til kunden automatisk (webhooken customers/redact).",
+        "shopRedact": "48 timer etter avinstallering ber Shopify om sletting av butikkens data; alle dataene blir da slettet (webhooken shop/redact).",
+        "merchant": "Forhandleren kan når som helst fjerne en kunde fra programmet i appen."
+      },
+      "rightsTitle": "Dine rettigheter",
+      "rights": "I henhold til personvernforordningen (GDPR) og lignende lover har kundene rett til innsyn, retting, sletting og til å protestere mot behandlingen av dataene sine. De kan utøve disse rettighetene overfor den aktuelle butikken (behandlingsansvarlig) eller ved å skrive til oss. Innsynsforespørsler sendt av Shopify (webhooken customers/data_request) blir behandlet.",
+      "contactTitle": "Kontakt",
+      "contact": "Har du spørsmål:"
+    },
+    "support": {
+      "title": "Hjelp og kontakt",
+      "intro": "Et spørsmål eller et problem? Skriv til oss, så svarer vi innen 2 virkedager:",
+      "faqTitle": "Vanlige spørsmål",
+      "faq": {
+        "widget": {
+          "q": "Hvordan viser jeg programmet i butikken min?",
+          "a": "I Shopify: Nettbutikk → Temaer → Tilpass → Appinnbygginger, og slå deretter på «Hoshi Club». Appens oversikt har en direktelenke."
+        },
+        "points": {
+          "q": "Når får kundene mine poengene sine?",
+          "a": "Automatisk så snart bestillingen er betalt. Poengene fjernes hvis bestillingen refunderes."
+        },
+        "tierDiscounts": {
+          "q": "Hvordan fungerer nivårabatter?",
+          "a": "Hvert nivå legger til en etikett på kunden og oppretter en automatisk Shopify-rabatt forbeholdt kunder på det nivået. Den brukes i kassen, uten kode. Du finner rabattene under Shopify → Rabatter."
+        },
+        "assignTier": {
+          "q": "Kan jeg tildele et nivå til en bestemt kunde?",
+          "a": "Ja: Medlemmer → Legg til en kunde, eller fra et medlems side (delen «Kundenivå»)."
+        },
+        "referrals": {
+          "q": "Hvordan fungerer verving?",
+          "a": "Hvert medlem har en personlig lenke. Den inviterte vennen oppgir e-postadressen sin og mottar en velkomstkode; den som verver, tjener poeng når koden brukes i en betalt bestilling."
+        },
+        "languages": {
+          "q": "Hvilke språk støttes?",
+          "a": "Appen følger språket i Shopify-administratoren din, og widgeten følger butikkens språk, på 36 språk. Belønningsnavn som står tomme, oversettes automatisk."
+        },
+        "uninstall": {
+          "q": "Hva skjer hvis jeg avinstallerer appen?",
+          "a": "Automatiske rabatter blir værende i Shopify til du sletter dem. Programdataene slettes 48 timer etter avinstalleringen."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "Belønninger",
+    "new": "Ny belønning",
+    "create": "Opprett en belønning",
+    "editTitle": "Rediger belønning",
+    "deleted": "Belønningen er slettet",
+    "hidden": "Belønningen er skjult",
+    "shown": "Belønningen er synlig",
+    "updated": "Belønningen er oppdatert",
+    "created": "Belønningen er opprettet",
+    "errors": {
+      "cost": "Poengkostnaden må være større enn 0",
+      "value": "Angi rabattverdien",
+      "percent": "En rabatt kan ikke overstige 100 %"
+    },
+    "emptyTitle": "Ingen belønninger ennå",
+    "emptyText": "Opprett din første belønning: kundene kan få den i bytte mot {pointsName}.",
+    "columns": {
+      "reward": "Belønning",
+      "cost": "Kostnad",
+      "claimed": "Innløst"
+    },
+    "types": {
+      "AMOUNT": "Fast beløp",
+      "PERCENT": "Prosent",
+      "FREE_SHIPPING": "Gratis frakt"
+    },
+    "minimumShort": "Ved kjøp fra {amount}",
+    "autoTranslated": "Navnet oversettes automatisk",
+    "timesClaimed_one": "{count} gang",
+    "timesClaimed_other": "{count} ganger",
+    "visible": "Synlig",
+    "hiddenBadge": "Skjult",
+    "hide": "Skjul",
+    "show": "Vis",
+    "confirmDelete": "Vil du slette «{title}»?",
+    "tipTitle": "Tips",
+    "tip": "En god første belønning kan oppnås på 2 til 3 bestillinger. Med 1 poeng per brukte enhet tilsvarer 500 poeng for 5 i rabatt en rabatt på 1 %: attraktivt uten å skade marginene dine.",
+    "typeLabel": "Belønningstype",
+    "percentLabel": "Rabattprosent",
+    "amountLabel": "Rabattbeløp",
+    "costLabel": "Kostnad i poeng",
+    "nameLabel": "Visningsnavn (valgfritt)",
+    "nameDetails": "La feltet stå tomt for å vise et navn oversatt til kundens språk.",
+    "minimumLabel": "Minste bestillingsbeløp (valgfritt)"
+  },
+  "labels": {
+    "rewardPercent": "{value} % rabatt",
+    "rewardAmount": "{amount} rabatt",
+    "freeShipping": "Gratis frakt",
+    "percentOff": "{value} % rabatt",
+    "amountOff": "{amount} rabatt",
+    "tierDiscount": "{discount} på alle bestillinger",
+    "tierDiscountFrom": "{discount} på alle bestillinger over {minimum}",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{reward} på bestillinger over {minimum}"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "Velkomst",
+      "ORDER": "Bestilling",
+      "FIRST_ORDER": "1. bestilling",
+      "REDEEM": "Innløsning",
+      "REFUND": "Refusjon",
+      "ADJUST": "Justering",
+      "BIRTHDAY": "Bursdag",
+      "REFERRAL": "Verving",
+      "SOCIAL": "Sosiale medier",
+      "EXPIRE": "Utløp"
+    },
+    "desc": {
+      "SIGNUP": "Velkomstbonus",
+      "ORDER": "Bestilling {order}",
+      "ORDER_BONUS": "Bestilling {order} (bonus ×{bonus})",
+      "FIRST_ORDER": "Bonus for første bestilling ({order})",
+      "REDEEM": "Innløst: {reward}",
+      "REFUND": "Refusjon (bestilling {order})",
+      "ADJUST_ADD": "Manuelt tillegg",
+      "ADJUST_REMOVE": "Manuelt trekk",
+      "BIRTHDAY": "Gratulerer med dagen! ({year})",
+      "REFERRAL": "Verving: {friend}",
+      "SOCIAL": "Fulgte på {network}",
+      "EXPIRE": "Utløpt etter {months} måneder uten aktivitet"
+    }
+  },
+  "errors": {
+    "unexpected": "Noe gikk galt: {details}",
+    "memberNotFound": "Fant ikke medlemmet",
+    "tierNotFound": "Fant ikke nivået",
+    "rewardUnavailable": "Denne belønningen er ikke lenger tilgjengelig",
+    "programDisabled": "Lojalitetsprogrammet er for øyeblikket satt på pause",
+    "notEnoughPoints": "Du trenger {missing} {pointsName} til",
+    "discountFailed": "Rabattkoden kunne ikke opprettes. {details}",
+    "referralCodeFailed": "Vervekoden kunne ikke genereres",
+    "referralUnavailable": "Verving er ikke tilgjengelig",
+    "invalidEmail": "Ugyldig e-postadresse",
+    "invalidReferral": "Ugyldig vervelenke",
+    "selfReferral": "Du kan ikke verve deg selv",
+    "referralAlreadyUsed": "Denne e-postadressen har allerede brukt en verving",
+    "referralNewCustomersOnly": "Verving gjelder kun nye kunder",
+    "invalidDate": "Ugyldig dato",
+    "birthdayAlreadySet": "Bursdagen din er allerede lagret",
+    "actionUnavailable": "Denne handlingen er ikke tilgjengelig",
+    "loginRequired": "Logg inn for å dra nytte av programmet",
+    "notInstalled": "Appen er ikke installert i denne butikken",
+    "generic": "Noe gikk galt. Prøv igjen."
+  },
+  "seed": {
+    "pointsName": "poeng",
+    "tierBronze": "Bronse",
+    "tierSilver": "Sølv",
+    "tierGold": "Gull"
+  },
+  "server": {
+    "tierDiscountTitle": "Nivå {tier}: {discount}",
+    "tierShippingTitle": "Nivå {tier}: gratis frakt"
+  },
+  "tiers": {
+    "title": "Kundenivåer",
+    "new": "Nytt nivå",
+    "create": "Opprett et nivå",
+    "editTitle": "Rediger nivå",
+    "resync": "Synkroniser på nytt med Shopify",
+    "deleted": "Nivået er slettet",
+    "created": "Nivået er opprettet",
+    "updated": "Nivået er oppdatert",
+    "resynced_one": "Synkroniseringen er fullført ({count} kunde oppdatert)",
+    "resynced_other": "Synkroniseringen er fullført ({count} kunder oppdatert)",
+    "errors": {
+      "name": "Gi nivået et navn",
+      "value": "Angi rabattverdien",
+      "percent": "Rabatten kan ikke overstige 100 %",
+      "sync": "Nivået er lagret, men Shopify-rabatten kunne ikke opprettes: {details}"
+    },
+    "intro": "Hvert nivå kan tilby fordeler som brukes automatisk i kassen (permanent rabatt, gratis frakt), en {pointsName}-multiplikator og egendefinerte fordeler. Et nivå er enten automatisk (nås ved å samle {pointsName}) eller manuelt (du tildeler det selv fra kundens side, f.eks. «Ambassadør» eller «Grossist»). Et manuelt nivå har alltid forrang.",
+    "emptyTitle": "Ingen nivåer",
+    "emptyText": "Opprett kundenivåene dine og fordelene deres.",
+    "autoSection": "Automatiske nivåer (basert på poeng)",
+    "manualSection": "Manuelt tildelte nivåer",
+    "levelNumber": "Nivå {number}",
+    "invitationOnly": "Kun for inviterte",
+    "assignedManually": "Tildelt manuelt",
+    "fromPoints": "Fra {points} innsamlede {pointsName}",
+    "noPerks": "Ingen fordeler definert",
+    "customers_one": "{count} kunde",
+    "customers_other": "{count} kunder",
+    "tag": "Etikett: {tag}",
+    "syncError": "Shopify-rabatten ble ikke opprettet: {details}",
+    "confirmDelete": "Vil du slette nivået «{name}»? De automatiske rabattene blir slettet.",
+    "nameLabel": "Navn på nivået",
+    "namePlaceholder": "F.eks. Gull, Ambassadør, Grossist …",
+    "modeQuestion": "Hvordan får en kunde dette nivået?",
+    "modeAuto": "Automatisk",
+    "modeAutoText": "Ved å samle {pointsName}",
+    "modeManual": "Manuelt",
+    "modeManualText": "Du tildeler det selv",
+    "minPointsLabel": "Innsamlede {pointsName} som kreves",
+    "perksTitle": "Automatiske fordeler",
+    "discountLabel": "Permanent rabatt på bestillinger",
+    "discountNone": "Ingen rabatt",
+    "discountPercent": "Prosent (f.eks. 10 % rabatt)",
+    "discountAmount": "Fast beløp (f.eks. 5 i rabatt)",
+    "discountValue": "Rabattverdi",
+    "discountMinimum": "Minstekjøp (valgfritt)",
+    "freeShipping": "Gratis frakt på alle bestillinger",
+    "multiplierLabel": "{pointsName}-multiplikator",
+    "multiplierDetails": "1 = normalt, 2 = dobbelt så mange {pointsName} per bestilling.",
+    "otherPerks": "Andre fordeler (én per linje, vises for kundene)",
+    "otherPerksPlaceholder": "Tidlig tilgang til salg\nBursdagsgave"
+  },
+  "widget": {
+    "title": "Mine belønninger",
+    "unavailable": "Lojalitetsprogrammet er midlertidig utilgjengelig.",
+    "guestText": "Opprett en konto for å tjene poeng på hvert kjøp og låse opp eksklusive rabatter.",
+    "join": "Bli med i programmet",
+    "haveAccount": "Jeg har allerede en konto",
+    "hello": "Hei, {name}",
+    "earnTitle": "Tjen {pointsName}",
+    "nextTier": "{points} {pointsName} igjen til {tier}",
+    "bonusDefault": "{pointsName} ×{multiplier}!",
+    "bonusUntil": "til og med {date}",
+    "rewardsTitle": "Belønninger",
+    "minimum": "fra {amount}",
+    "redeem": "Løs inn",
+    "missing": "{points} igjen",
+    "codesTitle": "Mine koder",
+    "useCode": "Bruk",
+    "perksTitle": "Mine {tier}-fordeler",
+    "perUnit": "{points} {pointsName} per {amount} du handler for",
+    "signup": "{points} {pointsName} når du registrerer deg",
+    "firstOrder": "{points} {pointsName} for din første bestilling",
+    "follow": "Følg oss på {network}",
+    "followButton": "Følg",
+    "birthdayGuest": "{points} {pointsName} på bursdagen din",
+    "birthdaySet": "Bursdag {date}: {points} {pointsName} til deg",
+    "birthdayAsk": "Bursdagen din:",
+    "birthdayConfirm": "Har du bursdag {date}? Den kan ikke endres senere.",
+    "birthdaySaved": "Bursdagen er lagret 🎂",
+    "day": "Dag",
+    "month": "Måned",
+    "ok": "OK",
+    "socialThanks": "Takk! Poengene dine er lagt til",
+    "socialAlready": "Du har allerede fått poeng for dette nettverket",
+    "referralTitle": "Verving",
+    "referralMemberTitle": "Verv vennene dine",
+    "referralIntro": "Gi {reward} til vennene dine og tjen {points} {pointsName} når de legger inn sin første bestilling.",
+    "referralLink": "Vervelenke",
+    "copy": "Kopier",
+    "copied": "Kopiert!",
+    "share": "Del …",
+    "shareText": "Få rabatt på din første bestilling!",
+    "referralsDone_one": "{count} venn vervet 🎉",
+    "referralsDone_other": "{count} venner vervet 🎉",
+    "tiersTitle": "Nivåer",
+    "tierFrom": "fra {points} {pointsName}",
+    "expires": "Dine {pointsName} er gyldige til og med {date} (forlenges ved hvert kjøp).",
+    "confirmRedeem": "Vil du bytte poengene dine mot «{reward}»?",
+    "congrats": "Gratulerer!",
+    "rewardReady": "Belønningen din «{reward}» er klar:",
+    "applyCart": "Bruk i handlekurven min",
+    "close": "Lukk",
+    "errorGeneric": "Noe gikk galt. Prøv igjen.",
+    "aFriend": "En venn",
+    "giftTitle": "{name} har sendt deg en gave!",
+    "giftText": "Få {reward} på din første bestilling.",
+    "emailPlaceholder": "E-postadressen din",
+    "getCode": "Få koden min",
+    "later": "Kanskje senere",
+    "welcomeCodeTitle": "Velkomstkoden din",
+    "welcomeCodeText": "{reward} på din første bestilling:",
+    "continueShopping": "Fortsett å handle",
+    "productPoints": "Tjen {points} {pointsName} med dette kjøpet"
+  }
+}

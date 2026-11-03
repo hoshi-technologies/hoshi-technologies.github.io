@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Knapptext", "info": "Lämna tomt för att använda rubriken som angetts i appen." },
+    "position": { "label": "Placering", "app": "Appinställning", "right": "Nere till höger", "left": "Nere till vänster" },
+    "guest_text": { "label": "Meddelande till utloggade besökare", "info": "Lämna tomt för att använda det översatta standardmeddelandet." }
+  },
+  "card": { "name": "Lojalitetskort", "heading": "Rubrik", "max_width": "Maximal bredd" },
+  "product": { "name": "Produktpoäng", "text": "Anpassad text", "text_info": "Valfritt. {points} och {name} ersätts. Lämna tomt för att använda den översatta standardtexten." }
+}

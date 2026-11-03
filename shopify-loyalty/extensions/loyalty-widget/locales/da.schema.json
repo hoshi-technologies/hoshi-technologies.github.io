@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Knaptekst", "info": "Lad feltet være tomt for at bruge titlen, der er angivet i appen." },
+    "position": { "label": "Placering", "app": "Appindstilling", "right": "Nederst til højre", "left": "Nederst til venstre" },
+    "guest_text": { "label": "Besked til besøgende, der ikke er logget ind", "info": "Lad feltet være tomt for at bruge den oversatte standardbesked." }
+  },
+  "card": { "name": "Loyalitetskort", "heading": "Overskrift", "max_width": "Maksimal bredde" },
+  "product": { "name": "Produktpoint", "text": "Brugerdefineret tekst", "text_info": "Valgfrit. {points} og {name} erstattes. Lad feltet være tomt for at bruge den oversatte standardtekst." }
+}

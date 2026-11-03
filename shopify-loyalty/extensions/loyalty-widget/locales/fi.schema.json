@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Painikkeen teksti", "info": "Jätä tyhjäksi, niin käytetään sovelluksessa määritettyä otsikkoa." },
+    "position": { "label": "Sijainti", "app": "Sovelluksen asetus", "right": "Alhaalla oikealla", "left": "Alhaalla vasemmalla" },
+    "guest_text": { "label": "Viesti uloskirjautuneille vierailijoille", "info": "Jätä tyhjäksi, niin käytetään käännettyä oletusviestiä." }
+  },
+  "card": { "name": "Kanta-asiakaskortti", "heading": "Otsikko", "max_width": "Enimmäisleveys" },
+  "product": { "name": "Tuotteen pisteet", "text": "Mukautettu teksti", "text_info": "Valinnainen. {points} ja {name} korvataan. Jätä tyhjäksi, niin käytetään käännettyä oletustekstiä." }
+}

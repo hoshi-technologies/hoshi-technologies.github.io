@@ -1,0 +1,599 @@
+{
+  "nav": {
+    "dashboard": "Hallintapaneeli",
+    "members": "Jäsenet",
+    "rewards": "Palkinnot",
+    "tiers": "Asiakastasot",
+    "settings": "Asetukset"
+  },
+  "common": {
+    "edit": "Muokkaa",
+    "active": "Aktiivinen",
+    "paused": "Keskeytetty",
+    "customer": "Asiakas",
+    "type": "Tyyppi",
+    "detail": "Tiedot",
+    "points": "Pisteet",
+    "date": "Päivämäärä",
+    "anonymousCustomer": "Anonyymi asiakas",
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "delete": "Poista",
+    "status": "Tila",
+    "actions": "Toiminnot",
+    "change": "Muuta",
+    "optional": "valinnainen",
+    "color": "Väri"
+  },
+  "dashboard": {
+    "title": "Hallintapaneeli",
+    "manageRewards": "Hallinnoi palkintoja",
+    "pausedTitle": "Ohjelma on keskeytetty",
+    "pausedText": "Asiakkaasi eivät enää kerrytä pisteitä eivätkä voi lunastaa palkintoja.",
+    "reactivate": "Ota uudelleen käyttöön",
+    "campaignTitle": "Kampanja käynnissä: {pointsName} ×{multiplier}",
+    "campaignUntil": "Päättyy {date}.",
+    "campaignNoEnd": "Ei päättymispäivää.",
+    "welcome": "Tervetuloa Hoshi Clubiin",
+    "summary": "{amount} ostoja = {points} {pointsName} · {signup} {pointsName} rekisteröitymisestä",
+    "stats": {
+      "members": "Jäsenet",
+      "newMembers_one": "+{count} viimeisen 30 päivän aikana",
+      "newMembers_other": "+{count} viimeisen 30 päivän aikana",
+      "pointsEarned": "Myönnetty ({pointsName})",
+      "pointsSpent": "Lunastettu ({pointsName})",
+      "rewardsClaimed": "Lunastetut palkinnot",
+      "rewardsUsed_one": "{count} käytetty tilauksessa",
+      "rewardsUsed_other": "{count} käytetty tilauksissa",
+      "rewardRevenue": "Palkintojen tuottama myynti",
+      "rewardRevenueHint": "Kanta-asiakaskoodilla tehdyt tilaukset",
+      "referrals": "Suositellut asiakkaat",
+      "pendingReferrals_one": "{count} odottava kutsu",
+      "pendingReferrals_other": "{count} odottavaa kutsua",
+      "referralRevenue": "Suosittelujen tuottama myynti",
+      "referralRevenueHint": "Suositeltujen ystävien ensimmäiset tilaukset"
+    },
+    "chartTitle": "Ansaittu päivittäin ({pointsName}, viimeiset 30 päivää)",
+    "chartAria": "{total} {unit} ansaittu viimeisen 30 päivän aikana",
+    "recentActivity": "Viimeaikainen toiminta",
+    "noActivity": "Ei vielä toimintaa. Pisteet näkyvät täällä ensimmäisen tilauksen tai rekisteröitymisen jälkeen.",
+    "gettingStarted": "Aloitus",
+    "steps": {
+      "enableTitle": "Ota ohjelma käyttöön",
+      "enableText": "Asiakkaasi ansaitsevat pisteitä heti, kun ohjelma on aktiivinen.",
+      "rewardsTitle": "Tarjoa palkintoja",
+      "rewardsText": "Alennuksia, jotka asiakkaasi voivat avata pisteillään.",
+      "tiersTitle": "Määritä asiakastasot",
+      "tiersText": "Pronssi, Hopea, Kulta tai vain kutsutuille tarkoitetut tasot automaattisilla alennuksilla.",
+      "widgetTitle": "Näytä widget kaupassasi",
+      "widgetText": "Ota ”Hoshi Club” käyttöön teemaeditorissa (Sovellusten upotukset).",
+      "widgetAction": "Avaa teemaeditori"
+    },
+    "howItWorks": "Miten se toimii?",
+    "how": {
+      "signup": "Asiakas luo tilin: tervetuliaisbonus.",
+      "orders": "Jokainen maksettu tilaus kerryttää pisteitä.",
+      "tiers": "Mitä enemmän he keräävät, sitä korkeampi taso (tai voit määrittää tason itse).",
+      "discounts": "Jokainen taso voi antaa automaattisen alennuksen kassalla.",
+      "rewards": "Widgetissä he vaihtavat pisteitä henkilökohtaiseen alennuskoodiin.",
+      "more": "He ansaitsevat pisteitä myös suosittelemalla ystäviä, syntymäpäivänään ja seuraamalla sinua somessa."
+    }
+  },
+  "member": {
+    "viewCustomer": "Näytä asiakas",
+    "tierSaved": "Taso päivitetty",
+    "codeCreated": "Koodi luotu: {code}",
+    "pointsAdded": "Pisteet lisätty",
+    "pointsRemoved": "Pisteet poistettu",
+    "errors": {
+      "points": "Anna pistemäärä"
+    },
+    "available": "Käytettävissä oleva saldo",
+    "tier": "Taso",
+    "tierAssigned": "Taso (määritetty)",
+    "noTier": "Ei mitään",
+    "lifetimeAndOrders": "{lifetime} yhteensä · {orders}",
+    "toNextTier": "Vielä {points} {pointsName} tasoon {tier}",
+    "history": "Pistehistoria",
+    "noHistory": "Ei vielä toimintaa.",
+    "codes": "Ansaitut alennuskoodit",
+    "code": "Koodi",
+    "codeUsed": "Käytetty",
+    "codeAvailable": "Käytettävissä",
+    "adjust": "Säädä saldoa",
+    "adjustAction": "Toiminto",
+    "addPoints": "Lisää pisteitä",
+    "removePoints": "Poista pisteitä",
+    "pointsCount": "Pistemäärä",
+    "reason": "Syy (näkyy historiassa)",
+    "reasonPlaceholder": "Hyvityseleenä",
+    "confirm": "Vahvista",
+    "giftReward": "Anna palkinto",
+    "giftRewardText": "Luo henkilökohtaisen koodin ja vähentää asiakkaan pisteet.",
+    "generateCode": "Luo koodi",
+    "info": "Tiedot",
+    "birthday": "Syntymäpäivä: {date}",
+    "notProvided": "ei ilmoitettu",
+    "referralCode": "Suosituskoodi: {code}",
+    "referrals": "Suosittelut: {converted} toteutunutta / {invited} kutsuttua",
+    "expiresAt": "Pisteet voimassa {date} asti",
+    "tierSection": "Asiakastaso",
+    "tierLocked": "Lukittu taso: se ei enää muutu pisteiden mukaan.",
+    "tierAuto": "Automaattinen: tällä hetkellä {tier}, muuttuu kertyneiden pisteiden ({pointsName}) mukaan.",
+    "applyTier": "Käytä tasoa",
+    "perks": "Tason {tier} edut",
+    "noPerks": "Tälle tasolle ei ole määritetty etuja.",
+    "shopifyTag": "Shopify-tunniste: {tag}",
+    "danger": "Vaaravyöhyke",
+    "confirmRemove": "Poistetaanko asiakas ohjelmasta? Saldo ja historia poistetaan.",
+    "remove": "Poista ohjelmasta"
+  },
+  "members": {
+    "title": "Jäsenet",
+    "add": "Lisää asiakas",
+    "importAll": "Tuo kaikki asiakkaani",
+    "joined": "{name} liittyi ohjelmaan",
+    "tierUpdated": "Asiakkaan {name} taso päivitetty",
+    "imported_one": "{count} asiakas tuotu",
+    "imported_other": "{count} asiakasta tuotu",
+    "allImported": "Kaikki asiakkaasi ovat jo jäseniä",
+    "search": "Haku",
+    "searchPlaceholder": "Nimi tai sähköposti",
+    "tier": "Taso",
+    "allTiers": "Kaikki tasot",
+    "sort": "Lajittele",
+    "sortPoints": "Eniten pisteitä",
+    "sortRecent": "Uusimmat",
+    "email": "Sähköposti",
+    "balance": "Saldo",
+    "lifetime": "Yhteensä",
+    "orders": "Tilaukset",
+    "assigned": "Määritetty",
+    "noResults": "Hakuasi vastaavia jäseniä ei löytynyt.",
+    "empty": "Ei vielä jäseniä. Lisää asiakas tai tuo kaikki asiakkaasi.",
+    "total_one": "{count} jäsen",
+    "total_other": "{count} jäsentä"
+  },
+  "addMember": {
+    "title": "Lisää asiakas ohjelmaan",
+    "search": "Hae Shopify-asiakasta",
+    "searchPlaceholder": "Nimi, sähköposti tai puhelin",
+    "searching": "Haetaan",
+    "noResults": "Asiakkaita ei löytynyt.",
+    "noEmail": "Ei sähköpostia",
+    "orders_one": "{count} tilaus",
+    "orders_other": "{count} tilausta",
+    "alreadyMember": "Jo jäsen",
+    "choose": "Valitse",
+    "tierLabel": "Asiakastaso",
+    "tierDetails": "”Automaattinen”: taso muuttuu pisteiden mukaan. Muuten valittu taso lukitaan.",
+    "autoTier": "Automaattinen (perustuu: {pointsName})",
+    "invitationTier": "{name} (vain kutsutuille)",
+    "welcomeBonus": "Anna tervetuliaisbonus ({points} {pointsName})",
+    "update": "Päivitä",
+    "submit": "Lisää ohjelmaan"
+  },
+  "program": {
+    "title": "Ohjelman asetukset",
+    "saved": "Asetukset tallennettu",
+    "pointsNameFallback": "pistettä",
+    "status": {
+      "title": "Tila",
+      "label": "Kanta-asiakasohjelma käytössä",
+      "details": "Poista käytöstä keskeyttääksesi ohjelman ilman, että asiakkaasi menettävät pisteensä."
+    },
+    "earn": {
+      "title": "Pisteiden ansaitseminen",
+      "pointsName": "Pisteiden nimi",
+      "pointsNameDetails": "Esim. pistettä, tähteä, kolikkoa…",
+      "perUnit": "Pisteitä per käytetty {currency}",
+      "perUnitDetails": "Esimerkki: {amount}:n tilaus tuottaa {points} {pointsName} (ennen tasokerrointa).",
+      "signup": "Tervetuliaisbonus",
+      "signupDetails": "Annetaan, kun asiakas luo tilin.",
+      "firstOrder": "Ensimmäisen tilauksen bonus",
+      "firstOrderDetails": "Tilauksen pisteiden lisäksi."
+    },
+    "birthday": {
+      "title": "Syntymäpäivä 🎂",
+      "label": "Syntymäpäivänä annettavat pisteet",
+      "details": "Asiakkaat syöttävät päivämäärän widgetissä. Väärinkäytösten estämiseksi päivämäärä on tallennettava vähintään 30 päivää etukäteen. 0 = pois käytöstä."
+    },
+    "referral": {
+      "title": "Suosittelu 🤝",
+      "enable": "Ota suosittelu käyttöön",
+      "enableDetails": "Jokainen jäsen saa henkilökohtaisen linkin. Ystävä saa tervetuliaiskoodin; suosittelija ansaitsee pisteitä, kun ystävä tekee ensimmäisen tilauksensa.",
+      "referrerPoints": "Suosittelijan ansaitsemat pisteet",
+      "friendGift": "Lahja ystävälle",
+      "value": "Arvo",
+      "minimum": "Vähimmäisostos (valinnainen)"
+    },
+    "social": {
+      "title": "Sosiaalinen media 📣",
+      "intro": "Lisää sivusi: widget kutsuu asiakkaita seuraamaan sinua, ja he saavat siitä pisteitä ({pointsName}) kerran per verkosto.",
+      "points": "Pisteitä per seurattu verkosto"
+    },
+    "bonus": {
+      "title": "Bonuspistekampanja 🔥",
+      "intro": "Moninkertaista ansaitut pisteet ({pointsName}) tietyksi ajaksi (alennusmyynnit, juhlapyhät, lanseeraukset…). Kampanjan aikana widgetissä näkyy banneri.",
+      "multiplier": "Kerroin",
+      "none": "Ei kampanjaa",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "Alku (valinnainen)",
+      "end": "Loppu (valinnainen)",
+      "message": "Bannerin viesti",
+      "messageDetails": "Jätä tyhjäksi, niin näytetään käännetty oletusviesti.",
+      "messagePlaceholder": "Black Friday: {pointsName} ×{multiplier}!"
+    },
+    "expiration": {
+      "title": "Pisteiden vanheneminen ⏳",
+      "label": "Pisteet vanhenevat",
+      "details": "Jokainen ostos, lunastus tai pisteiden ansaitseminen siirtää päivämäärää eteenpäin. Vanhenemispäivä kannustaa asiakkaita palaamaan.",
+      "never": "Ei koskaan",
+      "months_one": "{count} kuukauden toimettomuuden jälkeen",
+      "months_other": "{count} kuukauden toimettomuuden jälkeen"
+    },
+    "widget": {
+      "title": "Widgetin ulkoasu",
+      "languageNote": "Widget näkyy automaattisesti kauppasi kielellä (36 tuettua kieltä).",
+      "widgetTitle": "Widgetin otsikko",
+      "widgetTitleDetails": "Jätä tyhjäksi, niin käytetään käännettyä oletusotsikkoa kaikilla kielillä.",
+      "defaultTitle": "Palkintoni",
+      "color": "Pääväri",
+      "colorOption": "Väri {color}",
+      "customColor": "Mukautettu väri",
+      "position": "Painikkeen sijainti",
+      "right": "Alhaalla oikealla",
+      "left": "Alhaalla vasemmalla"
+    },
+    "preview": "Esikatselu",
+    "previewTier": "Hopeataso",
+    "previewRedeem": "Lunasta"
+  },
+  "landing": {
+    "tagline": "Helpoin kanta-asiakasohjelma Shopify-kauppaasi: pisteet, VIP-tasot automaattisilla alennuksilla, suosittelut ja palkinnot muutamalla klikkauksella.",
+    "pricing": "{price}/kk · kaikki sisältyy · {days} päivän ilmainen kokeilu",
+    "shopDomain": "Kaupan verkkotunnus",
+    "install": "Asenna",
+    "login": "Kirjaudu sisään",
+    "installFromStore": "Asenna Hoshi Club Shopify App Storesta.",
+    "errors": {
+      "missingShop": "Anna kauppasi verkkotunnus",
+      "invalidShop": "Tämä kaupan verkkotunnus ei ole kelvollinen"
+    },
+    "features": {
+      "points": {
+        "title": "Automaattiset pisteet.",
+        "text": "Asiakkaat ansaitsevat pisteitä jokaisesta tilauksesta ilman teknisiä asetuksia."
+      },
+      "tiers": {
+        "title": "VIP-tasot.",
+        "text": "Pronssi, Hopea, Kulta tai vain kutsutuille tarkoitetut tasot automaattisilla alennuksilla ja pistekertoimilla parhaille asiakkaillesi."
+      },
+      "referrals": {
+        "title": "Suosittelut ja bonukset.",
+        "text": "Suositteluohjelma, syntymäpäiväpalkinnot, somessa seuraaminen ja tuplapistekampanjat."
+      },
+      "widget": {
+        "title": "Tyylikäs widget.",
+        "text": "Kelluva painike kauppasi väreissä pisteiden tarkistamiseen ja lunastamiseen."
+      },
+      "languages": {
+        "title": "36 kieltä.",
+        "text": "Sovellus ja widget puhuvat sinun ja asiakkaidesi kieltä."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "Tietosuojakäytäntö",
+    "supportLink": "Ohjeet ja yhteystiedot",
+    "language": "Kieli",
+    "privacy": {
+      "title": "Tietosuojakäytäntö",
+      "updated": "Hoshi Club, julkaisija Hoshi Technologies. Päivitetty viimeksi: {date}.",
+      "intro": "Hoshi Club (”sovellus”) antaa Shopify-kauppiaille mahdollisuuden tarjota asiakkailleen kanta-asiakasohjelman. Tässä käytännössä kerrotaan, mitä tietoja sovellus käsittelee, miksi ja miten.",
+      "collectedTitle": "Kerättävät tiedot",
+      "collected": {
+        "store": {
+          "label": "Kaupan tiedot:",
+          "text": "kaupan verkkotunnus ja Shopifyn asennuksen yhteydessä antamat käyttöoikeustunnukset."
+        },
+        "members": {
+          "label": "Jäsentiedot:",
+          "text": "Shopify-asiakastunnus, etunimi, sukunimi, sähköpostiosoite, tilausten määrä, pistesaldo ja -historia, kanta-asiakastaso, ansaitut alennuskoodit, syntymäpäivä (päivä ja kuukausi, jos asiakas ilmoittaa sen) ja suosituskoodi."
+        },
+        "referrals": {
+          "label": "Suosittelutiedot:",
+          "text": "kutsutun henkilön antama sähköpostiosoite tervetuliaiskoodin vastaanottamista varten."
+        },
+        "orders": {
+          "label": "Tilaustiedot:",
+          "text": "maksettujen tilausten tunnus, välisumma ja kokonaissumma sekä käytetyt alennuskoodit, ainoastaan pisteiden laskemista varten."
+        }
+      },
+      "noPayment": "Sovellus ei kerää maksutietoja eikä käytä mainosevästeitä.",
+      "useTitle": "Miten tietoja käytetään",
+      "use": "Tietoja käytetään ainoastaan kaupan kanta-asiakasohjelman toteuttamiseen: pisteiden laskemiseen ja näyttämiseen, tasojen ja niiden etujen määrittämiseen, alennuskoodien luomiseen, suosittelujen hallintaan ja tilastojen näyttämiseen kauppiaalle. Tietoja ei koskaan myydä, vuokrata tai jaeta kolmansille osapuolille markkinointitarkoituksiin.",
+      "hostingTitle": "Säilytys ja käsittelijät",
+      "hosting": "Tiedot säilytetään Cloudflaren palvelussa (Cloudflare Workers ja D1). Shopify toimittaa kaupan ja asiakkaiden tiedot rajapintojensa kautta. Nämä palveluntarjoajat toimivat henkilötietojen käsittelijöinä ja soveltavat omia suojatoimiaan.",
+      "retentionTitle": "Säilytysaika ja poistaminen",
+      "retention": {
+        "installed": "Tietoja säilytetään niin kauan kuin sovellus on asennettuna.",
+        "customerRedact": "Kun asiakas sitä pyytää (Shopifyn kautta), hänen tietonsa poistetaan automaattisesti (customers/redact-webhook).",
+        "shopRedact": "48 tuntia asennuksen poistamisen jälkeen Shopify pyytää kaupan tietojen poistamista; kaikki tiedot poistetaan tällöin (shop/redact-webhook).",
+        "merchant": "Kauppias voi poistaa asiakkaan ohjelmasta milloin tahansa sovelluksessa."
+      },
+      "rightsTitle": "Oikeutesi",
+      "rights": "Yleisen tietosuoja-asetuksen (GDPR) ja vastaavien lakien nojalla asiakkailla on oikeus tutustua tietoihinsa, oikaista ja poistaa ne sekä vastustaa niiden käsittelyä. He voivat käyttää näitä oikeuksia asianomaisessa kaupassa (rekisterinpitäjä) tai kirjoittamalla meille. Shopifyn lähettämät tietopyynnöt (customers/data_request-webhook) käsitellään.",
+      "contactTitle": "Yhteystiedot",
+      "contact": "Kysymyksiä?"
+    },
+    "support": {
+      "title": "Ohjeet ja yhteystiedot",
+      "intro": "Kysyttävää tai ongelma? Kirjoita meille, vastaamme 2 arkipäivän kuluessa:",
+      "faqTitle": "Usein kysytyt kysymykset",
+      "faq": {
+        "widget": {
+          "q": "Miten näytän ohjelman kaupassani?",
+          "a": "Shopifyssa: Verkkokauppa → Teemat → Muokkaa → Sovellusten upotukset, ja ota sitten ”Hoshi Club” käyttöön. Sovelluksen hallintapaneelissa on suora linkki."
+        },
+        "points": {
+          "q": "Milloin asiakkaani saavat pisteensä?",
+          "a": "Automaattisesti heti, kun tilaus on maksettu. Pisteet poistetaan, jos tilaus hyvitetään."
+        },
+        "tierDiscounts": {
+          "q": "Miten tasoalennukset toimivat?",
+          "a": "Jokainen taso lisää asiakkaalle tunnisteen ja luo Shopifyn automaattisen alennuksen, joka on varattu kyseisen tason asiakkaille. Se vähennetään kassalla ilman koodia. Näet alennukset kohdassa Shopify → Alennukset."
+        },
+        "assignTier": {
+          "q": "Voinko määrittää tason tietylle asiakkaalle?",
+          "a": "Kyllä: Jäsenet → Lisää asiakas, tai jäsenen sivulta (osio ”Asiakastaso”)."
+        },
+        "referrals": {
+          "q": "Miten suosittelu toimii?",
+          "a": "Jokaisella jäsenellä on henkilökohtainen linkki. Kutsuttu ystävä antaa sähköpostiosoitteensa ja saa tervetuliaiskoodin; suosittelija ansaitsee pisteitä, kun koodia käytetään maksetussa tilauksessa."
+        },
+        "languages": {
+          "q": "Mitä kieliä tuetaan?",
+          "a": "Sovellus noudattaa Shopify-hallintasi kieltä ja widget kauppasi kieltä, 36 kielellä. Tyhjiksi jätetyt palkintojen nimet käännetään automaattisesti."
+        },
+        "uninstall": {
+          "q": "Mitä tapahtuu, jos poistan sovelluksen?",
+          "a": "Automaattiset alennukset säilyvät Shopifyssa, kunnes poistat ne. Ohjelman tiedot poistetaan 48 tuntia sovelluksen poistamisen jälkeen."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "Palkinnot",
+    "new": "Uusi palkinto",
+    "create": "Luo palkinto",
+    "editTitle": "Muokkaa palkintoa",
+    "deleted": "Palkinto poistettu",
+    "hidden": "Palkinto piilotettu",
+    "shown": "Palkinto näkyvissä",
+    "updated": "Palkinto päivitetty",
+    "created": "Palkinto luotu",
+    "errors": {
+      "cost": "Pistehinnan on oltava suurempi kuin 0",
+      "value": "Anna alennuksen arvo",
+      "percent": "Alennus ei voi olla yli 100 %"
+    },
+    "emptyTitle": "Ei vielä palkintoja",
+    "emptyText": "Luo ensimmäinen palkintosi: asiakkaat voivat saada sen pisteitä vastaan ({pointsName}).",
+    "columns": {
+      "reward": "Palkinto",
+      "cost": "Hinta",
+      "claimed": "Lunastettu"
+    },
+    "types": {
+      "AMOUNT": "Kiinteä summa",
+      "PERCENT": "Prosentti",
+      "FREE_SHIPPING": "Ilmainen toimitus"
+    },
+    "minimumShort": "Ostoksille alkaen {amount}",
+    "autoTranslated": "Nimi käännetään automaattisesti",
+    "timesClaimed_one": "{count} kerta",
+    "timesClaimed_other": "{count} kertaa",
+    "visible": "Näkyvissä",
+    "hiddenBadge": "Piilotettu",
+    "hide": "Piilota",
+    "show": "Näytä",
+    "confirmDelete": "Poistetaanko ”{title}”?",
+    "tipTitle": "Vinkki",
+    "tip": "Hyvän ensimmäisen palkinnon voi ansaita 2–3 tilauksella. Kun 1 piste vastaa yhtä käytettyä yksikköä, 500 pistettä 5:n alennuksesta on 1 %:n alennus: houkutteleva heikentämättä katteitasi.",
+    "typeLabel": "Palkinnon tyyppi",
+    "percentLabel": "Alennusprosentti",
+    "amountLabel": "Alennuksen määrä",
+    "costLabel": "Hinta pisteinä",
+    "nameLabel": "Näyttönimi (valinnainen)",
+    "nameDetails": "Jätä tyhjäksi, niin näytetään asiakkaan kielelle käännetty nimi.",
+    "minimumLabel": "Tilauksen vähimmäissumma (valinnainen)"
+  },
+  "labels": {
+    "rewardPercent": "-{value} %",
+    "rewardAmount": "-{amount}",
+    "freeShipping": "Ilmainen toimitus",
+    "percentOff": "-{value} %",
+    "amountOff": "-{amount}",
+    "tierDiscount": "{discount} jokaisesta tilauksesta",
+    "tierDiscountFrom": "{discount} jokaisesta yli {minimum}:n tilauksesta",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{reward} yli {minimum}:n tilauksista"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "Tervetuloa",
+      "ORDER": "Tilaus",
+      "FIRST_ORDER": "1. tilaus",
+      "REDEEM": "Lunastus",
+      "REFUND": "Hyvitys",
+      "ADJUST": "Säätö",
+      "BIRTHDAY": "Syntymäpäivä",
+      "REFERRAL": "Suosittelu",
+      "SOCIAL": "Sosiaalinen media",
+      "EXPIRE": "Vanheneminen"
+    },
+    "desc": {
+      "SIGNUP": "Tervetuliaisbonus",
+      "ORDER": "Tilaus {order}",
+      "ORDER_BONUS": "Tilaus {order} (bonus ×{bonus})",
+      "FIRST_ORDER": "Ensimmäisen tilauksen bonus ({order})",
+      "REDEEM": "Lunastettu: {reward}",
+      "REFUND": "Hyvitys (tilaus {order})",
+      "ADJUST_ADD": "Manuaalinen lisäys",
+      "ADJUST_REMOVE": "Manuaalinen vähennys",
+      "BIRTHDAY": "Hyvää syntymäpäivää! ({year})",
+      "REFERRAL": "Suosittelu: {friend}",
+      "SOCIAL": "Seurattu: {network}",
+      "EXPIRE": "Vanhentunut {months} kuukauden toimettomuuden jälkeen"
+    }
+  },
+  "errors": {
+    "unexpected": "Jokin meni vikaan: {details}",
+    "memberNotFound": "Jäsentä ei löytynyt",
+    "tierNotFound": "Tasoa ei löytynyt",
+    "rewardUnavailable": "Tämä palkinto ei ole enää saatavilla",
+    "programDisabled": "Kanta-asiakasohjelma on tällä hetkellä keskeytetty",
+    "notEnoughPoints": "Tarvitset vielä {missing} {pointsName}",
+    "discountFailed": "Alennuskoodia ei voitu luoda. {details}",
+    "referralCodeFailed": "Suosituskoodia ei voitu luoda",
+    "referralUnavailable": "Suosittelu ei ole käytettävissä",
+    "invalidEmail": "Virheellinen sähköpostiosoite",
+    "invalidReferral": "Virheellinen suosituslinkki",
+    "selfReferral": "Et voi suositella itseäsi",
+    "referralAlreadyUsed": "Tällä sähköpostiosoitteella on jo käytetty suosittelu",
+    "referralNewCustomersOnly": "Suosittelu koskee vain uusia asiakkaita",
+    "invalidDate": "Virheellinen päivämäärä",
+    "birthdayAlreadySet": "Syntymäpäiväsi on jo tallennettu",
+    "actionUnavailable": "Tämä toiminto ei ole käytettävissä",
+    "loginRequired": "Kirjaudu sisään nauttiaksesi ohjelmasta",
+    "notInstalled": "Sovellusta ei ole asennettu tähän kauppaan",
+    "generic": "Jokin meni vikaan, yritä uudelleen."
+  },
+  "seed": {
+    "pointsName": "pistettä",
+    "tierBronze": "Pronssi",
+    "tierSilver": "Hopea",
+    "tierGold": "Kulta"
+  },
+  "server": {
+    "tierDiscountTitle": "Taso {tier}: {discount}",
+    "tierShippingTitle": "Taso {tier}: ilmainen toimitus"
+  },
+  "tiers": {
+    "title": "Asiakastasot",
+    "new": "Uusi taso",
+    "create": "Luo taso",
+    "editTitle": "Muokkaa tasoa",
+    "resync": "Synkronoi uudelleen Shopifyn kanssa",
+    "deleted": "Taso poistettu",
+    "created": "Taso luotu",
+    "updated": "Taso päivitetty",
+    "resynced_one": "Synkronointi valmis ({count} asiakas päivitetty)",
+    "resynced_other": "Synkronointi valmis ({count} asiakasta päivitetty)",
+    "errors": {
+      "name": "Anna tasolle nimi",
+      "value": "Anna alennuksen arvo",
+      "percent": "Alennus ei voi olla yli 100 %",
+      "sync": "Taso tallennettu, mutta Shopify-alennusta ei voitu luoda: {details}"
+    },
+    "intro": "Jokainen taso voi tarjota kassalla automaattisesti sovellettavia etuja (pysyvä alennus, ilmainen toimitus), pistekertoimen ({pointsName}) ja mukautettuja etuja. Taso on joko automaattinen (saavutetaan keräämällä pisteitä: {pointsName}) tai manuaalinen (määrität sen itse asiakkaan sivulla, esim. ”Lähettiläs” tai ”Tukku”). Manuaalinen taso on aina etusijalla.",
+    "emptyTitle": "Ei tasoja",
+    "emptyText": "Luo asiakastasot ja niiden edut.",
+    "autoSection": "Automaattiset tasot (pisteiden perusteella)",
+    "manualSection": "Manuaalisesti määritetyt tasot",
+    "levelNumber": "Taso {number}",
+    "invitationOnly": "Vain kutsutuille",
+    "assignedManually": "Määritetty manuaalisesti",
+    "fromPoints": "Alkaen {points} {pointsName} kerättynä",
+    "noPerks": "Ei määritettyjä etuja",
+    "customers_one": "{count} asiakas",
+    "customers_other": "{count} asiakasta",
+    "tag": "Tunniste: {tag}",
+    "syncError": "Shopify-alennusta ei luotu: {details}",
+    "confirmDelete": "Poistetaanko taso ”{name}”? Sen automaattiset alennukset poistetaan.",
+    "nameLabel": "Tason nimi",
+    "namePlaceholder": "Esim. Kulta, Lähettiläs, Tukku…",
+    "modeQuestion": "Miten asiakas saa tämän tason?",
+    "modeAuto": "Automaattisesti",
+    "modeAutoText": "Keräämällä pisteitä ({pointsName})",
+    "modeManual": "Manuaalisesti",
+    "modeManualText": "Määrität sen itse",
+    "minPointsLabel": "Vaaditut kerätyt pisteet ({pointsName})",
+    "perksTitle": "Automaattiset edut",
+    "discountLabel": "Pysyvä alennus tilauksista",
+    "discountNone": "Ei alennusta",
+    "discountPercent": "Prosentti (esim. -10 %)",
+    "discountAmount": "Kiinteä summa (esim. -5)",
+    "discountValue": "Alennuksen arvo",
+    "discountMinimum": "Vähimmäisostos (valinnainen)",
+    "freeShipping": "Ilmainen toimitus kaikille tilauksille",
+    "multiplierLabel": "Pistekerroin ({pointsName})",
+    "multiplierDetails": "1 = normaali, 2 = kaksinkertaiset pisteet ({pointsName}) tilausta kohden.",
+    "otherPerks": "Muut edut (yksi per rivi, näytetään asiakkaille)",
+    "otherPerksPlaceholder": "Ennakkopääsy alennusmyynteihin\nSyntymäpäivälahja"
+  },
+  "widget": {
+    "title": "Palkintoni",
+    "unavailable": "Kanta-asiakasohjelma ei ole tilapäisesti käytettävissä.",
+    "guestText": "Luo tili, niin ansaitset pisteitä jokaisesta ostoksesta ja saat käyttöösi eksklusiivisia alennuksia.",
+    "join": "Liity ohjelmaan",
+    "haveAccount": "Minulla on jo tili",
+    "hello": "Hei {name}",
+    "earnTitle": "Ansaitse {pointsName}",
+    "nextTier": "Vielä {points} {pointsName} tasoon {tier}",
+    "bonusDefault": "{pointsName} ×{multiplier}!",
+    "bonusUntil": "{date} asti",
+    "rewardsTitle": "Palkinnot",
+    "minimum": "alkaen {amount}",
+    "redeem": "Lunasta",
+    "missing": "Vielä {points}",
+    "codesTitle": "Koodini",
+    "useCode": "Käytä",
+    "perksTitle": "Tason {tier} etuni",
+    "perUnit": "{points} {pointsName} jokaista {amount} kohden",
+    "signup": "{points} {pointsName} rekisteröityessäsi",
+    "firstOrder": "{points} {pointsName} ensimmäisestä tilauksestasi",
+    "follow": "Seuraa meitä: {network}",
+    "followButton": "Seuraa",
+    "birthdayGuest": "{points} {pointsName} syntymäpäivänäsi",
+    "birthdaySet": "Syntymäpäivä {date}: {points} {pointsName} sinulle",
+    "birthdayAsk": "Syntymäpäiväsi:",
+    "birthdayConfirm": "Onko syntymäpäiväsi {date}? Sitä ei voi muuttaa myöhemmin.",
+    "birthdaySaved": "Syntymäpäivä tallennettu 🎂",
+    "day": "Päivä",
+    "month": "Kuukausi",
+    "ok": "OK",
+    "socialThanks": "Kiitos! Pisteesi on lisätty",
+    "socialAlready": "Olet jo saanut pisteet tästä verkostosta",
+    "referralTitle": "Suosittelu",
+    "referralMemberTitle": "Suosittele ystävillesi",
+    "referralIntro": "Anna ystävillesi {reward} ja ansaitse {points} {pointsName}, kun he tekevät ensimmäisen tilauksensa.",
+    "referralLink": "Suosituslinkki",
+    "copy": "Kopioi",
+    "copied": "Kopioitu!",
+    "share": "Jaa…",
+    "shareText": "Saat alennuksen ensimmäisestä tilauksestasi!",
+    "referralsDone_one": "{count} ystävä suositeltu 🎉",
+    "referralsDone_other": "{count} ystävää suositeltu 🎉",
+    "tiersTitle": "Tasot",
+    "tierFrom": "alkaen {points} {pointsName}",
+    "expires": "Pisteesi ({pointsName}) ovat voimassa {date} asti (voimassaolo pitenee jokaisesta ostoksesta).",
+    "confirmRedeem": "Vaihdetaanko pisteesi palkintoon ”{reward}”?",
+    "congrats": "Onnittelut!",
+    "rewardReady": "Palkintosi ”{reward}” on valmis:",
+    "applyCart": "Käytä ostoskoriini",
+    "close": "Sulje",
+    "errorGeneric": "Jokin meni vikaan, yritä uudelleen.",
+    "aFriend": "Ystävä",
+    "giftTitle": "{name} lähetti sinulle lahjan!",
+    "giftText": "Nauti edusta {reward} ensimmäisestä tilauksestasi.",
+    "emailPlaceholder": "Sähköpostiosoitteesi",
+    "getCode": "Hae koodini",
+    "later": "Ehkä myöhemmin",
+    "welcomeCodeTitle": "Tervetuliaiskoodisi",
+    "welcomeCodeText": "{reward} ensimmäisestä tilauksestasi:",
+    "continueShopping": "Jatka ostoksia",
+    "productPoints": "Ansaitse {points} {pointsName} tällä ostoksella"
+  }
+}
