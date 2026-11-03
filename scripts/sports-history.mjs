@@ -141,7 +141,7 @@ const STRATS = [
   ...[1.02, 1.05, 1.1, 1.2].map((t) => ({ id: 'val_' + t, label: `Valeur ≥ ${String(t).replace('.', ',')}`, t })),
   ...[1.05, 1.1].map((t) => ({ id: 'valout_' + t, label: `Valeur ≥ ${String(t).replace('.', ',')}, cote ≥ 3`, t, minOdds: 3 })),
 ];
-function backtest(list, alpha) {
+function backtest(list, alpha, suffix) {
   return STRATS.map((st) => {
     let bets = 0,
       ret = 0,
@@ -163,7 +163,7 @@ function backtest(list, alpha) {
     }
     const roi = bets ? (ret - bets) / bets : 0;
     const sd = bets > 1 ? Math.sqrt(pr.reduce((a, v) => a + (v - roi) ** 2, 0) / (bets - 1)) : 0;
-    return { id: st.id, label: st.label, bets, wins, roi: +roi.toFixed(4), roiSE: bets ? +(sd / Math.sqrt(bets)).toFixed(4) : null };
+    return { id: st.id + (suffix || ''), label: st.label + (suffix ? ' · ' + ({ _a0: 'modèle seul', _a50: 'modèle + cotes' }[suffix] || 'cotes ' + suffix.slice(2) + ' %') : ''), bets, wins, roi: +roi.toFixed(4), roiSE: bets ? +(sd / Math.sqrt(bets)).toFixed(4) : null };
   });
 }
 
@@ -207,12 +207,15 @@ async function main() {
     const l = evaluate(train, a).logLoss;
     if (l < best) (best = l), (alpha = a);
   }
-  const bSel = backtest(sel, alpha);
-  const bConf = backtest(conf, alpha);
-  const cand = bSel.filter((x) => x.id !== 'fav' && x.bets >= 100 && x.roi > 0).sort((a, b) => b.roi - a.roi)[0];
+  // Stratégies testées avec le modèle seul, avec un mélange moitié-moitié, et avec la part retenue.
+  const variants = [...new Set([0, 0.5, alpha])];
+  const sfx = (a) => '_a' + Math.round(a * 100);
+  const bSel = variants.flatMap((a) => backtest(sel, a, sfx(a)));
+  const bConf = variants.flatMap((a) => backtest(conf, a, sfx(a)));
+  const cand = bSel.filter((x) => !x.id.startsWith('fav') && x.bets >= 100 && x.roi > 0).sort((a, b) => b.roi - a.roi)[0];
   const strategies = bConf.map((x) => {
     const s = bSel.find((y) => y.id === x.id);
-    const chosen = cand && cand.id === x.id;
+    const chosen = !!(cand && cand.id === x.id);
     return Object.assign({}, x, { roiSelection: s.roi, betsSelection: s.bets, chosen, validated: !!(chosen && x.bets >= 100 && x.roi - 2 * x.roiSE > 0) });
   });
   const perLeague = LEAGUES.map((lg) => {
@@ -238,7 +241,7 @@ async function main() {
       blend: evaluate(conf, alpha),
     },
     perLeague,
-    strategies,
+    strategies: strategies.filter((x) => x.bets || x.betsSelection),
     validated: strategies.some((x) => x.validated),
   };
   await writeFile(OUT, JSON.stringify(out));

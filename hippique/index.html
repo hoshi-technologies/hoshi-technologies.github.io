@@ -3493,10 +3493,13 @@
             // Chances affichées : modèle Elo combiné aux cotes quand elles sont complètes
             // (moitié-moitié, ou 80 % cotes si l'une des équipes a moins de 10 matchs connus).
             var need = cfg.draws ? ['h', 'd', 'a'] : ['h', 'a'];
+            // Référence du marché : les cotes de la source (pas celles que vous saisissez, sinon
+            // la valeur se calculerait contre elle-même). Votre cote sert à calculer la valeur.
+            var ref = e.odds || {};
             var ip =
               need.every(function (k) {
-                return o[k] > 1;
-              }) && SP.impliedProbs(o);
+                return ref[k] > 1;
+              }) && SP.impliedProbs(ref);
             var fewGames = e.games && Math.min(e.games[0], e.games[1]) < 10;
             var hA = sp === 'foot' && sportHist.foot && sportHist.foot.alpha != null ? sportHist.foot.alpha : 0.5;
             var alphaUsed = fewGames ? Math.max(0.8, hA) : hA;
@@ -3567,7 +3570,16 @@
             else if (p) html += '<p class="hint" style="margin:6px 0 0">Saisissez la cote de votre bookmaker pour voir la valeur et les gains possibles.</p>';
             if (e.games && Math.min(e.games[0], e.games[1]) < 5)
               html += '<p class="hint" style="margin:4px 0 0">⚠️ Peu de matchs connus pour l\'un des deux : pronostic peu fiable.</p>';
-            if (pm && ip)
+            if (pm && ip && alphaUsed >= 0.99)
+              html +=
+                '<p class="hint" style="margin:4px 0 0">Chances = cotes de référence (l\'étude sur 8 saisons montre qu\'elles prévoient mieux que notre modèle). Modèle seul : ' +
+                need
+                  .map(function (k) {
+                    return pctS(pm[k]);
+                  })
+                  .join(' / ') +
+                '. Une valeur au-dessus de 1 signifie que votre cote est meilleure que celle du marché.</p>';
+            else if (pm && ip)
               html +=
                 '<p class="hint" style="margin:4px 0 0">Chances = modèle Elo combiné aux cotes (' +
                 Math.round(alphaUsed * 100) +
