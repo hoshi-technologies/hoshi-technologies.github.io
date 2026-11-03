@@ -811,6 +811,106 @@
     };
   }
 
+  // ---------------------------------------------------------------------------
+  // Paris combinés (couplé, 2 sur 4 / duo, trio, quarté / quatrio)
+  // ---------------------------------------------------------------------------
+
+  // size : chevaux par combinaison ; depth : places concernées ; need : bons chevaux requis.
+  var COMBO_BETS = [
+    { key: 'couple_g', label: 'Couplé gagnant', rule: 'les 2 premiers, dans n\'importe quel ordre', size: 2, depth: 2, need: 2 },
+    { key: 'couple_p', label: 'Couplé placé', rule: '2 chevaux parmi les 3 premiers', size: 2, depth: 3, need: 2 },
+    { key: 'duo4', label: '2 sur 4 / Duo 4', rule: '2 chevaux parmi les 4 premiers', size: 2, depth: 4, need: 2 },
+    { key: 'trio', label: 'Trio', rule: 'les 3 premiers, dans n\'importe quel ordre', size: 3, depth: 3, need: 3 },
+    { key: 'quatrio', label: 'Quarté désordre / Quatrio', rule: 'les 4 premiers, dans n\'importe quel ordre', size: 4, depth: 4, need: 4 },
+  ];
+
+  /**
+   * Chances des paris combinés par simulation de l'arrivée (même modèle que les places).
+   * Pour chaque pari : les combinaisons les plus probables, et des formules « champ réduit »
+   * avec nos k meilleurs chevaux (nombre de combinaisons, chances d'avoir au moins une
+   * combinaison gagnante).
+   */
+  function comboAnalysis(pWin, opts) {
+    opts = opts || {};
+    var n = pWin.length;
+    if (n < 4) return null;
+    var N = opts.simulations || 30000,
+      lam = opts.placeDiscount || 0.8,
+      rand = rng(opts.seed || 20261104);
+    var depthMax = Math.min(5, n);
+    var adj = pWin.map((p) => Math.pow(p, lam));
+    var used = new Uint8Array(n);
+    var top = [];
+    for (var d = 0; d < depthMax; d++) top.push(new Float64Array(n));
+    var bets = COMBO_BETS.filter((b) => b.depth <= n);
+    var counts = bets.map(() => ({}));
+    var firstK = new Int32Array(depthMax);
+    // Formules : nos k meilleurs chevaux (par chances d'être dans les « depth » premiers).
+    var sims = new Int32Array(N * depthMax);
+    for (var k = 0; k < N; k++) {
+      used.fill(0);
+      for (var pos = 0; pos < depthMax; pos++) {
+        var w = pos === 0 ? pWin : adj,
+          tot = 0,
+          i;
+        for (i = 0; i < n; i++) if (!used[i]) tot += w[i];
+        var x = rand() * tot,
+          j = -1;
+        for (i = 0; i < n; i++) {
+          if (used[i]) continue;
+          x -= w[i];
+          j = i;
+          if (x <= 0) break;
+        }
+        used[j] = 1;
+        firstK[pos] = j;
+        sims[k * depthMax + pos] = j;
+        for (var dd = pos; dd < depthMax; dd++) top[dd][j]++;
+      }
+      // Combinaisons gagnantes de chaque pari pour cette arrivée
+      bets.forEach(function (b, q) {
+        var arr = Array.prototype.slice.call(firstK, 0, b.depth).sort((u, v) => u - v);
+        var C = counts[q];
+        if (b.size === b.depth) {
+          var key = arr.join('-');
+          C[key] = (C[key] || 0) + 1;
+        } else {
+          // toutes les sous-combinaisons de taille « size » parmi les « depth » premiers
+          (function rec(start, acc) {
+            if (acc.length === b.size) {
+              var kk = acc.join('-');
+              C[kk] = (C[kk] || 0) + 1;
+              return;
+            }
+            for (var t = start; t < arr.length; t++) rec(t + 1, acc.concat(arr[t]));
+          })(0, []);
+        }
+      });
+    }
+    return bets.map(function (b, q) {
+      var pTop = Array.from(top[b.depth - 1], (c) => c / N);
+      var order = pTop.map((_, i) => i).sort((u, v) => pTop[v] - pTop[u] || pWin[v] - pWin[u]);
+      var best = Object.keys(counts[q])
+        .map((key) => ({ idx: key.split('-').map(Number), p: counts[q][key] / N }))
+        .sort((u, v) => v.p - u.p)
+        .slice(0, 5);
+      var formulas = [];
+      for (var kk = b.size; kk <= Math.min(n, b.size + 4); kk++) {
+        var set = order.slice(0, kk);
+        var inSet = new Uint8Array(n);
+        set.forEach((i) => (inSet[i] = 1));
+        var ok = 0;
+        for (var s2 = 0; s2 < N; s2++) {
+          var hits = 0;
+          for (var t = 0; t < b.depth; t++) if (inSet[sims[s2 * depthMax + t]]) hits++;
+          if (hits >= b.need) ok++;
+        }
+        formulas.push({ k: kk, idx: set, combos: comb(kk, b.size), p: ok / N });
+      }
+      return { key: b.key, label: b.label, rule: b.rule, size: b.size, depth: b.depth, best: best, formulas: formulas };
+    });
+  }
+
   /** Taux de victoire (%) lissé d'un jockey/entraîneur à partir de [courses, victoires, places]. */
   function statRate(st) {
     if (!st || st[0] < 3) return null;
@@ -820,6 +920,8 @@
   var api = {
     statRate: statRate,
     quinteAnalysis: quinteAnalysis,
+    comboAnalysis: comboAnalysis,
+    COMBO_BETS: COMBO_BETS,
     comb: comb,
     validatedStrategy: validatedStrategy,
     valueBets: valueBets,

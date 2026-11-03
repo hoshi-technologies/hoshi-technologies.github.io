@@ -122,3 +122,7 @@ relais toutes les ~5 h 40. La tâche planifiée horaire ne sert qu'à redémarre
   qu'il soit joué (Elo), règle la part des cotes dans la combinaison, puis choisit et confirme des stratégies
   « valeur » sur trois périodes, comme pour les courses. Le résultat (`foot-history.json`) s'affiche dans le bilan du
   football, et la part des cotes retenue sert à combiner modèle et cotes dans la page. Calcul au plus une fois par jour.
+- **Paris combinés** (vue Courses) : couplé gagnant, couplé placé, 2 sur 4 / Duo 4, Trio, Quarté désordre /
+  Quatrio. `T.comboAnalysis` (20 000 simulations de l'arrivée) donne les combinaisons les plus probables et des
+  formules avec nos k meilleurs chevaux : nombre de combinaisons, coût selon la mise et chances d'avoir au moins
+  une combinaison gagnante. Après la course, chaque combinaison est marquée ✓ ou ✗.
