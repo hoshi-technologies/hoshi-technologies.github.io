@@ -102,6 +102,10 @@ jobs:
       - name: Calibrer le modèle (une fois par jour)
         if: ${{ !inputs.probe }}
         run: node scripts/calibrate.mjs
+      - name: Sports (football, tennis, basket, rugby)
+        if: ${{ !inputs.probe }}
+        continue-on-error: true
+        run: node scripts/sports.mjs --backfill "${{ inputs.backfill || '0' }}"
       - name: Alertes (paris validés)
         if: ${{ !inputs.probe }}
         env:

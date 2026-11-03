@@ -100,3 +100,20 @@ relais toutes les ~5 h 40. La tâche planifiée horaire ne sert qu'à redémarre
 - **Application mobile** : barre d'onglets en bas (Courses, Quinté+, Bilan, Alertes, Expert), barre de titre fixe,
   installation sur l'écran d'accueil (`manifest.webmanifest`, icônes dans `hippique/icons/`), ouverture en plein
   écran, et service worker (`sw.js`) qui sert la dernière version hors connexion.
+
+## Hoshi Sports (football, tennis, basket, rugby)
+
+- **Sélecteur de sport** en haut de l'application : 🏇 Courses · ⚽ Foot · 🎾 Tennis · 🏀 Basket · 🏉 Rugby. Chaque sport a
+  ses onglets : Matchs (à venir, par jour et par compétition), Bilan et Classement.
+- **Données** : API publique ESPN (`site.api.espn.com`), récupérée par `scripts/sports.mjs` (passage complet chaque
+  heure, rapide toutes les 10 min) dans `hippique/data/sports/`. Compétitions dans `hippique/sports.js` : Ligue 1,
+  Premier League, Liga, Serie A, Bundesliga, Ligue des champions ; ATP et WTA ; NBA ; URC, Top 14, Champions Cup et
+  Six Nations.
+- **Modèle** : note Elo par équipe (par joueur au tennis, avec un K décroissant selon l'expérience), avec avantage du
+  terrain. Pour le nul (football, rugby), un modèle logistique ordonné. Les réglages (K, terrain, nul, facteur de
+  prudence) sont calibrés par sport sur les prévisions faites avant chaque match. Quand des cotes sont disponibles,
+  la page combine le modèle et les cotes (moitié-moitié, ou 80 % cotes si une équipe a peu de matchs connus).
+- **Cotes** : DraftKings via ESPN pour le football et la NBA (bookmaker américain, à titre indicatif). On peut aussi
+  saisir la cote de son bookmaker pour chaque issue. La cote vue au moins 15 min avant le match est enregistrée.
+- **Pronostics figés** dans les 3 h avant le début, jamais modifiés ensuite, et suivis dans le bilan de chaque sport.
+- Historique : `node scripts/sports.mjs --backfill 365` (ou *Run workflow* avec `backfill`).

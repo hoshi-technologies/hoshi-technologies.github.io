@@ -71,10 +71,13 @@ while :; do
     echo "::group::Passage complet $(TZ=Europe/Paris date +%H:%M)"
     node scripts/pmu-fetch.mjs || ok=0
     node scripts/calibrate.mjs || ok=0
+    # Sports : une panne de la source sportive ne doit pas bloquer les courses hippiques.
+    node scripts/sports.mjs || echo "Sports : récupération en échec (sans effet sur les courses)."
     last_full=$now
   else
     echo "::group::Cotes des courses proches $(TZ=Europe/Paris date +%H:%M)"
     node scripts/pmu-fetch.mjs --quick || ok=0
+    node scripts/sports.mjs --quick || echo "Sports : récupération rapide en échec."
   fi
   node scripts/pmu-alerts.mjs || ok=0
   node scripts/bilan.mjs || ok=0
