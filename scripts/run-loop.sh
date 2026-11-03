@@ -26,15 +26,35 @@ notify() { # titre, message, tag
   curl -s -o /dev/null -H 'Content-Type: application/json' \
     -d "{\"topic\":\"$TOPIC\",\"title\":\"$1\",\"message\":\"$2\",\"tags\":[\"$3\"],\"priority\":4}" https://ntfy.sh/ || true
 }
+BR="${GITHUB_REF_NAME:-main}"
+git config user.name "hoshi-turf-bot"
+git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+# Publication des données. Ne peut pas rester bloquée : si une autre modification est arrivée
+# entre-temps, notre commit est rejoué par-dessus ; en cas de conflit, nos données (les plus
+# récentes) l'emportent, et en dernier recours on repart de la version distante en y remettant
+# nos fichiers de données.
 publish() {
-  git add hippique/data
+  git rebase --abort >/dev/null 2>&1 || true
+  git checkout -q -B "$BR" >/dev/null 2>&1 || true
+  git add -A hippique/data
   git diff --cached --quiet && return 0
-  git -c user.name="hoshi-turf-bot" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-    commit -qm "Hoshi Turf : programme PMU du $(TZ=Europe/Paris date +'%d/%m/%Y %Hh%M')"
-  for i in 1 2 3; do
-    # En cas de conflit sur un fichier de données, la version qui vient d'être calculée l'emporte.
-    git pull -q --rebase -X theirs && git push -q && return 0
-    sleep 5
+  local msg="Hoshi Turf : programme PMU du $(TZ=Europe/Paris date +'%d/%m/%Y %Hh%M')"
+  git commit -qm "$msg" || return 1
+  for i in 1 2 3 4; do
+    git push -q origin "HEAD:$BR" && return 0
+    sleep $((i * 3))
+    git fetch -q origin "$BR" || continue
+    if ! git rebase -q -X theirs "origin/$BR" >/dev/null 2>&1; then
+      git rebase --abort >/dev/null 2>&1 || true
+      local mine
+      mine=$(git rev-parse HEAD)
+      git reset -q --hard "origin/$BR"
+      git checkout "$mine" -- hippique/data
+      git add -A hippique/data
+      git diff --cached --quiet && return 0
+      git commit -qm "$msg" || return 1
+    fi
   done
   return 1
 }
