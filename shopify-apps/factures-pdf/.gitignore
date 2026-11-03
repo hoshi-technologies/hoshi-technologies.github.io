@@ -1,8 +1,0 @@
-node_modules/
-data/
-.env
-*.pdf
-!test/fixtures/*.pdf
-.shopify/
-.dev.vars
-.wrangler/
