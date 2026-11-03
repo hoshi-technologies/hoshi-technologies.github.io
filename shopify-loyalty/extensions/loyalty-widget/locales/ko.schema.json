@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "버튼 텍스트", "info": "비워 두면 앱에서 설정한 제목이 사용됩니다." },
+    "position": { "label": "위치", "app": "앱 설정", "right": "오른쪽 하단", "left": "왼쪽 하단" },
+    "guest_text": { "label": "로그인하지 않은 방문자용 메시지", "info": "비워 두면 번역된 기본 메시지가 사용됩니다." }
+  },
+  "card": { "name": "로열티 카드", "heading": "제목", "max_width": "최대 너비" },
+  "product": { "name": "상품 포인트", "text": "사용자 지정 텍스트", "text_info": "선택 사항. {points} 및 {name}은(는) 대체됩니다. 비워 두면 번역된 기본 텍스트가 사용됩니다." }
+}

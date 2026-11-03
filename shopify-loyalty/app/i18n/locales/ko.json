@@ -1,0 +1,588 @@
+{
+  "nav": {
+    "dashboard": "대시보드",
+    "members": "회원",
+    "rewards": "리워드",
+    "tiers": "고객 등급",
+    "settings": "설정"
+  },
+  "common": {
+    "edit": "편집",
+    "active": "활성",
+    "paused": "일시 중지됨",
+    "customer": "고객",
+    "type": "유형",
+    "detail": "세부 정보",
+    "points": "포인트",
+    "date": "날짜",
+    "anonymousCustomer": "익명 고객",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "status": "상태",
+    "actions": "작업",
+    "change": "변경",
+    "optional": "선택 사항",
+    "color": "색상"
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "manageRewards": "리워드 관리",
+    "pausedTitle": "프로그램이 일시 중지되었습니다",
+    "pausedText": "고객이 더 이상 포인트를 적립하거나 리워드를 교환할 수 없습니다.",
+    "reactivate": "다시 활성화",
+    "campaignTitle": "캠페인 진행 중: {pointsName} ×{multiplier}",
+    "campaignUntil": "{date}까지.",
+    "campaignNoEnd": "종료일 없음.",
+    "welcome": "Hoshi Club에 오신 것을 환영합니다",
+    "summary": "{amount} 구매 = {points} {pointsName} · 가입 시 {signup} {pointsName} 지급",
+    "stats": {
+      "members": "회원",
+      "newMembers_other": "최근 30일간 +{count}",
+      "pointsEarned": "지급된 {pointsName}",
+      "pointsSpent": "사용된 {pointsName}",
+      "rewardsClaimed": "받은 리워드",
+      "rewardsUsed_other": "{count}개 주문에 사용됨",
+      "rewardRevenue": "리워드 매출",
+      "rewardRevenueHint": "로열티 코드로 결제된 주문",
+      "referrals": "추천받은 고객",
+      "pendingReferrals_other": "대기 중인 초대 {count}건",
+      "referralRevenue": "추천 매출",
+      "referralRevenueHint": "추천받은 친구의 첫 주문"
+    },
+    "chartTitle": "일별 적립 {pointsName}(최근 30일)",
+    "chartAria": "최근 30일간 {total} {unit} 적립",
+    "recentActivity": "최근 활동",
+    "noActivity": "아직 활동이 없습니다. 첫 주문이나 가입 후 여기에 포인트가 표시됩니다.",
+    "gettingStarted": "시작하기",
+    "steps": {
+      "enableTitle": "프로그램 활성화",
+      "enableText": "프로그램이 활성화되면 고객이 바로 포인트를 적립할 수 있습니다.",
+      "rewardsTitle": "리워드 제공",
+      "rewardsText": "고객이 포인트로 받을 수 있는 할인입니다.",
+      "tiersTitle": "고객 등급 설정",
+      "tiersText": "자동 할인이 적용되는 브론즈, 실버, 골드 또는 초대 전용 등급을 설정하세요.",
+      "widgetTitle": "스토어에 위젯 표시",
+      "widgetText": "테마 편집기(앱 임베드)에서 “Hoshi Club”을 활성화하세요.",
+      "widgetAction": "테마 편집기 열기"
+    },
+    "howItWorks": "어떻게 작동하나요?",
+    "how": {
+      "signup": "고객이 계정을 만들면 웰컴 보너스를 받습니다.",
+      "orders": "결제된 주문마다 포인트가 적립됩니다.",
+      "tiers": "포인트를 많이 모을수록 등급이 올라갑니다(직접 지정할 수도 있습니다).",
+      "discounts": "각 등급은 결제 시 자동 할인을 제공할 수 있습니다.",
+      "rewards": "고객은 위젯에서 포인트를 개인 할인 코드로 교환합니다.",
+      "more": "친구 추천, 생일, 소셜 미디어 팔로우로도 포인트를 적립할 수 있습니다."
+    }
+  },
+  "member": {
+    "viewCustomer": "고객 보기",
+    "tierSaved": "등급이 업데이트되었습니다",
+    "codeCreated": "코드가 생성되었습니다: {code}",
+    "pointsAdded": "포인트가 추가되었습니다",
+    "pointsRemoved": "포인트가 차감되었습니다",
+    "errors": {
+      "points": "포인트 수를 입력하세요"
+    },
+    "available": "사용 가능 잔액",
+    "tier": "등급",
+    "tierAssigned": "등급(지정됨)",
+    "noTier": "없음",
+    "lifetimeAndOrders": "누적 {lifetime} · {orders}",
+    "toNextTier": "{tier} 등급까지 {points} {pointsName} 남음",
+    "history": "포인트 내역",
+    "noHistory": "아직 활동이 없습니다.",
+    "codes": "받은 할인 코드",
+    "code": "코드",
+    "codeUsed": "사용됨",
+    "codeAvailable": "사용 가능",
+    "adjust": "잔액 조정",
+    "adjustAction": "작업",
+    "addPoints": "포인트 추가",
+    "removePoints": "포인트 차감",
+    "pointsCount": "포인트 수",
+    "reason": "사유(내역에 표시됨)",
+    "reasonPlaceholder": "보상 차원의 지급",
+    "confirm": "확인",
+    "giftReward": "리워드 선물하기",
+    "giftRewardText": "개인 코드를 생성하고 고객의 포인트를 차감합니다.",
+    "generateCode": "코드 생성",
+    "info": "정보",
+    "birthday": "생일: {date}",
+    "notProvided": "미입력",
+    "referralCode": "추천 코드: {code}",
+    "referrals": "추천: {invited}명 초대 중 {converted}명 전환",
+    "expiresAt": "포인트 유효 기간: {date}까지",
+    "tierSection": "고객 등급",
+    "tierLocked": "고정 등급: 포인트에 따라 더 이상 변경되지 않습니다.",
+    "tierAuto": "자동: 현재 {tier}, {pointsName}에 따라 변경됩니다.",
+    "applyTier": "등급 적용",
+    "perks": "{tier} 혜택",
+    "noPerks": "이 등급에 정의된 혜택이 없습니다.",
+    "shopifyTag": "Shopify 태그: {tag}",
+    "danger": "위험 구역",
+    "confirmRemove": "이 고객을 프로그램에서 제거하시겠습니까? 잔액과 내역이 삭제됩니다.",
+    "remove": "프로그램에서 제거"
+  },
+  "members": {
+    "title": "회원",
+    "add": "고객 추가",
+    "importAll": "모든 고객 가져오기",
+    "joined": "{name} 님이 프로그램에 가입했습니다",
+    "tierUpdated": "{name} 님의 등급이 업데이트되었습니다",
+    "imported_other": "고객 {count}명을 가져왔습니다",
+    "allImported": "모든 고객이 이미 회원입니다",
+    "search": "검색",
+    "searchPlaceholder": "이름 또는 이메일",
+    "tier": "등급",
+    "allTiers": "모든 등급",
+    "sort": "정렬",
+    "sortPoints": "포인트 많은 순",
+    "sortRecent": "최신순",
+    "email": "이메일",
+    "balance": "잔액",
+    "lifetime": "누적",
+    "orders": "주문",
+    "assigned": "지정됨",
+    "noResults": "검색 조건에 맞는 회원이 없습니다.",
+    "empty": "아직 회원이 없습니다. 고객을 추가하거나 모든 고객을 가져오세요.",
+    "total_other": "회원 {count}명"
+  },
+  "addMember": {
+    "title": "프로그램에 고객 추가",
+    "search": "Shopify 고객 검색",
+    "searchPlaceholder": "이름, 이메일 또는 전화번호",
+    "searching": "검색 중",
+    "noResults": "고객을 찾을 수 없습니다.",
+    "noEmail": "이메일 없음",
+    "orders_other": "주문 {count}건",
+    "alreadyMember": "이미 회원임",
+    "choose": "선택",
+    "tierLabel": "고객 등급",
+    "tierDetails": "“자동”: 등급이 포인트에 따라 변경됩니다. 그 외에는 선택한 등급으로 고정됩니다.",
+    "autoTier": "자동({pointsName} 기준)",
+    "invitationTier": "{name}(초대 전용)",
+    "welcomeBonus": "웰컴 보너스 지급({points} {pointsName})",
+    "update": "업데이트",
+    "submit": "프로그램에 추가"
+  },
+  "program": {
+    "title": "프로그램 설정",
+    "saved": "설정이 저장되었습니다",
+    "pointsNameFallback": "포인트",
+    "status": {
+      "title": "상태",
+      "label": "로열티 프로그램 활성화",
+      "details": "비활성화하면 고객의 포인트를 잃지 않고 프로그램을 일시 중지할 수 있습니다."
+    },
+    "earn": {
+      "title": "포인트 적립",
+      "pointsName": "포인트 이름",
+      "pointsNameDetails": "예: 포인트, 스타, 코인…",
+      "perUnit": "1{currency}당 포인트",
+      "perUnitDetails": "예: {amount} 주문 시 {points} {pointsName} 적립(등급 배수 적용 전).",
+      "signup": "웰컴 보너스",
+      "signupDetails": "고객이 계정을 만들 때 지급됩니다.",
+      "firstOrder": "첫 주문 보너스",
+      "firstOrderDetails": "주문 포인트에 추가로 지급됩니다."
+    },
+    "birthday": {
+      "title": "생일 🎂",
+      "label": "생일에 지급할 포인트",
+      "details": "고객이 위젯에서 생일을 입력합니다. 악용을 방지하기 위해 생일은 최소 30일 전에 저장되어 있어야 합니다. 0 = 사용 안 함."
+    },
+    "referral": {
+      "title": "추천 🤝",
+      "enable": "추천 활성화",
+      "enableDetails": "각 회원에게 개인 링크가 제공됩니다. 친구는 웰컴 코드를 받고, 친구가 첫 주문을 하면 추천인이 포인트를 적립합니다.",
+      "referrerPoints": "추천인이 적립하는 포인트",
+      "friendGift": "친구에게 주는 선물",
+      "value": "값",
+      "minimum": "최소 구매 금액(선택 사항)"
+    },
+    "social": {
+      "title": "소셜 미디어 📣",
+      "intro": "페이지를 추가하세요. 위젯이 고객에게 {pointsName}을(를) 대가로 팔로우를 권유합니다(네트워크당 1회).",
+      "points": "팔로우한 네트워크당 포인트"
+    },
+    "bonus": {
+      "title": "보너스 포인트 캠페인 🔥",
+      "intro": "일정 기간 동안 적립되는 {pointsName}을(를) 늘려 보세요(세일, 공휴일, 신제품 출시 등). 캠페인 기간 중 위젯에 배너가 표시됩니다.",
+      "multiplier": "배수",
+      "none": "캠페인 없음",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "시작(선택 사항)",
+      "end": "종료(선택 사항)",
+      "message": "배너 메시지",
+      "messageDetails": "비워 두면 번역된 기본 메시지가 표시됩니다.",
+      "messagePlaceholder": "Black Friday: {pointsName} ×{multiplier}!"
+    },
+    "expiration": {
+      "title": "포인트 만료 ⏳",
+      "label": "포인트 만료 기준",
+      "details": "구매, 교환, 포인트 적립이 있을 때마다 만료일이 연장됩니다. 만료일을 설정하면 고객의 재방문을 유도할 수 있습니다.",
+      "never": "만료 없음",
+      "months_other": "{count}개월간 활동 없음"
+    },
+    "widget": {
+      "title": "위젯 디자인",
+      "languageNote": "위젯은 스토어 언어로 자동 표시됩니다(36개 언어 지원).",
+      "widgetTitle": "위젯 제목",
+      "widgetTitleDetails": "비워 두면 각 언어로 번역된 기본 제목이 사용됩니다.",
+      "defaultTitle": "내 리워드",
+      "color": "기본 색상",
+      "colorOption": "색상 {color}",
+      "customColor": "사용자 지정 색상",
+      "position": "버튼 위치",
+      "right": "오른쪽 하단",
+      "left": "왼쪽 하단"
+    },
+    "preview": "미리 보기",
+    "previewTier": "실버 등급",
+    "previewRedeem": "교환"
+  },
+  "landing": {
+    "tagline": "Shopify 스토어를 위한 가장 간편한 로열티 프로그램: 포인트, 자동 할인이 적용되는 VIP 등급, 추천, 리워드를 클릭 몇 번으로 설정하세요.",
+    "pricing": "월 {price} · 모든 기능 포함 · {days}일 무료 체험",
+    "shopDomain": "스토어 도메인",
+    "install": "설치",
+    "login": "로그인",
+    "installFromStore": "Shopify App Store에서 Hoshi Club을 설치하세요.",
+    "errors": {
+      "missingShop": "스토어 도메인을 입력하세요",
+      "invalidShop": "유효하지 않은 스토어 도메인입니다"
+    },
+    "features": {
+      "points": {
+        "title": "자동 포인트 적립.",
+        "text": "별도의 기술 설정 없이 고객이 주문할 때마다 포인트를 적립합니다."
+      },
+      "tiers": {
+        "title": "VIP 등급.",
+        "text": "브론즈, 실버, 골드 또는 초대 전용 등급으로 우수 고객에게 자동 할인과 포인트 배수를 제공하세요."
+      },
+      "referrals": {
+        "title": "추천 및 보너스.",
+        "text": "추천 프로그램, 생일 리워드, 소셜 팔로우, 포인트 2배 캠페인."
+      },
+      "widget": {
+        "title": "세련된 위젯.",
+        "text": "스토어 색상에 맞춘 플로팅 버튼으로 포인트를 확인하고 교환할 수 있습니다."
+      },
+      "languages": {
+        "title": "36개 언어.",
+        "text": "앱과 위젯이 판매자님과 고객의 언어를 지원합니다."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "개인정보 처리방침",
+    "supportLink": "도움말 및 문의",
+    "language": "언어",
+    "privacy": {
+      "title": "개인정보 처리방침",
+      "updated": "Hoshi Club, Hoshi Technologies 제공. 최종 업데이트: {date}.",
+      "intro": "Hoshi Club(이하 “앱”)은 Shopify 판매자가 고객에게 로열티 프로그램을 제공할 수 있도록 하는 앱입니다. 본 방침은 앱이 어떤 데이터를 처리하는지, 그 이유와 방법을 설명합니다.",
+      "collectedTitle": "수집하는 데이터",
+      "collected": {
+        "store": {
+          "label": "스토어 데이터:",
+          "text": "설치 시 Shopify가 제공하는 스토어 도메인 및 액세스 토큰."
+        },
+        "members": {
+          "label": "회원 데이터:",
+          "text": "Shopify 고객 ID, 이름, 성, 이메일 주소, 주문 수, 포인트 잔액 및 내역, 로열티 등급, 받은 할인 코드, 생일(고객이 제공한 경우 일과 월) 및 추천 코드."
+        },
+        "referrals": {
+          "label": "추천 데이터:",
+          "text": "초대받은 사람이 웰컴 코드를 받기 위해 입력한 이메일 주소."
+        },
+        "orders": {
+          "label": "주문 데이터:",
+          "text": "결제된 주문의 ID, 소계, 총액 및 사용된 할인 코드로, 포인트 계산에만 사용됩니다."
+        }
+      },
+      "noPayment": "앱은 결제 데이터를 수집하지 않으며 광고 쿠키를 사용하지 않습니다.",
+      "useTitle": "데이터 사용 방법",
+      "use": "데이터는 스토어의 로열티 프로그램 운영에만 사용됩니다. 즉, 포인트 계산 및 표시, 등급과 혜택 지정, 할인 코드 생성, 추천 관리, 판매자에게 통계 표시에 사용됩니다. 데이터는 마케팅 목적으로 제3자에게 판매, 대여 또는 공유되지 않습니다.",
+      "hostingTitle": "호스팅 및 수탁자",
+      "hosting": "데이터는 Cloudflare(Cloudflare Workers 및 D1)에서 호스팅됩니다. Shopify는 API를 통해 스토어 및 고객 데이터를 제공합니다. 이러한 제공업체는 수탁자로서 자체 보안 조치를 적용합니다.",
+      "retentionTitle": "보관 및 삭제",
+      "retention": {
+        "installed": "데이터는 앱이 설치되어 있는 동안 보관됩니다.",
+        "customerRedact": "고객이 (Shopify를 통해) 요청하면 해당 고객의 데이터가 자동으로 삭제됩니다(customers/redact webhook).",
+        "shopRedact": "앱 삭제 48시간 후 Shopify가 스토어 데이터 삭제를 요청하며, 이때 모든 데이터가 삭제됩니다(shop/redact webhook).",
+        "merchant": "판매자는 언제든지 앱에서 고객을 프로그램에서 제거할 수 있습니다."
+      },
+      "rightsTitle": "귀하의 권리",
+      "rights": "GDPR(EU 일반 개인정보 보호법) 및 이와 유사한 법률에 따라 고객은 자신의 데이터에 대한 열람, 정정, 삭제 및 처리 거부 권리를 가집니다. 이러한 권리는 해당 스토어(개인정보 처리자)에 요청하거나 당사에 서면으로 연락하여 행사할 수 있습니다. Shopify를 통해 전송된 열람 요청(customers/data_request webhook)도 처리됩니다.",
+      "contactTitle": "문의",
+      "contact": "문의 사항이 있으시면 연락해 주세요:"
+    },
+    "support": {
+      "title": "도움말 및 문의",
+      "intro": "질문이나 문제가 있으신가요? 연락해 주시면 영업일 기준 2일 이내에 답변드립니다:",
+      "faqTitle": "자주 묻는 질문",
+      "faq": {
+        "widget": {
+          "q": "스토어에 프로그램을 어떻게 표시하나요?",
+          "a": "Shopify에서 온라인 스토어 → 테마 → 사용자 지정 → 앱 임베드로 이동한 다음 “Hoshi Club”을 활성화하세요. 앱 대시보드에 바로 가기 링크가 있습니다."
+        },
+        "points": {
+          "q": "고객은 언제 포인트를 받나요?",
+          "a": "주문 결제가 완료되면 자동으로 지급됩니다. 주문이 환불되면 포인트가 차감됩니다."
+        },
+        "tierDiscounts": {
+          "q": "등급 할인은 어떻게 작동하나요?",
+          "a": "각 등급은 고객에게 태그를 추가하고 해당 등급의 고객 전용 Shopify 자동 할인을 생성합니다. 할인은 코드 없이 결제 시 적용됩니다. 할인은 Shopify → 할인에서 확인할 수 있습니다."
+        },
+        "assignTier": {
+          "q": "특정 고객에게 등급을 지정할 수 있나요?",
+          "a": "네. 회원 → 고객 추가에서, 또는 회원 페이지(“고객 등급” 섹션)에서 지정할 수 있습니다."
+        },
+        "referrals": {
+          "q": "추천은 어떻게 작동하나요?",
+          "a": "각 회원에게는 개인 링크가 있습니다. 초대받은 친구가 이메일을 입력하면 웰컴 코드를 받고, 해당 코드가 결제된 주문에 사용되면 추천인이 포인트를 적립합니다."
+        },
+        "languages": {
+          "q": "어떤 언어가 지원되나요?",
+          "a": "앱은 Shopify 관리자의 언어를, 위젯은 스토어의 언어를 따르며 36개 언어를 지원합니다. 이름을 비워 둔 리워드는 자동으로 번역됩니다."
+        },
+        "uninstall": {
+          "q": "앱을 삭제하면 어떻게 되나요?",
+          "a": "자동 할인은 직접 삭제할 때까지 Shopify에 남아 있습니다. 프로그램 데이터는 앱 삭제 48시간 후 삭제됩니다."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "리워드",
+    "new": "새 리워드",
+    "create": "리워드 만들기",
+    "editTitle": "리워드 편집",
+    "deleted": "리워드가 삭제되었습니다",
+    "hidden": "리워드가 숨겨졌습니다",
+    "shown": "리워드가 표시됩니다",
+    "updated": "리워드가 업데이트되었습니다",
+    "created": "리워드가 생성되었습니다",
+    "errors": {
+      "cost": "필요 포인트는 0보다 커야 합니다",
+      "value": "할인 값을 입력하세요",
+      "percent": "할인은 100%를 초과할 수 없습니다"
+    },
+    "emptyTitle": "아직 리워드가 없습니다",
+    "emptyText": "첫 리워드를 만들어 보세요. 고객이 {pointsName}을(를) 사용해 받을 수 있습니다.",
+    "columns": {
+      "reward": "리워드",
+      "cost": "필요 포인트",
+      "claimed": "교환 수"
+    },
+    "types": {
+      "AMOUNT": "정액",
+      "PERCENT": "비율",
+      "FREE_SHIPPING": "무료 배송"
+    },
+    "minimumShort": "{amount} 이상 구매 시",
+    "autoTranslated": "이름이 자동으로 번역됨",
+    "timesClaimed_other": "{count}회",
+    "visible": "표시됨",
+    "hiddenBadge": "숨김",
+    "hide": "숨기기",
+    "show": "표시",
+    "confirmDelete": "“{title}”을(를) 삭제하시겠습니까?",
+    "tipTitle": "팁",
+    "tip": "첫 리워드는 2~3회 주문으로 받을 수 있도록 설정하는 것이 좋습니다. 구매 금액 1단위당 1포인트라면, 500포인트로 5 할인은 1% 할인에 해당하여 마진에 부담을 주지 않으면서도 매력적입니다.",
+    "typeLabel": "리워드 유형",
+    "percentLabel": "할인율",
+    "amountLabel": "할인 금액",
+    "costLabel": "필요 포인트",
+    "nameLabel": "표시 이름(선택 사항)",
+    "nameDetails": "비워 두면 고객의 언어로 번역된 이름이 표시됩니다.",
+    "minimumLabel": "최소 주문 금액(선택 사항)"
+  },
+  "labels": {
+    "rewardPercent": "{value}% 할인",
+    "rewardAmount": "{amount} 할인",
+    "freeShipping": "무료 배송",
+    "percentOff": "{value}% 할인",
+    "amountOff": "{amount} 할인",
+    "tierDiscount": "모든 주문 {discount}",
+    "tierDiscountFrom": "{minimum} 초과 모든 주문 {discount}",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{minimum} 초과 주문 시 {reward}"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "웰컴",
+      "ORDER": "주문",
+      "FIRST_ORDER": "첫 주문",
+      "REDEEM": "교환",
+      "REFUND": "환불",
+      "ADJUST": "조정",
+      "BIRTHDAY": "생일",
+      "REFERRAL": "추천",
+      "SOCIAL": "소셜 미디어",
+      "EXPIRE": "만료"
+    },
+    "desc": {
+      "SIGNUP": "웰컴 보너스",
+      "ORDER": "주문 {order}",
+      "ORDER_BONUS": "주문 {order}(보너스 ×{bonus})",
+      "FIRST_ORDER": "첫 주문 보너스({order})",
+      "REDEEM": "교환: {reward}",
+      "REFUND": "환불(주문 {order})",
+      "ADJUST_ADD": "수동 추가",
+      "ADJUST_REMOVE": "수동 차감",
+      "BIRTHDAY": "생일 축하합니다! ({year})",
+      "REFERRAL": "추천: {friend}",
+      "SOCIAL": "{network} 팔로우",
+      "EXPIRE": "{months}개월간 활동이 없어 만료됨"
+    }
+  },
+  "errors": {
+    "unexpected": "문제가 발생했습니다: {details}",
+    "memberNotFound": "회원을 찾을 수 없습니다",
+    "tierNotFound": "등급을 찾을 수 없습니다",
+    "rewardUnavailable": "이 리워드는 더 이상 이용할 수 없습니다",
+    "programDisabled": "로열티 프로그램이 현재 일시 중지되었습니다",
+    "notEnoughPoints": "{missing} {pointsName}이(가) 더 필요합니다",
+    "discountFailed": "할인 코드를 생성할 수 없습니다. {details}",
+    "referralCodeFailed": "추천 코드를 생성할 수 없습니다",
+    "referralUnavailable": "추천을 이용할 수 없습니다",
+    "invalidEmail": "유효하지 않은 이메일 주소입니다",
+    "invalidReferral": "유효하지 않은 추천 링크입니다",
+    "selfReferral": "자기 자신을 추천할 수 없습니다",
+    "referralAlreadyUsed": "이 이메일 주소는 이미 추천을 사용했습니다",
+    "referralNewCustomersOnly": "추천은 신규 고객만 이용할 수 있습니다",
+    "invalidDate": "유효하지 않은 날짜입니다",
+    "birthdayAlreadySet": "생일이 이미 저장되어 있습니다",
+    "actionUnavailable": "이 작업은 이용할 수 없습니다",
+    "loginRequired": "프로그램을 이용하려면 로그인하세요",
+    "notInstalled": "이 스토어에 앱이 설치되어 있지 않습니다",
+    "generic": "문제가 발생했습니다. 다시 시도해 주세요."
+  },
+  "seed": {
+    "pointsName": "포인트",
+    "tierBronze": "브론즈",
+    "tierSilver": "실버",
+    "tierGold": "골드"
+  },
+  "server": {
+    "tierDiscountTitle": "{tier} 등급: {discount}",
+    "tierShippingTitle": "{tier} 등급: 무료 배송"
+  },
+  "tiers": {
+    "title": "고객 등급",
+    "new": "새 등급",
+    "create": "등급 만들기",
+    "editTitle": "등급 편집",
+    "resync": "Shopify와 다시 동기화",
+    "deleted": "등급이 삭제되었습니다",
+    "created": "등급이 생성되었습니다",
+    "updated": "등급이 업데이트되었습니다",
+    "resynced_other": "동기화 완료(고객 {count}명 업데이트됨)",
+    "errors": {
+      "name": "등급 이름을 입력하세요",
+      "value": "할인 값을 입력하세요",
+      "percent": "할인은 100%를 초과할 수 없습니다",
+      "sync": "등급은 저장되었지만 Shopify 할인을 생성할 수 없습니다: {details}"
+    },
+    "intro": "각 등급은 결제 시 자동으로 적용되는 혜택(상시 할인, 무료 배송), {pointsName} 배수 및 맞춤 혜택을 제공할 수 있습니다. 등급은 자동({pointsName}을(를) 모아 도달) 또는 수동(고객 페이지에서 직접 지정, 예: “앰버서더” 또는 “도매”)입니다. 수동 등급이 항상 우선 적용됩니다.",
+    "emptyTitle": "등급 없음",
+    "emptyText": "고객 등급과 혜택을 만들어 보세요.",
+    "autoSection": "자동 등급(포인트 기준)",
+    "manualSection": "수동 지정 등급",
+    "levelNumber": "레벨 {number}",
+    "invitationOnly": "초대 전용",
+    "assignedManually": "수동 지정",
+    "fromPoints": "누적 {points} {pointsName}부터",
+    "noPerks": "정의된 혜택 없음",
+    "customers_other": "고객 {count}명",
+    "tag": "태그: {tag}",
+    "syncError": "Shopify 할인이 생성되지 않음: {details}",
+    "confirmDelete": "“{name}” 등급을 삭제하시겠습니까? 해당 자동 할인도 삭제됩니다.",
+    "nameLabel": "등급 이름",
+    "namePlaceholder": "예: 골드, 앰버서더, 도매…",
+    "modeQuestion": "고객은 이 등급을 어떻게 얻나요?",
+    "modeAuto": "자동",
+    "modeAutoText": "{pointsName}을(를) 모아서",
+    "modeManual": "수동",
+    "modeManualText": "직접 지정합니다",
+    "minPointsLabel": "필요한 누적 {pointsName}",
+    "perksTitle": "자동 혜택",
+    "discountLabel": "주문 상시 할인",
+    "discountNone": "할인 없음",
+    "discountPercent": "비율(예: 10% 할인)",
+    "discountAmount": "정액(예: 5 할인)",
+    "discountValue": "할인 값",
+    "discountMinimum": "최소 구매 금액(선택 사항)",
+    "freeShipping": "모든 주문 무료 배송",
+    "multiplierLabel": "{pointsName} 배수",
+    "multiplierDetails": "1 = 기본, 2 = 주문당 {pointsName} 2배.",
+    "otherPerks": "기타 혜택(한 줄에 하나씩, 고객에게 표시됨)",
+    "otherPerksPlaceholder": "세일 사전 이용\n생일 선물"
+  },
+  "widget": {
+    "title": "내 리워드",
+    "unavailable": "로열티 프로그램을 일시적으로 이용할 수 없습니다.",
+    "guestText": "계정을 만들고 구매할 때마다 포인트를 적립하여 특별 할인을 받으세요.",
+    "join": "프로그램 가입하기",
+    "haveAccount": "이미 계정이 있습니다",
+    "hello": "{name} 님, 안녕하세요",
+    "earnTitle": "{pointsName} 적립하기",
+    "nextTier": "{tier}까지 {points} {pointsName}",
+    "bonusDefault": "{pointsName} ×{multiplier}!",
+    "bonusUntil": "{date}까지",
+    "rewardsTitle": "리워드",
+    "minimum": "{amount} 이상",
+    "redeem": "교환",
+    "missing": "{points} 남음",
+    "codesTitle": "내 코드",
+    "useCode": "사용",
+    "perksTitle": "내 {tier} 혜택",
+    "perUnit": "{amount} 구매당 {points} {pointsName}",
+    "signup": "가입 시 {points} {pointsName}",
+    "firstOrder": "첫 주문 시 {points} {pointsName}",
+    "follow": "{network}에서 팔로우하기",
+    "followButton": "팔로우",
+    "birthdayGuest": "생일에 {points} {pointsName}",
+    "birthdaySet": "생일 {date}: {points} {pointsName} 지급",
+    "birthdayAsk": "생일:",
+    "birthdayConfirm": "생일이 {date}이(가) 맞나요? 나중에 변경할 수 없습니다.",
+    "birthdaySaved": "생일이 저장되었습니다 🎂",
+    "day": "일",
+    "month": "월",
+    "ok": "확인",
+    "socialThanks": "감사합니다! 포인트가 추가되었습니다",
+    "socialAlready": "이 네트워크에 대한 포인트를 이미 받았습니다",
+    "referralTitle": "추천",
+    "referralMemberTitle": "친구 추천하기",
+    "referralIntro": "친구에게 {reward}을(를) 선물하고, 친구가 첫 주문을 하면 {points} {pointsName}을(를) 받으세요.",
+    "referralLink": "추천 링크",
+    "copy": "복사",
+    "copied": "복사되었습니다!",
+    "share": "공유…",
+    "shareText": "첫 주문 할인을 받아 보세요!",
+    "referralsDone_other": "친구 {count}명 추천 완료 🎉",
+    "tiersTitle": "등급",
+    "tierFrom": "{points} {pointsName}부터",
+    "expires": "{pointsName}은(는) {date}까지 유효합니다(구매할 때마다 연장됩니다).",
+    "confirmRedeem": "포인트를 “{reward}”(으)로 교환하시겠습니까?",
+    "congrats": "축하합니다!",
+    "rewardReady": "“{reward}” 리워드가 준비되었습니다:",
+    "applyCart": "장바구니에 적용",
+    "close": "닫기",
+    "errorGeneric": "문제가 발생했습니다. 다시 시도해 주세요.",
+    "aFriend": "친구",
+    "giftTitle": "{name} 님이 선물을 보냈습니다!",
+    "giftText": "첫 주문에서 {reward} 혜택을 누리세요.",
+    "emailPlaceholder": "이메일 주소",
+    "getCode": "코드 받기",
+    "later": "나중에",
+    "welcomeCodeTitle": "웰컴 코드",
+    "welcomeCodeText": "첫 주문 시 {reward}:",
+    "continueShopping": "쇼핑 계속하기",
+    "productPoints": "이 상품 구매 시 {points} {pointsName} 적립"
+  }
+}

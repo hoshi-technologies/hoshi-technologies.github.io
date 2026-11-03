@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "按钮文本", "info": "留空则使用应用中设置的标题。" },
+    "position": { "label": "位置", "app": "应用设置", "right": "右下角", "left": "左下角" },
+    "guest_text": { "label": "未登录访客的信息", "info": "留空则使用已翻译的默认信息。" }
+  },
+  "card": { "name": "会员卡", "heading": "标题", "max_width": "最大宽度" },
+  "product": { "name": "商品积分", "text": "自定义文本", "text_info": "可选。{points} 和 {name} 将被替换。留空则使用已翻译的默认文本。" }
+}

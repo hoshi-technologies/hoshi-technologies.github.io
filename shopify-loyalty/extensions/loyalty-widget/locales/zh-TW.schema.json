@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "按鈕文字", "info": "留空則使用應用程式中設定的標題。" },
+    "position": { "label": "位置", "app": "應用程式設定", "right": "右下角", "left": "左下角" },
+    "guest_text": { "label": "給未登入訪客的訊息", "info": "留空則使用已翻譯的預設訊息。" }
+  },
+  "card": { "name": "會員卡", "heading": "標題", "max_width": "最大寬度" },
+  "product": { "name": "商品點數", "text": "自訂文字", "text_info": "選填。{points} 和 {name} 會被取代。留空則使用已翻譯的預設文字。" }
+}
