@@ -638,7 +638,30 @@
     var c = num(cote);
     if (!c || c <= 1 || !nPlaces) return null;
     var k = (coefs && coefs[nPlaces]) || PLACE_ODDS_DEFAULT[nPlaces];
-    return Math.max(1.1, 1 + Math.exp(k.a + k.b * Math.log(c - 1)));
+    var t = k.table;
+    if (t && t.length >= 2) {
+      // Interpolation en log(cote − 1) dans la table des rapports moyens observés.
+      var lx = Math.log(c - 1);
+      var L = function (i) {
+        return Math.log(t[i][0] - 1);
+      };
+      var v;
+      if (lx <= L(0)) {
+        // Avant la 1re tranche : on suit la pente de la formule.
+        v = 1 + (t[0][1] - 1) * Math.exp(k.b * (lx - L(0)));
+      } else if (lx >= L(t.length - 1)) {
+        v = 1 + (t[t.length - 1][1] - 1) * Math.exp(k.b * (lx - L(t.length - 1)));
+      } else {
+        for (var i = 1; i < t.length; i++)
+          if (lx <= L(i)) {
+            var w = (lx - L(i - 1)) / (L(i) - L(i - 1));
+            v = t[i - 1][1] + w * (t[i][1] - t[i - 1][1]);
+            break;
+          }
+      }
+      return Math.max(1.1, v);
+    }
+    return Math.max(1.1, 1 + Math.exp(k.a + k.b * Math.log(c - 1)) * (k.smear || 1));
   }
 
   /** Fraction de Kelly : part de la bankroll à miser pour une probabilité p à la cote o. */

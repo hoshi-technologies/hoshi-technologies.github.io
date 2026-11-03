@@ -368,7 +368,23 @@ function fitPlaceOdds(items) {
       sxx = 0;
     xs.forEach((x, i) => ((sxy += (x - mx) * (ys[i] - my)), (sxx += (x - mx) ** 2)));
     const b = sxx ? sxy / sxx : 0.72;
-    out[np] = { a: +(my - b * mx).toFixed(4), b: +b.toFixed(4), n: xs.length };
+    const a = my - b * mx;
+    // Correction de Duan : la régression en logarithmes donne le rapport « typique » (médian),
+    // qui sous-estime le rapport moyen. On multiplie par la moyenne des exp(résidus).
+    const smear = xs.reduce((acc, x, i) => acc + Math.exp(ys[i] - (a + b * x)), 0) / xs.length;
+    // Table « cote → rapport placé moyen observé » par tranches de cote (interpolée ensuite) :
+    // plus fidèle que la seule formule sur toute la gamme, des favoris aux gros outsiders.
+    const pts = xs.map((x, i) => [x, Math.exp(ys[i]) + 1]).sort((p, q) => p[0] - q[0]);
+    const nb = Math.max(4, Math.min(14, Math.floor(pts.length / 120)));
+    const table = [];
+    for (let k = 0; k < nb; k++) {
+      const part = pts.slice(Math.floor((k * pts.length) / nb), Math.floor(((k + 1) * pts.length) / nb));
+      if (!part.length) continue;
+      const lx = part.reduce((acc, p) => acc + p[0], 0) / part.length;
+      const rp = part.reduce((acc, p) => acc + p[1], 0) / part.length;
+      table.push([+(Math.exp(lx) + 1).toFixed(2), +rp.toFixed(3)]);
+    }
+    out[np] = { a: +a.toFixed(4), b: +b.toFixed(4), smear: +smear.toFixed(4), table, n: xs.length };
   }
   return out;
 }
@@ -567,7 +583,7 @@ const resolver = (groups, globalS) => (it) => {
 
 async function main() {
   const prev = await readJson(OUT, null);
-  if (!FORCE && prev && prev.status === 'ok' && prev.version === 3 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
+  if (!FORCE && prev && prev.status === 'ok' && prev.version === 4 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
     console.log('Calibrage récent (' + prev.updated + '), rien à faire.');
     return;
   }
@@ -576,7 +592,7 @@ async function main() {
   console.log(`${items.length} courses terminées sur ${days} journées`);
   console.log(`cotes utilisées : ${oddsSource.T} au moment du pari, ${oddsSource.ref} du matin, ${oddsSource.final} finales`);
   const defaults = Turf.mergeSettings({});
-  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 3, oddsSource };
+  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 4, oddsSource };
 
   // Notes Elo à jour pour la page et les alertes.
   const rt = {};
