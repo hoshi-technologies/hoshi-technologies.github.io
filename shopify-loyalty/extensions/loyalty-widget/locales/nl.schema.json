@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Knoptekst", "info": "Laat leeg om de titel uit de app te gebruiken." },
+    "position": { "label": "Positie", "app": "App-instelling", "right": "Rechtsonder", "left": "Linksonder" },
+    "guest_text": { "label": "Bericht voor uitgelogde bezoekers", "info": "Laat leeg om het vertaalde standaardbericht te gebruiken." }
+  },
+  "card": { "name": "Loyaliteitskaart", "heading": "Kop", "max_width": "Maximale breedte" },
+  "product": { "name": "Productpunten", "text": "Aangepaste tekst", "text_info": "Optioneel. {points} en {name} worden vervangen. Laat leeg voor de vertaalde standaardtekst." }
+}

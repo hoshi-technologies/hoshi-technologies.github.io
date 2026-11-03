@@ -1,0 +1,599 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "members": "Leden",
+    "rewards": "Beloningen",
+    "tiers": "Klantniveaus",
+    "settings": "Instellingen"
+  },
+  "common": {
+    "edit": "Bewerken",
+    "active": "Actief",
+    "paused": "Gepauzeerd",
+    "customer": "Klant",
+    "type": "Type",
+    "detail": "Details",
+    "points": "Punten",
+    "date": "Datum",
+    "anonymousCustomer": "Anonieme klant",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "status": "Status",
+    "actions": "Acties",
+    "change": "Wijzigen",
+    "optional": "optioneel",
+    "color": "Kleur"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "manageRewards": "Beloningen beheren",
+    "pausedTitle": "Het programma is gepauzeerd",
+    "pausedText": "Je klanten sparen geen punten meer en kunnen geen beloningen inwisselen.",
+    "reactivate": "Weer inschakelen",
+    "campaignTitle": "Lopende actie: {pointsName} ×{multiplier}",
+    "campaignUntil": "Tot {date}.",
+    "campaignNoEnd": "Geen einddatum.",
+    "welcome": "Welkom bij Hoshi Club",
+    "summary": "{amount} besteed = {points} {pointsName} · {signup} {pointsName} cadeau bij aanmelding",
+    "stats": {
+      "members": "Leden",
+      "newMembers_one": "+{count} in de afgelopen 30 dagen",
+      "newMembers_other": "+{count} in de afgelopen 30 dagen",
+      "pointsEarned": "{pointsName} toegekend",
+      "pointsSpent": "{pointsName} ingewisseld",
+      "rewardsClaimed": "Geclaimde beloningen",
+      "rewardsUsed_one": "{count} gebruikt in een bestelling",
+      "rewardsUsed_other": "{count} gebruikt in bestellingen",
+      "rewardRevenue": "Omzet uit beloningen",
+      "rewardRevenueHint": "Bestellingen geplaatst met een loyaliteitscode",
+      "referrals": "Doorverwezen klanten",
+      "pendingReferrals_one": "{count} openstaande uitnodiging",
+      "pendingReferrals_other": "{count} openstaande uitnodigingen",
+      "referralRevenue": "Omzet uit doorverwijzingen",
+      "referralRevenueHint": "Eerste bestellingen van doorverwezen vrienden"
+    },
+    "chartTitle": "{pointsName} verdiend per dag (afgelopen 30 dagen)",
+    "chartAria": "{total} {unit} verdiend in de afgelopen 30 dagen",
+    "recentActivity": "Recente activiteit",
+    "noActivity": "Nog geen activiteit. Punten verschijnen hier na de eerste bestelling of aanmelding.",
+    "gettingStarted": "Aan de slag",
+    "steps": {
+      "enableTitle": "Schakel het programma in",
+      "enableText": "Je klanten sparen punten zodra het programma actief is.",
+      "rewardsTitle": "Bied beloningen aan",
+      "rewardsText": "Kortingen die je klanten met hun punten kunnen ontgrendelen.",
+      "tiersTitle": "Stel je klantniveaus in",
+      "tiersText": "Brons, Zilver, Goud of niveaus alleen op uitnodiging, met automatische kortingen.",
+      "widgetTitle": "Toon de widget in je winkel",
+      "widgetText": "Schakel ‘Hoshi Club’ in via de thema-editor (App-embeds).",
+      "widgetAction": "Thema-editor openen"
+    },
+    "howItWorks": "Hoe werkt het?",
+    "how": {
+      "signup": "Een klant maakt een account aan: welkomstbonus.",
+      "orders": "Elke betaalde bestelling levert punten op.",
+      "tiers": "Hoe meer ze sparen, hoe hoger hun niveau (of je wijst er zelf een toe).",
+      "discounts": "Elk niveau kan een automatische korting geven bij de checkout.",
+      "rewards": "Via de widget wisselen ze punten in voor een persoonlijke kortingscode.",
+      "more": "Ze verdienen ook punten door vrienden door te verwijzen, op hun verjaardag en door je te volgen op social media."
+    }
+  },
+  "member": {
+    "viewCustomer": "Klant bekijken",
+    "tierSaved": "Niveau bijgewerkt",
+    "codeCreated": "Code aangemaakt: {code}",
+    "pointsAdded": "Punten toegevoegd",
+    "pointsRemoved": "Punten verwijderd",
+    "errors": {
+      "points": "Voer een aantal punten in"
+    },
+    "available": "Beschikbaar saldo",
+    "tier": "Niveau",
+    "tierAssigned": "Niveau (toegewezen)",
+    "noTier": "Geen",
+    "lifetimeAndOrders": "{lifetime} in totaal · {orders}",
+    "toNextTier": "Nog {points} {pointsName} tot {tier}",
+    "history": "Puntengeschiedenis",
+    "noHistory": "Nog geen activiteit.",
+    "codes": "Verdiende kortingscodes",
+    "code": "Code",
+    "codeUsed": "Gebruikt",
+    "codeAvailable": "Beschikbaar",
+    "adjust": "Saldo aanpassen",
+    "adjustAction": "Actie",
+    "addPoints": "Punten toevoegen",
+    "removePoints": "Punten verwijderen",
+    "pointsCount": "Aantal punten",
+    "reason": "Reden (zichtbaar in de geschiedenis)",
+    "reasonPlaceholder": "Coulancegebaar",
+    "confirm": "Bevestigen",
+    "giftReward": "Beloning cadeau geven",
+    "giftRewardText": "Maakt een persoonlijke code aan en trekt de punten van de klant af.",
+    "generateCode": "Code genereren",
+    "info": "Informatie",
+    "birthday": "Verjaardag: {date}",
+    "notProvided": "niet opgegeven",
+    "referralCode": "Doorverwijscode: {code}",
+    "referrals": "Doorverwijzingen: {converted} geconverteerd van {invited} uitgenodigd",
+    "expiresAt": "Punten geldig tot {date}",
+    "tierSection": "Klantniveau",
+    "tierLocked": "Vast niveau: het verandert niet meer met de punten.",
+    "tierAuto": "Automatisch: momenteel {tier}, verandert met de {pointsName}.",
+    "applyTier": "Niveau toepassen",
+    "perks": "Voordelen van {tier}",
+    "noPerks": "Geen voordelen ingesteld voor dit niveau.",
+    "shopifyTag": "Shopify-tag: {tag}",
+    "danger": "Gevarenzone",
+    "confirmRemove": "Deze klant uit het programma verwijderen? Het saldo en de geschiedenis worden verwijderd.",
+    "remove": "Uit het programma verwijderen"
+  },
+  "members": {
+    "title": "Leden",
+    "add": "Klant toevoegen",
+    "importAll": "Al mijn klanten importeren",
+    "joined": "{name} doet nu mee aan het programma",
+    "tierUpdated": "Niveau van {name} bijgewerkt",
+    "imported_one": "{count} klant geïmporteerd",
+    "imported_other": "{count} klanten geïmporteerd",
+    "allImported": "Al je klanten zijn al lid",
+    "search": "Zoeken",
+    "searchPlaceholder": "Naam of e-mailadres",
+    "tier": "Niveau",
+    "allTiers": "Alle niveaus",
+    "sort": "Sorteren",
+    "sortPoints": "Meeste punten",
+    "sortRecent": "Meest recent",
+    "email": "E-mailadres",
+    "balance": "Saldo",
+    "lifetime": "Totaal",
+    "orders": "Bestellingen",
+    "assigned": "Toegewezen",
+    "noResults": "Geen leden gevonden die overeenkomen met je zoekopdracht.",
+    "empty": "Nog geen leden. Voeg een klant toe of importeer al je klanten.",
+    "total_one": "{count} lid",
+    "total_other": "{count} leden"
+  },
+  "addMember": {
+    "title": "Klant aan het programma toevoegen",
+    "search": "Zoek een Shopify-klant",
+    "searchPlaceholder": "Naam, e-mailadres of telefoon",
+    "searching": "Zoeken",
+    "noResults": "Geen klanten gevonden.",
+    "noEmail": "Geen e-mailadres",
+    "orders_one": "{count} bestelling",
+    "orders_other": "{count} bestellingen",
+    "alreadyMember": "Al lid",
+    "choose": "Selecteren",
+    "tierLabel": "Klantniveau",
+    "tierDetails": "‘Automatisch’: het niveau verandert met de punten. Anders wordt het gekozen niveau vastgezet.",
+    "autoTier": "Automatisch (op basis van {pointsName})",
+    "invitationTier": "{name} (alleen op uitnodiging)",
+    "welcomeBonus": "Welkomstbonus geven ({points} {pointsName})",
+    "update": "Bijwerken",
+    "submit": "Aan het programma toevoegen"
+  },
+  "program": {
+    "title": "Programma-instellingen",
+    "saved": "Instellingen opgeslagen",
+    "pointsNameFallback": "punten",
+    "status": {
+      "title": "Status",
+      "label": "Loyaliteitsprogramma actief",
+      "details": "Schakel het uit om het programma te pauzeren zonder dat je klanten hun punten verliezen."
+    },
+    "earn": {
+      "title": "Punten sparen",
+      "pointsName": "Naam van de punten",
+      "pointsNameDetails": "Bijv. punten, sterren, munten…",
+      "perUnit": "Punten per besteed(e) {currency}",
+      "perUnitDetails": "Voorbeeld: een bestelling van {amount} levert {points} {pointsName} op (vóór de niveauvermenigvuldiger).",
+      "signup": "Welkomstbonus",
+      "signupDetails": "Gegeven wanneer de klant een account aanmaakt.",
+      "firstOrder": "Bonus eerste bestelling",
+      "firstOrderDetails": "Bovenop de punten van de bestelling."
+    },
+    "birthday": {
+      "title": "Verjaardag 🎂",
+      "label": "Punten op de verjaardag",
+      "details": "Klanten vullen hun datum in via de widget. Om misbruik te voorkomen, moet de datum minstens 30 dagen van tevoren zijn opgeslagen. 0 = uit."
+    },
+    "referral": {
+      "title": "Doorverwijzingen 🤝",
+      "enable": "Doorverwijzingen inschakelen",
+      "enableDetails": "Elk lid krijgt een persoonlijke link. De vriend ontvangt een welkomstcode; de doorverwijzer verdient punten wanneer de vriend zijn eerste bestelling plaatst.",
+      "referrerPoints": "Punten voor de doorverwijzer",
+      "friendGift": "Cadeau voor de vriend",
+      "value": "Waarde",
+      "minimum": "Minimale aankoop (optioneel)"
+    },
+    "social": {
+      "title": "Social media 📣",
+      "intro": "Voeg je pagina's toe: de widget nodigt klanten uit om je te volgen in ruil voor {pointsName} (één keer per netwerk).",
+      "points": "Punten per gevolgd netwerk"
+    },
+    "bonus": {
+      "title": "Bonuspuntenactie 🔥",
+      "intro": "Vermenigvuldig de verdiende {pointsName} gedurende een periode (uitverkoop, feestdagen, lanceringen…). Tijdens de actie wordt een banner in de widget getoond.",
+      "multiplier": "Vermenigvuldiger",
+      "none": "Geen actie",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "Start (optioneel)",
+      "end": "Einde (optioneel)",
+      "message": "Bannerbericht",
+      "messageDetails": "Laat leeg om een vertaald standaardbericht te tonen.",
+      "messagePlaceholder": "Black Friday: {pointsName} ×{multiplier}!"
+    },
+    "expiration": {
+      "title": "Vervallen van punten ⏳",
+      "label": "Punten vervallen na",
+      "details": "Elke aankoop, inwisseling of verdiende punt verschuift de datum. Een vervaldatum moedigt klanten aan om terug te komen.",
+      "never": "Nooit",
+      "months_one": "{count} maand zonder activiteit",
+      "months_other": "{count} maanden zonder activiteit"
+    },
+    "widget": {
+      "title": "Weergave van de widget",
+      "languageNote": "De widget wordt automatisch getoond in de taal van je winkel (36 talen ondersteund).",
+      "widgetTitle": "Titel van de widget",
+      "widgetTitleDetails": "Laat leeg om in elke taal de vertaalde standaardtitel te gebruiken.",
+      "defaultTitle": "Mijn beloningen",
+      "color": "Hoofdkleur",
+      "colorOption": "Kleur {color}",
+      "customColor": "Aangepaste kleur",
+      "position": "Positie van de knop",
+      "right": "Rechtsonder",
+      "left": "Linksonder"
+    },
+    "preview": "Voorbeeld",
+    "previewTier": "Niveau Zilver",
+    "previewRedeem": "Inwisselen"
+  },
+  "landing": {
+    "tagline": "Het eenvoudigste loyaliteitsprogramma voor je Shopify-winkel: punten, VIP-niveaus met automatische kortingen, doorverwijzingen en beloningen in een paar klikken.",
+    "pricing": "{price}/maand · alles inbegrepen · {days} dagen gratis proberen",
+    "shopDomain": "Winkeldomein",
+    "install": "Installeren",
+    "login": "Inloggen",
+    "installFromStore": "Installeer Hoshi Club via de Shopify App Store.",
+    "errors": {
+      "missingShop": "Voer je winkeldomein in",
+      "invalidShop": "Dit winkeldomein is ongeldig"
+    },
+    "features": {
+      "points": {
+        "title": "Automatische punten.",
+        "text": "Klanten verdienen punten bij elke bestelling, zonder technische configuratie."
+      },
+      "tiers": {
+        "title": "VIP-niveaus.",
+        "text": "Brons, Zilver, Goud of niveaus alleen op uitnodiging, met automatische kortingen en puntenvermenigvuldigers voor je beste klanten."
+      },
+      "referrals": {
+        "title": "Doorverwijzingen en bonussen.",
+        "text": "Doorverwijsprogramma, verjaardagsbeloningen, volgen op social media en acties met dubbele punten."
+      },
+      "widget": {
+        "title": "Elegante widget.",
+        "text": "Een zwevende knop in de kleuren van je winkel om punten te bekijken en in te wisselen."
+      },
+      "languages": {
+        "title": "36 talen.",
+        "text": "De app en de widget spreken jouw taal en die van je klanten."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "Privacybeleid",
+    "supportLink": "Hulp en contact",
+    "language": "Taal",
+    "privacy": {
+      "title": "Privacybeleid",
+      "updated": "Hoshi Club, uitgegeven door Hoshi Technologies. Laatst bijgewerkt: {date}.",
+      "intro": "Hoshi Club (‘de app’) stelt Shopify-verkopers in staat hun klanten een loyaliteitsprogramma aan te bieden. Dit beleid legt uit welke gegevens de app verwerkt, waarom en hoe.",
+      "collectedTitle": "Verzamelde gegevens",
+      "collected": {
+        "store": {
+          "label": "Winkelgegevens:",
+          "text": "winkeldomein en toegangstokens die Shopify bij de installatie verstrekt."
+        },
+        "members": {
+          "label": "Ledengegevens:",
+          "text": "Shopify-klant-ID, voornaam, achternaam, e-mailadres, aantal bestellingen, puntensaldo en -geschiedenis, loyaliteitsniveau, verdiende kortingscodes, verjaardag (dag en maand, als de klant die opgeeft) en doorverwijscode."
+        },
+        "referrals": {
+          "label": "Doorverwijsgegevens:",
+          "text": "e-mailadres dat de uitgenodigde persoon invoert om zijn welkomstcode te ontvangen."
+        },
+        "orders": {
+          "label": "Bestelgegevens:",
+          "text": "ID, subtotaal en totaal van betaalde bestellingen en gebruikte kortingscodes, uitsluitend om punten te berekenen."
+        }
+      },
+      "noPayment": "De app verzamelt geen betaalgegevens en gebruikt geen advertentiecookies.",
+      "useTitle": "Hoe gegevens worden gebruikt",
+      "use": "Gegevens worden uitsluitend gebruikt om het loyaliteitsprogramma van de winkel uit te voeren: punten berekenen en tonen, niveaus en bijbehorende voordelen toekennen, kortingscodes aanmaken, doorverwijzingen beheren en statistieken aan de verkoper tonen. Ze worden nooit verkocht, verhuurd of met derden gedeeld voor marketingdoeleinden.",
+      "hostingTitle": "Hosting en verwerkers",
+      "hosting": "Gegevens worden gehost door Cloudflare (Cloudflare Workers en D1). Shopify levert winkel- en klantgegevens via zijn API's. Deze aanbieders treden op als verwerkers en passen hun eigen beveiligingsmaatregelen toe.",
+      "retentionTitle": "Bewaring en verwijdering",
+      "retention": {
+        "installed": "Gegevens worden bewaard zolang de app is geïnstalleerd.",
+        "customerRedact": "Wanneer een klant hierom vraagt (via Shopify), worden diens gegevens automatisch verwijderd (webhook customers/redact).",
+        "shopRedact": "48 uur na het verwijderen van de app vraagt Shopify om verwijdering van de winkelgegevens; deze worden dan volledig gewist (webhook shop/redact).",
+        "merchant": "De verkoper kan een klant op elk moment via de app uit het programma verwijderen."
+      },
+      "rightsTitle": "Je rechten",
+      "rights": "Op grond van de AVG en vergelijkbare wetgeving hebben klanten het recht op inzage, rectificatie en verwijdering van hun gegevens en het recht om bezwaar te maken tegen de verwerking ervan. Ze kunnen deze rechten uitoefenen bij de betreffende winkel (de verwerkingsverantwoordelijke) of door ons te schrijven. Inzageverzoeken die via Shopify worden verzonden (webhook customers/data_request) worden afgehandeld.",
+      "contactTitle": "Contact",
+      "contact": "Voor vragen:"
+    },
+    "support": {
+      "title": "Hulp en contact",
+      "intro": "Een vraag of probleem? Schrijf ons, we antwoorden binnen 2 werkdagen:",
+      "faqTitle": "Veelgestelde vragen",
+      "faq": {
+        "widget": {
+          "q": "Hoe toon ik het programma in mijn winkel?",
+          "a": "In Shopify: Webwinkel → Thema's → Aanpassen → App-embeds, en schakel dan ‘Hoshi Club’ in. Het dashboard van de app bevat een directe link."
+        },
+        "points": {
+          "q": "Wanneer krijgen mijn klanten hun punten?",
+          "a": "Automatisch zodra de bestelling is betaald. Punten worden verwijderd als de bestelling wordt terugbetaald."
+        },
+        "tierDiscounts": {
+          "q": "Hoe werken niveaukortingen?",
+          "a": "Elk niveau voegt een tag toe aan de klant en maakt een automatische Shopify-korting aan die alleen geldt voor klanten van dat niveau. Deze wordt zonder code toegepast bij de checkout. Je vindt de kortingen in Shopify → Kortingen."
+        },
+        "assignTier": {
+          "q": "Kan ik een niveau toewijzen aan een specifieke klant?",
+          "a": "Ja: Leden → Klant toevoegen, of via de pagina van een lid (sectie ‘Klantniveau’)."
+        },
+        "referrals": {
+          "q": "Hoe werken doorverwijzingen?",
+          "a": "Elk lid heeft een persoonlijke link. De uitgenodigde vriend vult zijn e-mailadres in en ontvangt een welkomstcode; de doorverwijzer verdient punten wanneer die code wordt gebruikt in een betaalde bestelling."
+        },
+        "languages": {
+          "q": "Welke talen worden ondersteund?",
+          "a": "De app volgt de taal van je Shopify-beheercentrum en de widget volgt de taal van je winkel, in 36 talen. Leeg gelaten namen van beloningen worden automatisch vertaald."
+        },
+        "uninstall": {
+          "q": "Wat gebeurt er als ik de app verwijder?",
+          "a": "Automatische kortingen blijven in Shopify staan totdat je ze verwijdert. Programmagegevens worden 48 uur na het verwijderen van de app gewist."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "Beloningen",
+    "new": "Nieuwe beloning",
+    "create": "Beloning aanmaken",
+    "editTitle": "Beloning bewerken",
+    "deleted": "Beloning verwijderd",
+    "hidden": "Beloning verborgen",
+    "shown": "Beloning zichtbaar",
+    "updated": "Beloning bijgewerkt",
+    "created": "Beloning aangemaakt",
+    "errors": {
+      "cost": "De puntenkosten moeten groter zijn dan 0",
+      "value": "Voer de waarde van de korting in",
+      "percent": "Een korting kan niet hoger zijn dan 100%"
+    },
+    "emptyTitle": "Nog geen beloningen",
+    "emptyText": "Maak je eerste beloning aan: klanten kunnen deze krijgen in ruil voor hun {pointsName}.",
+    "columns": {
+      "reward": "Beloning",
+      "cost": "Kosten",
+      "claimed": "Geclaimd"
+    },
+    "types": {
+      "AMOUNT": "Vast bedrag",
+      "PERCENT": "Percentage",
+      "FREE_SHIPPING": "Gratis verzending"
+    },
+    "minimumShort": "Vanaf {amount} besteed",
+    "autoTranslated": "Naam automatisch vertaald",
+    "timesClaimed_one": "{count} keer",
+    "timesClaimed_other": "{count} keer",
+    "visible": "Zichtbaar",
+    "hiddenBadge": "Verborgen",
+    "hide": "Verbergen",
+    "show": "Tonen",
+    "confirmDelete": "‘{title}’ verwijderen?",
+    "tipTitle": "Tip",
+    "tip": "Een goede eerste beloning is haalbaar in 2 tot 3 bestellingen. Met 1 punt per bestede eenheid is 500 punten voor 5 korting gelijk aan 1% korting: aantrekkelijk zonder je marges aan te tasten.",
+    "typeLabel": "Type beloning",
+    "percentLabel": "Kortingspercentage",
+    "amountLabel": "Kortingsbedrag",
+    "costLabel": "Puntenkosten",
+    "nameLabel": "Weergavenaam (optioneel)",
+    "nameDetails": "Laat leeg om een naam te tonen die in de taal van je klant is vertaald.",
+    "minimumLabel": "Minimaal bestelbedrag (optioneel)"
+  },
+  "labels": {
+    "rewardPercent": "{value}% korting",
+    "rewardAmount": "{amount} korting",
+    "freeShipping": "Gratis verzending",
+    "percentOff": "{value}% korting",
+    "amountOff": "{amount} korting",
+    "tierDiscount": "{discount} op elke bestelling",
+    "tierDiscountFrom": "{discount} op elke bestelling boven {minimum}",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{reward} op bestellingen boven {minimum}"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "Welkom",
+      "ORDER": "Bestelling",
+      "FIRST_ORDER": "1e bestelling",
+      "REDEEM": "Inwisseling",
+      "REFUND": "Terugbetaling",
+      "ADJUST": "Aanpassing",
+      "BIRTHDAY": "Verjaardag",
+      "REFERRAL": "Doorverwijzing",
+      "SOCIAL": "Social media",
+      "EXPIRE": "Vervallen"
+    },
+    "desc": {
+      "SIGNUP": "Welkomstbonus",
+      "ORDER": "Bestelling {order}",
+      "ORDER_BONUS": "Bestelling {order} (bonus ×{bonus})",
+      "FIRST_ORDER": "Bonus eerste bestelling ({order})",
+      "REDEEM": "Ingewisseld: {reward}",
+      "REFUND": "Terugbetaling (bestelling {order})",
+      "ADJUST_ADD": "Handmatige toevoeging",
+      "ADJUST_REMOVE": "Handmatige verwijdering",
+      "BIRTHDAY": "Gefeliciteerd met je verjaardag! ({year})",
+      "REFERRAL": "Doorverwijzing: {friend}",
+      "SOCIAL": "Gevolgd op {network}",
+      "EXPIRE": "Vervallen na {months} maanden inactiviteit"
+    }
+  },
+  "errors": {
+    "unexpected": "Er is iets misgegaan: {details}",
+    "memberNotFound": "Lid niet gevonden",
+    "tierNotFound": "Niveau niet gevonden",
+    "rewardUnavailable": "Deze beloning is niet meer beschikbaar",
+    "programDisabled": "Het loyaliteitsprogramma is momenteel gepauzeerd",
+    "notEnoughPoints": "Je hebt nog {missing} {pointsName} nodig",
+    "discountFailed": "De kortingscode kon niet worden aangemaakt. {details}",
+    "referralCodeFailed": "De doorverwijscode kon niet worden gegenereerd",
+    "referralUnavailable": "Doorverwijzingen zijn niet beschikbaar",
+    "invalidEmail": "Ongeldig e-mailadres",
+    "invalidReferral": "Ongeldige doorverwijslink",
+    "selfReferral": "Je kunt jezelf niet doorverwijzen",
+    "referralAlreadyUsed": "Dit e-mailadres heeft al een doorverwijzing gebruikt",
+    "referralNewCustomersOnly": "Doorverwijzingen zijn alleen voor nieuwe klanten",
+    "invalidDate": "Ongeldige datum",
+    "birthdayAlreadySet": "Je verjaardag is al opgeslagen",
+    "actionUnavailable": "Deze actie is niet beschikbaar",
+    "loginRequired": "Log in om van het programma te profiteren",
+    "notInstalled": "De app is niet geïnstalleerd in deze winkel",
+    "generic": "Er is iets misgegaan, probeer het opnieuw."
+  },
+  "seed": {
+    "pointsName": "punten",
+    "tierBronze": "Brons",
+    "tierSilver": "Zilver",
+    "tierGold": "Goud"
+  },
+  "server": {
+    "tierDiscountTitle": "Niveau {tier}: {discount}",
+    "tierShippingTitle": "Niveau {tier}: gratis verzending"
+  },
+  "tiers": {
+    "title": "Klantniveaus",
+    "new": "Nieuw niveau",
+    "create": "Niveau aanmaken",
+    "editTitle": "Niveau bewerken",
+    "resync": "Opnieuw synchroniseren met Shopify",
+    "deleted": "Niveau verwijderd",
+    "created": "Niveau aangemaakt",
+    "updated": "Niveau bijgewerkt",
+    "resynced_one": "Synchronisatie voltooid ({count} klant bijgewerkt)",
+    "resynced_other": "Synchronisatie voltooid ({count} klanten bijgewerkt)",
+    "errors": {
+      "name": "Geef het niveau een naam",
+      "value": "Voer de waarde van de korting in",
+      "percent": "De korting kan niet hoger zijn dan 100%",
+      "sync": "Niveau opgeslagen, maar de Shopify-korting kon niet worden aangemaakt: {details}"
+    },
+    "intro": "Elk niveau kan voordelen bieden die automatisch worden toegepast bij de checkout (permanente korting, gratis verzending), een {pointsName}-vermenigvuldiger en eigen voordelen. Een niveau is automatisch (bereikt door {pointsName} te sparen) of handmatig (je wijst het zelf toe via de pagina van de klant, bijv. ‘Ambassadeur’ of ‘Groothandel’). Een handmatig niveau heeft altijd voorrang.",
+    "emptyTitle": "Geen niveaus",
+    "emptyText": "Maak je klantniveaus en hun voordelen aan.",
+    "autoSection": "Automatische niveaus (op basis van punten)",
+    "manualSection": "Handmatig toegewezen niveaus",
+    "levelNumber": "Niveau {number}",
+    "invitationOnly": "Alleen op uitnodiging",
+    "assignedManually": "Handmatig toegewezen",
+    "fromPoints": "Vanaf {points} gespaarde {pointsName}",
+    "noPerks": "Geen voordelen ingesteld",
+    "customers_one": "{count} klant",
+    "customers_other": "{count} klanten",
+    "tag": "Tag: {tag}",
+    "syncError": "Shopify-korting niet aangemaakt: {details}",
+    "confirmDelete": "Het niveau ‘{name}’ verwijderen? De automatische kortingen ervan worden verwijderd.",
+    "nameLabel": "Naam van het niveau",
+    "namePlaceholder": "Bijv. Goud, Ambassadeur, Groothandel…",
+    "modeQuestion": "Hoe krijgt een klant dit niveau?",
+    "modeAuto": "Automatisch",
+    "modeAutoText": "Door {pointsName} te sparen",
+    "modeManual": "Handmatig",
+    "modeManualText": "Je wijst het zelf toe",
+    "minPointsLabel": "Vereiste gespaarde {pointsName}",
+    "perksTitle": "Automatische voordelen",
+    "discountLabel": "Permanente korting op bestellingen",
+    "discountNone": "Geen korting",
+    "discountPercent": "Percentage (bijv. 10% korting)",
+    "discountAmount": "Vast bedrag (bijv. 5 korting)",
+    "discountValue": "Kortingswaarde",
+    "discountMinimum": "Minimale aankoop (optioneel)",
+    "freeShipping": "Gratis verzending op elke bestelling",
+    "multiplierLabel": "{pointsName}-vermenigvuldiger",
+    "multiplierDetails": "1 = normaal, 2 = twee keer zoveel {pointsName} per bestelling.",
+    "otherPerks": "Andere voordelen (één per regel, zichtbaar voor klanten)",
+    "otherPerksPlaceholder": "Vroege toegang tot de uitverkoop\nVerjaardagscadeau"
+  },
+  "widget": {
+    "title": "Mijn beloningen",
+    "unavailable": "Het loyaliteitsprogramma is tijdelijk niet beschikbaar.",
+    "guestText": "Maak een account aan om bij elke aankoop punten te sparen en exclusieve kortingen te ontgrendelen.",
+    "join": "Doe mee aan het programma",
+    "haveAccount": "Ik heb al een account",
+    "hello": "Hoi {name}",
+    "earnTitle": "Verdien {pointsName}",
+    "nextTier": "{points} {pointsName} tot {tier}",
+    "bonusDefault": "{pointsName} ×{multiplier}!",
+    "bonusUntil": "tot {date}",
+    "rewardsTitle": "Beloningen",
+    "minimum": "vanaf {amount}",
+    "redeem": "Inwisselen",
+    "missing": "Nog {points}",
+    "codesTitle": "Mijn codes",
+    "useCode": "Gebruiken",
+    "perksTitle": "Mijn {tier}-voordelen",
+    "perUnit": "{points} {pointsName} per {amount} besteed",
+    "signup": "{points} {pointsName} bij aanmelding",
+    "firstOrder": "{points} {pointsName} voor je eerste bestelling",
+    "follow": "Volg ons op {network}",
+    "followButton": "Volgen",
+    "birthdayGuest": "{points} {pointsName} op je verjaardag",
+    "birthdaySet": "Verjaardag op {date}: {points} {pointsName} voor jou",
+    "birthdayAsk": "Je verjaardag:",
+    "birthdayConfirm": "Is je verjaardag op {date}? Dit kan later niet meer worden gewijzigd.",
+    "birthdaySaved": "Verjaardag opgeslagen 🎂",
+    "day": "Dag",
+    "month": "Maand",
+    "ok": "OK",
+    "socialThanks": "Bedankt! Je punten zijn toegevoegd",
+    "socialAlready": "Je hebt voor dit netwerk al punten gekregen",
+    "referralTitle": "Doorverwijzen",
+    "referralMemberTitle": "Verwijs je vrienden door",
+    "referralIntro": "Geef je vrienden {reward} en verdien {points} {pointsName} wanneer ze hun eerste bestelling plaatsen.",
+    "referralLink": "Doorverwijslink",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!",
+    "share": "Delen…",
+    "shareText": "Profiteer van korting op je eerste bestelling!",
+    "referralsDone_one": "{count} vriend doorverwezen 🎉",
+    "referralsDone_other": "{count} vrienden doorverwezen 🎉",
+    "tiersTitle": "Niveaus",
+    "tierFrom": "vanaf {points} {pointsName}",
+    "expires": "Je {pointsName} zijn geldig tot {date} (verlengd bij elke aankoop).",
+    "confirmRedeem": "Je punten inwisselen voor ‘{reward}’?",
+    "congrats": "Gefeliciteerd!",
+    "rewardReady": "Je beloning ‘{reward}’ staat klaar:",
+    "applyCart": "Toepassen op mijn winkelwagen",
+    "close": "Sluiten",
+    "errorGeneric": "Er is iets misgegaan, probeer het opnieuw.",
+    "aFriend": "Een vriend",
+    "giftTitle": "{name} heeft je een cadeau gestuurd!",
+    "giftText": "Profiteer van {reward} op je eerste bestelling.",
+    "emailPlaceholder": "Je e-mailadres",
+    "getCode": "Mijn code ontvangen",
+    "later": "Misschien later",
+    "welcomeCodeTitle": "Je welkomstcode",
+    "welcomeCodeText": "{reward} op je eerste bestelling:",
+    "continueShopping": "Verder winkelen",
+    "productPoints": "Verdien {points} {pointsName} met deze aankoop"
+  }
+}

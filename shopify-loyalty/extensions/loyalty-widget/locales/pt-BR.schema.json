@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Texto do botão", "info": "Deixe em branco para usar o título definido no app." },
+    "position": { "label": "Posição", "app": "Configuração do app", "right": "Canto inferior direito", "left": "Canto inferior esquerdo" },
+    "guest_text": { "label": "Mensagem para visitantes não conectados", "info": "Deixe em branco para usar a mensagem padrão traduzida." }
+  },
+  "card": { "name": "Cartão de fidelidade", "heading": "Título", "max_width": "Largura máxima" },
+  "product": { "name": "Pontos do produto", "text": "Texto personalizado", "text_info": "Opcional. {points} e {name} são substituídos. Deixe em branco para o texto padrão traduzido." }
+}
