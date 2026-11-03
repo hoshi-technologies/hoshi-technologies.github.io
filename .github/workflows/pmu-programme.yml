@@ -95,13 +95,17 @@ jobs:
         run: node --test tests/*.test.mjs
       - name: Diagnostic API
         if: ${{ inputs.probe }}
-        run: node scripts/sports-probe.mjs
+        run: node scripts/sports.mjs --backfill 120
       - name: Récupérer le programme
         if: ${{ !inputs.probe }}
         run: node scripts/pmu-fetch.mjs --backfill "${{ inputs.backfill || '0' }}"
       - name: Calibrer le modèle (une fois par jour)
         if: ${{ !inputs.probe }}
         run: node scripts/calibrate.mjs
+      - name: Sports (football, tennis, basket, rugby)
+        if: ${{ !inputs.probe }}
+        continue-on-error: true
+        run: node scripts/sports.mjs --backfill "${{ inputs.backfill || '0' }}"
       - name: Alertes (paris validés)
         if: ${{ !inputs.probe }}
         env:
