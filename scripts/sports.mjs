@@ -174,7 +174,7 @@ async function main() {
     store.leagues = store.leagues || {};
     const jobs = [];
     for (const lg of sport.leagues) for (const d of dates) jobs.push({ lg, d });
-    await pool(jobs, 4, async ({ lg, d }) => {
+    await pool(process.env.SPORTS_OFFLINE ? [] : jobs, 4, async ({ lg, d }) => {
       calls++;
       let j;
       try {
@@ -232,11 +232,11 @@ async function main() {
     const R = (id) => (fin.ratings[id] != null ? fin.ratings[id] : 1500);
     const G = (id) => fin.games[id] || 0;
     for (const e of events) {
-      if (e.status !== 'pre' || e.date <= now) continue;
-      const p = S.matchProbs(R(e.home.id), R(e.away.id), params, e.neutral);
+      if (e.status === 'post' || e.prono && e.date <= now) continue;
+      const p = S.matchProbs(R(e.home.id), R(e.away.id), params, e.neutral || params.tennis);
       e.model = p;
       e.games = [G(e.home.id), G(e.away.id)];
-      if (e.date - now <= FREEZE_BEFORE_MS)
+      if (e.status === 'pre' && e.date > now && e.date - now <= FREEZE_BEFORE_MS)
         e.prono = {
           at: now,
           p: { h: +p.h.toFixed(4), d: +p.d.toFixed(4), a: +p.a.toFixed(4) },

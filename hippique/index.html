@@ -787,6 +787,13 @@
         backdrop-filter: saturate(1.6) blur(14px);
         border-bottom: 1px solid var(--line);
       }
+      header.appbar {
+        flex-wrap: wrap;
+      }
+      header.appbar .sportbar {
+        width: 100%;
+        margin-top: 2px;
+      }
       header.appbar h1 {
         font-size: 20px;
       }
@@ -909,6 +916,124 @@
         min-width: 0;
         font-size: 12px;
       }
+      /* ---------- Sports ---------- */
+      .sportbar {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        margin-top: 8px;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+      }
+      .sportbar::-webkit-scrollbar {
+        display: none;
+      }
+      .sportbar button {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        min-height: 34px;
+      }
+      .sportbar button.on {
+        background: var(--fg);
+        color: var(--bg);
+        border-color: transparent;
+      }
+      #sportApp,
+      #sportTabbar {
+        display: none;
+      }
+      body.sport-mode #sportApp {
+        display: block;
+      }
+      body.sport-mode #sportTabbar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      body.sport-mode #tabbar,
+      body.sport-mode [data-view] {
+        display: none !important;
+      }
+      .match {
+        background: var(--card2);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+      .match .mtop {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .match .mtop b {
+        color: var(--fg);
+        font-size: 14px;
+      }
+      .outc {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 52px 64px 50px;
+        gap: 8px;
+        align-items: center;
+        padding: 6px 0;
+        border-top: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .outc:first-of-type {
+        border-top: 0;
+      }
+      .outc .nm {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .outc .nm small {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .outc .pc {
+        text-align: right;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+      .outc input {
+        width: 64px;
+        min-height: 32px;
+        padding: 4px 6px;
+        text-align: right;
+        font-size: 14px;
+      }
+      .outc.head {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding-top: 0;
+      }
+      .outc.head span:not(:first-child) {
+        text-align: right;
+      }
+      .outc.win .nm {
+        font-weight: 800;
+      }
+      .mbest {
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      .dayhead {
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin: 16px 2px 8px;
+      }
       /* ---------- Quinté+ ---------- */
       .qhead {
         display: flex;
@@ -963,6 +1088,13 @@
       <header class="appbar">
         <div class="mark">H</div>
         <div class="ttl"><h1>Hoshi Turf</h1><small id="appSub">Pronostics hippiques</small></div>
+      <div class="sportbar" id="sportBar">
+        <button data-sport="hippique">🏇 Courses</button>
+        <button data-sport="foot">⚽ Foot</button>
+        <button data-sport="tennis">🎾 Tennis</button>
+        <button data-sport="basket">🏀 Basket</button>
+        <button data-sport="rugby">🏉 Rugby</button>
+      </div>
       </header>
 
       <div data-view="courses">
@@ -1005,6 +1137,13 @@
         <section class="card" id="sPick"></section>
         <section class="card" id="sAdvice"></section>
       </div>
+      </div>
+
+      <!-- Autres sports -->
+      <div id="sportApp">
+        <div data-sview="matchs"><section class="card" id="spMatches"></section></div>
+        <div data-sview="bilan" class="view-off"><section class="card" id="spBilan"></section></div>
+        <div data-sview="classement" class="view-off"><section class="card" id="spRank"></section></div>
       </div>
 
       <div data-view="quinte" class="view-off">
@@ -1229,7 +1368,14 @@
       <button data-go="expert"><span class="i">⚙️</span>Expert</button>
     </nav>
 
+    <nav class="tabbar" id="sportTabbar" aria-label="Navigation du sport">
+      <button data-sgo="matchs" class="on"><span class="i">📋</span>Matchs</button>
+      <button data-sgo="bilan"><span class="i">📊</span>Bilan</button>
+      <button data-sgo="classement"><span class="i">🏆</span>Classement</button>
+    </nav>
+
     <script src="engine.js"></script>
+    <script src="sports.js"></script>
     <script>
       (function () {
         'use strict';
@@ -3199,6 +3345,448 @@
         }, 5 * 60000);
 
 
+
+        // ======================================================================
+        // Autres sports (football, tennis, basket, rugby)
+        // ======================================================================
+        var SP = window.HoshiSports;
+        var sportData = {};
+        store.sport = store.sport || 'hippique';
+        store.sportOdds = store.sportOdds || {};
+        store.sportLeague = store.sportLeague || {};
+        store.sview = store.sview || 'matchs';
+        function parisDayOf(ms) {
+          return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date(ms));
+        }
+        function setSport(sp, keepScroll) {
+          if (sp !== 'hippique' && !SP.SPORTS[sp]) sp = 'hippique';
+          store.sport = sp;
+          save(store);
+          document.body.classList.toggle('sport-mode', sp !== 'hippique');
+          document.querySelectorAll('#sportBar button').forEach(function (b) {
+            b.classList.toggle('on', b.dataset.sport === sp);
+          });
+          $('appSub').textContent = sp === 'hippique' ? 'Pronostics hippiques' : 'Pronostics ' + SP.SPORTS[sp].label.toLowerCase();
+          if (!keepScroll) window.scrollTo(0, 0);
+          if (sp !== 'hippique') {
+            setSView(store.sview, true);
+            loadSport(sp);
+          }
+        }
+        function setSView(v, keepScroll) {
+          if (['matchs', 'bilan', 'classement'].indexOf(v) < 0) v = 'matchs';
+          store.sview = v;
+          save(store);
+          document.querySelectorAll('[data-sview]').forEach(function (el) {
+            el.classList.toggle('view-off', el.dataset.sview !== v);
+          });
+          document.querySelectorAll('#sportTabbar button').forEach(function (b) {
+            b.classList.toggle('on', b.dataset.sgo === v);
+          });
+          if (!keepScroll) window.scrollTo(0, 0);
+          renderSport();
+        }
+        function loadSport(sp) {
+          if (!sportData[sp]) $('spMatches').innerHTML = '<p class="muted">Chargement…</p>';
+          return getJson('data/sports/' + sp + '.json')
+            .then(function (d) {
+              sportData[sp] = d;
+            })
+            .catch(function () {
+              sportData[sp] = sportData[sp] || null;
+            })
+            .then(renderSport);
+        }
+        function renderSport() {
+          if (store.sport === 'hippique') return;
+          if (store.sview === 'bilan') renderSportBilan();
+          else if (store.sview === 'classement') renderSportRank();
+          else renderSportMatches();
+        }
+        function leagueChips(sp, d, noAll) {
+          var lgs = (d.leagues || []).filter(function (l) {
+            return l.matches > 0;
+          });
+          var cur = store.sportLeague[sp] || (noAll && lgs[0] ? lgs[0].key : '');
+          if (lgs.length < 2 && !noAll) return '';
+          return (
+            '<div class="chips" style="margin-bottom:10px">' +
+            (noAll ? '' : '<button class="chip' + (cur ? '' : ' on') + '" data-league="">Toutes</button>') +
+            lgs
+              .map(function (l) {
+                return '<button class="chip' + (cur === l.key ? ' on' : '') + '" data-league="' + esc(l.key) + '">' + esc(l.label) + '</button>';
+              })
+              .join('') +
+            '</div>'
+          );
+        }
+        function leagueLabel(d, key) {
+          var l = (d.leagues || []).filter(function (x) {
+            return x.key === key;
+          })[0];
+          return l ? l.label : key;
+        }
+        function oddsFor(e) {
+          var o = Object.assign({}, e.odds || {});
+          var u = store.sportOdds[e.id] || {};
+          ['h', 'd', 'a'].forEach(function (k) {
+            if (u[k]) o[k] = u[k];
+          });
+          return o;
+        }
+        function pctS(p) {
+          return p == null || !isFinite(p) ? '—' : Math.round(p * 100) + ' %';
+        }
+        function favOf(p) {
+          return p.h >= p.a ? (p.h >= (p.d || 0) ? 'home' : 'draw') : p.a >= (p.d || 0) ? 'away' : 'draw';
+        }
+        function renderSportMatches() {
+          var sp = store.sport,
+            d = sportData[sp],
+            el = $('spMatches');
+          var cfg = SP.SPORTS[sp];
+          if (!d) {
+            el.innerHTML =
+              '<h2>' +
+              cfg.icon +
+              ' ' +
+              cfg.label +
+              '</h2><p class="muted">Données pas encore disponibles : elles sont récupérées automatiquement toutes les heures.</p>';
+            return;
+          }
+          var cur = store.sportLeague[sp] || '';
+          var stake = parseFloat(String(store.myStake || 2).replace(',', '.')) || 2;
+          var html = '<h2>' + cfg.icon + ' ' + cfg.label + ' · matchs à venir</h2>' + leagueChips(sp, d);
+          html +=
+            '<div class="kpi" style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><b style="margin-right:4px">Ma mise</b>' +
+            [1, 2, 5, 10]
+              .map(function (v) {
+                return '<button class="chip' + (stake === v ? ' on' : '') + '" data-sstake="' + v + '">' + v + ' €</button>';
+              })
+              .join('') +
+            '</div>';
+          var list = (d.upcoming || []).filter(function (e) {
+            return !cur || e.league === cur;
+          });
+          if (!list.length) html += '<p class="muted">Aucun match dans les 7 prochains jours pour cette sélection.</p>';
+          var lastDay = '';
+          var now = Date.now();
+          list.forEach(function (e) {
+            var dk = parisDayOf(e.date);
+            if (dk !== lastDay) {
+              lastDay = dk;
+              html += '<div class="dayhead">' + esc(fmtDay(dk)) + '</div>';
+            }
+            var pm = e.model;
+            var o = oddsFor(e);
+            // Chances affichées : modèle Elo combiné aux cotes quand elles sont complètes
+            // (moitié-moitié, ou 80 % cotes si l'une des équipes a moins de 10 matchs connus).
+            var need = cfg.draws ? ['h', 'd', 'a'] : ['h', 'a'];
+            var ip =
+              need.every(function (k) {
+                return o[k] > 1;
+              }) && SP.impliedProbs(o);
+            var fewGames = e.games && Math.min(e.games[0], e.games[1]) < 10;
+            var p = pm && ip ? SP.blend(pm, ip, fewGames ? 0.8 : 0.5) : pm;
+            var outs = [['h', e.home.name + (cfg.individual ? '' : ' (dom.)'), e.ratings ? e.ratings[0] : null]];
+            if (cfg.draws) outs.push(['d', 'Match nul', null]);
+            outs.push(['a', e.away.name, e.ratings ? e.ratings[1] : null]);
+            var fav = p
+              ? outs.reduce(function (b, x) {
+                  return (p[x[0]] || 0) > (p[b[0]] || 0) ? x : b;
+                })
+              : null;
+            var started = e.date <= now || e.status === 'in';
+            html += '<div class="match"><div class="mtop"><b>' + fmtHour(e.date) + '</b><span class="tag">' + esc(leagueLabel(d, e.league)) + '</span>';
+            if (e.name && cfg.individual) html += '<span>' + esc(e.name) + '</span>';
+            if (e.status === 'in') html += '<span class="pill mid">en cours</span>';
+            if (started && e.frozenAt) html += '<span>🔒 figé à ' + fmtHour(e.frozenAt) + '</span>';
+            html += '</div>';
+            html += '<div class="outc head"><span>Issue</span><span>Chances</span><span>Cote</span><span>Valeur</span></div>';
+            var best = null;
+            outs.forEach(function (x) {
+              var k = x[0],
+                pk = p ? p[k] : null,
+                ok = o[k];
+              var v = pk && ok ? pk * ok : null;
+              if (v && (!best || v > best.v)) best = { k: k, label: x[1], v: v, o: ok, p: pk };
+              html +=
+                '<div class="outc' +
+                (fav && fav[0] === k ? ' win' : '') +
+                '"><span class="nm">' +
+                esc(x[1]) +
+                (x[2] ? ' <small>Elo ' + x[2] + '</small>' : '') +
+                '</span><span class="pc" title="' +
+                (pm && ip ? 'Modèle seul ' + pctS(pm[k]) + ' · cotes ' + pctS(ip[k]) : 'Modèle Elo') +
+                '" style="color:' +
+                (pk >= 0.5 ? 'var(--good)' : pk >= 0.3 ? 'var(--mid)' : 'var(--muted)') +
+                '">' +
+                pctS(pk) +
+                '</span><span><input inputmode="decimal" data-sodds="' +
+                esc(e.id) +
+                '" data-k="' +
+                k +
+                '" value="' +
+                (ok ? String(ok).replace('.', ',') : '') +
+                '" placeholder="cote" /></span><span style="text-align:right">' +
+                (v ? '<span class="pill ' + (v >= 1.05 ? 'good' : v >= 0.95 ? 'mid' : 'bad') + '">' + v.toFixed(2).replace('.', ',') + '</span>' : '<span class="muted">—</span>') +
+                '</span></div>';
+            });
+            if (best)
+              html +=
+                '<p class="mbest">💡 Meilleure valeur : <b>' +
+                esc(best.label) +
+                '</b> (' +
+                pctS(best.p) +
+                ' de chances, cote ' +
+                String(best.o).replace('.', ',') +
+                '). Avec ' +
+                money(stake) +
+                ' : <b>' +
+                money(stake * best.o) +
+                '</b> si gagné, gain moyen attendu <b style="color:' +
+                (best.v >= 1 ? 'var(--good)' : 'var(--bad)') +
+                '">' +
+                signedMoney(stake * (best.v - 1)) +
+                '</b>.' +
+                (best.v < 1 ? ' <span class="muted">Valeur sous 1 : pari perdant à long terme.</span>' : '') +
+                '</p>';
+            else if (p) html += '<p class="hint" style="margin:6px 0 0">Saisissez la cote de votre bookmaker pour voir la valeur et les gains possibles.</p>';
+            if (e.games && Math.min(e.games[0], e.games[1]) < 5)
+              html += '<p class="hint" style="margin:4px 0 0">⚠️ Peu de matchs connus pour l\'un des deux : pronostic peu fiable.</p>';
+            if (pm && ip)
+              html +=
+                '<p class="hint" style="margin:4px 0 0">Chances = modèle Elo combiné aux cotes (' +
+                (fewGames ? '80 % cotes, car peu de matchs connus' : 'moitié-moitié') +
+                '). Modèle seul : ' +
+                need
+                  .map(function (k) {
+                    return pctS(pm[k]);
+                  })
+                  .join(' / ') +
+                '.</p>';
+            if (e.odds && e.odds.src && !store.sportOdds[e.id])
+              html += '<p class="hint" style="margin:4px 0 0">Cotes indicatives (' + esc(e.odds.src) + ', bookmaker américain) : vérifiez celles de votre bookmaker français.</p>';
+            html += '</div>';
+          });
+          var res = (d.results || []).filter(function (e) {
+            return (!cur || e.league === cur) && e.prono;
+          });
+          if (res.length) {
+            html += '<div class="dayhead">Derniers résultats avec pronostic figé</div><div class="others">';
+            res.slice(0, 25).forEach(function (e) {
+              var q = e.prono.p,
+                fav = favOf(q);
+              html +=
+                '<div class="brace"><div class="brace-top"><span class="tag">' +
+                esc(fmtDay(parisDayOf(e.date))) +
+                '</span><span class="brace-res">' +
+                (fav === e.winner ? '<span class="ok-mark">✓</span>' : '<span class="ko-mark">✗</span>') +
+                '</span></div><div>' +
+                esc(e.home.name) +
+                ' <b>' +
+                (e.score ? e.score[0] + ' – ' + e.score[1] : e.winner === 'home' ? 'bat' : 'perd contre') +
+                '</b> ' +
+                esc(e.away.name) +
+                ' <span class="muted">· notre favori : ' +
+                esc(fav === 'home' ? e.home.name : fav === 'away' ? e.away.name : 'nul') +
+                ' (' +
+                pctS(fav === 'home' ? q.h : fav === 'away' ? q.a : q.d) +
+                ')</span></div></div>';
+            });
+            html += '</div>';
+          }
+          html +=
+            '<p class="hint" style="margin-top:12px">Chances calculées par une note Elo rejouée sur l\'historique (' +
+            (cfg.individual ? 'une note par joueur' : 'avantage du terrain compris') +
+            '), combinée aux cotes quand elles sont disponibles, et figée avant le début du match. Valeur = chances × cote : au-dessus de 1, le pari rapporte en moyenne plus qu\'il ne coûte. La marge des bookmakers fait que la plupart des valeurs sont sous 1.</p>';
+          el.innerHTML = html;
+        }
+        function renderSportBilan() {
+          var sp = store.sport,
+            d = sportData[sp],
+            el = $('spBilan'),
+            cfg = SP.SPORTS[sp];
+          if (!d) {
+            el.innerHTML = '<p class="muted">Données pas encore disponibles.</p>';
+            return;
+          }
+          var b = d.bilan || {},
+            r = d.reliability || {};
+          var html = '<h2>📊 Bilan · ' + cfg.label + '</h2>';
+          html += '<p class="hint" style="margin-top:-6px">Pronostics figés avant le début du match, comparés au résultat.</p>';
+          if (!b.matches) html += '<p class="muted">Pas encore de match terminé avec un pronostic figé : le bilan se remplira au fil des matchs.</p>';
+          else {
+            var g = b.ret - b.stake;
+            html +=
+              '<div class="kpis"><div class="kpi"><small>Notre favori gagnant</small><strong>' +
+              b.favWon +
+              ' / ' +
+              b.matches +
+              '</strong><br><small>' +
+              pctS(b.favWon / b.matches) +
+              ' (annoncé ' +
+              pctS(b.expected / b.matches) +
+              ')</small></div>' +
+              (b.withOdds
+                ? '<div class="kpi"><small>Favori du bookmaker</small><strong>' +
+                  pctS(b.mkFavWon / b.withOdds) +
+                  '</strong><br><small>sur ' +
+                  b.withOdds +
+                  ' matchs avec cotes</small></div><div class="kpi"><small>1 € sur notre favori</small><strong style="color:' +
+                  (g >= 0 ? 'var(--good)' : 'var(--bad)') +
+                  '">' +
+                  signedMoney(g) +
+                  '</strong><br><small>sur ' +
+                  b.stake +
+                  ' paris</small></div><div class="kpi"><small>Paris « valeur »</small><strong>' +
+                  b.valBets +
+                  '</strong><br><small>résultat ' +
+                  signedMoney(b.valRet - b.valBets) +
+                  '</small></div>'
+                : '') +
+              '</div>';
+          }
+          html += '<h2 style="margin-top:16px">Fiabilité du modèle sur l\'historique</h2>';
+          if (r.matches) {
+            html +=
+              '<p>Sur <b>' +
+              r.matches.toLocaleString('fr-FR') +
+              '</b> matchs passés, prévus avant d\'être joués : notre favori a gagné <b>' +
+              pctS(r.favWon / r.matches) +
+              '</b> du temps' +
+              (cfg.individual ? '' : ' (l\'équipe à domicile gagne ' + pctS(r.homeRate) + ' du temps)') +
+              '.</p>';
+            html += '<div class="scroll"><table><thead><tr><th>Favori annoncé à</th><th>Matchs</th><th>Prévu</th><th>Réel</th></tr></thead><tbody>';
+            (r.buckets || []).forEach(function (x) {
+              if (!x.n) return;
+              html +=
+                '<tr><td>' +
+                Math.round(x.from * 100) +
+                '–' +
+                Math.round(x.from * 100 + 10) +
+                ' %</td><td>' +
+                x.n +
+                '</td><td>' +
+                pctS(x.predicted) +
+                '</td><td><b>' +
+                pctS(x.observed) +
+                '</b></td></tr>';
+            });
+            html += '</tbody></table></div><p class="hint">Si « prévu » et « réel » sont proches, les pourcentages affichés sont fiables.</p>';
+          } else html += '<p class="muted">Pas encore assez d\'historique.</p>';
+          if (b.recent && b.recent.length) {
+            html += '<h2 style="margin-top:16px">Derniers pronostics</h2><div class="others">';
+            b.recent.slice(0, 40).forEach(function (x) {
+              html +=
+                '<div class="brace"><div class="brace-top"><span class="tag">' +
+                esc(leagueLabel(d, x.league)) +
+                '</span><span class="muted">' +
+                esc(fmtDay(parisDayOf(x.date))) +
+                '</span><span class="brace-res">' +
+                (x.fav === x.winner ? '<span class="ok-mark">✓</span>' : '<span class="ko-mark">✗</span>') +
+                (x.odds ? ' <span class="muted">cote ' + String(x.odds).replace('.', ',') + '</span>' : '') +
+                '</span></div><div>' +
+                esc(x.home) +
+                (x.score ? ' <b>' + x.score[0] + ' – ' + x.score[1] + '</b> ' : ' – ') +
+                esc(x.away) +
+                ' <span class="muted">· favori : ' +
+                esc(x.fav === 'home' ? x.home : x.fav === 'away' ? x.away : 'nul') +
+                ' (' +
+                pctS(x.p) +
+                ')</span></div></div>';
+            });
+            html += '</div>';
+          }
+          el.innerHTML = html;
+        }
+        function renderSportRank() {
+          var sp = store.sport,
+            d = sportData[sp],
+            el = $('spRank'),
+            cfg = SP.SPORTS[sp];
+          if (!d) {
+            el.innerHTML = '<p class="muted">Données pas encore disponibles.</p>';
+            return;
+          }
+          var lgs = (d.leagues || []).filter((l) => l.matches > 0);
+          var cur = store.sportLeague[sp] && lgs.some((l) => l.key === store.sportLeague[sp]) ? store.sportLeague[sp] : lgs[0] ? lgs[0].key : '';
+          var html = '<h2>🏆 Classement Elo · ' + cfg.label + '</h2>';
+          if (lgs.length > 1)
+            html +=
+              '<div class="chips" style="margin-bottom:10px">' +
+              lgs
+                .map(function (l) {
+                  return '<button class="chip' + (cur === l.key ? ' on' : '') + '" data-league="' + esc(l.key) + '">' + esc(l.label) + '</button>';
+                })
+                .join('') +
+              '</div>';
+          var rows = (d.ratings || {})[cur] || [];
+          if (!rows.length) html += '<p class="muted">Pas encore assez de matchs pour établir un classement.</p>';
+          else {
+            var cols = 'grid-template-columns:30px minmax(0,1fr) 60px 56px';
+            html +=
+              '<div class="others"><div class="oth head" style="' +
+              cols +
+              '"><span>#</span><span>' +
+              (cfg.individual ? 'Joueur' : 'Équipe') +
+              '</span><span style="text-align:right">Note</span><span style="text-align:right">Matchs</span></div>';
+            rows.forEach(function (x, i) {
+              html +=
+                '<div class="oth" style="' +
+                cols +
+                '"><span class="muted">' +
+                (i + 1) +
+                '</span><span class="nm">' +
+                esc(x.name) +
+                '</span><span class="pcs">' +
+                x.r +
+                '</span><span class="ct">' +
+                x.n +
+                '</span></div>';
+            });
+            html += '</div>';
+          }
+          html += '<p class="hint">Note Elo : 1 500 = niveau moyen. 100 points d\'écart ≈ 64 % de chances de gagner (hors avantage du terrain).</p>';
+          el.innerHTML = html;
+        }
+        $('sportBar').addEventListener('click', function (e) {
+          var b = e.target.closest('[data-sport]');
+          if (b) setSport(b.dataset.sport);
+        });
+        $('sportTabbar').addEventListener('click', function (e) {
+          var b = e.target.closest('[data-sgo]');
+          if (b) setSView(b.dataset.sgo);
+        });
+        $('sportApp').addEventListener('click', function (e) {
+          var l = e.target.closest('[data-league]');
+          if (l) {
+            store.sportLeague[store.sport] = l.dataset.league;
+            save(store);
+            renderSport();
+            return;
+          }
+          var st = e.target.closest('[data-sstake]');
+          if (st) {
+            store.myStake = parseFloat(st.dataset.sstake);
+            save(store);
+            renderSport();
+          }
+        });
+        $('sportApp').addEventListener('change', function (e) {
+          var t = e.target;
+          if (!t.dataset.sodds) return;
+          var v = parseFloat(String(t.value).replace(',', '.'));
+          var o = (store.sportOdds[t.dataset.sodds] = store.sportOdds[t.dataset.sodds] || {});
+          if (v > 1) o[t.dataset.k] = v;
+          else delete o[t.dataset.k];
+          save(store);
+          renderSport();
+        });
+        setInterval(function () {
+          if (!document.hidden && store.sport !== 'hippique') loadSport(store.sport);
+        }, 5 * 60000);
+
         // ---------------- Quinté+ ----------------
         function findQuinte(day) {
           if (!day || !day.reunions) return null;
@@ -4314,6 +4902,7 @@
         }
         loadAlerts();
         loadBilan();
+        setSport(store.sport || 'hippique', true);
       })();
     </script>
   </body>

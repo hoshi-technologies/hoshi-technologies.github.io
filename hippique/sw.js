@@ -1,7 +1,7 @@
 // Hoshi Turf : service worker minimal. Réseau d'abord (données toujours fraîches),
 // copie en cache utilisée seulement hors connexion.
-const CACHE = 'hoshi-turf-v1';
-const SHELL = ['./', 'index.html', 'engine.js', 'manifest.webmanifest', 'icons/icon-192.png'];
+const CACHE = 'hoshi-turf-v2';
+const SHELL = ['./', 'index.html', 'engine.js', 'sports.js', 'manifest.webmanifest', 'icons/icon-192.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });

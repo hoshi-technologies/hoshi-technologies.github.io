@@ -57,7 +57,7 @@
   // Réglages par défaut (remplacés par le calibrage de chaque sport).
   var DEFAULTS = {
     foot: { K: 24, H: 60, c: 0.55, gd: true },
-    rugby: { K: 28, H: 70, c: 1.6, gd: true },
+    rugby: { K: 28, H: 70, c: 0.05, gd: true },
     basket: { K: 18, H: 70, c: 0, gd: false },
     tennis: { K: 0, H: 0, c: 0, gd: false, tennis: true },
   };
@@ -97,7 +97,8 @@
   function matchProbs(rHome, rAway, params, neutral) {
     var p = params || {};
     var d = rHome - rAway + (neutral ? 0 : p.H || 0);
-    var x = (d / 400) * Math.LN10;
+    // s < 1 : prudence (resserre les probabilités quand les notes sont trop « sûres d'elles »).
+    var x = (d / 400) * Math.LN10 * (p.s || 1);
     if (!p.c) {
       var ph = 1 / (1 + Math.exp(-x));
       return { h: ph, d: 0, a: 1 - ph };
@@ -132,10 +133,13 @@
     list.forEach(function (e) {
       var h = e.home.id,
         a = e.away.id;
-      var pr = matchProbs(get(h), get(a), params, e.neutral || params.tennis);
+      var neutral = e.neutral || params.tennis;
+      var pr = matchProbs(get(h), get(a), params, neutral);
       if (onMatch) onMatch(e, pr, N[h] || 0, N[a] || 0);
       var S = e.winner === 'home' ? 1 : e.winner === 'away' ? 0 : 0.5;
-      var E = pr.h + pr.d / 2;
+      // La mise à jour Elo utilise l'espérance classique (sans facteur de prudence).
+      var pu = params.s && params.s !== 1 ? matchProbs(get(h), get(a), Object.assign({}, params, { s: 1 }), neutral) : pr;
+      var E = pu.h + pu.d / 2;
       var K;
       if (params.tennis) K = (tennisK(N[h]) + tennisK(N[a])) / 2;
       else {
@@ -179,19 +183,27 @@
       });
       return n ? loss / n : Infinity;
     };
-    if (base.tennis) return { params: base, loss: score(base) };
     var best = { params: base, loss: score(base) };
-    var Ks = [10, 15, 20, 25, 30, 40];
-    var Hs = [0, 30, 50, 70, 90, 110];
-    var Cs = base.c ? (sportKey === 'rugby' ? [1.2, 1.6, 2, 2.5] : [0.35, 0.45, 0.55, 0.65, 0.75]) : [0];
-    Ks.forEach(function (K) {
-      Hs.forEach(function (H) {
-        Cs.forEach(function (c) {
-          var p = Object.assign({}, base, { K: K, H: H, c: c });
-          var l = score(p);
-          if (l < best.loss) best = { params: p, loss: l };
+    if (!base.tennis) {
+      var Ks = [10, 15, 20, 30, 40, 55, 70];
+      var Hs = [0, 30, 60, 90, 120, 160, 200];
+      // Nul : seuil c (plus grand = plus de nuls). Football ≈ 25 % de nuls, rugby ≈ 3 %.
+      var Cs = base.c ? (sportKey === 'rugby' ? [0.03, 0.06, 0.1, 0.15, 0.22, 0.3] : [0.35, 0.45, 0.55, 0.65, 0.75]) : [0];
+      Ks.forEach(function (K) {
+        Hs.forEach(function (H) {
+          Cs.forEach(function (c) {
+            var p = Object.assign({}, base, { K: K, H: H, c: c });
+            var l = score(p);
+            if (l < best.loss) best = { params: p, loss: l };
+          });
         });
       });
+    }
+    // Facteur de prudence s, réglé en dernier.
+    [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1].forEach(function (sv) {
+      var p = Object.assign({}, best.params, { s: sv });
+      var l = score(p);
+      if (l < best.loss) best = { params: p, loss: l };
     });
     return best;
   }
