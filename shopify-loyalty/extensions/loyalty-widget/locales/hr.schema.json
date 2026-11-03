@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "label": {
+      "label": "Tekst gumba",
+      "info": "Ostavite prazno za upotrebu naslova postavljenog u aplikaciji."
+    },
+    "position": {
+      "label": "Položaj",
+      "app": "Postavka aplikacije",
+      "right": "Dolje desno",
+      "left": "Dolje lijevo"
+    },
+    "guest_text": {
+      "label": "Poruka za neprijavljene posjetitelje",
+      "info": "Ostavite prazno za upotrebu prevedene zadane poruke."
+    }
+  },
+  "card": {
+    "name": "Kartica vjernosti",
+    "heading": "Naslov",
+    "max_width": "Maksimalna širina"
+  },
+  "product": {
+    "name": "Bodovi za proizvod",
+    "text": "Prilagođeni tekst",
+    "text_info": "Neobavezno. {points} i {name} se zamjenjuju. Ostavite prazno za prevedeni zadani tekst."
+  }
+}

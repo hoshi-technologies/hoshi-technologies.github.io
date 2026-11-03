@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "label": {
+      "label": "Besedilo gumba",
+      "info": "Pustite prazno, da se uporabi naslov, nastavljen v aplikaciji."
+    },
+    "position": {
+      "label": "Položaj",
+      "app": "Nastavitev aplikacije",
+      "right": "Spodaj desno",
+      "left": "Spodaj levo"
+    },
+    "guest_text": {
+      "label": "Sporočilo za neprijavljene obiskovalce",
+      "info": "Pustite prazno, da se uporabi prevedeno privzeto sporočilo."
+    }
+  },
+  "card": {
+    "name": "Kartica zvestobe",
+    "heading": "Naslov",
+    "max_width": "Največja širina"
+  },
+  "product": {
+    "name": "Točke za izdelek",
+    "text": "Besedilo po meri",
+    "text_info": "Neobvezno. {points} in {name} se zamenjata. Pustite prazno, da se uporabi prevedeno privzeto besedilo."
+  }
+}

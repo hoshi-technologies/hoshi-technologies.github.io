@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "label": {
+      "label": "Text tlačidla",
+      "info": "Nechajte prázdne, ak chcete použiť názov nastavený v aplikácii."
+    },
+    "position": {
+      "label": "Umiestnenie",
+      "app": "Nastavenie aplikácie",
+      "right": "Vpravo dole",
+      "left": "Vľavo dole"
+    },
+    "guest_text": {
+      "label": "Správa pre neprihlásených návštevníkov",
+      "info": "Nechajte prázdne, ak chcete použiť preloženú predvolenú správu."
+    }
+  },
+  "card": {
+    "name": "Vernostná karta",
+    "heading": "Nadpis",
+    "max_width": "Maximálna šírka"
+  },
+  "product": {
+    "name": "Body za produkt",
+    "text": "Vlastný text",
+    "text_info": "Voliteľné. {points} a {name} sa nahradia. Nechajte prázdne, ak chcete použiť preložený predvolený text."
+  }
+}
