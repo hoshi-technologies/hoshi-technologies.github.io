@@ -17,14 +17,14 @@ import { SITE, PRIVACY, TERMS } from './site-content.js';
 const env = process.env;
 export const COMPANY = {
   name: env.COMPANY_NAME || 'Hoshi Technologies',
-  legal: env.COMPANY_LEGAL || '[forme juridique et capital]',
-  address: env.COMPANY_ADDRESS || '[adresse du siège]',
-  siren: env.COMPANY_SIREN || '[SIREN]',
+  legal: env.COMPANY_LEGAL || 'Kévin Toxé – EI, RCS Évry',
+  address: env.COMPANY_ADDRESS || '26 rue du Puits Sucré, 91630 Marolles-en-Hurepoix, France',
+  siren: env.COMPANY_SIREN || '132 055 567',
   email: env.SUPPORT_EMAIL || 'hoshi.technologies@gmail.com',
   host: env.HOSTING_PROVIDER || 'Cloudflare, Inc. (USA; EU–US Data Privacy Framework)',
   mailer: env.EMAIL_PROVIDER || 'Brevo – Sendinblue SAS (France)',
   transfers: env.DATA_TRANSFERS || '',
-  court: env.COMPANY_COURT || '[ville du siège]',
+  court: env.COMPANY_COURT || 'Évry',
   appStoreUrl: env.APP_STORE_URL || 'https://apps.shopify.com/',
   updated: env.LEGAL_DATE || new Date().toISOString().slice(0, 10),
 };

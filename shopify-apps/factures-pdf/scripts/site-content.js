@@ -94,7 +94,7 @@ export const PRIVACY = {
     updated: 'Dernière mise à jour : {date}',
     sections: [
       ['Qui sommes-nous ?', [
-        '« {app} » est une application Shopify éditée par {company}, {legal}, dont le siège est situé {address} (SIREN {siren}). Contact : {email}.',
+        '« {app} » est une application Shopify éditée par {company}, {legal}, dont l’établissement est situé au {address} (SIREN {siren}). Contact : {email}.',
       ]],
       ['Nos rôles au sens du RGPD', [
         'Pour les données des clients de votre boutique (acheteurs), vous êtes responsable de traitement et {company} agit comme sous-traitant (article 28 du RGPD) : nous traitons ces données uniquement pour établir et envoyer vos factures, sur vos instructions.',
@@ -145,7 +145,7 @@ export const PRIVACY = {
     updated: 'Last updated: {date}',
     sections: [
       ['Who we are', [
-        '“{app}” is a Shopify app published by {company}, {legal}, with its registered office at {address} (SIREN {siren}). Contact: {email}.',
+        '“{app}” is a Shopify app published by {company}, {legal}, with its business address at {address} (SIREN {siren}). Contact: {email}.',
       ]],
       ['Our roles under the GDPR', [
         'For the data of your store’s customers (buyers), you are the data controller and {company} acts as a processor (GDPR article 28): we only process this data to create and send your invoices, on your instructions.',
