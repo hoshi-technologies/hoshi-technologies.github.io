@@ -174,3 +174,19 @@ test('non-partants exclus, champ trop petit refusé', () => {
   assert.equal(T.analyzeRace(r, { simulations: 0 }).nPartants, 3);
   assert.ok(T.analyzeRace({ runners: [{ nom: 'A' }] }).error);
 });
+
+test('Quinté+ : chances cohérentes', () => {
+  const a = T.analyzeRace(race(14), { simulations: 0 });
+  const q = T.quinteAnalysis(
+    a.runners.map((x) => x.pWin),
+    { placeDiscount: a.settings.placeDiscount, simulations: 20000 },
+  );
+  close(sum(q.pTop5), 5, 1e-9, 'top 5');
+  assert.equal(q.picks.length, 5);
+  assert.ok(q.p.ordre <= q.p.desordre && q.p.desordre <= q.p.bonus4 && q.p.bonus4 <= q.p.bonus3);
+  for (let i = 1; i < q.combines.length; i++) assert.ok(q.combines[i].pDesordre >= q.combines[i - 1].pDesordre);
+  assert.equal(q.combines[0].combos, 1);
+  assert.equal(q.combines[3].combos, 56); // 8 chevaux : C(8,5)
+  close(q.combines[0].pDesordre, q.p.desordre, 1e-12);
+  assert.equal(T.quinteAnalysis([0.5, 0.3, 0.2]), null);
+});

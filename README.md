@@ -88,3 +88,15 @@ première nuit. La mise à jour tourne donc dans une **boucle qui se relance ell
 toutes les 10 minutes de 8 h à 23 h (heure de Paris), toutes les heures la nuit, puis une nouvelle boucle prend le
 relais toutes les ~5 h 40. La tâche planifiée horaire ne sert qu'à redémarrer la boucle si elle s'est arrêtée.
 `hippique/data/health.json` indique l'état du dernier passage.
+
+### Quinté+ et application mobile
+
+- **Onglet Quinté+** : la course support du Quinté+ est repérée dans le programme (`course.quinte`). Une simulation
+  de l'arrivée (`T.quinteAnalysis`, 30 000 tirages) donne les chances de chaque cheval de finir dans les 5 premiers,
+  nos 5 chevaux et l'ordre proposé, les chances de l'ordre, du désordre, du bonus 4 et du bonus 3, ainsi que des
+  formules combinées de 5 à 8 chevaux (nombre de combinaisons, coût, chances). Ce pronostic est figé avant le départ
+  (`prono.quinte`) et suivi dans le bilan (`bilan.json` → `quinte`). Les rapports Quinté+ sont enregistrés
+  (`rapports.q`).
+- **Application mobile** : barre d'onglets en bas (Courses, Quinté+, Bilan, Alertes, Expert), barre de titre fixe,
+  installation sur l'écran d'accueil (`manifest.webmanifest`, icônes dans `hippique/icons/`), ouverture en plein
+  écran, et service worker (`sw.js`) qui sert la dernière version hors connexion.

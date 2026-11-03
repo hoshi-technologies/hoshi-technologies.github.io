@@ -187,6 +187,31 @@ async function freezePronos(day, cal, stats, today, state) {
           cote: x.runner.cote || null,
         })),
       };
+      // Quinté+ : nos 5 chevaux, l'ordre proposé et les chances de chaque formule, figés aussi.
+      if (c.quinte) {
+        const q = Turf.quinteAnalysis(
+          a.runners.map((x) => x.pWin),
+          { placeDiscount: a.settings.placeDiscount },
+        );
+        if (q) {
+          const numOf = (i) => a.runners[i].runner.num;
+          c.prono.quinte = {
+            order: q.order.slice(0, 10).map(numOf),
+            pTop5: Object.fromEntries(q.order.map((i) => [numOf(i), +q.pTop5[i].toFixed(4)])),
+            picks: q.picks.map(numOf),
+            ordre: q.ordre.map(numOf),
+            p: Object.fromEntries(Object.entries(q.p).map(([k, v]) => [k, +v.toFixed(5)])),
+            combines: q.combines.map((x) => ({
+              n: x.n,
+              nums: x.idx.map(numOf),
+              combos: x.combos,
+              pDesordre: +x.pDesordre.toFixed(4),
+              pBonus4: +x.pBonus4.toFixed(4),
+              pBonus3: +x.pBonus3.toFixed(4),
+            })),
+          };
+        }
+      }
       n++;
     }
   if (n) {

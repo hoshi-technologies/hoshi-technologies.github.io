@@ -137,6 +137,17 @@ function parseRapports(list) {
   if (!Array.isArray(list)) return null;
   for (const t of list) {
     const type = t.typePari || '';
+    // Quinté+ : on garde les rapports tels quels (ordre, désordre, bonus 4, bonus 3…).
+    if (type === 'QUINTE_PLUS' && !out.q) {
+      out.q = (t.rapports || []).map((r) => ({
+        lib: r.libelle || '',
+        comb: r.combinaison ? String(r.combinaison) : '',
+        div: r.dividendePourUnEuro != null ? r.dividendePourUnEuro / 100 : null,
+        divBase: r.dividendePourUneMiseDeBase != null ? r.dividendePourUneMiseDeBase / 100 : null,
+      }));
+      out.qBase = t.miseBase ? t.miseBase / 100 : null;
+      continue;
+    }
     const key = type === 'SIMPLE_GAGNANT' ? 'g' : type === 'SIMPLE_PLACE' ? 'p' : null;
     if (!key || Object.keys(out[key]).length) continue; // garde le premier enjeu (national)
     for (const r of t.rapports || []) {
@@ -180,6 +191,9 @@ async function fetchDay(iso, prevDay, opts = {}) {
         terrain: terrain(c),
         allocation: c.montantPrix || c.montantTotalOffert || c.montantOffert1er || '',
         categorie: c.categorieParticularite || '',
+        // Course support du Quinté+ (et mise de base du pari en point de vente).
+        quinte: (c.paris || []).some((x) => /QUINTE/.test(x.typePari || '')) || undefined,
+        quinteBase: ((c.paris || []).find((x) => x.typePari === 'QUINTE_PLUS') || {}).miseBase / 100 || undefined,
         statut: c.statut || '',
         arrivee: arrivalOrder(c),
         partants: [],

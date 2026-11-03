@@ -696,6 +696,98 @@
     return out.sort((a, b) => b.ev - a.ev);
   }
 
+  // ---------------------------------------------------------------------------
+  // Quinté+
+  // ---------------------------------------------------------------------------
+
+  function comb(n, k) {
+    if (k < 0 || k > n) return 0;
+    var r = 1;
+    for (var i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
+    return Math.round(r);
+  }
+
+  /**
+   * Analyse Quinté+ par simulation de l'arrivée (Plackett-Luce, correctif des places) :
+   * chances de chaque cheval de finir dans les 5 premiers, nos 5 chevaux, chances du
+   * désordre / bonus 4 / bonus 3, et formules combinées de 5 à 8 chevaux.
+   */
+  function quinteAnalysis(pWin, opts) {
+    opts = opts || {};
+    var n = pWin.length;
+    if (n < 6) return null;
+    var N = opts.simulations || 30000,
+      lam = opts.placeDiscount || 0.8,
+      rand = rng(opts.seed || 20261103);
+    var adj = pWin.map((p) => Math.pow(p, lam));
+    var used = new Uint8Array(n),
+      top5 = new Float64Array(n);
+    var sims = new Int32Array(N * 5);
+    for (var k = 0; k < N; k++) {
+      used.fill(0);
+      for (var pos = 0; pos < 5; pos++) {
+        var w = pos === 0 ? pWin : adj,
+          tot = 0,
+          i;
+        for (i = 0; i < n; i++) if (!used[i]) tot += w[i];
+        var x = rand() * tot,
+          j = -1;
+        for (i = 0; i < n; i++) {
+          if (used[i]) continue;
+          x -= w[i];
+          j = i;
+          if (x <= 0) break;
+        }
+        used[j] = 1;
+        sims[k * 5 + pos] = j;
+        top5[j]++;
+      }
+    }
+    var pTop5 = Array.from(top5, (c) => c / N);
+    var byTop5 = pTop5.map((_, i) => i).sort((a, b) => pTop5[b] - pTop5[a] || pWin[b] - pWin[a]);
+    var picks = byTop5.slice(0, 5);
+    var ordre = picks.slice().sort((a, b) => pWin[b] - pWin[a]);
+    var maskOf = (idx) => idx.reduce((m, i) => m | (1 << i), 0);
+    var sets = [];
+    for (var m = 5; m <= Math.min(8, n); m++) sets.push({ n: m, idx: byTop5.slice(0, m), mask: maskOf(byTop5.slice(0, m)) });
+    var S5 = maskOf(picks);
+    var c = { ordre: 0, desordre: 0, bonus4: 0, bonus3: 0 };
+    var cs = sets.map(() => ({ d: 0, b4: 0, b3: 0 }));
+    for (k = 0; k < N; k++) {
+      var o = k * 5;
+      var m3 = (1 << sims[o]) | (1 << sims[o + 1]) | (1 << sims[o + 2]);
+      var m4 = m3 | (1 << sims[o + 3]);
+      var m5 = m4 | (1 << sims[o + 4]);
+      if (m5 === S5) {
+        c.desordre++;
+        if (sims[o] === ordre[0] && sims[o + 1] === ordre[1] && sims[o + 2] === ordre[2] && sims[o + 3] === ordre[3] && sims[o + 4] === ordre[4]) c.ordre++;
+      }
+      if ((m4 & ~S5) === 0) c.bonus4++;
+      if ((m3 & ~S5) === 0) c.bonus3++;
+      for (var q = 0; q < sets.length; q++) {
+        var S = sets[q].mask;
+        if ((m5 & ~S) === 0) cs[q].d++;
+        if ((m4 & ~S) === 0) cs[q].b4++;
+        if ((m3 & ~S) === 0) cs[q].b3++;
+      }
+    }
+    return {
+      pTop5: pTop5,
+      order: byTop5,
+      picks: picks,
+      ordre: ordre,
+      p: { ordre: c.ordre / N, desordre: c.desordre / N, bonus4: c.bonus4 / N, bonus3: c.bonus3 / N },
+      combines: sets.map((st, q) => ({
+        n: st.n,
+        idx: st.idx,
+        combos: comb(st.n, 5),
+        pDesordre: cs[q].d / N,
+        pBonus4: cs[q].b4 / N,
+        pBonus3: cs[q].b3 / N,
+      })),
+    };
+  }
+
   /** Taux de victoire (%) lissé d'un jockey/entraîneur à partir de [courses, victoires, places]. */
   function statRate(st) {
     if (!st || st[0] < 3) return null;
@@ -704,6 +796,8 @@
 
   var api = {
     statRate: statRate,
+    quinteAnalysis: quinteAnalysis,
+    comb: comb,
     validatedStrategy: validatedStrategy,
     valueBets: valueBets,
     featureVector: featureVector,

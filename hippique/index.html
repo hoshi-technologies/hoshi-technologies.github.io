@@ -2,8 +2,17 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Hoshi Turf · Analyse des courses</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Hoshi Turf" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0b0b0f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f4f7" media="(prefers-color-scheme: light)" />
     <meta name="description" content="Analyse des courses hippiques : notes des chevaux et probabilités d'être placé." />
     <style>
       :root {
@@ -750,23 +759,211 @@
         background: var(--good);
         margin-right: 6px;
       }
+      /* ---------- Application mobile ---------- */
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        padding-bottom: calc(68px + env(safe-area-inset-bottom));
+        -webkit-tap-highlight-color: transparent;
+      }
+      main {
+        padding-top: 0;
+      }
+      header.appbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        margin: 0 -16px 12px;
+        padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
+        -webkit-backdrop-filter: saturate(1.6) blur(14px);
+        backdrop-filter: saturate(1.6) blur(14px);
+        border-bottom: 1px solid var(--line);
+      }
+      header.appbar h1 {
+        font-size: 20px;
+      }
+      header.appbar .ttl {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+      }
+      header.appbar .ttl small {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .mark {
+        background: linear-gradient(145deg, #2a6df4, #7cc4ff);
+        color: #fff;
+      }
+      .view-off {
+        display: none !important;
+      }
+      nav.tabbar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 30;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+        background: color-mix(in srgb, var(--card) 88%, transparent);
+        -webkit-backdrop-filter: saturate(1.6) blur(16px);
+        backdrop-filter: saturate(1.6) blur(16px);
+        border-top: 1px solid var(--line);
+      }
+      nav.tabbar button {
+        background: none;
+        border: 0;
+        padding: 4px 2px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 10px;
+      }
+      nav.tabbar button .i {
+        font-size: 21px;
+        line-height: 1;
+        filter: grayscale(1);
+        opacity: 0.75;
+      }
+      nav.tabbar button.on {
+        color: var(--accent);
+      }
+      nav.tabbar button.on .i {
+        filter: none;
+        opacity: 1;
+      }
+      button,
+      .chip,
+      select,
+      input {
+        min-height: 38px;
+      }
+      @media (max-width: 700px) {
+        main {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+        header.appbar {
+          margin: 0 -12px 10px;
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+        .card {
+          border-radius: 18px;
+          padding: 14px;
+          margin-bottom: 12px;
+        }
+        h2 {
+          font-size: 17px;
+        }
+        .hero h2 {
+          font-size: 20px;
+        }
+      }
+      @media (min-width: 900px) {
+        nav.tabbar {
+          max-width: 560px;
+          margin: 0 auto 12px;
+          border: 1px solid var(--line);
+          border-radius: 18px;
+          padding-bottom: 6px;
+        }
+      }
+      @media (max-width: 700px) {
+        #progControls {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        #progControls label.f {
+          font-size: 11px;
+        }
+        #progControls select,
+        #progControls button {
+          width: 100%;
+        }
+        #btnProgRefresh {
+          display: none;
+        }
+        #btnProgNext {
+          grid-column: 1 / -1;
+        }
+      }
+      input[type='file'] {
+        max-width: 210px;
+        min-width: 0;
+        font-size: 12px;
+      }
+      /* ---------- Quinté+ ---------- */
+      .qhead {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .qpicks {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 10px 0 4px;
+      }
+      .qpicks .big-num {
+        min-width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: var(--fg);
+        color: var(--bg);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        font-size: 21px;
+      }
+      .qpicks .big-num.hit {
+        background: var(--good);
+        color: #fff;
+      }
+      .qchances {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 12px;
+      }
+      @media (max-width: 520px) {
+        .qchances {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .qchances .kpi strong {
+        font-size: 20px;
+      }
+      .days3 {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
     </style>
   </head>
   <body>
     <main>
-      <header>
+      <header class="appbar">
         <div class="mark">H</div>
-        <h1>Hoshi Turf</h1>
-        <span class="spacer"></span>
-        <button id="btnBilan" class="ghost">📊 Bilan</button>
-        <button id="btnExpert" class="ghost" aria-pressed="false">Mode expert</button>
+        <div class="ttl"><h1>Hoshi Turf</h1><small id="appSub">Pronostics hippiques</small></div>
       </header>
-      <p class="sub">Pour chaque course : les chevaux qui ont le plus de chances d'être placés, et s'il vaut la peine de jouer.</p>
 
+      <div data-view="courses">
       <!-- Programme automatique -->
       <section class="card">
         <h2>Choisir une course</h2>
-        <div class="row">
+        <div class="row" id="progControls">
           <label class="f">Journée<select id="progDate"></select></label>
           <label class="f"
             >Afficher
@@ -791,11 +988,17 @@
         <section class="card hero" id="sHero"></section>
         <section class="card" id="sPick"></section>
         <section class="card" id="sAdvice"></section>
-        <section class="card" id="sBilan"></section>
-        <section class="card" id="sAlerts"></section>
+      </div>
       </div>
 
-      <div id="expert" class="hide">
+      <div data-view="quinte" class="view-off">
+        <section class="card" id="qView"></section>
+        <section class="card" id="qHist"></section>
+      </div>
+      <div data-view="bilan" class="view-off"><section class="card" id="sBilan"></section></div>
+      <div data-view="alertes" class="view-off"><section class="card" id="sAlerts"></section></div>
+
+      <div id="expert" data-view="expert" class="view-off">
       <!-- Course -->
       <section class="card">
         <h2>1. La course</h2>
@@ -1001,6 +1204,14 @@
         13 (appel non surtaxé). Interdit aux mineurs.
       </p>
     </main>
+
+    <nav class="tabbar" id="tabbar" aria-label="Navigation">
+      <button data-go="courses"><span class="i">🏇</span>Courses</button>
+      <button data-go="quinte"><span class="i">🎯</span>Quinté+</button>
+      <button data-go="bilan"><span class="i">📊</span>Bilan</button>
+      <button data-go="alertes"><span class="i">🔔</span>Alertes</button>
+      <button data-go="expert"><span class="i">⚙️</span>Expert</button>
+    </nav>
 
     <script src="engine.js"></script>
     <script>
@@ -1438,6 +1649,8 @@
                       discipline: /ATTELE/.test(sp) ? 'trot attelé' : /MONTE/.test(sp) ? 'trot monté' : /HAIE|STEEPLE|CROSS|OBSTACLE/.test(sp) ? 'obstacle' : 'plat',
                       terrain: (c.penetrometre && c.penetrometre.intitule) || '',
                       nPartants: c.nombreDeclaresPartants,
+                      quinte: (c.paris || []).some((x) => /QUINTE/.test(x.typePari || '')),
+                      categorie: c.categorieParticularite || '',
                       arrivee: c.ordreArrivee || null,
                       partants: null,
                     };
@@ -1457,6 +1670,7 @@
               prog.day = day;
               computeOpportunities();
               renderProgram();
+              if (store.view === 'quinte') renderQuinte();
               var upd = day.updated ? ' · mis à jour le ' + new Date(day.updated).toLocaleString('fr-FR') : '';
               setStatus(day.live ? 'Programme PMU en direct' : 'Programme publié automatiquement' + upd, day.live);
               return day;
@@ -1825,7 +2039,10 @@
               'R' + r + 'C' + c + ' chargée' + (live ? ' avec les cotes PMU en direct' : ' (données publiées)') + ' · ' + new Date().toLocaleTimeString('fr-FR'),
               live,
             );
-            if (!quiet) $(store.expert ? 'results' : 'simple').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (!quiet) {
+              if (store.view !== 'expert' && store.view !== 'courses') setView('courses', true);
+              $(store.view === 'expert' ? 'results' : 'simple').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
           };
           // Cotes les plus fraîches possibles : API en direct, sinon données publiées.
           livePartants(iso, r, c)
@@ -2352,17 +2569,29 @@
         var lastAdvice = null;
 
         // ---------------- Vue simple ----------------
-        function setExpert(on) {
-          store.expert = !!on;
+        // ---------- Navigation par onglets ----------
+        var VIEWS = ['courses', 'quinte', 'bilan', 'alertes', 'expert'];
+        function setView(v, keepScroll) {
+          if (VIEWS.indexOf(v) < 0) v = 'courses';
+          store.view = v;
+          store.expert = v === 'expert';
           save(store);
-          $('expert').classList.toggle('hide', !on);
-          $('btnExpert').textContent = on ? 'Vue simple' : 'Mode expert';
-          $('btnExpert').setAttribute('aria-pressed', on ? 'true' : 'false');
+          document.querySelectorAll('[data-view]').forEach(function (el) {
+            el.classList.toggle('view-off', el.dataset.view !== v);
+          });
+          document.querySelectorAll('#tabbar button').forEach(function (b) {
+            b.classList.toggle('on', b.dataset.go === v);
+          });
+          if (!keepScroll) window.scrollTo(0, 0);
+          if (v === 'quinte' && typeof renderQuinte === 'function') renderQuinte();
         }
-        $('btnExpert').onclick = function () {
-          setExpert(!store.expert);
-          if (store.expert) $('expert').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
+        function setExpert(on) {
+          setView(on ? 'expert' : 'courses');
+        }
+        $('tabbar').addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-go]');
+          if (b) setView(b.dataset.go);
+        });
         function confidenceLabel(p) {
           if (p >= 0.6) return ['Très solide', 'good'];
           if (p >= 0.45) return ['Solide', 'good'];
@@ -2614,7 +2843,10 @@
             .catch(function () {
               bilan = null;
             })
-            .then(renderBilan);
+            .then(function () {
+              renderBilan();
+              if (store.view === 'quinte') renderQuinte();
+            });
         }
         function ratio(a, b) {
           return b ? Math.round((a / b) * 100) + ' %' : '—';
@@ -2761,14 +2993,328 @@
           bilanOpen[tr.dataset.day] = !bilanOpen[tr.dataset.day];
           renderBilan();
         });
-        $('btnBilan').onclick = function () {
-          if (store.expert) setExpert(false);
-          $('sBilan').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
+
         $('progFilter').addEventListener('change', renderBilan);
         setInterval(function () {
           if (!document.hidden) loadBilan();
         }, 5 * 60000);
+
+
+        // ---------------- Quinté+ ----------------
+        function findQuinte(day) {
+          if (!day || !day.reunions) return null;
+          for (var i = 0; i < day.reunions.length; i++)
+            for (var k = 0; k < day.reunions[i].courses.length; k++) {
+              var c = day.reunions[i].courses[k];
+              if (c.quinte) return { reu: day.reunions[i], course: c };
+            }
+          return null;
+        }
+        function pctFine(p) {
+          if (p == null) return '—';
+          if (p >= 0.1) return Math.round(p * 100) + ' %';
+          if (p >= 0.01) return (p * 100).toFixed(1).replace('.', ',') + ' %';
+          return (p * 100).toFixed(2).replace('.', ',') + ' %';
+        }
+        function oneIn(p) {
+          return p > 0 ? '1 chance sur ' + Math.round(1 / p).toLocaleString('fr-FR') : '—';
+        }
+        // Analyse Quinté de la course : figée si la course est partie, sinon calculée maintenant.
+        function quinteFor(f, iso) {
+          var c = f.course;
+          var started = c.heure && c.heure <= Date.now();
+          var frozen = c.prono && c.prono.quinte;
+          var names = {};
+          (c.partants || []).forEach(function (p) {
+            names[String(p.num)] = p;
+          });
+          if (frozen && (started || c.arrivee)) {
+            return {
+              frozenAt: c.prono.at,
+              picks: frozen.picks,
+              ordre: frozen.ordre,
+              p: frozen.p,
+              order: frozen.order,
+              pTop5: frozen.pTop5,
+              pWin: {},
+              combines: frozen.combines,
+              names: names,
+            };
+          }
+          if (!c.partants || !c.partants.length) return null;
+          var runners = withRecul(enrich(c.partants, iso), c.discipline);
+          var a = T.analyzeRace(
+            { discipline: c.discipline, allocation: c.allocation, runners: runners },
+            Object.assign({}, settingsForDiscipline(c.discipline, c.categorie), { simulations: 0 }),
+          );
+          if (a.error) return null;
+          var q = T.quinteAnalysis(
+            a.runners.map((x) => x.pWin),
+            { placeDiscount: a.settings.placeDiscount },
+          );
+          if (!q) return null;
+          var num = function (i) {
+            return a.runners[i].runner.num;
+          };
+          var pTop5 = {},
+            pWin = {};
+          q.order.forEach(function (i) {
+            pTop5[num(i)] = q.pTop5[i];
+            pWin[num(i)] = a.runners[i].pWin;
+          });
+          return {
+            live: true,
+            started: started,
+            hasOdds: !!a.market,
+            picks: q.picks.map(num),
+            ordre: q.ordre.map(num),
+            p: q.p,
+            order: q.order.map(num),
+            pTop5: pTop5,
+            pWin: pWin,
+            combines: q.combines.map(function (x) {
+              return { n: x.n, nums: x.idx.map(num), combos: x.combos, pDesordre: x.pDesordre, pBonus4: x.pBonus4, pBonus3: x.pBonus3 };
+            }),
+            names: names,
+          };
+        }
+        function renderQuinte() {
+          var el = $('qView');
+          var iso = prog.day ? prog.day.date : parisIso(0);
+          var dayBtns =
+            '<div class="days3">' +
+            [-1, 0, 1]
+              .map(function (o) {
+                var d = parisIso(o);
+                return (
+                  '<button class="chip' +
+                  (d === iso ? ' on' : '') +
+                  '" data-qday="' +
+                  d +
+                  '">' +
+                  (o === 0 ? "Aujourd'hui" : o === 1 ? 'Demain' : 'Hier') +
+                  '</button>'
+                );
+              })
+              .join('') +
+            '</div>';
+          var f = findQuinte(prog.day);
+          if (!f) {
+            el.innerHTML =
+              dayBtns +
+              '<h2>🎯 Quinté+</h2><p class="muted">' +
+              (prog.day ? 'Pas de Quinté+ repéré dans le programme de cette journée pour l\'instant (le programme est mis à jour toutes les heures).' : 'Chargement du programme…') +
+              '</p>';
+            renderQuinteHist();
+            return;
+          }
+          var c = f.course,
+            q = quinteFor(f, iso);
+          var w = whenText(c.heure);
+          var html = dayBtns;
+          html +=
+            '<div class="qhead"><span class="tag accent">Quinté+</span><span class="tag">R' +
+            f.reu.r +
+            'C' +
+            c.c +
+            '</span><span class="muted">' +
+            esc(f.reu.hippodrome) +
+            ' · ' +
+            esc(c.discipline) +
+            (c.distance ? ' · ' + Number(c.distance).toLocaleString('fr-FR') + ' m' : '') +
+            (c.partants && c.partants.length ? ' · ' + c.partants.filter((p) => !p.nonPartant).length + ' partants' : '') +
+            '</span></div>';
+          html += '<h2 style="margin:10px 0 4px;font-size:20px">' + esc(c.libelle || 'Quinté+') + '</h2>';
+          var arr = [];
+          (c.arrivee || []).forEach(function (g) {
+            (Array.isArray(g) ? g : [g]).forEach(function (n) {
+              arr.push(String(n));
+            });
+          });
+          if (arr.length) html += '<div class="when">Course terminée</div>';
+          else if (w.txt) html += '<div class="when ' + w.cls + '">' + w.txt + '</div>';
+          if (!q) {
+            el.innerHTML = html + '<p class="muted">Partants pas encore disponibles.</p>';
+            renderQuinteHist();
+            return;
+          }
+          if (q.frozenAt)
+            html +=
+              '<p class="hint" style="margin:6px 0 0">🔒 Pronostic figé à ' +
+              new Date(q.frozenAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) +
+              ', avant le départ.</p>';
+          else if (q.live && !q.hasOdds) html += '<p class="hint" style="margin:6px 0 0">Cotes pas encore publiées : pronostic provisoire.</p>';
+          var top5 = arr.slice(0, 5);
+          var hit = function (n) {
+            return top5.indexOf(String(n)) >= 0;
+          };
+          html +=
+            '<h2 style="margin-top:14px">Notre quinté</h2><div class="qpicks">' +
+            q.ordre
+              .map(function (n) {
+                return '<span class="big-num' + (arr.length && hit(n) ? ' hit' : '') + '">' + esc(n) + '</span>';
+              })
+              .join('') +
+            '</div><p class="hint" style="margin-top:2px">Dans l\'ordre proposé (du plus probable gagnant au moins probable).' +
+            (arr.length
+              ? ' Arrivée : ' +
+                top5.map((n) => '<span class="num-badge">' + esc(n) + '</span>').join(' ') +
+                ' — <b>' +
+                q.picks.filter(hit).length +
+                ' de nos 5</b> dans les 5 premiers.'
+              : '') +
+            '</p>';
+          html +=
+            '<div class="qchances">' +
+            [
+              ['Ordre exact', q.p.ordre],
+              ['Désordre', q.p.desordre],
+              ['Bonus 4', q.p.bonus4],
+              ['Bonus 3', q.p.bonus3],
+            ]
+              .map(function (k) {
+                return '<div class="kpi"><small>' + k[0] + '</small><strong>' + pctFine(k[1]) + '</strong><br><small>' + oneIn(k[1]) + '</small></div>';
+              })
+              .join('') +
+            '</div>';
+          // Classement par chances d'être dans les 5
+          html += '<h2 style="margin-top:16px">Chances d\'être dans les 5 premiers</h2><div class="others">';
+          q.order.slice(0, 12).forEach(function (n, k) {
+            var p = q.pTop5[n] || 0,
+              r = q.names[String(n)] || {};
+            html +=
+              '<div class="oth"><span class="num-badge">' +
+              esc(n) +
+              '</span><span class="nm">' +
+              esc(r.nom || '') +
+              (k < 5 ? ' <span class="tag">quinté</span>' : '') +
+              (arr.length && hit(n) ? ' <span class="ok-mark">✓</span>' : '') +
+              '</span><div class="bar"><i style="width:' +
+              Math.max(2, p * 100) +
+              '%;background:' +
+              (p >= 0.5 ? 'var(--good)' : p >= 0.3 ? 'var(--mid)' : 'var(--bad)') +
+              '"></i></div><span class="pcs">' +
+              Math.round(p * 100) +
+              ' %</span><span class="ct">' +
+              esc(r.cote ? String(r.cote).replace('.', ',') : '—') +
+              '</span></div>';
+          });
+          html += '</div>';
+          // Formules combinées
+          var base = c.quinteBase || (c.rapports && c.rapports.qBase) || null;
+          html +=
+            '<h2 style="margin-top:16px">Formules combinées</h2><p class="hint" style="margin-top:-6px">Jouer n chevaux en combiné couvre toutes leurs combinaisons de 5. Le désordre est gagné si les 5 premiers sont tous parmi eux.</p>';
+          html +=
+            '<div class="scroll"><table><thead><tr><th>Chevaux</th><th>Combinaisons</th>' +
+            (base ? '<th>Coût</th>' : '') +
+            '<th>Désordre</th><th>Bonus 3</th><th>Sélection</th></tr></thead><tbody>';
+          q.combines.forEach(function (x) {
+            var won = arr.length >= 5 && top5.every((n) => x.nums.map(String).indexOf(n) >= 0);
+            html +=
+              '<tr><td><b>' +
+              x.n +
+              '</b></td><td>' +
+              x.combos +
+              '</td>' +
+              (base ? '<td>' + money(x.combos * base) + '</td>' : '') +
+              '<td>' +
+              pctFine(x.pDesordre) +
+              (won ? ' <span class="ok-mark">✓</span>' : '') +
+              '</td><td>' +
+              pctFine(x.pBonus3) +
+              '</td><td>' +
+              x.nums.map((n) => '<span class="num-badge">' + esc(n) + '</span>').join(' ') +
+              '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+          if (base) html += '<p class="hint">Coût pour une mise de base de ' + money(base) + ' par combinaison (point de vente ; sur internet la mise peut différer).</p>';
+          // Rapports
+          var qr = c.rapports && c.rapports.q;
+          if (qr && qr.length)
+            html +=
+              '<h2 style="margin-top:16px">Rapports</h2><div class="others">' +
+              qr
+                .map(function (r) {
+                  return (
+                    '<div class="oth alert-row" style="grid-template-columns:minmax(0,1fr) auto"><span class="nm">' +
+                    esc(r.lib) +
+                    (r.comb ? ' <span class="muted">' + esc(r.comb) + '</span>' : '') +
+                    '</span><b>' +
+                    (r.divBase != null ? money(r.divBase) : r.div != null ? money(r.div) + ' (1 €)' : '—') +
+                    '</b></div>'
+                  );
+                })
+                .join('') +
+              '</div>';
+          html +=
+            '<p class="hint" style="margin-top:12px">Le Quinté+ est le pari le plus difficile : même avec 8 chevaux, nos chances de désordre restent modestes, et la commission du PMU y est plus forte qu\'au simple. À jouer petit, pour le plaisir.</p>';
+          html += '<div class="row" style="margin-top:8px"><button class="primary" data-qopen="1">Voir la course en détail</button></div>';
+          el.innerHTML = html;
+          el._course = { r: f.reu.r, c: c.c };
+          renderQuinteHist();
+        }
+        function renderQuinteHist() {
+          var el = $('qHist');
+          var Q = bilan && bilan.quinte;
+          var html = '<h2>📈 Nos derniers quintés</h2>';
+          if (!Q || !Q.races || !Q.races.length) {
+            el.innerHTML =
+              html + '<p class="muted">Pas encore de Quinté+ terminé avec un pronostic figé avant le départ. L\'historique se remplira jour après jour.</p>';
+            return;
+          }
+          var t = Q.total;
+          html +=
+            '<div class="kpis"><div class="kpi"><small>Quintés suivis</small><strong>' +
+            t.courses +
+            '</strong></div><div class="kpi"><small>Chevaux trouvés</small><strong>' +
+            (t.hits / t.courses).toFixed(1).replace('.', ',') +
+            ' / 5</strong><br><small>en moyenne</small></div><div class="kpi"><small>Désordres</small><strong>' +
+            t.desordre +
+            '</strong><br><small>annoncé ' +
+            t.announcedDesordre.toFixed(1).replace('.', ',') +
+            '</small></div><div class="kpi"><small>Bonus 3</small><strong>' +
+            t.bonus3 +
+            '</strong><br><small>annoncé ' +
+            t.announcedBonus3.toFixed(1).replace('.', ',') +
+            '</small></div></div>';
+          html += '<div class="others">';
+          Q.races.slice(0, 20).forEach(function (x) {
+            html +=
+              '<div class="brace"><div class="brace-top"><span class="tag">' +
+              esc(fmtDay(x.date)) +
+              '</span><span class="muted">' +
+              esc(x.hippodrome) +
+              ' R' +
+              x.r +
+              'C' +
+              x.c +
+              '</span><span class="brace-res"><b>' +
+              x.hits +
+              '/5</b>' +
+              (x.desordre ? ' · <span class="ok-mark">désordre</span>' : x.bonus4 ? ' · <span class="ok-mark">bonus 4</span>' : x.bonus3 ? ' · <span class="ok-mark">bonus 3</span>' : '') +
+              '</span></div><div>Notre quinté ' +
+              x.ordre.map((n) => '<span class="num-badge">' + esc(n) + '</span>').join(' ') +
+              ' · arrivée ' +
+              x.arrivee.map((n) => '<span class="num-badge">' + esc(n) + '</span>').join(' ') +
+              '</div></div>';
+          });
+          html += '</div>';
+          el.innerHTML = html;
+        }
+        $('qView').addEventListener('click', function (e) {
+          var d = e.target.closest('[data-qday]');
+          if (d) {
+            var iso = d.dataset.qday;
+            if (![].some.call($('progDate').options, (o) => o.value === iso))
+              $('progDate').insertAdjacentHTML('beforeend', '<option value="' + iso + '">' + esc(fmtDay(iso)) + '</option>');
+            $('progDate').value = iso;
+            prog.sel = null;
+            prog.reu = null;
+            loadDay(iso).then(renderQuinte);
+            return;
+          }
+          if (e.target.closest('[data-qopen]') && this._course) selectCourse(this._course.r, this._course.c);
+        });
 
         // ---------------- Alertes ----------------
         var alertsData = null;
@@ -2881,6 +3427,14 @@
             '<li>Touchez « + » (s\'abonner à un sujet) et entrez exactement : <code>hoshi-turf-b12tj5jfgndm</code></li>' +
             '<li>C\'est tout. Vous recevrez : 📋 la sélection du jour vers 9 h, ⏰ un rappel 10 à 40 min avant chaque course sélectionnée (avec la cote), et 🔔 une alerte prioritaire si un pari validé apparaît. Touchez une notification pour ouvrir la course.</li>' +
             '</ol></details>';
+          var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+          if (!standalone && !navigator.standalone)
+            html +=
+              '<details style="margin-top:6px"><summary>📲 Installer Hoshi Turf sur l\'écran d\'accueil</summary><ol class="hint" style="padding-left:18px">' +
+              '<li>Ouvrez cette page dans <b>Safari</b> sur l\'iPhone.</li>' +
+              '<li>Touchez le bouton <b>Partager</b> (le carré avec une flèche).</li>' +
+              '<li>Choisissez <b>Sur l\'écran d\'accueil</b>, puis <b>Ajouter</b>.</li>' +
+              '<li>L\'icône Hoshi Turf s\'ouvre alors en plein écran, comme une application.</li></ol></details>';
           $('sAlerts').innerHTML = html;
         }
         $('sAlerts').addEventListener('click', function (e) {
@@ -3549,12 +4103,16 @@
         renderRace();
         renderSettings();
         renderSaved();
-        setExpert(!!store.expert);
+        setView(/^#\d{4}-\d{2}-\d{2}\/R\d+C\d+$/.test(location.hash) ? 'courses' : store.view || (store.expert ? 'expert' : 'courses'), true);
         initBetForm();
         renderJournal();
         render();
         initProgram();
         settleJournal();
+        // Application installable (écran d'accueil) et utilisable hors connexion.
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js').catch(function () {});
+        }
         loadAlerts();
         loadBilan();
       })();

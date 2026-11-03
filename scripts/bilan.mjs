@@ -144,15 +144,56 @@ async function checkDrift(recent, prev) {
   return drift;
 }
 
+/** Bilan Quinté+ d'une course dont le pronostic Quinté a été figé avant le départ. */
+function scoreQuinte(reu, c) {
+  const q = c.prono && c.prono.quinte;
+  if (!q || !c.arrivee) return null;
+  const order = [];
+  c.arrivee.forEach((g) => (Array.isArray(g) ? g : [g]).forEach((n) => order.push(String(n))));
+  if (order.length < 5) return null;
+  const picks = new Set(q.picks.map(String));
+  const first = (k) => order.slice(0, k);
+  const inPicks = (arr) => arr.every((n) => picks.has(n));
+  const res = {
+    date: null,
+    r: reu.r,
+    c: c.c,
+    heure: c.heure,
+    hippodrome: reu.hippodrome,
+    picks: q.picks,
+    ordre: q.ordre,
+    arrivee: first(5),
+    hits: first(5).filter((n) => picks.has(n)).length,
+    desordre: inPicks(first(5)),
+    bonus4: inPicks(first(4)),
+    bonus3: inPicks(first(3)),
+    ordreExact: q.ordre.map(String).join('-') === first(5).join('-'),
+    combines: (q.combines || []).map((x) => {
+      const S = new Set(x.nums.map(String));
+      return { n: x.n, combos: x.combos, desordre: first(5).every((n) => S.has(n)), bonus3: first(3).every((n) => S.has(n)) };
+    }),
+    announced: q.p,
+    rapports: (c.rapports && c.rapports.q) || null,
+    base: (c.rapports && c.rapports.qBase) || c.quinteBase || null,
+  };
+  return res;
+}
+
 async function main() {
   const prev = await readJson(path.join(DATA, 'bilan.json'));
   const recent = []; // { p, placed } dans l'ordre chronologique (France)
+  const quinte = []; // Quinté+ joués avec un pronostic figé
   const files = (await readdir(DATA)).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   const out = { updated: new Date().toISOString(), total: { fr: emptyAgg(), all: emptyAgg() }, days: [] };
   for (const f of files) {
     const day = await readJson(path.join(DATA, f));
     if (!day) continue;
     const d = { date: day.date, fr: emptyAgg(), all: emptyAgg(), details: [] };
+    for (const reu of day.reunions || [])
+      for (const c of reu.courses || []) {
+        const q = scoreQuinte(reu, c);
+        if (q) quinte.push(Object.assign(q, { date: day.date }));
+      }
     for (const reu of day.reunions || [])
       for (const c of reu.courses || []) {
         const r = scoreCourse(reu, c);
@@ -171,6 +212,16 @@ async function main() {
     out.days.push(d);
   }
   recent.sort((a, b) => a.h - b.h);
+  const qt = { courses: quinte.length, hits: 0, desordre: 0, bonus4: 0, bonus3: 0, announcedDesordre: 0, announcedBonus3: 0 };
+  for (const q of quinte) {
+    qt.hits += q.hits;
+    qt.desordre += q.desordre ? 1 : 0;
+    qt.bonus4 += q.bonus4 ? 1 : 0;
+    qt.bonus3 += q.bonus3 ? 1 : 0;
+    qt.announcedDesordre += (q.announced && q.announced.desordre) || 0;
+    qt.announcedBonus3 += (q.announced && q.announced.bonus3) || 0;
+  }
+  out.quinte = { total: qt, races: quinte.sort((a, b) => (b.heure || 0) - (a.heure || 0)).slice(0, 60) };
   out.drift = await checkDrift(recent, prev);
   out.days.reverse(); // le plus récent d'abord
   out.days.forEach((d, k) => {
