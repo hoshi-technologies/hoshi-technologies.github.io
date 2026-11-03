@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Düğme metni", "info": "Uygulamada ayarlanan başlığı kullanmak için boş bırakın." },
+    "position": { "label": "Konum", "app": "Uygulama ayarı", "right": "Sağ alt", "left": "Sol alt" },
+    "guest_text": { "label": "Giriş yapmamış ziyaretçiler için mesaj", "info": "Çevrilmiş varsayılan mesajı kullanmak için boş bırakın." }
+  },
+  "card": { "name": "Sadakat kartı", "heading": "Başlık", "max_width": "Maksimum genişlik" },
+  "product": { "name": "Ürün puanları", "text": "Özel metin", "text_info": "İsteğe bağlı. {points} ve {name} değiştirilir. Çevrilmiş varsayılan metin için boş bırakın." }
+}

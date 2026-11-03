@@ -64,6 +64,7 @@
   background: linear-gradient(135deg, var(--hl-color), color-mix(in srgb, var(--hl-color) 60%, #000));
 }
 .hl-header-label { font-size: 13px; opacity: 0.9; }
+.hl-header-content { padding-inline-end: 34px; }
 .hl-header-big { font-size: 30px; font-weight: 700; margin-top: 2px; }
 .hl-header-big small { font-size: 15px; font-weight: 500; }
 .hl-tier {
@@ -79,7 +80,7 @@
 .hl-close {
   position: absolute;
   top: 10px;
-  right: 12px;
+  inset-inline-end: 12px; /* à droite, ou à gauche en arabe/hébreu/ourdou */
   border: 0;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;

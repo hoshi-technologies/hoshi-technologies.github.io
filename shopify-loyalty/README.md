@@ -9,6 +9,10 @@ sociaux, campagnes de points bonus et widget sur la boutique.
 | --- | --- |
 | ![Widget sur la boutique](docs/widget.png) | ![Fenêtre de parrainage](docs/parrainage.png) |
 
+| Widget en japonais | Widget en arabe (droite à gauche) |
+| --- | --- |
+| ![Widget en japonais](docs/widget-ja.png) | ![Widget en arabe](docs/widget-ar.png) |
+
 ## Fonctionnalités
 
 **Pour le marchand (administration Shopify, Polaris)**

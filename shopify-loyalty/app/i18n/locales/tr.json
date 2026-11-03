@@ -1,0 +1,599 @@
+{
+  "nav": {
+    "dashboard": "Kontrol paneli",
+    "members": "Üyeler",
+    "rewards": "Ödüller",
+    "tiers": "Müşteri seviyeleri",
+    "settings": "Ayarlar"
+  },
+  "common": {
+    "edit": "Düzenle",
+    "active": "Etkin",
+    "paused": "Duraklatıldı",
+    "customer": "Müşteri",
+    "type": "Tür",
+    "detail": "Ayrıntılar",
+    "points": "Puan",
+    "date": "Tarih",
+    "anonymousCustomer": "Anonim müşteri",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "status": "Durum",
+    "actions": "İşlemler",
+    "change": "Değiştir",
+    "optional": "isteğe bağlı",
+    "color": "Renk"
+  },
+  "dashboard": {
+    "title": "Kontrol paneli",
+    "manageRewards": "Ödülleri yönet",
+    "pausedTitle": "Program duraklatıldı",
+    "pausedText": "Müşterileriniz artık puan kazanamıyor ve ödül kullanamıyor.",
+    "reactivate": "Yeniden etkinleştir",
+    "campaignTitle": "Kampanya devam ediyor: {pointsName} ×{multiplier}",
+    "campaignUntil": "{date} tarihine kadar.",
+    "campaignNoEnd": "Bitiş tarihi yok.",
+    "welcome": "Hoshi Club'a hoş geldiniz",
+    "summary": "{amount} harcama = {points} {pointsName} · kayıtta {signup} {pointsName} hediye",
+    "stats": {
+      "members": "Üyeler",
+      "newMembers_one": "Son 30 günde +{count}",
+      "newMembers_other": "Son 30 günde +{count}",
+      "pointsEarned": "Verilen {pointsName}",
+      "pointsSpent": "Kullanılan {pointsName}",
+      "rewardsClaimed": "Alınan ödüller",
+      "rewardsUsed_one": "{count} tanesi bir siparişte kullanıldı",
+      "rewardsUsed_other": "{count} tanesi siparişlerde kullanıldı",
+      "rewardRevenue": "Ödüllerden gelen gelir",
+      "rewardRevenueHint": "Sadakat koduyla verilen siparişler",
+      "referrals": "Davet edilen müşteriler",
+      "pendingReferrals_one": "{count} bekleyen davet",
+      "pendingReferrals_other": "{count} bekleyen davet",
+      "referralRevenue": "Davetlerden gelen gelir",
+      "referralRevenueHint": "Davet edilen arkadaşların ilk siparişleri"
+    },
+    "chartTitle": "Günlük kazanılan {pointsName} (son 30 gün)",
+    "chartAria": "Son 30 günde kazanılan {total} {unit}",
+    "recentActivity": "Son etkinlikler",
+    "noActivity": "Henüz etkinlik yok. Puanlar ilk sipariş veya kayıttan sonra burada görünür.",
+    "gettingStarted": "Başlarken",
+    "steps": {
+      "enableTitle": "Programı etkinleştirin",
+      "enableText": "Program etkin olduğu anda müşterileriniz puan kazanmaya başlar.",
+      "rewardsTitle": "Ödül sunun",
+      "rewardsText": "Müşterilerinizin puanlarıyla açabileceği indirimler.",
+      "tiersTitle": "Müşteri seviyelerinizi ayarlayın",
+      "tiersText": "Otomatik indirimli Bronz, Gümüş, Altın veya yalnızca davetle katılınan seviyeler.",
+      "widgetTitle": "Widget'ı mağazanızda gösterin",
+      "widgetText": "Tema düzenleyicide “Hoshi Club”ı etkinleştirin (Uygulama yerleştirmeleri).",
+      "widgetAction": "Tema düzenleyiciyi aç"
+    },
+    "howItWorks": "Nasıl çalışır?",
+    "how": {
+      "signup": "Müşteri hesap oluşturur: hoş geldin bonusu.",
+      "orders": "Ödenen her sipariş puan kazandırır.",
+      "tiers": "Ne kadar çok biriktirirse seviyesi o kadar yükselir (ya da seviyeyi siz atarsınız).",
+      "discounts": "Her seviye ödeme sırasında otomatik indirim sağlayabilir.",
+      "rewards": "Widget'tan puanlarını kişisel bir indirim koduyla değiştirirler.",
+      "more": "Arkadaşlarını davet ederek, doğum günlerinde ve sizi sosyal medyada takip ederek de puan kazanırlar."
+    }
+  },
+  "member": {
+    "viewCustomer": "Müşteriyi görüntüle",
+    "tierSaved": "Seviye güncellendi",
+    "codeCreated": "Kod oluşturuldu: {code}",
+    "pointsAdded": "Puan eklendi",
+    "pointsRemoved": "Puan düşüldü",
+    "errors": {
+      "points": "Bir puan miktarı girin"
+    },
+    "available": "Kullanılabilir bakiye",
+    "tier": "Seviye",
+    "tierAssigned": "Seviye (atanmış)",
+    "noTier": "Yok",
+    "lifetimeAndOrders": "Toplam {lifetime} · {orders}",
+    "toNextTier": "{tier} seviyesine ulaşmak için {points} {pointsName} kaldı",
+    "history": "Puan geçmişi",
+    "noHistory": "Henüz etkinlik yok.",
+    "codes": "Kazanılan indirim kodları",
+    "code": "Kod",
+    "codeUsed": "Kullanıldı",
+    "codeAvailable": "Kullanılabilir",
+    "adjust": "Bakiyeyi düzenle",
+    "adjustAction": "İşlem",
+    "addPoints": "Puan ekle",
+    "removePoints": "Puan düş",
+    "pointsCount": "Puan miktarı",
+    "reason": "Neden (geçmişte gösterilir)",
+    "reasonPlaceholder": "Jest",
+    "confirm": "Onayla",
+    "giftReward": "Ödül hediye et",
+    "giftRewardText": "Kişisel bir kod oluşturur ve müşterinin puanlarından düşer.",
+    "generateCode": "Kod oluştur",
+    "info": "Bilgiler",
+    "birthday": "Doğum günü: {date}",
+    "notProvided": "belirtilmedi",
+    "referralCode": "Davet kodu: {code}",
+    "referrals": "Davetler: {invited} davetten {converted} dönüşüm",
+    "expiresAt": "Puanlar {date} tarihine kadar geçerli",
+    "tierSection": "Müşteri seviyesi",
+    "tierLocked": "Kilitli seviye: artık puanlara göre değişmez.",
+    "tierAuto": "Otomatik: şu anda {tier}, {pointsName} miktarına göre değişir.",
+    "applyTier": "Seviyeyi uygula",
+    "perks": "{tier} avantajları",
+    "noPerks": "Bu seviye için tanımlı avantaj yok.",
+    "shopifyTag": "Shopify etiketi: {tag}",
+    "danger": "Tehlikeli bölge",
+    "confirmRemove": "Bu müşteri programdan çıkarılsın mı? Bakiyesi ve geçmişi silinecek.",
+    "remove": "Programdan çıkar"
+  },
+  "members": {
+    "title": "Üyeler",
+    "add": "Müşteri ekle",
+    "importAll": "Tüm müşterilerimi içe aktar",
+    "joined": "{name} programa katıldı",
+    "tierUpdated": "{name} adlı müşterinin seviyesi güncellendi",
+    "imported_one": "{count} müşteri içe aktarıldı",
+    "imported_other": "{count} müşteri içe aktarıldı",
+    "allImported": "Tüm müşterileriniz zaten üye",
+    "search": "Ara",
+    "searchPlaceholder": "Ad veya e-posta",
+    "tier": "Seviye",
+    "allTiers": "Tüm seviyeler",
+    "sort": "Sırala",
+    "sortPoints": "En çok puan",
+    "sortRecent": "En yeni",
+    "email": "E-posta",
+    "balance": "Bakiye",
+    "lifetime": "Toplam",
+    "orders": "Siparişler",
+    "assigned": "Atanmış",
+    "noResults": "Aramanızla eşleşen üye yok.",
+    "empty": "Henüz üye yok. Bir müşteri ekleyin veya tüm müşterilerinizi içe aktarın.",
+    "total_one": "{count} üye",
+    "total_other": "{count} üye"
+  },
+  "addMember": {
+    "title": "Programa müşteri ekle",
+    "search": "Shopify müşterisi ara",
+    "searchPlaceholder": "Ad, e-posta veya telefon",
+    "searching": "Aranıyor",
+    "noResults": "Müşteri bulunamadı.",
+    "noEmail": "E-posta yok",
+    "orders_one": "{count} sipariş",
+    "orders_other": "{count} sipariş",
+    "alreadyMember": "Zaten üye",
+    "choose": "Seç",
+    "tierLabel": "Müşteri seviyesi",
+    "tierDetails": "“Otomatik”: seviye puanlara göre değişir. Aksi takdirde seçilen seviye sabitlenir.",
+    "autoTier": "Otomatik ({pointsName} miktarına göre)",
+    "invitationTier": "{name} (yalnızca davetle)",
+    "welcomeBonus": "Hoş geldin bonusunu ver ({points} {pointsName})",
+    "update": "Güncelle",
+    "submit": "Programa ekle"
+  },
+  "program": {
+    "title": "Program ayarları",
+    "saved": "Ayarlar kaydedildi",
+    "pointsNameFallback": "puan",
+    "status": {
+      "title": "Durum",
+      "label": "Sadakat programı etkin",
+      "details": "Müşterilerinizin puanlarını kaybetmeden programı duraklatmak için kapatın."
+    },
+    "earn": {
+      "title": "Puan kazanma",
+      "pointsName": "Puan adı",
+      "pointsNameDetails": "Örn. puan, yıldız, jeton…",
+      "perUnit": "Harcanan her {currency} başına puan",
+      "perUnitDetails": "Örnek: {amount} tutarındaki bir sipariş {points} {pointsName} kazandırır (seviye çarpanı hariç).",
+      "signup": "Hoş geldin bonusu",
+      "signupDetails": "Müşteri hesap oluşturduğunda verilir.",
+      "firstOrder": "İlk sipariş bonusu",
+      "firstOrderDetails": "Siparişin puanlarına ek olarak."
+    },
+    "birthday": {
+      "title": "Doğum günü 🎂",
+      "label": "Doğum gününde verilen puan",
+      "details": "Müşteriler tarihlerini widget'tan girer. Kötüye kullanımı önlemek için tarih en az 30 gün önceden kaydedilmiş olmalıdır. 0 = kapalı."
+    },
+    "referral": {
+      "title": "Arkadaş daveti 🤝",
+      "enable": "Arkadaş davetini etkinleştir",
+      "enableDetails": "Her üye kişisel bir bağlantı alır. Arkadaş bir hoş geldin kodu alır; davet eden kişi, arkadaşı ilk siparişini verdiğinde puan kazanır.",
+      "referrerPoints": "Davet edenin kazandığı puan",
+      "friendGift": "Arkadaşa hediye",
+      "value": "Değer",
+      "minimum": "Minimum alışveriş tutarı (isteğe bağlı)"
+    },
+    "social": {
+      "title": "Sosyal medya 📣",
+      "intro": "Sayfalarınızı ekleyin: widget, müşterileri {pointsName} karşılığında sizi takip etmeye davet eder (ağ başına bir kez).",
+      "points": "Takip edilen ağ başına puan"
+    },
+    "bonus": {
+      "title": "Bonus puan kampanyası 🔥",
+      "intro": "Belirli bir dönem için kazanılan {pointsName} miktarını katlayın (indirimler, bayramlar, lansmanlar…). Kampanya süresince widget'ta bir banner gösterilir.",
+      "multiplier": "Çarpan",
+      "none": "Kampanya yok",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "Başlangıç (isteğe bağlı)",
+      "end": "Bitiş (isteğe bağlı)",
+      "message": "Banner mesajı",
+      "messageDetails": "Çevrilmiş varsayılan mesajı göstermek için boş bırakın.",
+      "messagePlaceholder": "Black Friday: {pointsName} ×{multiplier}!"
+    },
+    "expiration": {
+      "title": "Puanların sona ermesi ⏳",
+      "label": "Puanların sona erme süresi",
+      "details": "Her alışveriş, kullanım veya kazanılan puan bu tarihi ileri taşır. Son kullanma tarihi müşterileri geri gelmeye teşvik eder.",
+      "never": "Hiçbir zaman",
+      "months_one": "{count} ay işlem yapılmazsa",
+      "months_other": "{count} ay işlem yapılmazsa"
+    },
+    "widget": {
+      "title": "Widget görünümü",
+      "languageNote": "Widget otomatik olarak mağazanızın dilinde görünür (36 dil desteklenir).",
+      "widgetTitle": "Widget başlığı",
+      "widgetTitleDetails": "Her dilde çevrilmiş varsayılan başlığı kullanmak için boş bırakın.",
+      "defaultTitle": "Ödüllerim",
+      "color": "Ana renk",
+      "colorOption": "{color} rengi",
+      "customColor": "Özel renk",
+      "position": "Düğme konumu",
+      "right": "Sağ alt",
+      "left": "Sol alt"
+    },
+    "preview": "Önizleme",
+    "previewTier": "Gümüş seviye",
+    "previewRedeem": "Kullan"
+  },
+  "landing": {
+    "tagline": "Shopify mağazanız için en basit sadakat programı: puanlar, otomatik indirimli VIP seviyeleri, arkadaş daveti ve ödüller birkaç tıklamayla.",
+    "pricing": "{price}/ay · her şey dahil · {days} gün ücretsiz deneme",
+    "shopDomain": "Mağaza alan adı",
+    "install": "Yükle",
+    "login": "Giriş yap",
+    "installFromStore": "Hoshi Club'ı Shopify App Store'dan yükleyin.",
+    "errors": {
+      "missingShop": "Mağaza alan adınızı girin",
+      "invalidShop": "Bu mağaza alan adı geçerli değil"
+    },
+    "features": {
+      "points": {
+        "title": "Otomatik puanlar.",
+        "text": "Müşteriler her siparişte puan kazanır, teknik kurulum gerekmez."
+      },
+      "tiers": {
+        "title": "VIP seviyeleri.",
+        "text": "En iyi müşterileriniz için otomatik indirimler ve puan çarpanları sunan Bronz, Gümüş, Altın veya yalnızca davetle katılınan seviyeler."
+      },
+      "referrals": {
+        "title": "Davetler ve bonuslar.",
+        "text": "Arkadaş daveti programı, doğum günü ödülleri, sosyal medya takipleri ve çift puan kampanyaları."
+      },
+      "widget": {
+        "title": "Şık widget.",
+        "text": "Puanları görmek ve kullanmak için mağazanızın renklerinde kayan bir düğme."
+      },
+      "languages": {
+        "title": "36 dil.",
+        "text": "Uygulama ve widget hem sizin hem de müşterilerinizin dilini konuşur."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "Gizlilik politikası",
+    "supportLink": "Yardım ve iletişim",
+    "language": "Dil",
+    "privacy": {
+      "title": "Gizlilik politikası",
+      "updated": "Hoshi Club, Hoshi Technologies tarafından yayımlanmaktadır. Son güncelleme: {date}.",
+      "intro": "Hoshi Club (“uygulama”), Shopify satıcılarının müşterilerine sadakat programı sunmasını sağlar. Bu politika, uygulamanın hangi verileri, neden ve nasıl işlediğini açıklar.",
+      "collectedTitle": "Toplanan veriler",
+      "collected": {
+        "store": {
+          "label": "Mağaza verileri:",
+          "text": "mağaza alan adı ve kurulum sırasında Shopify tarafından sağlanan erişim token'ları."
+        },
+        "members": {
+          "label": "Üye verileri:",
+          "text": "Shopify müşteri kimliği, ad, soyad, e-posta adresi, sipariş sayısı, puan bakiyesi ve geçmişi, sadakat seviyesi, kazanılan indirim kodları, doğum günü (müşteri belirtirse gün ve ay) ve davet kodu."
+        },
+        "referrals": {
+          "label": "Davet verileri:",
+          "text": "davet edilen kişinin hoş geldin kodunu almak için girdiği e-posta adresi."
+        },
+        "orders": {
+          "label": "Sipariş verileri:",
+          "text": "ödenen siparişlerin kimliği, ara toplamı ve toplamı ile kullanılan indirim kodları; yalnızca puan hesaplamak için."
+        }
+      },
+      "noPayment": "Uygulama hiçbir ödeme verisi toplamaz ve reklam çerezi kullanmaz.",
+      "useTitle": "Verilerin kullanımı",
+      "use": "Veriler yalnızca mağazanın sadakat programını yürütmek için kullanılır: puanların hesaplanması ve gösterilmesi, seviyelerin ve avantajlarının atanması, indirim kodlarının oluşturulması, davetlerin yönetilmesi ve satıcıya istatistiklerin gösterilmesi. Veriler hiçbir zaman satılmaz, kiralanmaz veya pazarlama amacıyla üçüncü taraflarla paylaşılmaz.",
+      "hostingTitle": "Barındırma ve veri işleyenler",
+      "hosting": "Veriler Cloudflare tarafından barındırılır (Cloudflare Workers ve D1). Shopify, mağaza ve müşteri verilerini API'leri aracılığıyla sağlar. Bu sağlayıcılar veri işleyen olarak hareket eder ve kendi güvenlik önlemlerini uygular.",
+      "retentionTitle": "Saklama ve silme",
+      "retention": {
+        "installed": "Veriler, uygulama yüklü olduğu sürece saklanır.",
+        "customerRedact": "Bir müşteri talep ettiğinde (Shopify aracılığıyla), verileri otomatik olarak silinir (customers/redact webhook'u).",
+        "shopRedact": "Kaldırma işleminden 48 saat sonra Shopify mağaza verilerinin silinmesini talep eder; ardından tüm veriler silinir (shop/redact webhook'u).",
+        "merchant": "Satıcı, bir müşteriyi istediği zaman uygulamadan programdan çıkarabilir."
+      },
+      "rightsTitle": "Haklarınız",
+      "rights": "GDPR (Genel Veri Koruma Yönetmeliği) ve benzer yasalar kapsamında müşteriler, verilerine erişme, verilerini düzeltme, silme ve işlenmesine itiraz etme hakkına sahiptir. Bu hakları ilgili mağazaya (veri sorumlusu) başvurarak veya bize yazarak kullanabilirler. Shopify tarafından gönderilen erişim talepleri (customers/data_request webhook'u) işleme alınır.",
+      "contactTitle": "İletişim",
+      "contact": "Her türlü soru için:"
+    },
+    "support": {
+      "title": "Yardım ve iletişim",
+      "intro": "Bir sorunuz veya sorununuz mu var? Bize yazın, 2 iş günü içinde yanıt veriyoruz:",
+      "faqTitle": "Sıkça sorulan sorular",
+      "faq": {
+        "widget": {
+          "q": "Programı mağazamda nasıl gösteririm?",
+          "a": "Shopify'da: Online Mağaza → Temalar → Özelleştir → Uygulama yerleştirmeleri, ardından “Hoshi Club”ı etkinleştirin. Uygulamanın kontrol panelinde doğrudan bir bağlantı bulunur."
+        },
+        "points": {
+          "q": "Müşterilerim puanlarını ne zaman alır?",
+          "a": "Sipariş ödendiği anda otomatik olarak. Sipariş iade edilirse puanlar geri alınır."
+        },
+        "tierDiscounts": {
+          "q": "Seviye indirimleri nasıl çalışır?",
+          "a": "Her seviye müşteriye bir etiket ekler ve yalnızca o seviyedeki müşterilere özel bir Shopify otomatik indirimi oluşturur. İndirim, ödeme sırasında kod gerekmeden uygulanır. İndirimleri Shopify → İndirimler bölümünde görebilirsiniz."
+        },
+        "assignTier": {
+          "q": "Belirli bir müşteriye seviye atayabilir miyim?",
+          "a": "Evet: Üyeler → Müşteri ekle veya bir üyenin sayfasından (“Müşteri seviyesi” bölümü)."
+        },
+        "referrals": {
+          "q": "Arkadaş daveti nasıl çalışır?",
+          "a": "Her üyenin kişisel bir bağlantısı vardır. Davet edilen arkadaş e-posta adresini girer ve bir hoş geldin kodu alır; bu kod ödenen bir siparişte kullanıldığında davet eden kişi puan kazanır."
+        },
+        "languages": {
+          "q": "Hangi diller destekleniyor?",
+          "a": "Uygulama Shopify yöneticinizin dilini, widget ise mağazanızın dilini kullanır; 36 dil desteklenir. Boş bırakılan ödül adları otomatik olarak çevrilir."
+        },
+        "uninstall": {
+          "q": "Uygulamayı kaldırırsam ne olur?",
+          "a": "Otomatik indirimler siz silene kadar Shopify'da kalır. Program verileri, kaldırma işleminden 48 saat sonra silinir."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "Ödüller",
+    "new": "Yeni ödül",
+    "create": "Ödül oluştur",
+    "editTitle": "Ödülü düzenle",
+    "deleted": "Ödül silindi",
+    "hidden": "Ödül gizlendi",
+    "shown": "Ödül görünür",
+    "updated": "Ödül güncellendi",
+    "created": "Ödül oluşturuldu",
+    "errors": {
+      "cost": "Puan bedeli 0'dan büyük olmalıdır",
+      "value": "İndirim değerini girin",
+      "percent": "İndirim %100'ü aşamaz"
+    },
+    "emptyTitle": "Henüz ödül yok",
+    "emptyText": "İlk ödülünüzü oluşturun: müşteriler bunu {pointsName} karşılığında alabilecek.",
+    "columns": {
+      "reward": "Ödül",
+      "cost": "Bedel",
+      "claimed": "Alınma"
+    },
+    "types": {
+      "AMOUNT": "Sabit tutar",
+      "PERCENT": "Yüzde",
+      "FREE_SHIPPING": "Ücretsiz kargo"
+    },
+    "minimumShort": "{amount} harcamadan itibaren",
+    "autoTranslated": "Ad otomatik olarak çevrildi",
+    "timesClaimed_one": "{count} kez",
+    "timesClaimed_other": "{count} kez",
+    "visible": "Görünür",
+    "hiddenBadge": "Gizli",
+    "hide": "Gizle",
+    "show": "Göster",
+    "confirmDelete": "“{title}” silinsin mi?",
+    "tipTitle": "İpucu",
+    "tip": "İyi bir ilk ödül 2 ila 3 siparişte kazanılabilmelidir. Harcanan her birim için 1 puanla, 5 indirim için 500 puan %1 indirime denk gelir: kâr marjınızı zedelemeden cazip.",
+    "typeLabel": "Ödül türü",
+    "percentLabel": "İndirim yüzdesi",
+    "amountLabel": "İndirim tutarı",
+    "costLabel": "Puan bedeli",
+    "nameLabel": "Görünen ad (isteğe bağlı)",
+    "nameDetails": "Müşterinizin diline çevrilmiş bir ad göstermek için boş bırakın.",
+    "minimumLabel": "Minimum sipariş tutarı (isteğe bağlı)"
+  },
+  "labels": {
+    "rewardPercent": "%{value} indirim",
+    "rewardAmount": "{amount} indirim",
+    "freeShipping": "Ücretsiz kargo",
+    "percentOff": "%{value} indirim",
+    "amountOff": "{amount} indirim",
+    "tierDiscount": "Her siparişte {discount}",
+    "tierDiscountFrom": "{minimum} üzerindeki her siparişte {discount}",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{minimum} üzerindeki siparişlerde {reward}"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "Hoş geldin",
+      "ORDER": "Sipariş",
+      "FIRST_ORDER": "İlk sipariş",
+      "REDEEM": "Kullanım",
+      "REFUND": "İade",
+      "ADJUST": "Düzeltme",
+      "BIRTHDAY": "Doğum günü",
+      "REFERRAL": "Davet",
+      "SOCIAL": "Sosyal medya",
+      "EXPIRE": "Süre sonu"
+    },
+    "desc": {
+      "SIGNUP": "Hoş geldin bonusu",
+      "ORDER": "Sipariş {order}",
+      "ORDER_BONUS": "Sipariş {order} (bonus ×{bonus})",
+      "FIRST_ORDER": "İlk sipariş bonusu ({order})",
+      "REDEEM": "Kullanıldı: {reward}",
+      "REFUND": "İade (sipariş {order})",
+      "ADJUST_ADD": "Manuel ekleme",
+      "ADJUST_REMOVE": "Manuel düşme",
+      "BIRTHDAY": "Doğum gününüz kutlu olsun! ({year})",
+      "REFERRAL": "Davet: {friend}",
+      "SOCIAL": "{network} üzerinde takip edildi",
+      "EXPIRE": "{months} ay işlem yapılmadığı için süresi doldu"
+    }
+  },
+  "errors": {
+    "unexpected": "Bir sorun oluştu: {details}",
+    "memberNotFound": "Üye bulunamadı",
+    "tierNotFound": "Seviye bulunamadı",
+    "rewardUnavailable": "Bu ödül artık kullanılamıyor",
+    "programDisabled": "Sadakat programı şu anda duraklatıldı",
+    "notEnoughPoints": "{missing} {pointsName} daha gerekiyor",
+    "discountFailed": "İndirim kodu oluşturulamadı. {details}",
+    "referralCodeFailed": "Davet kodu oluşturulamadı",
+    "referralUnavailable": "Arkadaş daveti kullanılamıyor",
+    "invalidEmail": "Geçersiz e-posta adresi",
+    "invalidReferral": "Geçersiz davet bağlantısı",
+    "selfReferral": "Kendinizi davet edemezsiniz",
+    "referralAlreadyUsed": "Bu e-posta adresi zaten bir davetten yararlandı",
+    "referralNewCustomersOnly": "Arkadaş daveti yalnızca yeni müşteriler içindir",
+    "invalidDate": "Geçersiz tarih",
+    "birthdayAlreadySet": "Doğum gününüz zaten kayıtlı",
+    "actionUnavailable": "Bu işlem kullanılamıyor",
+    "loginRequired": "Programdan yararlanmak için giriş yapın",
+    "notInstalled": "Uygulama bu mağazada yüklü değil",
+    "generic": "Bir sorun oluştu, lütfen tekrar deneyin."
+  },
+  "seed": {
+    "pointsName": "puan",
+    "tierBronze": "Bronz",
+    "tierSilver": "Gümüş",
+    "tierGold": "Altın"
+  },
+  "server": {
+    "tierDiscountTitle": "{tier} seviyesi: {discount}",
+    "tierShippingTitle": "{tier} seviyesi: ücretsiz kargo"
+  },
+  "tiers": {
+    "title": "Müşteri seviyeleri",
+    "new": "Yeni seviye",
+    "create": "Seviye oluştur",
+    "editTitle": "Seviyeyi düzenle",
+    "resync": "Shopify ile yeniden senkronize et",
+    "deleted": "Seviye silindi",
+    "created": "Seviye oluşturuldu",
+    "updated": "Seviye güncellendi",
+    "resynced_one": "Senkronizasyon tamamlandı ({count} müşteri güncellendi)",
+    "resynced_other": "Senkronizasyon tamamlandı ({count} müşteri güncellendi)",
+    "errors": {
+      "name": "Seviyeye bir ad verin",
+      "value": "İndirim değerini girin",
+      "percent": "İndirim %100'ü aşamaz",
+      "sync": "Seviye kaydedildi ancak Shopify indirimi oluşturulamadı: {details}"
+    },
+    "intro": "Her seviye, ödeme sırasında otomatik uygulanan avantajlar (kalıcı indirim, ücretsiz kargo), bir {pointsName} çarpanı ve özel avantajlar sunabilir. Bir seviye ya otomatiktir ({pointsName} biriktirerek ulaşılır) ya da manueldir (müşterinin sayfasından kendiniz atarsınız; örn. “Elçi” veya “Toptan”). Manuel seviye her zaman önceliklidir.",
+    "emptyTitle": "Seviye yok",
+    "emptyText": "Müşteri seviyelerinizi ve avantajlarını oluşturun.",
+    "autoSection": "Otomatik seviyeler (puana göre)",
+    "manualSection": "Manuel atanan seviyeler",
+    "levelNumber": "Seviye {number}",
+    "invitationOnly": "Yalnızca davetle",
+    "assignedManually": "Manuel atanır",
+    "fromPoints": "{points} {pointsName} biriktirildiğinde",
+    "noPerks": "Tanımlı avantaj yok",
+    "customers_one": "{count} müşteri",
+    "customers_other": "{count} müşteri",
+    "tag": "Etiket: {tag}",
+    "syncError": "Shopify indirimi oluşturulmadı: {details}",
+    "confirmDelete": "“{name}” seviyesi silinsin mi? Otomatik indirimleri de silinecek.",
+    "nameLabel": "Seviye adı",
+    "namePlaceholder": "Örn. Altın, Elçi, Toptan…",
+    "modeQuestion": "Müşteri bu seviyeye nasıl ulaşır?",
+    "modeAuto": "Otomatik olarak",
+    "modeAutoText": "{pointsName} biriktirerek",
+    "modeManual": "Manuel olarak",
+    "modeManualText": "Siz kendiniz atarsınız",
+    "minPointsLabel": "Gereken biriktirilmiş {pointsName}",
+    "perksTitle": "Otomatik avantajlar",
+    "discountLabel": "Siparişlerde kalıcı indirim",
+    "discountNone": "İndirim yok",
+    "discountPercent": "Yüzde (örn. %10 indirim)",
+    "discountAmount": "Sabit tutar (örn. 5 indirim)",
+    "discountValue": "İndirim değeri",
+    "discountMinimum": "Minimum alışveriş tutarı (isteğe bağlı)",
+    "freeShipping": "Her siparişte ücretsiz kargo",
+    "multiplierLabel": "{pointsName} çarpanı",
+    "multiplierDetails": "1 = normal, 2 = sipariş başına iki kat {pointsName}.",
+    "otherPerks": "Diğer avantajlar (her satıra bir tane, müşterilere gösterilir)",
+    "otherPerksPlaceholder": "İndirimlere erken erişim\nDoğum günü hediyesi"
+  },
+  "widget": {
+    "title": "Ödüllerim",
+    "unavailable": "Sadakat programı geçici olarak kullanılamıyor.",
+    "guestText": "Her alışverişte puan kazanmak ve özel indirimlerin kilidini açmak için hesap oluşturun.",
+    "join": "Programa katıl",
+    "haveAccount": "Zaten hesabım var",
+    "hello": "Merhaba {name}",
+    "earnTitle": "{pointsName} kazanın",
+    "nextTier": "{tier} seviyesine ulaşmak için {points} {pointsName}",
+    "bonusDefault": "{pointsName} ×{multiplier}!",
+    "bonusUntil": "{date} tarihine kadar",
+    "rewardsTitle": "Ödüller",
+    "minimum": "{amount} ve üzeri",
+    "redeem": "Kullan",
+    "missing": "{points} kaldı",
+    "codesTitle": "Kodlarım",
+    "useCode": "Kullan",
+    "perksTitle": "{tier} avantajlarım",
+    "perUnit": "Harcanan her {amount} için {points} {pointsName}",
+    "signup": "Kaydolduğunuzda {points} {pointsName}",
+    "firstOrder": "İlk siparişiniz için {points} {pointsName}",
+    "follow": "Bizi {network} üzerinde takip edin",
+    "followButton": "Takip et",
+    "birthdayGuest": "Doğum gününüzde {points} {pointsName}",
+    "birthdaySet": "Doğum günü {date}: size {points} {pointsName}",
+    "birthdayAsk": "Doğum gününüz:",
+    "birthdayConfirm": "Doğum gününüz {date} mi? Daha sonra değiştirilemez.",
+    "birthdaySaved": "Doğum günü kaydedildi 🎂",
+    "day": "Gün",
+    "month": "Ay",
+    "ok": "Tamam",
+    "socialThanks": "Teşekkürler! Puanlarınız eklendi",
+    "socialAlready": "Bu ağ için zaten puan kazandınız",
+    "referralTitle": "Arkadaş daveti",
+    "referralMemberTitle": "Arkadaşlarınızı davet edin",
+    "referralIntro": "Arkadaşlarınıza {reward} hediye edin, ilk siparişlerini verdiklerinde {points} {pointsName} kazanın.",
+    "referralLink": "Davet bağlantısı",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!",
+    "share": "Paylaş…",
+    "shareText": "İlk siparişinizde indirimin tadını çıkarın!",
+    "referralsDone_one": "{count} arkadaş davet edildi 🎉",
+    "referralsDone_other": "{count} arkadaş davet edildi 🎉",
+    "tiersTitle": "Seviyeler",
+    "tierFrom": "{points} {pointsName} ve üzeri",
+    "expires": "{pointsName} bakiyeniz {date} tarihine kadar geçerli (her alışverişte uzar).",
+    "confirmRedeem": "Puanlarınız “{reward}” ile değiştirilsin mi?",
+    "congrats": "Tebrikler!",
+    "rewardReady": "“{reward}” ödülünüz hazır:",
+    "applyCart": "Sepetime uygula",
+    "close": "Kapat",
+    "errorGeneric": "Bir sorun oluştu, lütfen tekrar deneyin.",
+    "aFriend": "Bir arkadaşınız",
+    "giftTitle": "{name} size bir hediye gönderdi!",
+    "giftText": "İlk siparişinizde {reward} fırsatından yararlanın.",
+    "emailPlaceholder": "E-posta adresiniz",
+    "getCode": "Kodumu al",
+    "later": "Belki daha sonra",
+    "welcomeCodeTitle": "Hoş geldin kodunuz",
+    "welcomeCodeText": "İlk siparişinizde {reward}:",
+    "continueShopping": "Alışverişe devam et",
+    "productPoints": "Bu alışverişle {points} {pointsName} kazanın"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "label": {
+      "label": "Mygtuko tekstas",
+      "info": "Palikite tuščią, kad būtų naudojamas programėlėje nustatytas pavadinimas."
+    },
+    "position": {
+      "label": "Padėtis",
+      "app": "Programėlės nustatymas",
+      "right": "Apačioje dešinėje",
+      "left": "Apačioje kairėje"
+    },
+    "guest_text": {
+      "label": "Pranešimas neprisijungusiems lankytojams",
+      "info": "Palikite tuščią, kad būtų naudojamas išverstas numatytasis pranešimas."
+    }
+  },
+  "card": {
+    "name": "Lojalumo kortelė",
+    "heading": "Antraštė",
+    "max_width": "Didžiausias plotis"
+  },
+  "product": {
+    "name": "Produkto taškai",
+    "text": "Pasirinktinis tekstas",
+    "text_info": "Neprivaloma. {points} ir {name} pakeičiami reikšmėmis. Palikite tuščią, kad būtų naudojamas išverstas numatytasis tekstas."
+  }
+}

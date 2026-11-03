@@ -81,6 +81,17 @@ for (const file of files) {
     }
     if (!value.trim()) err(`${code} : texte vide pour ${key}`);
   }
+  // Pluriels : la forme « other » est obligatoire (repli automatique), les autres doivent
+  // être des catégories que Intl.PluralRules utilise réellement pour cette langue.
+  const categories = new Intl.PluralRules(code).resolvedOptions().pluralCategories;
+  const pluralBases = new Set(Object.keys(en).filter((k) => PLURAL.test(k)).map(base));
+  for (const b of pluralBases) {
+    if (!(`${b}_other` in data)) err(`${code} : forme « other » manquante pour ${b}`);
+  }
+  for (const key of Object.keys(data)) {
+    const m = key.match(PLURAL);
+    if (m && !categories.includes(m[1])) err(`${code} : forme de pluriel « ${m[1]} » inutilisée en ${code} (${key})`);
+  }
 }
 
 // 5. Schémas de l'extension de thème
