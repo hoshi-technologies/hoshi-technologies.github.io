@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – 常见问题</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><a href="guide-zh-CN.html">使用指南</a><span aria-current="page">常见问题</span></nav></div>
+  <h1>常见问题</h1>
+  <div class="langs"><a href="faq-fr.html" hreflang="fr">Français</a> · <a href="faq-en.html" hreflang="en">English</a> · <a href="faq-de.html" hreflang="de">Deutsch</a> · <a href="faq-es.html" hreflang="es">Español</a> · <a href="faq-it.html" hreflang="it">Italiano</a> · <a href="faq-nl.html" hreflang="nl">Nederlands</a> · <a href="faq-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="faq-cs.html" hreflang="cs">Čeština</a> · <a href="faq-da.html" hreflang="da">Dansk</a> · <a href="faq-fi.html" hreflang="fi">Suomi</a> · <a href="faq-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="faq-pl.html" hreflang="pl">Polski</a> · <a href="faq-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="faq-sv.html" hreflang="sv">Svenska</a> · <a href="faq-tr.html" hreflang="tr">Türkçe</a> · <a href="faq-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="faq-hi.html" hreflang="hi">हिन्दी</a> · <a href="faq-th.html" hreflang="th">ไทย</a> · <a href="faq-ja.html" hreflang="ja">日本語</a> · <a href="faq-ko.html" hreflang="ko">한국어</a> · <strong>简体中文</strong> · <a href="faq-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <input type="search" id="q" placeholder="搜索问题…" aria-label="搜索问题…">
+  <div id="faq"><section><h2>入门</h2><details><summary>如何开始使用？</summary><p>打开“设置”标签页，填写您的企业信息（名称、地址、注册号和增值税号）并保存。就这么简单：从下一个订单起，系统会自动创建发票并发送给客户。您可以点击“预览 PDF”按钮查看发票效果。</p></details><details><summary>企业信息可以自动填写吗？</summary><p>可以。安装时，应用会从 Shopify 获取您商店的名称、法定地址、电子邮件和电话。Shopify 并不知道您的注册号或增值税号：对于法国公司，请在“设置 › 自动填写”中输入您的 SIRET 或公司名称，即可从官方企业名录中补全其余信息。核对后保存即可。</p></details><details><summary>发票什么时候创建？</summary><p>默认情况下，订单付款后立即创建（银行卡付款即时完成）。您也可以选择在订单提交后立即创建，但如果订单之后被取消，则需要为其开具贷项通知单。</p></details><details><summary>客户会自动收到发票吗？</summary><p>会：客户会收到一封附有 PDF 发票的电子邮件。邮件以您商店的名义发送，客户回复时，回复会发送到您企业的电子邮箱。您可以在设置中关闭自动发送。</p></details><details><summary>为什么 Shopify 的订单确认邮件中没有发票？</summary><p>Shopify 不允许应用在其自身的邮件中添加附件或修改邮件内容。如果只想发送一封邮件，有两种方案：订单页面上的“下载我的发票”按钮（客户在 Shopify 邮件中点击“查看您的订单”；无需代码，只需点击 3 下启用一次），或直接在确认邮件中加入链接（粘贴一次代码）。应用的设置会一步步引导您完成。</p></details><details><summary>如何获取发票副本？</summary><p>勾选“将每张发票的副本发送给我”：每张发票也会发送到您企业的电子邮箱。此外，所有发票都可以在“首页”标签页中下载。</p></details></section><section><h2>发票与法律要求</h2><details><summary>我的发票合规吗？</summary><p>发票包含法国和欧盟要求的必备信息：唯一编号、日期、销售方身份及注册号、增值税号、商品明细、增值税税率和税额、合计金额、逾期付款罚息及催收费用补偿。请完整填写企业信息，并请了解您情况的会计师审核发票模板。</p></details><details><summary>编号是如何运作的？</summary><p>按照法律要求，编号连续、无间断且不重复（例如 F-2026-00001、F-2026-00002…）。如果您之前已开具过发票，请在设置中填写下一个编号：编号只能增大，不能减小。</p></details><details><summary>我是不收取增值税的小微企业。</summary><p>在设置中勾选免征增值税选项：发票上将不再显示增值税，并添加法国法律声明 « TVA non applicable, art. 293 B du CGI »。同时请确认 Shopify 不会向您的客户收取税费（设置 › 税费和关税）。</p></details><details><summary>我可以修改或删除发票吗？</summary><p>不可以：已开具的发票不得更改，这是法律规定。如果发票有误或订单已退款，必须开具贷项通知单。自动开具贷项通知单的功能将在后续版本中推出；在此之前，请使用您的会计工具开具。</p></details><details><summary>我的发票会保存多久？</summary><p>只要应用保持安装，发票就会一直保留在应用中。法国法律规定发票须保存 10 年：请保留通过电子邮件收到的副本，或定期下载发票。如果您卸载应用，Shopify 会要求我们在 48 小时后删除您的数据。</p></details></section><section><h2>Factur-X 与电子发票</h2><details><summary>什么是 Factur-X？</summary><p>这是一种 PDF，其中还包含一个可被会计软件读取的发票数据文件。电子发票平台接受这种格式，而在法国，企业之间使用电子发票将成为强制要求：所有企业须自 2026 年 9 月起能够接收电子发票，并自 2026 年 9 月（大型企业和中型企业）或 2027 年 9 月（中小企业和微型企业）起开具电子发票。面向个人消费者的销售不受此项义务约束。您的客户看到的是普通 PDF：对他们而言没有任何变化。</p></details><details><summary>为什么显示“Factur-X 已暂停”？</summary><p>缺少 Factur-X 所需的某项信息，具体会显示在提示旁边（通常是增值税号或国家/地区）。补全后保存：之后的发票将采用 Factur-X 格式。在此期间，发票以普通 PDF 格式创建。</p></details></section><section><h2>语言</h2><details><summary>发票和邮件使用什么语言？</summary><p>如果发票支持客户的语言，则使用该语言：法语、英语、德语、西班牙语、意大利语、荷兰语、巴西葡萄牙语、捷克语、丹麦语、芬兰语、书面挪威语、波兰语、欧洲葡萄牙语、瑞典语、土耳其语和马来语。否则使用您选择的备用语言。您也可以为所有发票指定同一种语言。应用本身支持 22 种语言。</p></details><details><summary>我可以自定义文本吗？</summary><p>可以：邮件主题和正文、发票底部的说明事项以及致谢语。如果留空，这些文本会自动翻译为发票语言；自定义文本则会按原样使用，不论发票是哪种语言。</p></details></section><section><h2>订阅</h2><details><summary>费用是多少？</summary><p>免费方案每月可开具 10 张发票。基础方案（每月 US$7.90）可开具 200 张，无限方案（每月 US$12.90）不限数量。付费方案提供 7 天免费试用，由 Shopify 随您的 Shopify 订阅一并收费。</p></details><details><summary>达到每月上限后会怎样？</summary><p>新订单将被暂缓处理，您会收到电子邮件通知。一旦您升级到更高级的方案，或在下个月初，点击“生成这些发票”即可：不会丢失任何订单。计数器每月 1 日清零。</p></details><details><summary>如何更换方案或取消订阅？</summary><p>在“订阅”标签页中：选择一个方案并在 Shopify 页面上确认，或点击“取消订阅”恢复为免费方案。卸载应用也会终止订阅。</p></details></section><section><h2>问题排查</h2><details><summary>有客户没有收到发票。</summary><p>在“首页”标签页中查看“邮件”一栏：“发送失败”表示出现了问题（将鼠标悬停在上面可查看详情）。请核对客户的邮箱地址，并请客户检查垃圾邮件文件夹，然后点击“重新发送”。您也可以下载 PDF 后自行发给客户。</p></details><details><summary>我的徽标无法显示。</summary><p>徽标必须是可通过 https 访问的 PNG 或 JPEG 图片。最简单的方法：将其上传到 Shopify（内容 › 文件），复制链接后粘贴到设置中。请使用预览功能进行检查。</p></details><details><summary>我和客户的数据会如何处理？</summary><p>应用只读取您的订单，无法修改订单，并且只保留开具发票所需的信息（客户姓名、地址、电子邮件、商品）。数据绝不会被出售或共享。Shopify 转来的删除请求（GDPR）会自动处理。</p></details><details><summary>如何联系客服？</summary><p>请发送邮件至 hoshi.technologies@gmail.com，并注明您的商店名称。我们通常会在一个工作日内回复。</p></details></section></div>
+  <p class="empty" id="empty" hidden>没有与您的搜索相符的问题。</p>
+  <footer>还有其他问题？请发送邮件至 <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>。</footer>
+</main>
+<script>
+  const q = document.getElementById('q');
+  const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  q.addEventListener('input', () => {
+    const words = norm(q.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of document.querySelectorAll('details')) {
+      const hit = words.every((w) => norm(d.textContent).includes(w));
+      d.hidden = !hit;
+      d.open = hit && words.length > 0;
+      shown += hit;
+    }
+    for (const s of document.querySelectorAll('#faq section')) s.hidden = !s.querySelector('details:not([hidden])');
+    document.getElementById('empty').hidden = shown > 0;
+  });
+</script>
+</body>
+</html>

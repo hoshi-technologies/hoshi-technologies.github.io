@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – 자주 묻는 질문</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><a href="guide-ko.html">사용자 가이드</a><span aria-current="page">자주 묻는 질문</span></nav></div>
+  <h1>자주 묻는 질문</h1>
+  <div class="langs"><a href="faq-fr.html" hreflang="fr">Français</a> · <a href="faq-en.html" hreflang="en">English</a> · <a href="faq-de.html" hreflang="de">Deutsch</a> · <a href="faq-es.html" hreflang="es">Español</a> · <a href="faq-it.html" hreflang="it">Italiano</a> · <a href="faq-nl.html" hreflang="nl">Nederlands</a> · <a href="faq-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="faq-cs.html" hreflang="cs">Čeština</a> · <a href="faq-da.html" hreflang="da">Dansk</a> · <a href="faq-fi.html" hreflang="fi">Suomi</a> · <a href="faq-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="faq-pl.html" hreflang="pl">Polski</a> · <a href="faq-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="faq-sv.html" hreflang="sv">Svenska</a> · <a href="faq-tr.html" hreflang="tr">Türkçe</a> · <a href="faq-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="faq-hi.html" hreflang="hi">हिन्दी</a> · <a href="faq-th.html" hreflang="th">ไทย</a> · <a href="faq-ja.html" hreflang="ja">日本語</a> · <strong>한국어</strong> · <a href="faq-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="faq-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <input type="search" id="q" placeholder="질문 검색…" aria-label="질문 검색…">
+  <div id="faq"><section><h2>시작하기</h2><details><summary>어떻게 시작하나요?</summary><p>설정 탭을 열고 비즈니스 정보(회사명, 주소, 사업자 등록번호, VAT 번호)를 입력한 후 저장하세요. 이것으로 끝입니다. 다음 주문부터 인보이스가 자동으로 생성되어 고객에게 이메일로 발송됩니다. “PDF 미리보기” 버튼으로 모양을 확인할 수 있습니다.</p></details><details><summary>비즈니스 정보를 자동으로 입력할 수 있나요?</summary><p>네. 설치 시 앱이 Shopify에서 스토어 이름, 법적 주소, 이메일, 전화번호를 가져옵니다. Shopify는 사업자 등록번호나 VAT 번호를 알지 못하므로, 프랑스 회사의 경우 설정 › 자동 입력에서 SIRET 또는 회사명을 입력하면 공식 기업 등록부에서 나머지 정보를 채울 수 있습니다. 확인한 후 저장하세요.</p></details><details><summary>인보이스는 언제 생성되나요?</summary><p>기본적으로 주문 결제가 완료되는 즉시 생성됩니다(카드 결제의 경우 즉시). 주문이 접수되는 즉시 생성하도록 선택할 수도 있지만, 이 경우 나중에 취소된 주문에는 대변 메모(크레딧 노트)를 발행해야 합니다.</p></details><details><summary>고객이 인보이스를 자동으로 받나요?</summary><p>네. 고객에게 PDF 인보이스가 첨부된 이메일이 발송됩니다. 이메일은 스토어 이름으로 발송되며, 고객이 회신하면 비즈니스 이메일 주소로 전달됩니다. 설정에서 자동 발송을 끌 수 있습니다.</p></details><details><summary>Shopify 주문 확인 이메일에 인보이스가 포함되지 않는 이유는 무엇인가요?</summary><p>Shopify는 앱이 Shopify 자체 이메일에 첨부 파일을 추가하거나 이메일을 수정하는 것을 허용하지 않습니다. 이메일 한 통만 보내려면 두 가지 방법이 있습니다. 주문 페이지의 “인보이스 다운로드” 버튼(고객이 Shopify 이메일에서 “주문 보기”를 클릭, 코드 불필요, 최초 1회 3번 클릭으로 활성화) 또는 확인 이메일에 바로 표시되는 링크(최초 1회 코드 붙여넣기)입니다. 앱 설정에서 단계별로 안내해 드립니다.</p></details><details><summary>인보이스 사본은 어떻게 받나요?</summary><p>“모든 인보이스의 사본을 나에게도 발송”을 선택하면 각 인보이스가 비즈니스 이메일 주소로도 발송됩니다. 또한 모든 인보이스는 홈 탭에서 다운로드할 수 있습니다.</p></details></section><section><h2>인보이스 및 법적 요건</h2><details><summary>인보이스가 법적 요건을 충족하나요?</summary><p>인보이스에는 프랑스와 EU에서 요구하는 기재 사항이 포함됩니다: 고유 번호, 날짜, 판매자 정보 및 등록번호, VAT 번호, 품목 내역, 부가가치세율 및 세액, 합계, 연체 조건. 비즈니스 정보를 모두 입력하고, 귀하의 상황을 잘 아는 담당 회계사에게 템플릿을 확인받으세요.</p></details><details><summary>번호는 어떻게 매겨지나요?</summary><p>법에서 요구하는 대로 번호는 누락이나 중복 없이 연속으로 매겨집니다(예: F-2026-00001, F-2026-00002…). 이미 인보이스를 발행한 적이 있다면 설정에서 다음 번호를 지정하세요. 번호는 늘릴 수 있지만 줄일 수는 없습니다.</p></details><details><summary>부가가치세를 부과하지 않는 소규모 사업자입니다.</summary><p>설정에서 부가가치세 면세 옵션을 선택하세요. 인보이스에서 부가가치세가 사라지고 프랑스 법적 고지 « TVA non applicable, art. 293 B du CGI »가 추가됩니다. 또한 Shopify가 고객에게 세금을 부과하지 않는지도 확인하세요(설정 › 세금 및 관세).</p></details><details><summary>인보이스를 수정하거나 삭제할 수 있나요?</summary><p>아니요. 발행된 인보이스는 절대 변경해서는 안 되며, 이는 법적 요건입니다. 오류가 있거나 주문이 환불된 경우에는 대변 메모를 발행해야 합니다. 대변 메모 자동 발행은 향후 버전에서 제공될 예정이며, 그때까지는 사용 중인 회계 도구로 작성하세요.</p></details><details><summary>인보이스는 얼마 동안 보관되나요?</summary><p>앱이 설치되어 있는 동안 앱에서 계속 이용할 수 있습니다. 프랑스 법에 따라 10년간 보관해야 합니다. 이메일로 받은 사본을 보관하거나 정기적으로 다운로드하세요. 앱을 제거하면 Shopify의 요청에 따라 48시간 후에 데이터가 삭제됩니다.</p></details></section><section><h2>Factur-X 및 전자 인보이스</h2><details><summary>Factur-X란 무엇인가요?</summary><p>회계 소프트웨어가 읽을 수 있는 파일 형태로 인보이스 데이터를 함께 담고 있는 PDF입니다. 전자 인보이스 플랫폼에서 사용할 수 있으며, 프랑스에서는 기업 간 거래에 전자 인보이스가 의무화됩니다. 모든 기업은 2026년 9월부터 전자 인보이스를 수신할 수 있어야 하며, 발행은 2026년 9월(대기업 및 중견기업) 또는 2027년 9월(중소기업 및 소상공인)부터 의무화됩니다. 소비자 대상 판매는 이 의무의 적용을 받지 않습니다. 고객에게는 일반 PDF로 보이므로 달라지는 점이 없습니다.</p></details><details><summary>“Factur-X 일시 중지됨”이라고 표시되는 이유는 무엇인가요?</summary><p>Factur-X에 필요한 정보가 누락되었으며, 누락된 항목은 메시지 옆에 표시됩니다(주로 VAT 번호 또는 국가). 해당 정보를 입력하고 저장하면 이후 인보이스는 Factur-X 형식으로 생성됩니다. 그동안에는 일반 PDF로 생성됩니다.</p></details></section><section><h2>언어</h2><details><summary>인보이스와 이메일은 어떤 언어로 작성되나요?</summary><p>고객의 언어로 인보이스를 제공할 수 있는 경우 해당 언어로 작성됩니다: 프랑스어, 영어, 독일어, 스페인어, 이탈리아어, 네덜란드어, 포르투갈어(브라질), 체코어, 덴마크어, 핀란드어, 노르웨이어(보크말), 폴란드어, 포르투갈어(유럽), 스웨덴어, 튀르키예어 및 말레이어. 그렇지 않으면 선택한 대체 언어로 작성됩니다. 모든 인보이스에 하나의 언어를 지정할 수도 있습니다. 앱 자체는 22개 언어로 제공됩니다.</p></details><details><summary>텍스트를 사용자 지정할 수 있나요?</summary><p>네. 이메일 제목과 메시지, 인보이스 하단의 법적 고지, 감사 메시지를 사용자 지정할 수 있습니다. 비워 두면 인보이스 언어로 자동 번역되며, 사용자 지정 텍스트는 언어와 관계없이 그대로 사용됩니다.</p></details></section><section><h2>요금제 및 결제</h2><details><summary>비용은 얼마인가요?</summary><p>무료 요금제는 월 10건의 인보이스를 포함합니다. 에센셜 요금제(월 US$7.90)는 200건을 포함하며, 무제한 요금제(월 US$12.90)는 한도가 없습니다. 유료 요금제는 7일 무료 체험이 제공되며, Shopify 구독과 함께 Shopify에서 청구됩니다.</p></details><details><summary>월간 한도에 도달하면 어떻게 되나요?</summary><p>새 주문은 보류되며 이메일로 알림을 받게 됩니다. 업그레이드하는 즉시 또는 다음 달 초에 “인보이스 생성”을 클릭하세요. 주문이 누락되지 않습니다. 카운터는 매월 1일에 초기화됩니다.</p></details><details><summary>요금제를 변경하거나 해지하려면 어떻게 하나요?</summary><p>요금제 탭에서 요금제를 선택하고 Shopify 페이지에서 승인하거나, “해지”를 클릭하여 무료 요금제로 돌아가세요. 앱을 제거해도 구독이 종료됩니다.</p></details></section><section><h2>문제 해결</h2><details><summary>고객이 인보이스를 받지 못했습니다.</summary><p>홈 탭에서 이메일 열을 확인하세요. “실패”는 문제가 발생했음을 의미합니다(마우스를 올리면 자세한 내용이 표시됩니다). 고객의 이메일 주소를 확인하고 스팸함을 확인해 달라고 요청한 후 “재발송”을 클릭하세요. PDF를 다운로드하여 직접 보낼 수도 있습니다.</p></details><details><summary>로고가 표시되지 않습니다.</summary><p>로고는 https로 제공되는 PNG 또는 JPEG 이미지여야 합니다. 가장 쉬운 방법은 Shopify에 업로드한 후(콘텐츠 › 파일) 링크를 복사하여 설정에 붙여넣는 것입니다. 미리보기로 확인하세요.</p></details><details><summary>내 데이터와 고객 데이터는 어떻게 처리되나요?</summary><p>앱은 주문을 읽기만 할 뿐 변경할 수 없으며, 인보이스에 필요한 정보(고객 이름, 주소, 이메일, 품목)만 보관합니다. 데이터는 절대 판매되거나 공유되지 않습니다. Shopify에서 전송하는 삭제 요청(GDPR)은 자동으로 처리됩니다.</p></details><details><summary>고객 지원팀에 어떻게 문의하나요?</summary><p>스토어 이름과 함께 hoshi.technologies@gmail.com(으)로 이메일을 보내 주세요. 보통 영업일 기준 1일 이내에 답변해 드립니다.</p></details></section></div>
+  <p class="empty" id="empty" hidden>검색과 일치하는 질문이 없습니다.</p>
+  <footer>다른 질문이 있으신가요? <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>(으)로 이메일을 보내 주세요.</footer>
+</main>
+<script>
+  const q = document.getElementById('q');
+  const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  q.addEventListener('input', () => {
+    const words = norm(q.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of document.querySelectorAll('details')) {
+      const hit = words.every((w) => norm(d.textContent).includes(w));
+      d.hidden = !hit;
+      d.open = hit && words.length > 0;
+      shown += hit;
+    }
+    for (const s of document.querySelectorAll('#faq section')) s.hidden = !s.querySelector('details:not([hidden])');
+    document.getElementById('empty').hidden = shown > 0;
+  });
+</script>
+</body>
+</html>

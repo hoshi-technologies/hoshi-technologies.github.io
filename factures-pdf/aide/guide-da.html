@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Brugervejledning</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">Brugervejledning</span><a href="faq-da.html">Ofte stillede spørgsmål</a></nav></div>
+  <h1>Brugervejledning</h1>
+  <p class="lead">Alt, hvad du skal vide for at bruge appen, trin for trin.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <strong>Dansk</strong> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">Udskriv eller gem som PDF</button></p>
+  <section class="card"><h2>Indhold</h2><ol class="toc"><li><a href="#install">Installér appen</a></li><li><a href="#company">Angiv dine virksomhedsoplysninger</a></li><li><a href="#look">Tilpas og kontrollér fakturaen</a></li><li><a href="#sending">Vælg, hvornår og hvordan fakturaer sendes</a></li><li><a href="#shopify-link">Føj fakturalinket til Shopifys ordrebekræftelse (valgfrit)</a></li><li><a href="#daily">Følg dine fakturaer i hverdagen</a></li><li><a href="#numbering">Nummerering og sprog</a></li><li><a href="#facturx">Factur-X: elektronisk fakturering</a></li><li><a href="#billing">Administrer dit abonnement</a></li><li><a href="#best-practices">God praksis</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Installér appen</span></h2>
+  <p>Installationen tager et minut og ændrer hverken din butik eller dine ordrer.</p>
+  <ol class="steps"><li>Åbn appens side i Shopify App Store, og klik på »Installér«.</li><li>Giv adgang til dine ordrer: appen læser dem for at oprette fakturaer og gemmer kun én ting på dem, linket til fakturaen. Den ændrer intet andet.</li><li>Appen åbnes i din Shopify-administrator under Apps › Hoshi Factures. Din butiks navn, adresse og e-mail er allerede udfyldt.</li><li>Følg listen »Kom godt i gang« på fanen Hjem: den forsvinder, når de tre trin er gennemført.</li></ol>
+  <div class="tip"><b>Tip:</b> Du starter på Gratis-abonnementet (10 fakturaer om måneden), uden betalingskort.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Angiv dine virksomhedsoplysninger</span></h2>
+  <p>Disse oplysninger vises på hver faktura. De er påkrævet for en gyldig faktura.</p>
+  <ol class="steps"><li>Åbn fanen Indstillinger, kortet »Din virksomhed«.</li><li>Hurtigste vej (franske virksomheder): skriv dit SIRET (eller virksomhedsnavn og by) under »Automatisk udfyldning«, klik på »Søg« og derefter på »Brug«. Virksomhedsnavn, adresse på hovedkontoret, SIRET, selskabsform og momsnummer hentes fra det officielle register. Du kan også klikke på »Brug oplysninger fra Shopify«.</li><li>Kontrollér virksomhedsnavn og e-mail: kunderne svarer til denne adresse, og du modtager kopier af fakturaerne her.</li><li>Indtast adressen på flere linjer med postnummer og by på samme linje (f.eks. »69002 Lyon«), og vælg derefter land.</li><li>Indtast virksomhedens registreringsnummer (SIRET i Frankrig) og momsnummer.</li><li>Momsfritaget lille virksomhed: markér muligheden for momsfritagelse. Momsen forsvinder fra fakturaerne, og den lovpligtige tekst tilføjes.</li><li>Åbn »Flere virksomhedsoplysninger« for selskabsform og selskabskapital, handelsregister, telefon, websted og hvad du sælger (varer, tjenesteydelser eller begge dele).</li><li>Klik på »Gem« i den bjælke, der vises nederst på skærmen.</li></ol>
+  <div class="tip"><b>Tip:</b> Få din revisor til at kontrollere en første faktura: revisoren kender de oplysninger, der gælder specifikt for din virksomhed.</div><div class="tip"><b>Tip:</b> Hvis du er momsfritaget, skal du også sikre dig, at Shopify ikke opkræver skat af dine kunder (Indstillinger › Skatter og afgifter).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Tilpas og kontrollér fakturaen</span></h2>
+  <p>Giv dine fakturaer dit brands udseende, og kontrollér resultatet før den første ordre.</p>
+  <ol class="steps"><li>Åbn Indhold › Filer i Shopify, upload dit logo (PNG eller JPEG), og kopiér linket.</li><li>Indsæt linket i »Logoets URL« under Indstillinger › Udseende, og vælg den primære farve.</li><li>Rediger om nødvendigt de lovpligtige oplysninger og takkebeskeden. Står de tomme, oversættes de automatisk til kundens sprog.</li><li>Klik på »Forhåndsvis PDF«: der downloades en eksempelfaktura med dine indstillinger, også dem, der ikke er gemt.</li><li>Gem, når du er tilfreds med resultatet.</li></ol>
+  <div class="tip"><b>Tip:</b> Indstillingerne gælder kun for de næste fakturaer: en udstedt faktura ændres aldrig.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Vælg, hvornår og hvordan fakturaer sendes</span></h2>
+  <p>Som standard oprettes fakturaen, når ordren er betalt, og sendes straks til kunden via e-mail.</p>
+  <ol class="steps"><li>Vælg under Indstillinger › Sådan fungerer det, hvornår fakturaen skal oprettes: når ordren er betalt (anbefales) eller så snart den er afgivet.</li><li>Vælg under »Sådan får dine kunder deres faktura«: en e-mail med PDF&#39;en vedhæftet (anbefales, ingen opsætning); én e-mail med knappen »Download faktura« på ordresiden (ingen kode: 3 klik for at aktivere den); eller én e-mail med linket direkte i Shopifys bekræftelse (indsæt en kode én gang). Indstillingerne guider dig trin for trin.</li><li>Markér »Send mig en kopi af hver faktura« for at modtage hver faktura og opbygge dit arkiv.</li><li>Hvis du vil tilpasse e-mailen, skal du åbne »E-mail til kunden«: emne og besked understøtter variablerne {{first_name}}, {{name}}, {{invoice_number}}, {{order}} og {{shop}}.</li></ol>
+  <div class="tip"><b>Tip:</b> Shopify tillader ikke vedhæftede filer i sine egne e-mails: fakturaen sendes i en separat e-mail på vegne af din butik.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Føj fakturalinket til Shopifys ordrebekræftelse (valgfrit)</span></h2>
+  <p>Dine kunder kan også hente deres faktura fra din butiks sædvanlige bekræftelsesmail.</p>
+  <ol class="steps"><li>Åbn »Link i Shopifys ordrebekræftelse« under Indstillinger, og klik på »Kopiér kode«.</li><li>Gå i Shopify til Indstillinger › Notifikationer › Kundenotifikationer › Ordrebekræftelse, og klik derefter på »Rediger kode«.</li><li>Indsæt koden, hvor knappen skal vises, f.eks. lige efter ordreoversigten.</li><li>Klik på »Forhåndsvisning« for at kontrollere, og derefter på »Gem«.</li></ol>
+  <div class="tip"><b>Tip:</b> Hvis kunden klikker før betaling, får kunden besked på en side om, at fakturaen er tilgængelig om et par minutter.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Følg dine fakturaer i hverdagen</span></h2>
+  <p>Fanen Hjem viser de seneste fakturaer med deres afsendelsesstatus.</p>
+  <ol class="steps"><li>Hver række viser nummer, ordre, kunde, dato, beløb i alt og e-mailstatus.</li><li>»Sendt«: kunden har modtaget fakturaen. »Ikke sendt«: automatisk afsendelse er slået fra. »Mislykkedes«: hold musen over statussen for at se årsagen.</li><li>Klik på »PDF« for at downloade en faktura eller på »Send igen« for at sende den til kunden igen.</li><li>Factur-X-mærket betyder, at fakturaen også indeholder dataene til elektronisk fakturering.</li></ol>
+  <div class="tip"><b>Tip:</b> Hvis afsendelsen mislykkedes, skal du kontrollere kundens adresse på Shopify-ordren og bede kunden om at se i sin spammappe.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Nummerering og sprog</span></h2>
+  <p>Numrene følger hinanden uden huller, sådan som loven kræver, og hver kunde modtager fakturaen på sit eget sprog.</p>
+  <ol class="steps"><li>Vælg præfikset for numre under Indstillinger › Nummerering og sprog (standard »F-«, dvs. F-2026-00001).</li><li>Hvis du allerede har udstedt fakturaer med et andet værktøj, skal du angive det næste nummer: det kan forøges, men aldrig sænkes.</li><li>Vælg fakturasprog: kundens (fransk, engelsk, tysk, spansk, italiensk, nederlandsk, brasiliansk portugisisk, tjekkisk, dansk, finsk, bokmål, polsk, europæisk portugisisk, svensk, tyrkisk og malajisk) eller ét fast sprog.</li><li>Med »Kundens sprog« skal du også vælge det reservesprog, der bruges, når kundens sprog ikke er tilgængeligt.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: elektronisk fakturering</span></h2>
+  <p>Med Factur-X indeholder PDF&#39;en også fakturadataene, som kan læses af regnskabsprogrammer og platforme til elektronisk fakturering, der bliver obligatorisk mellem virksomheder i Frankrig fra 2026–2027.</p>
+  <ol class="steps"><li>Åbn Indstillinger › Factur-X: muligheden er slået til som standard.</li><li>Hvis »Factur-X sat på pause« vises, skal du udfylde den manglende oplysning (ofte adresse, land eller momsnummer) og gemme.</li><li>Når indikatoren skifter til ✓, er alle efterfølgende fakturaer i Factur-X-format, uden ændringer for dine kunder.</li></ol>
+  <div class="tip"><b>Tip:</b> Din revisor kan importere disse fakturaer direkte i sit program.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Administrer dit abonnement</span></h2>
+  <p>Gratis-abonnement: 10 fakturaer om måneden. Essential: 200 fakturaer for 7,90 US$ om måneden. Ubegrænset: 12,90 US$ om måneden. Gratis prøveperiode på 7 dage på betalte abonnementer.</p>
+  <ol class="steps"><li>Fanen Abonnement (og Hjem) viser, hvor mange fakturaer du har brugt denne måned. Tælleren nulstilles den 1. i hver måned.</li><li>Hvis du vil skifte abonnement, skal du klikke på »Vælg« og derefter godkende på Shopify-siden: beløbet lægges til din Shopify-regning.</li><li>Hvis grænsen er nået, sættes nye ordrer i bero, og du får besked via e-mail. Når du har opgraderet, skal du klikke på »Generér deres fakturaer« på Hjem.</li><li>Klik på »Opsig« for at gå tilbage til Gratis-abonnementet.</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>God praksis</span></h2>
+  <p>Et par vaner, der holder dit regnskab stressfrit.</p>
+  <ol class="steps"><li>Afgiv en testordre efter opsætningen (med testtilstanden i Shopify Payments), og kontrollér den faktura, du modtager.</li><li>Opbevar dine fakturaer i 10 år: gem kopien fra e-mailen, eller download dem hver måned. De slettes fra appen 48 timer efter afinstallation.</li><li>En udstedt faktura kan ikke ændres: ved fejl eller refundering skal du udstede en kreditnota i dit regnskabsprogram.</li><li>Har du et spørgsmål? Se FAQ&#39;en på fanen Hjælp.</li></ol>
+  
+</section>
+  <footer>Har du et andet spørgsmål? Skriv til os på <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>.</footer>
+</main>
+
+</body>
+</html>

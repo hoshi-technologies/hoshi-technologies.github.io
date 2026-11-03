@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Questions fréquentes</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../index.html">Hoshi Factures</a><nav class="docs"><a href="guide-fr.html">Guide d&#39;utilisation</a><span aria-current="page">Questions fréquentes</span></nav></div>
+  <h1>Questions fréquentes</h1>
+  <div class="langs"><strong>Français</strong> · <a href="faq-en.html" hreflang="en">English</a> · <a href="faq-de.html" hreflang="de">Deutsch</a> · <a href="faq-es.html" hreflang="es">Español</a> · <a href="faq-it.html" hreflang="it">Italiano</a> · <a href="faq-nl.html" hreflang="nl">Nederlands</a> · <a href="faq-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="faq-cs.html" hreflang="cs">Čeština</a> · <a href="faq-da.html" hreflang="da">Dansk</a> · <a href="faq-fi.html" hreflang="fi">Suomi</a> · <a href="faq-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="faq-pl.html" hreflang="pl">Polski</a> · <a href="faq-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="faq-sv.html" hreflang="sv">Svenska</a> · <a href="faq-tr.html" hreflang="tr">Türkçe</a> · <a href="faq-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="faq-hi.html" hreflang="hi">हिन्दी</a> · <a href="faq-th.html" hreflang="th">ไทย</a> · <a href="faq-ja.html" hreflang="ja">日本語</a> · <a href="faq-ko.html" hreflang="ko">한국어</a> · <a href="faq-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="faq-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <input type="search" id="q" placeholder="Rechercher une question…" aria-label="Rechercher une question…">
+  <div id="faq"><section><h2>Démarrer</h2><details><summary>Comment démarrer ?</summary><p>Ouvrez l&#39;onglet Réglages, renseignez votre entreprise (nom, adresse, SIRET, n° de TVA) et enregistrez. C&#39;est tout : dès la prochaine commande, la facture est créée et envoyée automatiquement au client. Vous pouvez vérifier le rendu avec le bouton « Aperçu du PDF ».</p></details><details><summary>Puis-je remplir les informations de mon entreprise automatiquement ?</summary><p>Oui. À l&#39;installation, l&#39;appli reprend de Shopify le nom, l&#39;adresse légale, l&#39;e-mail et le téléphone de votre boutique. Shopify ne connaît pas le SIRET ni le n° de TVA : dans Réglages › Remplissage automatique, saisissez votre SIRET ou le nom de votre entreprise pour compléter le reste depuis le registre officiel des entreprises. Vérifiez puis enregistrez.</p></details><details><summary>Quand la facture est-elle créée ?</summary><p>Par défaut, dès que la commande est payée (paiement par carte : immédiatement). Vous pouvez choisir de la créer dès que la commande est passée, mais une commande annulée ensuite devra alors faire l&#39;objet d&#39;un avoir.</p></details><details><summary>Mon client reçoit-il sa facture automatiquement ?</summary><p>Oui : un e-mail lui est envoyé avec la facture en PDF en pièce jointe. Il est envoyé au nom de votre boutique, et si le client y répond, la réponse arrive à l&#39;adresse e-mail de votre entreprise. Vous pouvez désactiver l&#39;envoi automatique dans les réglages.</p></details><details><summary>Pourquoi la facture ne figure-t-elle pas dans l’e-mail de confirmation de Shopify ?</summary><p>Shopify ne permet pas aux applis d’ajouter une pièce jointe ni de modifier ses propres e-mails. Pour n’envoyer qu’un seul e-mail, deux solutions : le bouton « Télécharger ma facture » sur la page de commande (le client clique sur « Afficher votre commande » dans l’e-mail de Shopify ; aucun code, 3 clics pour l’activer une fois), ou un lien directement dans l’e-mail de confirmation (un code à coller une fois). Les réglages de l’appli vous guident pas à pas.</p></details><details><summary>Comment recevoir une copie de mes factures ?</summary><p>Cochez « M&#39;envoyer une copie de chaque facture » : chaque facture vous est aussi envoyée, à l&#39;adresse e-mail de votre entreprise. Toutes les factures restent par ailleurs téléchargeables dans l&#39;onglet Accueil.</p></details></section><section><h2>Factures et obligations légales</h2><details><summary>Mes factures sont-elles conformes ?</summary><p>Les factures reprennent les mentions obligatoires en France : numéro unique, dates, identité et SIRET du vendeur, n° de TVA, détail des articles, taux et montants de TVA, totaux, pénalités de retard et indemnité de recouvrement. Renseignez toutes les informations de votre entreprise et faites valider le modèle par votre expert-comptable, qui connaît votre situation.</p></details><details><summary>Comment fonctionne la numérotation ?</summary><p>Les numéros se suivent sans trou ni doublon (par exemple F-2026-00001, F-2026-00002…), comme la loi l’exige. Si vous aviez déjà des factures, indiquez le prochain numéro dans les réglages : il peut être augmenté mais jamais diminué.</p></details><details><summary>Je suis micro-entrepreneur, je ne facture pas la TVA.</summary><p>Cochez « Franchise en base de TVA » dans les réglages : la mention « TVA non applicable, art. 293 B du CGI » est ajoutée et la TVA n&#39;apparaît plus. Vérifiez aussi que Shopify ne facture pas de taxes à vos clients (Paramètres › Taxes et droits de douane).</p></details><details><summary>Puis-je modifier ou supprimer une facture ?</summary><p>Non : une facture émise ne doit plus changer, c&#39;est une obligation légale. Si elle comporte une erreur ou si la commande est remboursée, il faut émettre un avoir. Les avoirs automatiques arrivent dans une prochaine version ; en attendant, établissez-le avec votre outil comptable.</p></details><details><summary>Combien de temps mes factures sont-elles conservées ?</summary><p>Elles restent disponibles dans l&#39;appli tant qu&#39;elle est installée. La loi impose de les conserver 10 ans : gardez la copie reçue par e-mail ou téléchargez-les régulièrement. Si vous désinstallez l&#39;appli, Shopify nous demande d&#39;effacer vos données 48 heures plus tard.</p></details></section><section><h2>Factur-X et facture électronique</h2><details><summary>Qu&#39;est-ce que Factur-X ?</summary><p>C&#39;est un PDF qui contient aussi les données de la facture dans un fichier lisible par les logiciels comptables. C&#39;est un format accepté par les plateformes de la facture électronique, obligatoire entre entreprises en France : toutes doivent pouvoir en recevoir depuis septembre 2026, et les émettre dès septembre 2026 (grandes entreprises et ETI) ou septembre 2027 (PME et micro-entreprises). Les ventes aux particuliers ne sont pas concernées par cette obligation. Vos clients voient un PDF normal : rien ne change pour eux.</p></details><details><summary>Pourquoi est-il indiqué « Factur-X en pause » ?</summary><p>Il manque une information obligatoire pour Factur-X, indiquée à côté du message (souvent le n° de TVA ou le pays). Complétez-la et enregistrez : les factures suivantes seront au format Factur-X. En attendant, elles sont créées en PDF simple.</p></details></section><section><h2>Langues</h2><details><summary>Dans quelle langue sont les factures et les e-mails ?</summary><p>Dans la langue de votre client, si les factures existent dans sa langue : français, anglais, allemand, espagnol, italien, néerlandais, portugais brésilien, tchèque, danois, finnois, norvégien bokmål, polonais, portugais européen, suédois, turc et malais. Sinon, dans la langue de repli que vous choisissez. Vous pouvez aussi imposer une seule langue pour toutes les factures. L’appli elle-même est disponible dans 22 langues.</p></details><details><summary>Puis-je personnaliser les textes ?</summary><p>Oui : objet et message de l&#39;e-mail, mentions en bas de facture et message de remerciement. Laissés vides, ils sont traduits automatiquement dans la langue de la facture ; un texte personnalisé est utilisé tel quel, quelle que soit la langue.</p></details></section><section><h2>Abonnement</h2><details><summary>Combien ça coûte ?</summary><p>La formule Gratuite permet 10 factures par mois. La formule Essentiel (7,90 $US par mois) en permet 200, la formule Illimité (12,90 $US par mois) n&#39;a pas de limite. Les formules payantes ont 7 jours d&#39;essai gratuit et sont facturées par Shopify, avec votre abonnement Shopify.</p></details><details><summary>Que se passe-t-il quand la limite mensuelle est atteinte ?</summary><p>Les nouvelles commandes sont mises en attente et vous êtes prévenu par e-mail. Dès que vous passez à une formule supérieure, ou au début du mois suivant, cliquez sur « Générer leurs factures » : aucune commande n&#39;est perdue. Le compteur repart à zéro le 1er de chaque mois.</p></details><details><summary>Comment changer de formule ou résilier ?</summary><p>Dans l&#39;onglet Abonnement : choisissez une formule et validez sur la page Shopify, ou cliquez sur « Résilier » pour revenir à la formule gratuite. Désinstaller l&#39;appli arrête aussi l&#39;abonnement.</p></details></section><section><h2>Problèmes</h2><details><summary>Un client n&#39;a pas reçu sa facture.</summary><p>Dans l&#39;onglet Accueil, regardez la colonne E-mail : « Échec » indique un problème (passez la souris dessus pour le détail). Vérifiez l&#39;adresse du client et demandez-lui de regarder ses courriers indésirables, puis cliquez sur « Renvoyer ». Vous pouvez aussi télécharger le PDF et le lui transmettre.</p></details><details><summary>Mon logo ne s&#39;affiche pas.</summary><p>Le logo doit être une image PNG ou JPEG accessible en https. Le plus simple : importez-le dans Shopify (Contenu › Fichiers), copiez son lien et collez-le dans les réglages. Utilisez l&#39;aperçu pour vérifier.</p></details><details><summary>Que deviennent mes données et celles de mes clients ?</summary><p>L&#39;appli lit vos commandes sans pouvoir les modifier, et ne conserve que ce qui sert à la facture (nom, adresse, e-mail du client, articles). Les données ne sont ni revendues ni partagées. Les demandes de suppression transmises par Shopify (RGPD) sont traitées automatiquement.</p></details><details><summary>Comment contacter le support ?</summary><p>Écrivez-nous à hoshi.technologies@gmail.com, en indiquant le nom de votre boutique. Nous répondons en général sous un jour ouvré.</p></details></section></div>
+  <p class="empty" id="empty" hidden>Aucune question ne correspond à votre recherche.</p>
+  <footer>Une autre question ? Écrivez-nous à <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>.</footer>
+</main>
+<script>
+  const q = document.getElementById('q');
+  const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  q.addEventListener('input', () => {
+    const words = norm(q.value).split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of document.querySelectorAll('details')) {
+      const hit = words.every((w) => norm(d.textContent).includes(w));
+      d.hidden = !hit;
+      d.open = hit && words.length > 0;
+      shown += hit;
+    }
+    for (const s of document.querySelectorAll('#faq section')) s.hidden = !s.querySelector('details:not([hidden])');
+    document.getElementById('empty').hidden = shown > 0;
+  });
+</script>
+</body>
+</html>

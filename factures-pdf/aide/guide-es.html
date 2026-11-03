@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoshi Factures – Guía de uso</title>
+<style>
+  :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
+  .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:700; color:inherit; text-decoration:none; }
+  nav.docs { display:flex; gap:4px; background:var(--border); padding:3px; border-radius:10px; }
+  nav.docs a, nav.docs span { padding:5px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:14px; }
+  nav.docs span { background:var(--card); color:var(--text); font-weight:600; }
+  h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  .lead { color:var(--muted); margin:0 0 6px; }
+  .langs { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .langs a { color:inherit; }
+  input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); margin-bottom:20px; }
+  h2 { font-size:19px; margin:28px 0 8px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  .card h2 { margin-top:0; display:flex; gap:10px; align-items:baseline; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--card); display:inline-grid; place-items:center; font-size:14px; }
+  ol.steps { padding-left:22px; margin:10px 0 0; } ol.steps li { margin-bottom:6px; }
+  .tip { background:var(--tip); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:15px; }
+  .toc { columns:2; column-gap:24px; padding-left:20px; margin:0; } .toc li { break-inside:avoid; } .toc a { color:inherit; }
+  @media (max-width:560px) { .toc { columns:1; } }
+  details { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+  summary { cursor:pointer; padding:12px 16px; font-weight:600; }
+  details p { margin:0; padding:0 16px 14px; }
+  button.print { font:inherit; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:8px; padding:7px 14px; cursor:pointer; }
+  .empty, footer { color:var(--muted); }
+  footer { margin-top:32px; font-size:14px; }
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#000; --muted:#444; --border:#ccc; --accent:#000; --tip:#f2f2f2; }
+    .bar, .langs, button.print, input { display:none !important; }
+    .card { break-inside:avoid; }
+    details { break-inside:avoid; } details > p { display:block; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar"><a class="brand" href="../en.html">Hoshi Factures</a><nav class="docs"><span aria-current="page">Guía de uso</span><a href="faq-es.html">Preguntas frecuentes</a></nav></div>
+  <h1>Guía de uso</h1>
+  <p class="lead">Todo lo que necesita para usar la aplicación, paso a paso.</p>
+  <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <strong>Español</strong> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <a href="guide-fi.html" hreflang="fi">Suomi</a> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
+  <p><button type="button" class="print" onclick="print()">Imprimir o guardar como PDF</button></p>
+  <section class="card"><h2>Índice</h2><ol class="toc"><li><a href="#install">Instalar la aplicación</a></li><li><a href="#company">Completar los datos de su empresa</a></li><li><a href="#look">Personalizar y revisar la factura</a></li><li><a href="#sending">Elegir cuándo y cómo se envían las facturas</a></li><li><a href="#shopify-link">Añadir el enlace de la factura en la confirmación de pedido de Shopify (opcional)</a></li><li><a href="#daily">Seguir sus facturas en el día a día</a></li><li><a href="#numbering">Numeración e idiomas</a></li><li><a href="#facturx">Factur-X: la factura electrónica</a></li><li><a href="#billing">Gestionar su plan</a></li><li><a href="#best-practices">Buenas prácticas</a></li></ol></section>
+  <section class="card" id="install">
+  <h2><span class="num">1</span><span>Instalar la aplicación</span></h2>
+  <p>La instalación lleva un minuto y no modifica ni su tienda ni sus pedidos.</p>
+  <ol class="steps"><li>En la Shopify App Store, abra la página de la aplicación y haga clic en «Instalar».</li><li>Acepte el acceso a sus pedidos: la aplicación los lee para crear las facturas y solo guarda en ellos un dato, el enlace de la factura. No modifica nada más.</li><li>La aplicación se abre en su administrador de Shopify, en Aplicaciones › Hoshi Factures. El nombre, la dirección y el correo de su tienda ya están rellenados.</li><li>En la pestaña Inicio, siga la lista «Primeros pasos»: desaparece cuando se completan los tres pasos.</li></ol>
+  <div class="tip"><b>Consejo:</b> Empieza con el plan Gratis (10 facturas al mes), sin tarjeta bancaria.</div>
+</section>
+<section class="card" id="company">
+  <h2><span class="num">2</span><span>Completar los datos de su empresa</span></h2>
+  <p>Estos datos aparecen en cada factura. Son obligatorios para una factura válida.</p>
+  <ol class="steps"><li>Abra la pestaña Ajustes, tarjeta «Su empresa».</li><li>Lo más rápido (empresas francesas): en «Relleno automático», escriba su SIRET (o el nombre de la empresa y la ciudad), haga clic en «Buscar» y luego en «Usar». Razón social, domicilio social, SIRET, forma jurídica y n.º de IVA se toman del registro oficial. También puede hacer clic en «Usar los datos de Shopify».</li><li>Compruebe la razón social y el correo: sus clientes responden a esa dirección y ahí recibe las copias de las facturas.</li><li>Escriba la dirección en varias líneas, con el código postal y la ciudad en la misma línea (p. ej. «28001 Madrid»), y elija el país.</li><li>Indique el número de registro (SIRET en Francia) y el número de IVA.</li><li>Exento de IVA: marque la opción de exención. El IVA desaparece de las facturas y se añade la mención legal.</li><li>Abra «Más datos de la empresa» para la forma jurídica y el capital, el registro mercantil, el teléfono, el sitio web y el tipo de venta (bienes, servicios o ambos).</li><li>Haga clic en «Guardar» en la barra que aparece en la parte inferior de la pantalla.</li></ol>
+  <div class="tip"><b>Consejo:</b> Haga revisar una primera factura por su gestor: conoce las menciones propias de su actividad.</div><div class="tip"><b>Consejo:</b> Si está exento de IVA, compruebe también que Shopify no cobra impuestos a sus clientes (Configuración › Impuestos y aranceles).</div>
+</section>
+<section class="card" id="look">
+  <h2><span class="num">3</span><span>Personalizar y revisar la factura</span></h2>
+  <p>Dé a sus facturas la imagen de su marca y revise el resultado antes del primer pedido.</p>
+  <ol class="steps"><li>En Shopify, abra Contenido › Archivos, suba su logotipo (PNG o JPEG) y copie su enlace.</li><li>En Ajustes › Apariencia, pegue el enlace en «URL del logotipo» y elija el color principal.</li><li>Si lo desea, modifique las menciones al pie y el mensaje de agradecimiento. Si los deja vacíos, se traducen automáticamente al idioma del cliente.</li><li>Haga clic en «Vista previa del PDF»: se descarga una factura de ejemplo con sus ajustes, aunque no estén guardados.</li><li>Guarde cuando el resultado le convenza.</li></ol>
+  <div class="tip"><b>Consejo:</b> Los ajustes solo se aplican a las facturas siguientes: una factura emitida nunca cambia.</div>
+</section>
+<section class="card" id="sending">
+  <h2><span class="num">4</span><span>Elegir cuándo y cómo se envían las facturas</span></h2>
+  <p>Por defecto, la factura se crea al pagarse el pedido y se envía al cliente por correo al instante.</p>
+  <ol class="steps"><li>En Ajustes › Funcionamiento, elija cuándo crear la factura: cuando el pedido está pagado (recomendado) o en cuanto se realiza.</li><li>En «Cómo reciben la factura sus clientes», elija: un correo con el PDF adjunto (recomendado, sin configuración); un solo correo con un botón «Descargar factura» en la página del pedido (sin código: 3 clics para activarlo); o un solo correo con el enlace directamente en la confirmación de Shopify (pegar un código una vez). La configuración le guía paso a paso.</li><li>Marque «Enviarme una copia de cada factura» para recibir cada factura y crear su archivo.</li><li>Para personalizar el correo, abra «Correo al cliente»: el asunto y el mensaje aceptan las variables {{first_name}}, {{name}}, {{invoice_number}}, {{order}} y {{shop}}.</li></ol>
+  <div class="tip"><b>Consejo:</b> Shopify no admite adjuntos en sus propios correos: la factura se envía en un correo aparte, en nombre de su tienda.</div>
+</section>
+<section class="card" id="shopify-link">
+  <h2><span class="num">5</span><span>Añadir el enlace de la factura en la confirmación de pedido de Shopify (opcional)</span></h2>
+  <p>Sus clientes también encuentran la factura desde el correo de confirmación habitual de su tienda.</p>
+  <ol class="steps"><li>En Ajustes, abra «Enlace en el correo de confirmación de Shopify» y haga clic en «Copiar el código».</li><li>En Shopify, vaya a Configuración › Notificaciones › Notificaciones al cliente › Confirmación del pedido y luego a «Editar código».</li><li>Pegue el código donde deba aparecer el botón, por ejemplo justo después del resumen del pedido.</li><li>Haga clic en «Vista previa» para comprobarlo y luego en «Guardar».</li></ol>
+  <div class="tip"><b>Consejo:</b> Si el cliente hace clic antes del pago, una página le indica que la factura estará disponible en unos minutos.</div>
+</section>
+<section class="card" id="daily">
+  <h2><span class="num">6</span><span>Seguir sus facturas en el día a día</span></h2>
+  <p>La pestaña Inicio muestra las últimas facturas emitidas con su estado de envío.</p>
+  <ol class="steps"><li>Cada fila indica el número, el pedido, el cliente, la fecha, el total y el estado del correo.</li><li>«Enviada»: el cliente recibió la factura. «No enviada»: el envío automático está desactivado. «Error»: pase el ratón por el estado para ver la causa.</li><li>Haga clic en «PDF» para descargar una factura, o en «Reenviar» para enviarla de nuevo al cliente.</li><li>La etiqueta Factur-X indica que la factura también contiene los datos para la factura electrónica.</li></ol>
+  <div class="tip"><b>Consejo:</b> En caso de error, compruebe la dirección del cliente en el pedido de Shopify y pídale que revise su carpeta de spam.</div>
+</section>
+<section class="card" id="numbering">
+  <h2><span class="num">7</span><span>Numeración e idiomas</span></h2>
+  <p>Los números son correlativos y sin saltos, como exige la ley, y cada cliente recibe la factura en su idioma.</p>
+  <ol class="steps"><li>En Ajustes › Numeración e idioma, elija el prefijo de los números (por defecto «F-», es decir F-2026-00001).</li><li>Si ya emitía facturas con otra herramienta, indique el próximo número: puede aumentar, pero nunca disminuir.</li><li>Elija el idioma de las facturas: el del cliente (francés, inglés, alemán, español, italiano, neerlandés, portugués de Brasil, checo, danés, finés, noruego bokmal, polaco, portugués de Portugal, sueco, turco y malayo) o un idioma único.</li><li>Con «Idioma del cliente», elija también el idioma de respaldo si el del cliente no está disponible.</li></ol>
+  
+</section>
+<section class="card" id="facturx">
+  <h2><span class="num">8</span><span>Factur-X: la factura electrónica</span></h2>
+  <p>Con Factur-X, el PDF contiene además los datos de la factura, legibles por el software contable y las plataformas de facturación electrónica, obligatoria entre empresas en Francia a partir de 2026–2027.</p>
+  <ol class="steps"><li>Abra Ajustes › Factur-X: la opción está activada por defecto.</li><li>Si aparece «Factur-X en pausa», complete el dato indicado (a menudo la dirección, el país o el n.º de IVA) y guarde.</li><li>Cuando el indicador pasa a ✓, todas las facturas siguientes son Factur-X, sin ningún cambio para sus clientes.</li></ol>
+  <div class="tip"><b>Consejo:</b> Su gestor puede importar estas facturas directamente en su software.</div>
+</section>
+<section class="card" id="billing">
+  <h2><span class="num">9</span><span>Gestionar su plan</span></h2>
+  <p>Plan Gratis: 10 facturas al mes. Esencial: 200 facturas por 7,90 US$ al mes. Ilimitado: 12,90 US$ al mes. Prueba gratis de 7 días en los planes de pago.</p>
+  <ol class="steps"><li>La pestaña Plan (y el Inicio) muestra cuántas facturas ha usado este mes. El contador se reinicia el día 1 de cada mes.</li><li>Para cambiar de plan, haga clic en «Elegir» y apruébelo en la página de Shopify: el importe se añade a su factura de Shopify.</li><li>Si se alcanza el límite, los nuevos pedidos quedan en espera y se le avisa por correo. Tras cambiar de plan, haga clic en «Generar sus facturas» en el Inicio.</li><li>Para volver al plan Gratis, haga clic en «Cancelar».</li></ol>
+  
+</section>
+<section class="card" id="best-practices">
+  <h2><span class="num">10</span><span>Buenas prácticas</span></h2>
+  <p>Algunos hábitos para llevar su contabilidad con tranquilidad.</p>
+  <ol class="steps"><li>Haga un pedido de prueba tras la configuración (con el modo de prueba de Shopify Payments) y revise la factura recibida.</li><li>Conserve sus facturas 10 años: guarde la copia recibida por correo o descárguelas cada mes. Se eliminan de la aplicación 48 horas después de desinstalarla.</li><li>Una factura emitida no se modifica: en caso de error o reembolso, emita una factura rectificativa con su herramienta contable.</li><li>¿Alguna pregunta? Consulte las preguntas frecuentes en la pestaña Ayuda.</li></ol>
+  
+</section>
+  <footer>¿Otra pregunta? Escríbanos a <a href="mailto:hoshi.technologies@gmail.com">hoshi.technologies@gmail.com</a>.</footer>
+</main>
+
+</body>
+</html>
