@@ -15,7 +15,7 @@ liens de téléchargement des factures.
 
 ## Première mise en ligne (Windows, invite de commandes)
 
-Dans le dossier `shopify-apps\factures-pdf` :
+Dans le dossier du dépôt `hoshi-factures` :
 
 1. **Se connecter à Cloudflare**
    ```

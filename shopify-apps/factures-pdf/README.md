@@ -1,4 +1,8 @@
-# Hoshi Factures : appli Shopify (dossier `factures-pdf`)
+# Hoshi Factures : plugin Shopify de factures PDF
+
+Dépôt de l'appli Shopify **Hoshi Factures** de Hoshi Technologies. Le site public (pages légales,
+guide, FAQ) est publié par le dépôt `hoshi-technologies.github.io`, dans le dossier
+`factures-pdf/` : voir « Vendre l'appli » ci-dessous.
 
 Une facture PDF numérotée est créée automatiquement à chaque commande et envoyée au client
 par e-mail, en pièce jointe. Le marchand règle tout depuis l'administration Shopify
@@ -190,7 +194,8 @@ bouton « Télécharger ma facture » dans la confirmation de commande de Shopif
 Prérequis : [Node.js 22](https://nodejs.org) (version « LTS »).
 
 ```sh
-cd shopify-apps/factures-pdf
+git clone https://github.com/hoshi-technologies/hoshi-factures.git
+cd hoshi-factures
 npm install
 npm run demo            # ou : npm run demo -- en   (de, es, it, nl, pt-BR)
 ```
@@ -209,7 +214,7 @@ Autres commandes : `npm test` (tests automatiques), `npm run preview` (facture d
    puis une **boutique de développement** : Boutiques › Ajouter une boutique.
 2. Installez [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) :
    `npm install -g @shopify/cli`.
-3. Dans `shopify-apps/factures-pdf`, lancez `shopify app config link` et choisissez
+3. Dans le dossier du dépôt, lancez `shopify app config link` et choisissez
    « Créer une nouvelle appli » : le `client_id` de `shopify.app.toml` est rempli.
 4. Dans le tableau de bord de l'appli : *Accès aux données client protégées* › cochez
    nom, e-mail et adresse (sans examen pour une boutique de développement).
@@ -225,8 +230,9 @@ Les abonnements y sont des abonnements de test (`BILLING_TEST=true`) : aucun pr�
 
 ## Vendre l'appli : site, pages légales, fiche App Store
 
-- `npm run site` génère le site public dans `/factures-pdf` à la racine du dépôt (GitHub
-  Pages) : présentation (fr, en), politique de confidentialité, conditions d'utilisation,
+- `npm run site` génère le site public dans le dossier `factures-pdf/` du dépôt
+  `hoshi-technologies.github.io` (GitHub Pages), cloné à côté de ce dépôt (ou chemin indiqué
+  par `SITE_DIR`) : présentation (fr, en), politique de confidentialité, conditions d'utilisation,
   guide et FAQ dans les 7 langues. Les informations de l'éditeur (forme juridique, adresse,
   SIREN, hébergeur, service d'e-mail, tribunal…) se renseignent par variables
   d'environnement (`COMPANY_LEGAL`, `COMPANY_ADDRESS`, `COMPANY_SIREN`, `SUPPORT_EMAIL`,

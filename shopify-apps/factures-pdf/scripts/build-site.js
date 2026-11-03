@@ -1,5 +1,5 @@
-// Génère le site public de l'appli dans /factures-pdf à la racine du dépôt (GitHub Pages) :
-// présentation (fr, en), confidentialité, conditions, guide et FAQ dans les 7 langues.
+// Génère le site public de l'appli (GitHub Pages, dépôt hoshi-technologies.github.io, dossier
+// factures-pdf/) : présentation (fr, en), confidentialité, conditions, guide et FAQ en 7 langues.
 //
 //   npm run site
 //
@@ -29,7 +29,13 @@ export const COMPANY = {
   updated: env.LEGAL_DATE || new Date().toISOString().slice(0, 10),
 };
 
-const OUT = fileURLToPath(new URL('../../../factures-pdf/', import.meta.url));
+// Site public : dossier factures-pdf/ du dépôt hoshi-technologies.github.io, cloné à côté de
+// ce dépôt (../hoshi-technologies.github.io), ou indiqué par SITE_DIR.
+const OUT = (env.SITE_DIR ? `${env.SITE_DIR.replace(/[\\/]+$/, '')}/` : fileURLToPath(new URL('../../hoshi-technologies.github.io/factures-pdf/', import.meta.url)));
+if (!existsSync(OUT)) {
+  console.error(`Dossier du site introuvable : ${OUT}\nClonez hoshi-technologies.github.io à côté de ce dépôt, ou indiquez SITE_DIR.`);
+  process.exit(1);
+}
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 /** Texte échappé avec {variables} ; une valeur « [à compléter] » est surlignée. */
 const fill = (text, vars) =>

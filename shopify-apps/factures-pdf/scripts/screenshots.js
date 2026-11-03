@@ -2,7 +2,8 @@
 //
 //   npm run screenshots          (nécessite Playwright : npm i -D playwright && npx playwright install chromium)
 //
-// Résultat : docs/app-store/<langue>/*.png et ../../factures-pdf/img/home-<langue>.png
+// Résultat : docs/app-store/<langue>/*.png et, si le site est présent, <site>/img/home-<langue>.png
+// (site : ../hoshi-technologies.github.io/factures-pdf, ou SITE_DIR).
 
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, readFileSync, mkdtempSync } from 'node:fs';
@@ -14,7 +15,9 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const SITE_IMG = fileURLToPath(new URL('../../../factures-pdf/img/', import.meta.url));
+const SITE_IMG = process.env.SITE_DIR
+  ? `${process.env.SITE_DIR.replace(/[\\/]+$/, '')}/img/`
+  : fileURLToPath(new URL('../../hoshi-technologies.github.io/factures-pdf/img/', import.meta.url));
 const CAPTIONS = {
   fr: { invoice: 'Une facture claire, conforme et au format Factur-X' },
   en: { invoice: 'A clear, compliant invoice, in Factur-X format' },
