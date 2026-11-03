@@ -2710,6 +2710,37 @@
             if (ev == null) return '<span class="muted">—</span>';
             return '<span class="pill ' + (ev >= 1.05 ? 'good' : ev >= 0.95 ? 'mid' : 'bad') + '">' + ev.toFixed(2).replace('.', ',') + '</span>';
           };
+          // Ma mise (modifiable) et mise conseillée (Kelly fractionné sur la bankroll du conseiller de mise).
+          var stake = parseFloat(String(store.myStake || 2).replace(',', '.')) || 2;
+          var bankroll = typeof currentBank === 'function' ? currentBank() : 100;
+          var kFrac = parseFloat((store.bet && store.bet.kelly) || 0.25) || 0.25;
+          var kMax = (parseFloat(String((store.bet && store.bet.max) || 2).replace(',', '.')) || 2) / 100;
+          var proven = !!(typeof bestStrategy === 'function' && bestStrategy() && bestStrategy().validated);
+          var kellyStake = function (x) {
+            if (!x._oP) return 0;
+            var f = Math.min(kMax, kFrac * T.kelly(pp(x), x._oP));
+            return Math.floor(bankroll * f * 2) / 2;
+          };
+          var gainLine = function (x) {
+            if (!x._oP) return '';
+            var ret = stake * x._oP,
+              avg = stake * (x._ev - 1);
+            return (
+              'Avec ' +
+              money(stake) +
+              ' : <b>' +
+              money(ret) +
+              '</b> si placé (gain ' +
+              signedMoney(ret - stake) +
+              '), perte de ' +
+              money(stake) +
+              ' sinon. Gain moyen attendu : <b style="color:' +
+              (avg >= 0 ? 'var(--good)' : 'var(--bad)') +
+              '">' +
+              signedMoney(avg) +
+              '</b> par course.'
+            );
+          };
 
           var html = '';
           // Meilleur rapport chances / cote
@@ -2744,7 +2775,27 @@
               (best._ev >= 1.05 ? '✓' : best._ev >= 0.95 ? '≈' : '✗') +
               '</span> ' +
               verdict[1] +
-              ' Valeur = chances × rapport : au-dessus de 1, le pari rapporte en moyenne plus qu\'il ne coûte.</p></div>';
+              ' Valeur = chances × rapport : au-dessus de 1, le pari rapporte en moyenne plus qu\'il ne coûte.</p>' +
+              '<p style="margin:8px 0 0;font-size:14px">' +
+              gainLine(best) +
+              '</p>' +
+              (function () {
+                var ks = kellyStake(best);
+                if (best._ev <= 1 || ks < 1)
+                  return '<p class="hint" style="margin:6px 0 0">Mise conseillée : <b>0 €</b>. La valeur est sous 1 : à long terme, ce pari perd de l\'argent quelle que soit la mise.</p>';
+                return (
+                  '<p class="hint" style="margin:6px 0 0">Mise conseillée (méthode de Kelly, ' +
+                  (kFrac === 0.25 ? '¼' : kFrac === 0.5 ? '½' : '1/10') +
+                  ', bankroll ' +
+                  money(bankroll) +
+                  ') : <b>' +
+                  money(ks) +
+                  '</b>' +
+                  (proven ? '.' : ' — <b>théorique</b> : aucune stratégie n\'est encore validée par la simulation, la mise réellement conseillée reste 0 €.') +
+                  ' <a href="#" data-goexpert="1">Modifier la bankroll</a></p>'
+                );
+              })() +
+              '</div>';
           } else if (!a.market) {
             html += '<p class="hint" style="margin:0 0 12px">💡 Le meilleur rapport chances / cote s\'affichera dès que les cotes seront publiées.</p>';
           }
@@ -2784,6 +2835,7 @@
               '</span><span>Valeur ' +
               evPill(x._ev) +
               '</span></div>' +
+              (x._oP ? '<p class="hint" style="margin:8px 0 0">' + gainLine(x) + '</p>' : '') +
               (hasArr
                 ? '<div style="margin-top:8px">' +
                   (isPlaced(x)
@@ -2801,14 +2853,26 @@
             return sortBy === 'ev' ? (y._ev || 0) - (x._ev || 0) : pp(y) - pp(x);
           });
           html +=
-            '<div class="row" style="margin:16px 0 4px;align-items:center"><h2 style="margin:0;flex:1">Tous les chevaux</h2><div class="chips" style="margin:0">' +
+            '<div class="kpi" style="margin:16px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><b style="margin-right:4px">Ma mise placé</b>' +
+            [1, 2, 5, 10]
+              .map(function (v) {
+                return '<button class="chip' + (stake === v ? ' on' : '') + '" data-stake="' + v + '">' + v + ' €</button>';
+              })
+              .join('') +
+            '<label style="display:flex;align-items:center;gap:4px">autre : <input id="myStake" inputmode="decimal" value="' +
+            String(stake).replace('.', ',') +
+            '" style="width:70px" /> €</label></div>';
+          html +=
+            '<div class="row" style="margin:12px 0 4px;align-items:center"><h2 style="margin:0;flex:1">Tous les chevaux</h2><div class="chips" style="margin:0">' +
             '<button class="chip' +
             (sortBy === 'p' ? ' on' : '') +
             '" data-psort="p">Par chances</button><button class="chip' +
             (sortBy === 'ev' ? ' on' : '') +
             '" data-psort="ev">Par valeur</button></div></div>';
           html +=
-            '<div class="others"><div class="oth v head"><span>N°</span><span>Cheval</span><span style="text-align:right">Placé</span><span style="text-align:right" title="Rapport placé estimé pour 1 €">Rapport</span><span style="text-align:right" title="Chances × rapport">Valeur</span></div>';
+            '<div class="others"><div class="oth v head"><span>N°</span><span>Cheval</span><span style="text-align:right">Placé</span><span style="text-align:right" title="Ce que rapporte votre mise si le cheval est placé (estimation)">Pour ' +
+            money(stake).replace(',00', '') +
+            '</span><span style="text-align:right" title="Chances × rapport">Valeur</span></div>';
           all.forEach(function (x) {
             var p = pp(x);
             html +=
@@ -2819,12 +2883,13 @@
               (hasArr && x.runner.arrivee ? (isPlaced(x) ? ' <span class="ok-mark">✓</span>' : '') : '') +
               '<br><small class="muted">cote ' +
               esc(x.frozenCote || x.runner.cote ? String(x.frozenCote || x.runner.cote).replace('.', ',') : '—') +
+              (x._oP ? ' · placé ≈ ' + fmtO(x._oP) : '') +
               '</small></span><span class="pcs" style="color:' +
               colorP(p) +
               '">' +
               Math.round(p * 100) +
               ' %</span><span class="ct">' +
-              fmtO(x._oP) +
+              (x._oP ? money(stake * x._oP) : '—') +
               '</span><span style="text-align:right">' +
               evPill(x._ev) +
               '</span></div>';
@@ -2832,7 +2897,9 @@
           html += '</div>';
           if (a.placesPayees && a.market)
             html +=
-              '<p class="hint">Rapport placé <b>estimé</b> à partir de la cote gagnant (le vrai rapport n\'est connu qu\'après la course). Valeur = chances × rapport : 1 = juste prix, au-dessus = intéressant. La commission du PMU fait que la plupart des valeurs sont sous 1.</p>';
+              '<p class="hint">« Pour ' +
+              money(stake) +
+              ' » : ce que rapporte votre mise si le cheval est placé, mise comprise. Gain moyen attendu = mise × (valeur − 1). Rapport placé <b>estimé</b> à partir de la cote gagnant (le vrai rapport n\'est connu qu\'après la course). Valeur = chances × rapport : 1 = juste prix, au-dessus = intéressant. La commission du PMU fait que la plupart des valeurs sont sous 1.</p>';
           var nps = (race.runners || []).filter((r) => r.nonPartant);
           if (nps.length)
             html +=
@@ -2933,7 +3000,29 @@
         setInterval(function () {
           if (!document.hidden) renderSimple();
         }, 60000);
+        $('sPick').addEventListener('change', function (e) {
+          if (e.target.id !== 'myStake') return;
+          var v = parseFloat(String(e.target.value).replace(',', '.'));
+          if (v > 0 && v < 100000) {
+            store.myStake = v;
+            save(store);
+          }
+          renderSimple();
+        });
         $('sPick').addEventListener('click', function (e) {
+          var st = e.target.closest('[data-stake]');
+          if (st) {
+            store.myStake = parseFloat(st.dataset.stake);
+            save(store);
+            renderSimple();
+            return;
+          }
+          if (e.target.closest('[data-goexpert]')) {
+            e.preventDefault();
+            setView('expert');
+            $('advisorCard').scrollIntoView({ block: 'start' });
+            return;
+          }
           var b = e.target.closest('[data-psort]');
           if (!b) return;
           store.pickSort = b.dataset.psort;
