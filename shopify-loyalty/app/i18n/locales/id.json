@@ -1,0 +1,588 @@
+{
+  "nav": {
+    "dashboard": "Dasbor",
+    "members": "Anggota",
+    "rewards": "Hadiah",
+    "tiers": "Tingkat pelanggan",
+    "settings": "Pengaturan"
+  },
+  "common": {
+    "edit": "Edit",
+    "active": "Aktif",
+    "paused": "Dijeda",
+    "customer": "Pelanggan",
+    "type": "Jenis",
+    "detail": "Detail",
+    "points": "Poin",
+    "date": "Tanggal",
+    "anonymousCustomer": "Pelanggan anonim",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "status": "Status",
+    "actions": "Tindakan",
+    "change": "Ubah",
+    "optional": "opsional",
+    "color": "Warna"
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "manageRewards": "Kelola hadiah",
+    "pausedTitle": "Program sedang dijeda",
+    "pausedText": "Pelanggan Anda tidak lagi mendapatkan poin dan tidak dapat menukarkan hadiah.",
+    "reactivate": "Aktifkan kembali",
+    "campaignTitle": "Kampanye berjalan: {pointsName} ×{multiplier}",
+    "campaignUntil": "Hingga {date}.",
+    "campaignNoEnd": "Tanpa tanggal berakhir.",
+    "welcome": "Selamat datang di Hoshi Club",
+    "summary": "Belanja {amount} = {points} {pointsName} · {signup} {pointsName} diberikan saat mendaftar",
+    "stats": {
+      "members": "Anggota",
+      "newMembers_other": "+{count} dalam 30 hari terakhir",
+      "pointsEarned": "{pointsName} diberikan",
+      "pointsSpent": "{pointsName} ditukarkan",
+      "rewardsClaimed": "Hadiah diklaim",
+      "rewardsUsed_other": "{count} digunakan dalam pesanan",
+      "rewardRevenue": "Pendapatan dari hadiah",
+      "rewardRevenueHint": "Pesanan yang menggunakan kode loyalitas",
+      "referrals": "Pelanggan yang direferensikan",
+      "pendingReferrals_other": "{count} undangan tertunda",
+      "referralRevenue": "Pendapatan dari referensi",
+      "referralRevenueHint": "Pesanan pertama teman yang direferensikan"
+    },
+    "chartTitle": "{pointsName} yang diperoleh per hari (30 hari terakhir)",
+    "chartAria": "{total} {unit} diperoleh dalam 30 hari terakhir",
+    "recentActivity": "Aktivitas terbaru",
+    "noActivity": "Belum ada aktivitas. Poin akan muncul di sini setelah pesanan atau pendaftaran pertama.",
+    "gettingStarted": "Memulai",
+    "steps": {
+      "enableTitle": "Aktifkan program",
+      "enableText": "Pelanggan Anda mulai mendapatkan poin begitu program aktif.",
+      "rewardsTitle": "Tawarkan hadiah",
+      "rewardsText": "Diskon yang dapat dibuka pelanggan dengan poin mereka.",
+      "tiersTitle": "Siapkan tingkat pelanggan",
+      "tiersText": "Tingkat Perunggu, Perak, Emas, atau khusus undangan, dengan diskon otomatis.",
+      "widgetTitle": "Tampilkan widget di toko Anda",
+      "widgetText": "Aktifkan “Hoshi Club” di editor tema (Penyematan aplikasi).",
+      "widgetAction": "Buka editor tema"
+    },
+    "howItWorks": "Bagaimana cara kerjanya?",
+    "how": {
+      "signup": "Pelanggan membuat akun: bonus selamat datang.",
+      "orders": "Setiap pesanan yang dibayar menghasilkan poin.",
+      "tiers": "Semakin banyak poin yang dikumpulkan, semakin tinggi tingkatnya (atau Anda yang menetapkannya).",
+      "discounts": "Setiap tingkat dapat memberikan diskon otomatis saat checkout.",
+      "rewards": "Melalui widget, pelanggan menukarkan poin dengan kode diskon pribadi.",
+      "more": "Pelanggan juga mendapatkan poin dengan mereferensikan teman, saat ulang tahun, dan dengan mengikuti Anda di media sosial."
+    }
+  },
+  "member": {
+    "viewCustomer": "Lihat pelanggan",
+    "tierSaved": "Tingkat diperbarui",
+    "codeCreated": "Kode dibuat: {code}",
+    "pointsAdded": "Poin ditambahkan",
+    "pointsRemoved": "Poin dikurangi",
+    "errors": {
+      "points": "Masukkan jumlah poin"
+    },
+    "available": "Saldo tersedia",
+    "tier": "Tingkat",
+    "tierAssigned": "Tingkat (ditetapkan)",
+    "noTier": "Tidak ada",
+    "lifetimeAndOrders": "{lifetime} total · {orders}",
+    "toNextTier": "{points} {pointsName} lagi untuk mencapai {tier}",
+    "history": "Riwayat poin",
+    "noHistory": "Belum ada aktivitas.",
+    "codes": "Kode diskon yang diperoleh",
+    "code": "Kode",
+    "codeUsed": "Digunakan",
+    "codeAvailable": "Tersedia",
+    "adjust": "Sesuaikan saldo",
+    "adjustAction": "Tindakan",
+    "addPoints": "Tambah poin",
+    "removePoints": "Kurangi poin",
+    "pointsCount": "Jumlah poin",
+    "reason": "Alasan (ditampilkan di riwayat)",
+    "reasonPlaceholder": "Tanda terima kasih",
+    "confirm": "Konfirmasi",
+    "giftReward": "Berikan hadiah",
+    "giftRewardText": "Membuat kode pribadi dan mengurangi poin pelanggan.",
+    "generateCode": "Buat kode",
+    "info": "Informasi",
+    "birthday": "Ulang tahun: {date}",
+    "notProvided": "tidak diisi",
+    "referralCode": "Kode referensi: {code}",
+    "referrals": "Referensi: {converted} berhasil dari {invited} yang diundang",
+    "expiresAt": "Poin berlaku hingga {date}",
+    "tierSection": "Tingkat pelanggan",
+    "tierLocked": "Tingkat terkunci: tidak lagi berubah berdasarkan poin.",
+    "tierAuto": "Otomatis: saat ini {tier}, berubah sesuai {pointsName}.",
+    "applyTier": "Terapkan tingkat",
+    "perks": "Keuntungan {tier}",
+    "noPerks": "Belum ada keuntungan untuk tingkat ini.",
+    "shopifyTag": "Tag Shopify: {tag}",
+    "danger": "Zona berbahaya",
+    "confirmRemove": "Hapus pelanggan ini dari program? Saldo dan riwayatnya akan dihapus.",
+    "remove": "Hapus dari program"
+  },
+  "members": {
+    "title": "Anggota",
+    "add": "Tambahkan pelanggan",
+    "importAll": "Impor semua pelanggan saya",
+    "joined": "{name} bergabung dengan program",
+    "tierUpdated": "Tingkat {name} diperbarui",
+    "imported_other": "{count} pelanggan diimpor",
+    "allImported": "Semua pelanggan Anda sudah menjadi anggota",
+    "search": "Cari",
+    "searchPlaceholder": "Nama atau email",
+    "tier": "Tingkat",
+    "allTiers": "Semua tingkat",
+    "sort": "Urutkan",
+    "sortPoints": "Poin terbanyak",
+    "sortRecent": "Terbaru",
+    "email": "Email",
+    "balance": "Saldo",
+    "lifetime": "Total",
+    "orders": "Pesanan",
+    "assigned": "Ditetapkan",
+    "noResults": "Tidak ada anggota yang sesuai dengan pencarian Anda.",
+    "empty": "Belum ada anggota. Tambahkan pelanggan atau impor semua pelanggan Anda.",
+    "total_other": "{count} anggota"
+  },
+  "addMember": {
+    "title": "Tambahkan pelanggan ke program",
+    "search": "Cari pelanggan Shopify",
+    "searchPlaceholder": "Nama, email, atau telepon",
+    "searching": "Mencari",
+    "noResults": "Pelanggan tidak ditemukan.",
+    "noEmail": "Tidak ada email",
+    "orders_other": "{count} pesanan",
+    "alreadyMember": "Sudah menjadi anggota",
+    "choose": "Pilih",
+    "tierLabel": "Tingkat pelanggan",
+    "tierDetails": "“Otomatis”: tingkat berubah sesuai poin. Jika tidak, tingkat yang dipilih akan dikunci.",
+    "autoTier": "Otomatis (berdasarkan {pointsName})",
+    "invitationTier": "{name} (khusus undangan)",
+    "welcomeBonus": "Berikan bonus selamat datang ({points} {pointsName})",
+    "update": "Perbarui",
+    "submit": "Tambahkan ke program"
+  },
+  "program": {
+    "title": "Pengaturan program",
+    "saved": "Pengaturan disimpan",
+    "pointsNameFallback": "poin",
+    "status": {
+      "title": "Status",
+      "label": "Program loyalitas aktif",
+      "details": "Nonaktifkan untuk menjeda program tanpa menghilangkan poin pelanggan Anda."
+    },
+    "earn": {
+      "title": "Mendapatkan poin",
+      "pointsName": "Nama poin",
+      "pointsNameDetails": "Mis. poin, bintang, koin…",
+      "perUnit": "Poin per {currency} yang dibelanjakan",
+      "perUnitDetails": "Contoh: pesanan senilai {amount} menghasilkan {points} {pointsName} (sebelum pengali tingkat).",
+      "signup": "Bonus selamat datang",
+      "signupDetails": "Diberikan saat pelanggan membuat akun.",
+      "firstOrder": "Bonus pesanan pertama",
+      "firstOrderDetails": "Sebagai tambahan poin pesanan."
+    },
+    "birthday": {
+      "title": "Ulang tahun 🎂",
+      "label": "Poin yang diberikan saat ulang tahun",
+      "details": "Pelanggan memasukkan tanggal lahirnya di widget. Untuk mencegah penyalahgunaan, tanggal harus disimpan minimal 30 hari sebelumnya. 0 = nonaktif."
+    },
+    "referral": {
+      "title": "Referensi 🤝",
+      "enable": "Aktifkan referensi",
+      "enableDetails": "Setiap anggota mendapatkan tautan pribadi. Teman yang diundang menerima kode selamat datang; pemberi referensi mendapatkan poin saat teman melakukan pesanan pertamanya.",
+      "referrerPoints": "Poin untuk pemberi referensi",
+      "friendGift": "Hadiah untuk teman",
+      "value": "Nilai",
+      "minimum": "Pembelian minimum (opsional)"
+    },
+    "social": {
+      "title": "Media sosial 📣",
+      "intro": "Tambahkan halaman Anda: widget akan mengajak pelanggan mengikuti Anda dengan imbalan {pointsName} (sekali per jaringan).",
+      "points": "Poin per jaringan yang diikuti"
+    },
+    "bonus": {
+      "title": "Kampanye bonus poin 🔥",
+      "intro": "Lipat gandakan {pointsName} yang diperoleh selama periode tertentu (obral, hari libur, peluncuran…). Banner akan tampil di widget selama kampanye.",
+      "multiplier": "Pengali",
+      "none": "Tidak ada kampanye",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "Mulai (opsional)",
+      "end": "Berakhir (opsional)",
+      "message": "Pesan banner",
+      "messageDetails": "Biarkan kosong untuk menampilkan pesan default yang telah diterjemahkan.",
+      "messagePlaceholder": "Black Friday: {pointsName} ×{multiplier}!"
+    },
+    "expiration": {
+      "title": "Masa berlaku poin ⏳",
+      "label": "Poin kedaluwarsa setelah",
+      "details": "Setiap pembelian, penukaran, atau perolehan poin akan memperpanjang tanggalnya. Tanggal kedaluwarsa mendorong pelanggan untuk kembali.",
+      "never": "Tidak pernah",
+      "months_other": "{count} bulan tanpa aktivitas"
+    },
+    "widget": {
+      "title": "Tampilan widget",
+      "languageNote": "Widget otomatis tampil dalam bahasa toko Anda (mendukung 36 bahasa).",
+      "widgetTitle": "Judul widget",
+      "widgetTitleDetails": "Biarkan kosong untuk menggunakan judul default yang diterjemahkan ke setiap bahasa.",
+      "defaultTitle": "Hadiah saya",
+      "color": "Warna utama",
+      "colorOption": "Warna {color}",
+      "customColor": "Warna kustom",
+      "position": "Posisi tombol",
+      "right": "Kanan bawah",
+      "left": "Kiri bawah"
+    },
+    "preview": "Pratinjau",
+    "previewTier": "Tingkat Perak",
+    "previewRedeem": "Tukarkan"
+  },
+  "landing": {
+    "tagline": "Program loyalitas paling sederhana untuk toko Shopify Anda: poin, tingkat VIP dengan diskon otomatis, referensi, dan hadiah hanya dengan beberapa klik.",
+    "pricing": "{price}/bulan · semua fitur termasuk · uji coba gratis {days} hari",
+    "shopDomain": "Domain toko",
+    "install": "Instal",
+    "login": "Masuk",
+    "installFromStore": "Instal Hoshi Club dari Shopify App Store.",
+    "errors": {
+      "missingShop": "Masukkan domain toko Anda",
+      "invalidShop": "Domain toko ini tidak valid"
+    },
+    "features": {
+      "points": {
+        "title": "Poin otomatis.",
+        "text": "Pelanggan mendapatkan poin di setiap pesanan, tanpa pengaturan teknis."
+      },
+      "tiers": {
+        "title": "Tingkat VIP.",
+        "text": "Tingkat Perunggu, Perak, Emas, atau khusus undangan, dengan diskon otomatis dan pengali poin untuk pelanggan terbaik Anda."
+      },
+      "referrals": {
+        "title": "Referensi dan bonus.",
+        "text": "Program referensi, hadiah ulang tahun, bonus ikuti media sosial, dan kampanye poin ganda."
+      },
+      "widget": {
+        "title": "Widget elegan.",
+        "text": "Tombol mengambang dengan warna toko Anda untuk melihat dan menukarkan poin."
+      },
+      "languages": {
+        "title": "36 bahasa.",
+        "text": "Aplikasi dan widget menggunakan bahasa Anda dan bahasa pelanggan Anda."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "Kebijakan privasi",
+    "supportLink": "Bantuan dan kontak",
+    "language": "Bahasa",
+    "privacy": {
+      "title": "Kebijakan privasi",
+      "updated": "Hoshi Club, diterbitkan oleh Hoshi Technologies. Terakhir diperbarui: {date}.",
+      "intro": "Hoshi Club (“aplikasi”) memungkinkan merchant Shopify menawarkan program loyalitas kepada pelanggan mereka. Kebijakan ini menjelaskan data apa yang diproses oleh aplikasi, alasannya, dan caranya.",
+      "collectedTitle": "Data yang dikumpulkan",
+      "collected": {
+        "store": {
+          "label": "Data toko:",
+          "text": "domain toko dan token akses yang diberikan oleh Shopify saat instalasi."
+        },
+        "members": {
+          "label": "Data anggota:",
+          "text": "ID pelanggan Shopify, nama depan, nama belakang, alamat email, jumlah pesanan, saldo dan riwayat poin, tingkat loyalitas, kode diskon yang diperoleh, tanggal ulang tahun (hari dan bulan, jika diberikan oleh pelanggan), dan kode referensi."
+        },
+        "referrals": {
+          "label": "Data referensi:",
+          "text": "alamat email yang dimasukkan oleh orang yang diundang untuk menerima kode selamat datangnya."
+        },
+        "orders": {
+          "label": "Data pesanan:",
+          "text": "ID, subtotal, dan total pesanan yang dibayar serta kode diskon yang digunakan, semata-mata untuk menghitung poin."
+        }
+      },
+      "noPayment": "Aplikasi tidak mengumpulkan data pembayaran dan tidak menggunakan cookie iklan.",
+      "useTitle": "Cara data digunakan",
+      "use": "Data hanya digunakan untuk menjalankan program loyalitas toko: menghitung dan menampilkan poin, menetapkan tingkat beserta keuntungannya, membuat kode diskon, mengelola referensi, dan menampilkan statistik kepada merchant. Data tidak pernah dijual, disewakan, atau dibagikan kepada pihak ketiga untuk tujuan pemasaran.",
+      "hostingTitle": "Hosting dan pemroses data",
+      "hosting": "Data di-hosting oleh Cloudflare (Cloudflare Workers dan D1). Shopify menyediakan data toko dan pelanggan melalui API-nya. Penyedia ini bertindak sebagai pemroses data dan menerapkan langkah-langkah keamanan mereka sendiri.",
+      "retentionTitle": "Penyimpanan dan penghapusan",
+      "retention": {
+        "installed": "Data disimpan selama aplikasi terinstal.",
+        "customerRedact": "Jika pelanggan memintanya (melalui Shopify), datanya akan dihapus secara otomatis (webhook customers/redact).",
+        "shopRedact": "48 jam setelah aplikasi dihapus instalasinya, Shopify meminta penghapusan data toko; seluruh data kemudian dihapus (webhook shop/redact).",
+        "merchant": "Merchant dapat menghapus pelanggan dari program kapan saja melalui aplikasi."
+      },
+      "rightsTitle": "Hak Anda",
+      "rights": "Berdasarkan GDPR dan undang-undang serupa, pelanggan memiliki hak untuk mengakses, memperbaiki, menghapus, dan menolak pemrosesan data mereka. Hak ini dapat dilaksanakan melalui toko yang bersangkutan (pengendali data) atau dengan menghubungi kami. Permintaan akses yang dikirim oleh Shopify (webhook customers/data_request) akan ditangani.",
+      "contactTitle": "Kontak",
+      "contact": "Untuk pertanyaan apa pun:"
+    },
+    "support": {
+      "title": "Bantuan dan kontak",
+      "intro": "Ada pertanyaan atau masalah? Hubungi kami, kami akan membalas dalam 2 hari kerja:",
+      "faqTitle": "Pertanyaan umum",
+      "faq": {
+        "widget": {
+          "q": "Bagaimana cara menampilkan program di toko saya?",
+          "a": "Di Shopify: Toko Online → Tema → Sesuaikan → Penyematan aplikasi, lalu aktifkan “Hoshi Club”. Dasbor aplikasi menyediakan tautan langsung."
+        },
+        "points": {
+          "q": "Kapan pelanggan saya mendapatkan poin?",
+          "a": "Secara otomatis begitu pesanan dibayar. Poin akan dikurangi jika pesanan dikembalikan dananya."
+        },
+        "tierDiscounts": {
+          "q": "Bagaimana cara kerja diskon tingkat?",
+          "a": "Setiap tingkat menambahkan tag ke pelanggan dan membuat diskon otomatis Shopify khusus untuk pelanggan di tingkat tersebut. Diskon berlaku saat checkout, tanpa kode. Anda dapat melihat diskon di Shopify → Diskon."
+        },
+        "assignTier": {
+          "q": "Bisakah saya menetapkan tingkat untuk pelanggan tertentu?",
+          "a": "Bisa: Anggota → Tambahkan pelanggan, atau dari halaman anggota (bagian “Tingkat pelanggan”)."
+        },
+        "referrals": {
+          "q": "Bagaimana cara kerja referensi?",
+          "a": "Setiap anggota memiliki tautan pribadi. Teman yang diundang memasukkan email-nya dan menerima kode selamat datang; pemberi referensi mendapatkan poin saat kode tersebut digunakan dalam pesanan yang dibayar."
+        },
+        "languages": {
+          "q": "Bahasa apa saja yang didukung?",
+          "a": "Aplikasi mengikuti bahasa admin Shopify Anda dan widget mengikuti bahasa toko Anda, dalam 36 bahasa. Nama hadiah yang dibiarkan kosong diterjemahkan secara otomatis."
+        },
+        "uninstall": {
+          "q": "Apa yang terjadi jika saya menghapus instalasi aplikasi?",
+          "a": "Diskon otomatis tetap ada di Shopify sampai Anda menghapusnya. Data program dihapus 48 jam setelah aplikasi dihapus instalasinya."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "Hadiah",
+    "new": "Hadiah baru",
+    "create": "Buat hadiah",
+    "editTitle": "Edit hadiah",
+    "deleted": "Hadiah dihapus",
+    "hidden": "Hadiah disembunyikan",
+    "shown": "Hadiah ditampilkan",
+    "updated": "Hadiah diperbarui",
+    "created": "Hadiah dibuat",
+    "errors": {
+      "cost": "Biaya poin harus lebih dari 0",
+      "value": "Masukkan nilai diskon",
+      "percent": "Diskon tidak boleh melebihi 100%"
+    },
+    "emptyTitle": "Belum ada hadiah",
+    "emptyText": "Buat hadiah pertama Anda: pelanggan dapat memperolehnya dengan menukarkan {pointsName} mereka.",
+    "columns": {
+      "reward": "Hadiah",
+      "cost": "Biaya",
+      "claimed": "Diklaim"
+    },
+    "types": {
+      "AMOUNT": "Jumlah tetap",
+      "PERCENT": "Persentase",
+      "FREE_SHIPPING": "Gratis ongkir"
+    },
+    "minimumShort": "Mulai dari belanja {amount}",
+    "autoTranslated": "Nama diterjemahkan otomatis",
+    "timesClaimed_other": "{count} kali",
+    "visible": "Ditampilkan",
+    "hiddenBadge": "Disembunyikan",
+    "hide": "Sembunyikan",
+    "show": "Tampilkan",
+    "confirmDelete": "Hapus “{title}”?",
+    "tipTitle": "Tips",
+    "tip": "Hadiah pertama yang baik dapat diperoleh dalam 2 hingga 3 pesanan. Dengan 1 poin per unit yang dibelanjakan, 500 poin untuk potongan 5 setara dengan diskon 1%: menarik tanpa mengurangi margin Anda.",
+    "typeLabel": "Jenis hadiah",
+    "percentLabel": "Persentase diskon",
+    "amountLabel": "Jumlah diskon",
+    "costLabel": "Biaya poin",
+    "nameLabel": "Nama tampilan (opsional)",
+    "nameDetails": "Biarkan kosong untuk menampilkan nama yang diterjemahkan ke bahasa pelanggan Anda.",
+    "minimumLabel": "Jumlah pesanan minimum (opsional)"
+  },
+  "labels": {
+    "rewardPercent": "Diskon {value}%",
+    "rewardAmount": "Potongan {amount}",
+    "freeShipping": "Gratis ongkir",
+    "percentOff": "Diskon {value}%",
+    "amountOff": "Potongan {amount}",
+    "tierDiscount": "{discount} setiap pesanan",
+    "tierDiscountFrom": "{discount} setiap pesanan di atas {minimum}",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{reward} untuk pesanan di atas {minimum}"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "Selamat datang",
+      "ORDER": "Pesanan",
+      "FIRST_ORDER": "Pesanan pertama",
+      "REDEEM": "Penukaran",
+      "REFUND": "Pengembalian dana",
+      "ADJUST": "Penyesuaian",
+      "BIRTHDAY": "Ulang tahun",
+      "REFERRAL": "Referensi",
+      "SOCIAL": "Media sosial",
+      "EXPIRE": "Kedaluwarsa"
+    },
+    "desc": {
+      "SIGNUP": "Bonus selamat datang",
+      "ORDER": "Pesanan {order}",
+      "ORDER_BONUS": "Pesanan {order} (bonus ×{bonus})",
+      "FIRST_ORDER": "Bonus pesanan pertama ({order})",
+      "REDEEM": "Ditukarkan: {reward}",
+      "REFUND": "Pengembalian dana (pesanan {order})",
+      "ADJUST_ADD": "Penambahan manual",
+      "ADJUST_REMOVE": "Pengurangan manual",
+      "BIRTHDAY": "Selamat ulang tahun! ({year})",
+      "REFERRAL": "Referensi: {friend}",
+      "SOCIAL": "Mengikuti di {network}",
+      "EXPIRE": "Kedaluwarsa setelah {months} bulan tidak aktif"
+    }
+  },
+  "errors": {
+    "unexpected": "Terjadi kesalahan: {details}",
+    "memberNotFound": "Anggota tidak ditemukan",
+    "tierNotFound": "Tingkat tidak ditemukan",
+    "rewardUnavailable": "Hadiah ini sudah tidak tersedia",
+    "programDisabled": "Program loyalitas sedang dijeda",
+    "notEnoughPoints": "Anda membutuhkan {missing} {pointsName} lagi",
+    "discountFailed": "Kode diskon tidak dapat dibuat. {details}",
+    "referralCodeFailed": "Kode referensi tidak dapat dibuat",
+    "referralUnavailable": "Referensi tidak tersedia",
+    "invalidEmail": "Alamat email tidak valid",
+    "invalidReferral": "Tautan referensi tidak valid",
+    "selfReferral": "Anda tidak dapat mereferensikan diri sendiri",
+    "referralAlreadyUsed": "Alamat email ini sudah pernah menggunakan referensi",
+    "referralNewCustomersOnly": "Referensi hanya untuk pelanggan baru",
+    "invalidDate": "Tanggal tidak valid",
+    "birthdayAlreadySet": "Tanggal ulang tahun Anda sudah tersimpan",
+    "actionUnavailable": "Tindakan ini tidak tersedia",
+    "loginRequired": "Masuk untuk menikmati program",
+    "notInstalled": "Aplikasi belum terinstal di toko ini",
+    "generic": "Terjadi kesalahan, silakan coba lagi."
+  },
+  "seed": {
+    "pointsName": "poin",
+    "tierBronze": "Perunggu",
+    "tierSilver": "Perak",
+    "tierGold": "Emas"
+  },
+  "server": {
+    "tierDiscountTitle": "Tingkat {tier}: {discount}",
+    "tierShippingTitle": "Tingkat {tier}: gratis ongkir"
+  },
+  "tiers": {
+    "title": "Tingkat pelanggan",
+    "new": "Tingkat baru",
+    "create": "Buat tingkat",
+    "editTitle": "Edit tingkat",
+    "resync": "Sinkronkan ulang dengan Shopify",
+    "deleted": "Tingkat dihapus",
+    "created": "Tingkat dibuat",
+    "updated": "Tingkat diperbarui",
+    "resynced_other": "Sinkronisasi selesai ({count} pelanggan diperbarui)",
+    "errors": {
+      "name": "Beri nama untuk tingkat",
+      "value": "Masukkan nilai diskon",
+      "percent": "Diskon tidak boleh melebihi 100%",
+      "sync": "Tingkat disimpan, tetapi diskon Shopify tidak dapat dibuat: {details}"
+    },
+    "intro": "Setiap tingkat dapat menawarkan keuntungan yang diterapkan otomatis saat checkout (diskon permanen, gratis ongkir), pengali {pointsName}, dan keuntungan kustom. Tingkat bisa otomatis (dicapai dengan mengumpulkan {pointsName}) atau manual (Anda menetapkannya sendiri dari halaman pelanggan, mis. “Duta” atau “Grosir”). Tingkat manual selalu diprioritaskan.",
+    "emptyTitle": "Belum ada tingkat",
+    "emptyText": "Buat tingkat pelanggan beserta keuntungannya.",
+    "autoSection": "Tingkat otomatis (berdasarkan poin)",
+    "manualSection": "Tingkat yang ditetapkan manual",
+    "levelNumber": "Level {number}",
+    "invitationOnly": "Khusus undangan",
+    "assignedManually": "Ditetapkan manual",
+    "fromPoints": "Mulai dari {points} {pointsName} terkumpul",
+    "noPerks": "Belum ada keuntungan",
+    "customers_other": "{count} pelanggan",
+    "tag": "Tag: {tag}",
+    "syncError": "Diskon Shopify tidak dibuat: {details}",
+    "confirmDelete": "Hapus tingkat “{name}”? Diskon otomatisnya akan dihapus.",
+    "nameLabel": "Nama tingkat",
+    "namePlaceholder": "Mis. Emas, Duta, Grosir…",
+    "modeQuestion": "Bagaimana pelanggan mendapatkan tingkat ini?",
+    "modeAuto": "Otomatis",
+    "modeAutoText": "Dengan mengumpulkan {pointsName}",
+    "modeManual": "Manual",
+    "modeManualText": "Anda menetapkannya sendiri",
+    "minPointsLabel": "{pointsName} terkumpul yang dibutuhkan",
+    "perksTitle": "Keuntungan otomatis",
+    "discountLabel": "Diskon permanen untuk pesanan",
+    "discountNone": "Tanpa diskon",
+    "discountPercent": "Persentase (mis. diskon 10%)",
+    "discountAmount": "Jumlah tetap (mis. potongan 5)",
+    "discountValue": "Nilai diskon",
+    "discountMinimum": "Pembelian minimum (opsional)",
+    "freeShipping": "Gratis ongkir untuk setiap pesanan",
+    "multiplierLabel": "Pengali {pointsName}",
+    "multiplierDetails": "1 = normal, 2 = {pointsName} dua kali lipat per pesanan.",
+    "otherPerks": "Keuntungan lain (satu per baris, ditampilkan kepada pelanggan)",
+    "otherPerksPlaceholder": "Akses awal ke obral\nHadiah ulang tahun"
+  },
+  "widget": {
+    "title": "Hadiah saya",
+    "unavailable": "Program loyalitas untuk sementara tidak tersedia.",
+    "guestText": "Buat akun untuk mendapatkan poin di setiap pembelian dan membuka diskon eksklusif.",
+    "join": "Gabung program",
+    "haveAccount": "Saya sudah punya akun",
+    "hello": "Hai {name}",
+    "earnTitle": "Dapatkan {pointsName}",
+    "nextTier": "{points} {pointsName} lagi untuk mencapai {tier}",
+    "bonusDefault": "{pointsName} ×{multiplier}!",
+    "bonusUntil": "hingga {date}",
+    "rewardsTitle": "Hadiah",
+    "minimum": "mulai {amount}",
+    "redeem": "Tukarkan",
+    "missing": "Kurang {points}",
+    "codesTitle": "Kode saya",
+    "useCode": "Gunakan",
+    "perksTitle": "Keuntungan {tier} saya",
+    "perUnit": "{points} {pointsName} per {amount} yang dibelanjakan",
+    "signup": "{points} {pointsName} saat Anda mendaftar",
+    "firstOrder": "{points} {pointsName} untuk pesanan pertama Anda",
+    "follow": "Ikuti kami di {network}",
+    "followButton": "Ikuti",
+    "birthdayGuest": "{points} {pointsName} di hari ulang tahun Anda",
+    "birthdaySet": "Ulang tahun pada {date}: {points} {pointsName} untuk Anda",
+    "birthdayAsk": "Tanggal ulang tahun Anda:",
+    "birthdayConfirm": "Apakah ulang tahun Anda pada {date}? Tanggal ini tidak dapat diubah nanti.",
+    "birthdaySaved": "Tanggal ulang tahun disimpan 🎂",
+    "day": "Hari",
+    "month": "Bulan",
+    "ok": "OK",
+    "socialThanks": "Terima kasih! Poin Anda sudah ditambahkan",
+    "socialAlready": "Anda sudah mendapatkan poin untuk jaringan ini",
+    "referralTitle": "Referensi",
+    "referralMemberTitle": "Ajak teman Anda",
+    "referralIntro": "Berikan {reward} kepada teman Anda dan dapatkan {points} {pointsName} saat mereka melakukan pesanan pertama.",
+    "referralLink": "Tautan referensi",
+    "copy": "Salin",
+    "copied": "Disalin!",
+    "share": "Bagikan…",
+    "shareText": "Nikmati diskon untuk pesanan pertama Anda!",
+    "referralsDone_other": "{count} teman direferensikan 🎉",
+    "tiersTitle": "Tingkat",
+    "tierFrom": "mulai {points} {pointsName}",
+    "expires": "{pointsName} Anda berlaku hingga {date} (diperpanjang setiap kali berbelanja).",
+    "confirmRedeem": "Tukarkan poin Anda dengan “{reward}”?",
+    "congrats": "Selamat!",
+    "rewardReady": "Hadiah “{reward}” Anda sudah siap:",
+    "applyCart": "Terapkan ke keranjang saya",
+    "close": "Tutup",
+    "errorGeneric": "Terjadi kesalahan, silakan coba lagi.",
+    "aFriend": "Seorang teman",
+    "giftTitle": "{name} mengirimi Anda hadiah!",
+    "giftText": "Nikmati {reward} untuk pesanan pertama Anda.",
+    "emailPlaceholder": "Alamat email Anda",
+    "getCode": "Dapatkan kode saya",
+    "later": "Nanti saja",
+    "welcomeCodeTitle": "Kode selamat datang Anda",
+    "welcomeCodeText": "{reward} untuk pesanan pertama Anda:",
+    "continueShopping": "Lanjutkan belanja",
+    "productPoints": "Dapatkan {points} {pointsName} dengan pembelian ini"
+  }
+}

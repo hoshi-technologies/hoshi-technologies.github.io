@@ -1,0 +1,588 @@
+{
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "members": "Thành viên",
+    "rewards": "Phần thưởng",
+    "tiers": "Hạng khách hàng",
+    "settings": "Cài đặt"
+  },
+  "common": {
+    "edit": "Chỉnh sửa",
+    "active": "Đang hoạt động",
+    "paused": "Đã tạm dừng",
+    "customer": "Khách hàng",
+    "type": "Loại",
+    "detail": "Chi tiết",
+    "points": "Điểm",
+    "date": "Ngày",
+    "anonymousCustomer": "Khách hàng ẩn danh",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "status": "Trạng thái",
+    "actions": "Thao tác",
+    "change": "Thay đổi",
+    "optional": "không bắt buộc",
+    "color": "Màu"
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển",
+    "manageRewards": "Quản lý phần thưởng",
+    "pausedTitle": "Chương trình đang tạm dừng",
+    "pausedText": "Khách hàng của bạn không còn tích điểm và không thể đổi phần thưởng.",
+    "reactivate": "Bật lại",
+    "campaignTitle": "Chiến dịch đang chạy: {pointsName} ×{multiplier}",
+    "campaignUntil": "Đến {date}.",
+    "campaignNoEnd": "Không có ngày kết thúc.",
+    "welcome": "Chào mừng bạn đến với Hoshi Club",
+    "summary": "Chi tiêu {amount} = {points} {pointsName} · Tặng {signup} {pointsName} khi đăng ký",
+    "stats": {
+      "members": "Thành viên",
+      "newMembers_other": "+{count} trong 30 ngày qua",
+      "pointsEarned": "{pointsName} đã trao",
+      "pointsSpent": "{pointsName} đã đổi",
+      "rewardsClaimed": "Phần thưởng đã nhận",
+      "rewardsUsed_other": "{count} đã dùng trong đơn hàng",
+      "rewardRevenue": "Doanh thu từ phần thưởng",
+      "rewardRevenueHint": "Đơn hàng sử dụng mã khách hàng thân thiết",
+      "referrals": "Khách hàng được giới thiệu",
+      "pendingReferrals_other": "{count} lời mời đang chờ",
+      "referralRevenue": "Doanh thu từ giới thiệu",
+      "referralRevenueHint": "Đơn hàng đầu tiên của bạn bè được giới thiệu"
+    },
+    "chartTitle": "{pointsName} tích được mỗi ngày (30 ngày qua)",
+    "chartAria": "{total} {unit} tích được trong 30 ngày qua",
+    "recentActivity": "Hoạt động gần đây",
+    "noActivity": "Chưa có hoạt động nào. Điểm sẽ xuất hiện ở đây sau đơn hàng hoặc lượt đăng ký đầu tiên.",
+    "gettingStarted": "Bắt đầu",
+    "steps": {
+      "enableTitle": "Bật chương trình",
+      "enableText": "Khách hàng của bạn bắt đầu tích điểm ngay khi chương trình được kích hoạt.",
+      "rewardsTitle": "Tạo phần thưởng",
+      "rewardsText": "Các mức giảm giá khách hàng có thể mở khóa bằng điểm của mình.",
+      "tiersTitle": "Thiết lập hạng khách hàng",
+      "tiersText": "Hạng Đồng, Bạc, Vàng hoặc hạng chỉ dành cho khách được mời, kèm giảm giá tự động.",
+      "widgetTitle": "Hiển thị tiện ích trên cửa hàng",
+      "widgetText": "Bật “Hoshi Club” trong trình chỉnh sửa chủ đề (Nhúng ứng dụng).",
+      "widgetAction": "Mở trình chỉnh sửa chủ đề"
+    },
+    "howItWorks": "Chương trình hoạt động như thế nào?",
+    "how": {
+      "signup": "Khách hàng tạo tài khoản: nhận thưởng chào mừng.",
+      "orders": "Mỗi đơn hàng đã thanh toán đều được tích điểm.",
+      "tiers": "Tích càng nhiều, hạng càng cao (hoặc bạn tự chỉ định hạng).",
+      "discounts": "Mỗi hạng có thể được giảm giá tự động khi thanh toán.",
+      "rewards": "Từ tiện ích, khách hàng đổi điểm lấy mã giảm giá cá nhân.",
+      "more": "Khách hàng cũng được tích điểm khi giới thiệu bạn bè, vào ngày sinh nhật và khi theo dõi bạn trên mạng xã hội."
+    }
+  },
+  "member": {
+    "viewCustomer": "Xem khách hàng",
+    "tierSaved": "Đã cập nhật hạng",
+    "codeCreated": "Đã tạo mã: {code}",
+    "pointsAdded": "Đã cộng điểm",
+    "pointsRemoved": "Đã trừ điểm",
+    "errors": {
+      "points": "Nhập số điểm"
+    },
+    "available": "Số dư khả dụng",
+    "tier": "Hạng",
+    "tierAssigned": "Hạng (được chỉ định)",
+    "noTier": "Không có",
+    "lifetimeAndOrders": "{lifetime} tổng cộng · {orders}",
+    "toNextTier": "Còn {points} {pointsName} nữa để đạt hạng {tier}",
+    "history": "Lịch sử điểm",
+    "noHistory": "Chưa có hoạt động nào.",
+    "codes": "Mã giảm giá đã nhận",
+    "code": "Mã",
+    "codeUsed": "Đã dùng",
+    "codeAvailable": "Khả dụng",
+    "adjust": "Điều chỉnh số dư",
+    "adjustAction": "Thao tác",
+    "addPoints": "Cộng điểm",
+    "removePoints": "Trừ điểm",
+    "pointsCount": "Số điểm",
+    "reason": "Lý do (hiển thị trong lịch sử)",
+    "reasonPlaceholder": "Tri ân khách hàng",
+    "confirm": "Xác nhận",
+    "giftReward": "Tặng phần thưởng",
+    "giftRewardText": "Tạo mã cá nhân và trừ điểm của khách hàng.",
+    "generateCode": "Tạo mã",
+    "info": "Thông tin",
+    "birthday": "Sinh nhật: {date}",
+    "notProvided": "chưa cung cấp",
+    "referralCode": "Mã giới thiệu: {code}",
+    "referrals": "Giới thiệu: {converted} thành công trên {invited} lời mời",
+    "expiresAt": "Điểm có hiệu lực đến {date}",
+    "tierSection": "Hạng khách hàng",
+    "tierLocked": "Hạng đã khóa: không còn thay đổi theo điểm.",
+    "tierAuto": "Tự động: hiện là {tier}, thay đổi theo {pointsName}.",
+    "applyTier": "Áp dụng hạng",
+    "perks": "Đặc quyền hạng {tier}",
+    "noPerks": "Chưa có đặc quyền nào cho hạng này.",
+    "shopifyTag": "Thẻ Shopify: {tag}",
+    "danger": "Vùng nguy hiểm",
+    "confirmRemove": "Xóa khách hàng này khỏi chương trình? Số dư và lịch sử của họ sẽ bị xóa.",
+    "remove": "Xóa khỏi chương trình"
+  },
+  "members": {
+    "title": "Thành viên",
+    "add": "Thêm khách hàng",
+    "importAll": "Nhập tất cả khách hàng của tôi",
+    "joined": "{name} đã tham gia chương trình",
+    "tierUpdated": "Đã cập nhật hạng của {name}",
+    "imported_other": "Đã nhập {count} khách hàng",
+    "allImported": "Tất cả khách hàng của bạn đều đã là thành viên",
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Tên hoặc email",
+    "tier": "Hạng",
+    "allTiers": "Tất cả các hạng",
+    "sort": "Sắp xếp",
+    "sortPoints": "Nhiều điểm nhất",
+    "sortRecent": "Mới nhất",
+    "email": "Email",
+    "balance": "Số dư",
+    "lifetime": "Tổng cộng",
+    "orders": "Đơn hàng",
+    "assigned": "Được chỉ định",
+    "noResults": "Không có thành viên nào khớp với tìm kiếm của bạn.",
+    "empty": "Chưa có thành viên nào. Hãy thêm một khách hàng hoặc nhập tất cả khách hàng của bạn.",
+    "total_other": "{count} thành viên"
+  },
+  "addMember": {
+    "title": "Thêm khách hàng vào chương trình",
+    "search": "Tìm khách hàng Shopify",
+    "searchPlaceholder": "Tên, email hoặc số điện thoại",
+    "searching": "Đang tìm kiếm",
+    "noResults": "Không tìm thấy khách hàng nào.",
+    "noEmail": "Không có email",
+    "orders_other": "{count} đơn hàng",
+    "alreadyMember": "Đã là thành viên",
+    "choose": "Chọn",
+    "tierLabel": "Hạng khách hàng",
+    "tierDetails": "“Tự động”: hạng thay đổi theo điểm. Nếu không, hạng được chọn sẽ bị khóa cố định.",
+    "autoTier": "Tự động (dựa trên {pointsName})",
+    "invitationTier": "{name} (chỉ dành cho khách được mời)",
+    "welcomeBonus": "Tặng thưởng chào mừng ({points} {pointsName})",
+    "update": "Cập nhật",
+    "submit": "Thêm vào chương trình"
+  },
+  "program": {
+    "title": "Cài đặt chương trình",
+    "saved": "Đã lưu cài đặt",
+    "pointsNameFallback": "điểm",
+    "status": {
+      "title": "Trạng thái",
+      "label": "Chương trình khách hàng thân thiết đang hoạt động",
+      "details": "Tắt để tạm dừng chương trình mà không làm mất điểm của khách hàng."
+    },
+    "earn": {
+      "title": "Tích điểm",
+      "pointsName": "Tên gọi điểm",
+      "pointsNameDetails": "Ví dụ: điểm, sao, xu…",
+      "perUnit": "Số điểm cho mỗi {currency} chi tiêu",
+      "perUnitDetails": "Ví dụ: đơn hàng {amount} nhận {points} {pointsName} (trước hệ số nhân của hạng).",
+      "signup": "Thưởng chào mừng",
+      "signupDetails": "Được tặng khi khách hàng tạo tài khoản.",
+      "firstOrder": "Thưởng đơn hàng đầu tiên",
+      "firstOrderDetails": "Cộng thêm vào điểm của đơn hàng."
+    },
+    "birthday": {
+      "title": "Sinh nhật 🎂",
+      "label": "Số điểm tặng vào ngày sinh nhật",
+      "details": "Khách hàng nhập ngày sinh trong tiện ích. Để tránh lạm dụng, ngày sinh phải được lưu ít nhất 30 ngày trước đó. 0 = tắt."
+    },
+    "referral": {
+      "title": "Giới thiệu 🤝",
+      "enable": "Bật tính năng giới thiệu",
+      "enableDetails": "Mỗi thành viên nhận được một liên kết cá nhân. Người bạn nhận mã chào mừng; người giới thiệu được tích điểm khi người bạn đặt đơn hàng đầu tiên.",
+      "referrerPoints": "Số điểm người giới thiệu nhận được",
+      "friendGift": "Quà cho người bạn",
+      "value": "Giá trị",
+      "minimum": "Giá trị mua tối thiểu (không bắt buộc)"
+    },
+    "social": {
+      "title": "Mạng xã hội 📣",
+      "intro": "Thêm trang của bạn: tiện ích sẽ mời khách hàng theo dõi bạn để nhận {pointsName} (một lần cho mỗi mạng).",
+      "points": "Số điểm cho mỗi mạng được theo dõi"
+    },
+    "bonus": {
+      "title": "Chiến dịch thưởng điểm 🔥",
+      "intro": "Nhân số {pointsName} tích được trong một khoảng thời gian (đợt giảm giá, ngày lễ, ra mắt sản phẩm…). Một biểu ngữ sẽ hiển thị trong tiện ích suốt thời gian chiến dịch.",
+      "multiplier": "Hệ số nhân",
+      "none": "Không có chiến dịch",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "Bắt đầu (không bắt buộc)",
+      "end": "Kết thúc (không bắt buộc)",
+      "message": "Nội dung biểu ngữ",
+      "messageDetails": "Để trống để hiển thị thông điệp mặc định đã được dịch.",
+      "messagePlaceholder": "Black Friday: {pointsName} ×{multiplier}!"
+    },
+    "expiration": {
+      "title": "Hết hạn điểm ⏳",
+      "label": "Điểm hết hạn sau",
+      "details": "Mỗi lần mua hàng, đổi thưởng hoặc tích điểm đều gia hạn ngày hết hạn. Ngày hết hạn khuyến khích khách hàng quay lại.",
+      "never": "Không bao giờ",
+      "months_other": "{count} tháng không hoạt động"
+    },
+    "widget": {
+      "title": "Giao diện tiện ích",
+      "languageNote": "Tiện ích tự động hiển thị theo ngôn ngữ của cửa hàng bạn (hỗ trợ 36 ngôn ngữ).",
+      "widgetTitle": "Tiêu đề tiện ích",
+      "widgetTitleDetails": "Để trống để dùng tiêu đề mặc định đã được dịch sang mọi ngôn ngữ.",
+      "defaultTitle": "Phần thưởng của tôi",
+      "color": "Màu chính",
+      "colorOption": "Màu {color}",
+      "customColor": "Màu tùy chỉnh",
+      "position": "Vị trí nút",
+      "right": "Góc dưới bên phải",
+      "left": "Góc dưới bên trái"
+    },
+    "preview": "Xem trước",
+    "previewTier": "Hạng Bạc",
+    "previewRedeem": "Đổi"
+  },
+  "landing": {
+    "tagline": "Chương trình khách hàng thân thiết đơn giản nhất cho cửa hàng Shopify của bạn: điểm, hạng VIP với giảm giá tự động, giới thiệu bạn bè và phần thưởng chỉ với vài cú nhấp chuột.",
+    "pricing": "{price}/tháng · bao gồm mọi tính năng · dùng thử miễn phí {days} ngày",
+    "shopDomain": "Tên miền cửa hàng",
+    "install": "Cài đặt",
+    "login": "Đăng nhập",
+    "installFromStore": "Cài đặt Hoshi Club từ Shopify App Store.",
+    "errors": {
+      "missingShop": "Nhập tên miền cửa hàng của bạn",
+      "invalidShop": "Tên miền cửa hàng này không hợp lệ"
+    },
+    "features": {
+      "points": {
+        "title": "Tích điểm tự động.",
+        "text": "Khách hàng tích điểm với mỗi đơn hàng, không cần thiết lập kỹ thuật."
+      },
+      "tiers": {
+        "title": "Hạng VIP.",
+        "text": "Hạng Đồng, Bạc, Vàng hoặc hạng chỉ dành cho khách được mời, kèm giảm giá tự động và hệ số nhân điểm cho những khách hàng tốt nhất."
+      },
+      "referrals": {
+        "title": "Giới thiệu và tiền thưởng.",
+        "text": "Chương trình giới thiệu, quà sinh nhật, thưởng theo dõi mạng xã hội và chiến dịch nhân đôi điểm."
+      },
+      "widget": {
+        "title": "Tiện ích thanh lịch.",
+        "text": "Nút nổi mang màu sắc cửa hàng của bạn để xem và đổi điểm."
+      },
+      "languages": {
+        "title": "36 ngôn ngữ.",
+        "text": "Ứng dụng và tiện ích nói ngôn ngữ của bạn và của khách hàng."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "Chính sách quyền riêng tư",
+    "supportLink": "Trợ giúp và liên hệ",
+    "language": "Ngôn ngữ",
+    "privacy": {
+      "title": "Chính sách quyền riêng tư",
+      "updated": "Hoshi Club, do Hoshi Technologies phát hành. Cập nhật lần cuối: {date}.",
+      "intro": "Hoshi Club (“ứng dụng”) cho phép người bán trên Shopify cung cấp chương trình khách hàng thân thiết cho khách hàng của họ. Chính sách này giải thích ứng dụng xử lý những dữ liệu nào, vì sao và như thế nào.",
+      "collectedTitle": "Dữ liệu được thu thập",
+      "collected": {
+        "store": {
+          "label": "Dữ liệu cửa hàng:",
+          "text": "tên miền cửa hàng và mã truy cập do Shopify cung cấp khi cài đặt."
+        },
+        "members": {
+          "label": "Dữ liệu thành viên:",
+          "text": "ID khách hàng Shopify, tên, họ, địa chỉ email, số lượng đơn hàng, số dư và lịch sử điểm, hạng khách hàng thân thiết, mã giảm giá đã nhận, ngày sinh (ngày và tháng, nếu khách hàng cung cấp) và mã giới thiệu."
+        },
+        "referrals": {
+          "label": "Dữ liệu giới thiệu:",
+          "text": "địa chỉ email do người được mời nhập để nhận mã chào mừng."
+        },
+        "orders": {
+          "label": "Dữ liệu đơn hàng:",
+          "text": "ID, tổng phụ và tổng tiền của các đơn hàng đã thanh toán cùng mã giảm giá đã sử dụng, chỉ nhằm mục đích tính điểm."
+        }
+      },
+      "noPayment": "Ứng dụng không thu thập dữ liệu thanh toán và không sử dụng cookie quảng cáo.",
+      "useTitle": "Cách sử dụng dữ liệu",
+      "use": "Dữ liệu chỉ được sử dụng để vận hành chương trình khách hàng thân thiết của cửa hàng: tính và hiển thị điểm, xếp hạng và áp dụng đặc quyền của hạng, tạo mã giảm giá, quản lý giới thiệu và hiển thị số liệu thống kê cho người bán. Dữ liệu không bao giờ được bán, cho thuê hoặc chia sẻ với bên thứ ba cho mục đích tiếp thị.",
+      "hostingTitle": "Lưu trữ và bên xử lý",
+      "hosting": "Dữ liệu được lưu trữ bởi Cloudflare (Cloudflare Workers và D1). Shopify cung cấp dữ liệu cửa hàng và khách hàng thông qua API của mình. Các nhà cung cấp này đóng vai trò bên xử lý dữ liệu và áp dụng các biện pháp bảo mật riêng.",
+      "retentionTitle": "Lưu giữ và xóa dữ liệu",
+      "retention": {
+        "installed": "Dữ liệu được lưu giữ trong suốt thời gian ứng dụng được cài đặt.",
+        "customerRedact": "Khi khách hàng yêu cầu (thông qua Shopify), dữ liệu của họ sẽ tự động bị xóa (webhook customers/redact).",
+        "shopRedact": "48 giờ sau khi gỡ cài đặt, Shopify yêu cầu xóa dữ liệu của cửa hàng; toàn bộ dữ liệu khi đó sẽ bị xóa (webhook shop/redact).",
+        "merchant": "Người bán có thể xóa khách hàng khỏi chương trình bất cứ lúc nào từ ứng dụng."
+      },
+      "rightsTitle": "Quyền của bạn",
+      "rights": "Theo GDPR và các luật tương tự, khách hàng có quyền truy cập, chỉnh sửa, xóa và phản đối việc xử lý dữ liệu của mình. Họ có thể thực hiện các quyền này với cửa hàng liên quan (bên kiểm soát dữ liệu) hoặc bằng cách liên hệ với chúng tôi. Các yêu cầu truy cập do Shopify gửi (webhook customers/data_request) đều được xử lý.",
+      "contactTitle": "Liên hệ",
+      "contact": "Mọi thắc mắc xin gửi về:"
+    },
+    "support": {
+      "title": "Trợ giúp và liên hệ",
+      "intro": "Bạn có câu hỏi hoặc gặp sự cố? Hãy gửi thư cho chúng tôi, chúng tôi sẽ phản hồi trong vòng 2 ngày làm việc:",
+      "faqTitle": "Câu hỏi thường gặp",
+      "faq": {
+        "widget": {
+          "q": "Làm cách nào để hiển thị chương trình trên cửa hàng?",
+          "a": "Trong Shopify: Cửa hàng trực tuyến → Chủ đề → Tùy chỉnh → Nhúng ứng dụng, sau đó bật “Hoshi Club”. Bảng điều khiển của ứng dụng có liên kết trực tiếp."
+        },
+        "points": {
+          "q": "Khi nào khách hàng của tôi nhận được điểm?",
+          "a": "Tự động ngay khi đơn hàng được thanh toán. Điểm sẽ bị trừ nếu đơn hàng được hoàn tiền."
+        },
+        "tierDiscounts": {
+          "q": "Giảm giá theo hạng hoạt động như thế nào?",
+          "a": "Mỗi hạng gắn một thẻ cho khách hàng và tạo một giảm giá tự động trên Shopify dành riêng cho khách hàng thuộc hạng đó. Giảm giá được áp dụng khi thanh toán, không cần mã. Bạn có thể xem các giảm giá trong Shopify → Giảm giá."
+        },
+        "assignTier": {
+          "q": "Tôi có thể chỉ định hạng cho một khách hàng cụ thể không?",
+          "a": "Có: Thành viên → Thêm khách hàng, hoặc từ trang của thành viên (mục “Hạng khách hàng”)."
+        },
+        "referrals": {
+          "q": "Tính năng giới thiệu hoạt động như thế nào?",
+          "a": "Mỗi thành viên có một liên kết cá nhân. Người bạn được mời nhập email và nhận mã chào mừng; người giới thiệu được tích điểm khi mã đó được dùng trong một đơn hàng đã thanh toán."
+        },
+        "languages": {
+          "q": "Những ngôn ngữ nào được hỗ trợ?",
+          "a": "Ứng dụng theo ngôn ngữ trang quản trị Shopify của bạn và tiện ích theo ngôn ngữ của cửa hàng, với 36 ngôn ngữ. Tên phần thưởng để trống sẽ được dịch tự động."
+        },
+        "uninstall": {
+          "q": "Điều gì xảy ra nếu tôi gỡ cài đặt ứng dụng?",
+          "a": "Các giảm giá tự động vẫn tồn tại trong Shopify cho đến khi bạn xóa chúng. Dữ liệu chương trình sẽ bị xóa 48 giờ sau khi gỡ cài đặt."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "Phần thưởng",
+    "new": "Phần thưởng mới",
+    "create": "Tạo phần thưởng",
+    "editTitle": "Chỉnh sửa phần thưởng",
+    "deleted": "Đã xóa phần thưởng",
+    "hidden": "Đã ẩn phần thưởng",
+    "shown": "Phần thưởng đã hiển thị",
+    "updated": "Đã cập nhật phần thưởng",
+    "created": "Đã tạo phần thưởng",
+    "errors": {
+      "cost": "Số điểm đổi phải lớn hơn 0",
+      "value": "Nhập giá trị giảm giá",
+      "percent": "Mức giảm giá không được vượt quá 100%"
+    },
+    "emptyTitle": "Chưa có phần thưởng nào",
+    "emptyText": "Tạo phần thưởng đầu tiên: khách hàng có thể đổi {pointsName} của mình để nhận phần thưởng.",
+    "columns": {
+      "reward": "Phần thưởng",
+      "cost": "Chi phí",
+      "claimed": "Đã nhận"
+    },
+    "types": {
+      "AMOUNT": "Số tiền cố định",
+      "PERCENT": "Phần trăm",
+      "FREE_SHIPPING": "Miễn phí vận chuyển"
+    },
+    "minimumShort": "Từ {amount} chi tiêu",
+    "autoTranslated": "Tên được dịch tự động",
+    "timesClaimed_other": "{count} lần",
+    "visible": "Hiển thị",
+    "hiddenBadge": "Đã ẩn",
+    "hide": "Ẩn",
+    "show": "Hiện",
+    "confirmDelete": "Xóa “{title}”?",
+    "tipTitle": "Mẹo",
+    "tip": "Phần thưởng đầu tiên lý tưởng nên đạt được sau 2 đến 3 đơn hàng. Với 1 điểm cho mỗi đơn vị chi tiêu, 500 điểm đổi lấy giảm 5 tương đương mức giảm 1%: hấp dẫn mà không ảnh hưởng đến lợi nhuận của bạn.",
+    "typeLabel": "Loại phần thưởng",
+    "percentLabel": "Phần trăm giảm giá",
+    "amountLabel": "Số tiền giảm giá",
+    "costLabel": "Số điểm đổi",
+    "nameLabel": "Tên hiển thị (không bắt buộc)",
+    "nameDetails": "Để trống để hiển thị tên được dịch sang ngôn ngữ của khách hàng.",
+    "minimumLabel": "Giá trị đơn hàng tối thiểu (không bắt buộc)"
+  },
+  "labels": {
+    "rewardPercent": "Giảm {value}%",
+    "rewardAmount": "Giảm {amount}",
+    "freeShipping": "Miễn phí vận chuyển",
+    "percentOff": "Giảm {value}%",
+    "amountOff": "Giảm {amount}",
+    "tierDiscount": "{discount} mọi đơn hàng",
+    "tierDiscountFrom": "{discount} mọi đơn hàng trên {minimum}",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{reward} cho đơn hàng trên {minimum}"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "Chào mừng",
+      "ORDER": "Đơn hàng",
+      "FIRST_ORDER": "Đơn hàng đầu tiên",
+      "REDEEM": "Đổi thưởng",
+      "REFUND": "Hoàn tiền",
+      "ADJUST": "Điều chỉnh",
+      "BIRTHDAY": "Sinh nhật",
+      "REFERRAL": "Giới thiệu",
+      "SOCIAL": "Mạng xã hội",
+      "EXPIRE": "Hết hạn"
+    },
+    "desc": {
+      "SIGNUP": "Thưởng chào mừng",
+      "ORDER": "Đơn hàng {order}",
+      "ORDER_BONUS": "Đơn hàng {order} (thưởng ×{bonus})",
+      "FIRST_ORDER": "Thưởng đơn hàng đầu tiên ({order})",
+      "REDEEM": "Đã đổi: {reward}",
+      "REFUND": "Hoàn tiền (đơn hàng {order})",
+      "ADJUST_ADD": "Cộng thủ công",
+      "ADJUST_REMOVE": "Trừ thủ công",
+      "BIRTHDAY": "Chúc mừng sinh nhật! ({year})",
+      "REFERRAL": "Giới thiệu: {friend}",
+      "SOCIAL": "Đã theo dõi trên {network}",
+      "EXPIRE": "Hết hạn sau {months} tháng không hoạt động"
+    }
+  },
+  "errors": {
+    "unexpected": "Đã xảy ra lỗi: {details}",
+    "memberNotFound": "Không tìm thấy thành viên",
+    "tierNotFound": "Không tìm thấy hạng",
+    "rewardUnavailable": "Phần thưởng này không còn khả dụng",
+    "programDisabled": "Chương trình khách hàng thân thiết hiện đang tạm dừng",
+    "notEnoughPoints": "Bạn cần thêm {missing} {pointsName}",
+    "discountFailed": "Không thể tạo mã giảm giá. {details}",
+    "referralCodeFailed": "Không thể tạo mã giới thiệu",
+    "referralUnavailable": "Tính năng giới thiệu không khả dụng",
+    "invalidEmail": "Địa chỉ email không hợp lệ",
+    "invalidReferral": "Liên kết giới thiệu không hợp lệ",
+    "selfReferral": "Bạn không thể tự giới thiệu chính mình",
+    "referralAlreadyUsed": "Địa chỉ email này đã được dùng cho một lượt giới thiệu",
+    "referralNewCustomersOnly": "Tính năng giới thiệu chỉ dành cho khách hàng mới",
+    "invalidDate": "Ngày không hợp lệ",
+    "birthdayAlreadySet": "Ngày sinh nhật của bạn đã được lưu",
+    "actionUnavailable": "Thao tác này không khả dụng",
+    "loginRequired": "Đăng nhập để tham gia chương trình",
+    "notInstalled": "Ứng dụng chưa được cài đặt trên cửa hàng này",
+    "generic": "Đã xảy ra lỗi, vui lòng thử lại."
+  },
+  "seed": {
+    "pointsName": "điểm",
+    "tierBronze": "Đồng",
+    "tierSilver": "Bạc",
+    "tierGold": "Vàng"
+  },
+  "server": {
+    "tierDiscountTitle": "Hạng {tier}: {discount}",
+    "tierShippingTitle": "Hạng {tier}: miễn phí vận chuyển"
+  },
+  "tiers": {
+    "title": "Hạng khách hàng",
+    "new": "Hạng mới",
+    "create": "Tạo hạng",
+    "editTitle": "Chỉnh sửa hạng",
+    "resync": "Đồng bộ lại với Shopify",
+    "deleted": "Đã xóa hạng",
+    "created": "Đã tạo hạng",
+    "updated": "Đã cập nhật hạng",
+    "resynced_other": "Đồng bộ hoàn tất (đã cập nhật {count} khách hàng)",
+    "errors": {
+      "name": "Đặt tên cho hạng",
+      "value": "Nhập giá trị giảm giá",
+      "percent": "Mức giảm giá không được vượt quá 100%",
+      "sync": "Đã lưu hạng nhưng không thể tạo giảm giá trên Shopify: {details}"
+    },
+    "intro": "Mỗi hạng có thể mang lại đặc quyền được áp dụng tự động khi thanh toán (giảm giá cố định, miễn phí vận chuyển), hệ số nhân {pointsName} và các đặc quyền tùy chỉnh. Một hạng có thể là tự động (đạt được bằng cách tích {pointsName}) hoặc thủ công (bạn tự chỉ định từ trang của khách hàng, ví dụ “Đại sứ” hoặc “Bán sỉ”). Hạng thủ công luôn được ưu tiên.",
+    "emptyTitle": "Chưa có hạng nào",
+    "emptyText": "Tạo các hạng khách hàng và đặc quyền của từng hạng.",
+    "autoSection": "Hạng tự động (dựa trên điểm)",
+    "manualSection": "Hạng được chỉ định thủ công",
+    "levelNumber": "Cấp {number}",
+    "invitationOnly": "Chỉ dành cho khách được mời",
+    "assignedManually": "Chỉ định thủ công",
+    "fromPoints": "Từ {points} {pointsName} tích lũy",
+    "noPerks": "Chưa có đặc quyền nào",
+    "customers_other": "{count} khách hàng",
+    "tag": "Thẻ: {tag}",
+    "syncError": "Chưa tạo được giảm giá trên Shopify: {details}",
+    "confirmDelete": "Xóa hạng “{name}”? Các giảm giá tự động của hạng này sẽ bị xóa.",
+    "nameLabel": "Tên hạng",
+    "namePlaceholder": "Ví dụ: Vàng, Đại sứ, Bán sỉ…",
+    "modeQuestion": "Khách hàng đạt hạng này bằng cách nào?",
+    "modeAuto": "Tự động",
+    "modeAutoText": "Bằng cách tích {pointsName}",
+    "modeManual": "Thủ công",
+    "modeManualText": "Bạn tự chỉ định",
+    "minPointsLabel": "Số {pointsName} tích lũy cần có",
+    "perksTitle": "Đặc quyền tự động",
+    "discountLabel": "Giảm giá cố định cho đơn hàng",
+    "discountNone": "Không giảm giá",
+    "discountPercent": "Phần trăm (ví dụ: giảm 10%)",
+    "discountAmount": "Số tiền cố định (ví dụ: giảm 5)",
+    "discountValue": "Giá trị giảm giá",
+    "discountMinimum": "Giá trị mua tối thiểu (không bắt buộc)",
+    "freeShipping": "Miễn phí vận chuyển cho mọi đơn hàng",
+    "multiplierLabel": "Hệ số nhân {pointsName}",
+    "multiplierDetails": "1 = bình thường, 2 = gấp đôi {pointsName} cho mỗi đơn hàng.",
+    "otherPerks": "Đặc quyền khác (mỗi dòng một đặc quyền, hiển thị cho khách hàng)",
+    "otherPerksPlaceholder": "Truy cập sớm các đợt giảm giá\nQuà sinh nhật"
+  },
+  "widget": {
+    "title": "Phần thưởng của tôi",
+    "unavailable": "Chương trình khách hàng thân thiết tạm thời không khả dụng.",
+    "guestText": "Tạo tài khoản để tích điểm với mỗi lần mua hàng và mở khóa các ưu đãi độc quyền.",
+    "join": "Tham gia chương trình",
+    "haveAccount": "Tôi đã có tài khoản",
+    "hello": "Xin chào {name}",
+    "earnTitle": "Tích {pointsName}",
+    "nextTier": "Còn {points} {pointsName} để đạt hạng {tier}",
+    "bonusDefault": "{pointsName} ×{multiplier}!",
+    "bonusUntil": "đến {date}",
+    "rewardsTitle": "Phần thưởng",
+    "minimum": "từ {amount}",
+    "redeem": "Đổi",
+    "missing": "Còn thiếu {points}",
+    "codesTitle": "Mã của tôi",
+    "useCode": "Dùng",
+    "perksTitle": "Đặc quyền hạng {tier} của tôi",
+    "perUnit": "{points} {pointsName} cho mỗi {amount} chi tiêu",
+    "signup": "{points} {pointsName} khi bạn đăng ký",
+    "firstOrder": "{points} {pointsName} cho đơn hàng đầu tiên",
+    "follow": "Theo dõi chúng tôi trên {network}",
+    "followButton": "Theo dõi",
+    "birthdayGuest": "{points} {pointsName} vào ngày sinh nhật của bạn",
+    "birthdaySet": "Sinh nhật ngày {date}: tặng bạn {points} {pointsName}",
+    "birthdayAsk": "Ngày sinh nhật của bạn:",
+    "birthdayConfirm": "Sinh nhật của bạn là ngày {date}? Bạn sẽ không thể thay đổi sau này.",
+    "birthdaySaved": "Đã lưu ngày sinh nhật 🎂",
+    "day": "Ngày",
+    "month": "Tháng",
+    "ok": "OK",
+    "socialThanks": "Cảm ơn bạn! Điểm của bạn đã được cộng",
+    "socialAlready": "Bạn đã nhận điểm cho mạng xã hội này rồi",
+    "referralTitle": "Giới thiệu",
+    "referralMemberTitle": "Giới thiệu bạn bè",
+    "referralIntro": "Tặng bạn bè {reward} và nhận {points} {pointsName} khi họ đặt đơn hàng đầu tiên.",
+    "referralLink": "Liên kết giới thiệu",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép!",
+    "share": "Chia sẻ…",
+    "shareText": "Nhận ưu đãi cho đơn hàng đầu tiên của bạn!",
+    "referralsDone_other": "Đã giới thiệu {count} người bạn 🎉",
+    "tiersTitle": "Hạng",
+    "tierFrom": "từ {points} {pointsName}",
+    "expires": "{pointsName} của bạn có hiệu lực đến {date} (được gia hạn sau mỗi lần mua hàng).",
+    "confirmRedeem": "Đổi điểm lấy “{reward}”?",
+    "congrats": "Chúc mừng!",
+    "rewardReady": "Phần thưởng “{reward}” của bạn đã sẵn sàng:",
+    "applyCart": "Áp dụng vào giỏ hàng",
+    "close": "Đóng",
+    "errorGeneric": "Đã xảy ra lỗi, vui lòng thử lại.",
+    "aFriend": "Một người bạn",
+    "giftTitle": "{name} đã gửi bạn một món quà!",
+    "giftText": "Nhận {reward} cho đơn hàng đầu tiên của bạn.",
+    "emailPlaceholder": "Địa chỉ email của bạn",
+    "getCode": "Nhận mã của tôi",
+    "later": "Để sau",
+    "welcomeCodeTitle": "Mã chào mừng của bạn",
+    "welcomeCodeText": "{reward} cho đơn hàng đầu tiên của bạn:",
+    "continueShopping": "Tiếp tục mua sắm",
+    "productPoints": "Nhận {points} {pointsName} với lần mua này"
+  }
+}

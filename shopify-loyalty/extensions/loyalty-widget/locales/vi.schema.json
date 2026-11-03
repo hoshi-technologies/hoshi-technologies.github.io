@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Nội dung nút", "info": "Để trống để dùng tiêu đề đã thiết lập trong ứng dụng." },
+    "position": { "label": "Vị trí", "app": "Theo cài đặt ứng dụng", "right": "Góc dưới bên phải", "left": "Góc dưới bên trái" },
+    "guest_text": { "label": "Thông điệp cho khách chưa đăng nhập", "info": "Để trống để dùng thông điệp mặc định đã được dịch." }
+  },
+  "card": { "name": "Thẻ thành viên", "heading": "Tiêu đề", "max_width": "Chiều rộng tối đa" },
+  "product": { "name": "Điểm sản phẩm", "text": "Văn bản tùy chỉnh", "text_info": "Không bắt buộc. {points} và {name} sẽ được thay thế. Để trống để dùng văn bản mặc định đã được dịch." }
+}
