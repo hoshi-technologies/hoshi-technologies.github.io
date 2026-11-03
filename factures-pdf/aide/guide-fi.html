@@ -8,6 +8,8 @@
   :root { --bg:#f6f6f7; --card:#fff; --text:#202223; --muted:#6d7175; --border:#e1e3e5; --accent:#1f2937; --tip:#eaf4ff; }
   @media (prefers-color-scheme: dark) { :root { --bg:#111213; --card:#1c1d1f; --text:#e3e5e7; --muted:#a6acb2; --border:#2e3033; --accent:#e3e5e7; --tip:#16283d; } }
   * { box-sizing:border-box; }
+  video.shot { display:block; width:100%; height:auto; margin:0 0 20px; border-radius:12px; border:1px solid var(--border); background:#000; }
+  @media print { video.shot { display:none; } }
   body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
   main { max-width:780px; margin:0 auto; padding:24px 16px 64px; }
   .bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
@@ -49,6 +51,7 @@
   <p class="lead">Kaikki, mitä sinun tarvitsee tietää sovelluksen käytöstä, vaihe vaiheelta.</p>
   <div class="langs"><a href="guide-fr.html" hreflang="fr">Français</a> · <a href="guide-en.html" hreflang="en">English</a> · <a href="guide-de.html" hreflang="de">Deutsch</a> · <a href="guide-es.html" hreflang="es">Español</a> · <a href="guide-it.html" hreflang="it">Italiano</a> · <a href="guide-nl.html" hreflang="nl">Nederlands</a> · <a href="guide-pt-BR.html" hreflang="pt-BR">Português (Brasil)</a> · <a href="guide-cs.html" hreflang="cs">Čeština</a> · <a href="guide-da.html" hreflang="da">Dansk</a> · <strong>Suomi</strong> · <a href="guide-nb.html" hreflang="nb">Norsk bokmål</a> · <a href="guide-pl.html" hreflang="pl">Polski</a> · <a href="guide-pt-PT.html" hreflang="pt-PT">Português (Portugal)</a> · <a href="guide-sv.html" hreflang="sv">Svenska</a> · <a href="guide-tr.html" hreflang="tr">Türkçe</a> · <a href="guide-ms.html" hreflang="ms">Bahasa Melayu</a> · <a href="guide-hi.html" hreflang="hi">हिन्दी</a> · <a href="guide-th.html" hreflang="th">ไทย</a> · <a href="guide-ja.html" hreflang="ja">日本語</a> · <a href="guide-ko.html" hreflang="ko">한국어</a> · <a href="guide-zh-CN.html" hreflang="zh-CN">简体中文</a> · <a href="guide-zh-TW.html" hreflang="zh-TW">繁體中文</a></div>
   <p><button type="button" class="print" onclick="print()">Tulosta tai tallenna PDF-muodossa</button></p>
+  <video class="shot" controls preload="none" playsinline poster="../video/demo-en.jpg" aria-label="Hoshi Factures demo"><source src="../video/demo-en.mp4" type="video/mp4"></video>
   <section class="card"><h2>Sisällys</h2><ol class="toc"><li><a href="#install">Asenna sovellus</a></li><li><a href="#company">Anna yrityksesi tiedot</a></li><li><a href="#look">Mukauta ja tarkista lasku</a></li><li><a href="#sending">Valitse, milloin ja miten laskut lähetetään</a></li><li><a href="#shopify-link">Lisää laskun linkki Shopifyn tilausvahvistukseen (valinnainen)</a></li><li><a href="#daily">Seuraa laskujasi päivittäin</a></li><li><a href="#numbering">Numerointi ja kielet</a></li><li><a href="#facturx">Factur-X: sähköinen laskutus</a></li><li><a href="#billing">Hallitse pakettiasi</a></li><li><a href="#best-practices">Hyvät käytännöt</a></li></ol></section>
   <section class="card" id="install">
   <h2><span class="num">1</span><span>Asenna sovellus</span></h2>
