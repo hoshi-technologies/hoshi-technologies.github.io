@@ -1,61 +1,47 @@
-import type { MetaFunction } from "react-router";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import styles from "../components/legal.module.css";
+import { pickMessages, publicLocale } from "../i18n/i18n.server";
+import { isRtl } from "../i18n/config";
+import { createTranslator } from "../i18n/translate";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
-export const meta: MetaFunction = () => [{ title: "Aide – Hoshi Fidélité" }];
+export const meta: MetaFunction = () => [{ title: "Hoshi Club – Help" }];
 
-export const loader = () => ({ email: process.env.SUPPORT_EMAIL || "support@example.com" });
+export const loader = ({ request }: LoaderFunctionArgs) => {
+  const locale = publicLocale(request);
+  return {
+    locale,
+    dir: isRtl(locale) ? "rtl" : "ltr",
+    messages: pickMessages(locale, ["legal"]),
+    email: process.env.SUPPORT_EMAIL || "hoshi.technologies@gmail.com",
+  };
+};
 
-const FAQ = [
-  {
-    q: "Comment afficher le programme sur ma boutique ?",
-    a: "Dans Shopify : Boutique en ligne → Thèmes → Personnaliser → Intégrations d'applications, puis activez « Fidélité Hoshi ». Le tableau de bord de l'application contient un lien direct.",
-  },
-  {
-    q: "Quand mes clients reçoivent-ils leurs points ?",
-    a: "Automatiquement dès que la commande est payée. Les points sont retirés en cas de remboursement.",
-  },
-  {
-    q: "Comment fonctionnent les remises des niveaux ?",
-    a: "Chaque niveau pose une étiquette sur le client et crée une remise automatique Shopify réservée aux clients de ce niveau. Elle s'applique au paiement, sans code. Les remises sont visibles dans Shopify → Réductions.",
-  },
-  {
-    q: "Puis-je attribuer un niveau à un client précis ?",
-    a: "Oui : page Membres → Ajouter un client, ou depuis la fiche d'un membre (section « Niveau du client »).",
-  },
-  {
-    q: "Comment fonctionne le parrainage ?",
-    a: "Chaque membre a un lien personnel. L'ami invité saisit son e-mail et reçoit un code de bienvenue ; le parrain gagne des points quand ce code est utilisé dans une commande payée.",
-  },
-  {
-    q: "Que se passe-t-il si je désinstalle l'application ?",
-    a: "Les remises automatiques restent dans Shopify jusqu'à ce que vous les supprimiez. Les données du programme sont effacées 48 heures après la désinstallation.",
-  },
-];
+const FAQ = ["widget", "points", "tierDiscounts", "assignTier", "referrals", "languages", "uninstall"];
 
 export default function Support() {
-  const { email } = useLoaderData<typeof loader>();
+  const { email, locale, messages } = useLoaderData<typeof loader>();
+  const t = createTranslator(messages, locale);
   return (
     <div className={styles.page}>
       <article className={styles.card}>
-        <h1>Aide et contact</h1>
+        <h1>{t("legal.support.title")}</h1>
         <p>
-          Une question, un problème ? Écrivez-nous à <a href={`mailto:${email}`}>{email}</a> : nous
-          répondons sous 2 jours ouvrés.
+          {t("legal.support.intro")} <a href={`mailto:${email}`}>{email}</a>
         </p>
-        <h2>Questions fréquentes</h2>
-        {FAQ.map((item) => (
-          <div key={item.q}>
-            <p>
-              <strong>{item.q}</strong>
-              <br />
-              {item.a}
-            </p>
-          </div>
+        <h2>{t("legal.support.faqTitle")}</h2>
+        {FAQ.map((key) => (
+          <p key={key}>
+            <strong>{t(`legal.support.faq.${key}.q`)}</strong>
+            <br />
+            {t(`legal.support.faq.${key}.a`)}
+          </p>
         ))}
         <p className={styles.muted}>
-          <a href="/privacy">Politique de confidentialité</a>
+          <a href={`/privacy?lang=${locale}`}>{t("legal.privacyLink")}</a>
         </p>
+        <LanguageSwitcher locale={locale} label={t("legal.language")} />
       </article>
     </div>
   );

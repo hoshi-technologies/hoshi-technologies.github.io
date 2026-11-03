@@ -1,5 +1,5 @@
 {
-  "name": "hoshi-fidelite",
+  "name": "hoshi-club",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,8 @@
     "shopify": "shopify",
     "prisma": "prisma",
     "cf-typegen": "wrangler types",
-    "typecheck": "react-router typegen && tsc --noEmit"
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "i18n:check": "node scripts/check-i18n.mjs --strict"
   },
   "engines": {
     "node": ">=22.12"

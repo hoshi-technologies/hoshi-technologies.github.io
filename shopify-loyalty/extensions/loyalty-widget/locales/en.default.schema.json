@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "label": { "label": "Button text", "info": "Leave empty to use the title set in the app." },
+    "position": { "label": "Position", "app": "App setting", "right": "Bottom right", "left": "Bottom left" },
+    "guest_text": { "label": "Message for logged-out visitors", "info": "Leave empty to use the translated default message." }
+  },
+  "card": { "name": "Loyalty card", "heading": "Heading", "max_width": "Maximum width" },
+  "product": { "name": "Product points", "text": "Custom text", "text_info": "Optional. {points} and {name} are replaced. Leave empty for the translated default text." }
+}

@@ -1,9 +1,9 @@
-# Configuration de l'application Shopify « Hoshi Fidélité ».
-# `npm run config:link` remplit client_id. En production, remplacez https://example.com
+# Configuration de l'application Shopify « Hoshi Club ».
+# `npm run config:link` remplit client_id. En production, remplacez https://hoshi-club.example.com
 # par l'URL du Worker Cloudflare (même valeur que SHOPIFY_APP_URL dans wrangler.jsonc).
 client_id = ""
-name = "Hoshi Fidélité"
-application_url = "https://example.com"
+name = "Hoshi Club"
+application_url = "https://hoshi-club.example.com"
 embedded = true
 
 [access_scopes]
@@ -11,12 +11,12 @@ embedded = true
 scopes = "write_customers,read_orders,write_discounts"
 
 [auth]
-redirect_urls = ["https://example.com/auth/callback"]
+redirect_urls = ["https://hoshi-club.example.com/auth/callback"]
 
 [app_proxy]
-# Le widget de la boutique appelle https://<boutique>/apps/fidelite/...
-url = "https://example.com/proxy"
-subpath = "fidelite"
+# Le widget de la boutique appelle https://<boutique>/apps/hoshi-club/...
+url = "https://hoshi-club.example.com/proxy"
+subpath = "hoshi-club"
 prefix = "apps"
 
 [webhooks]

@@ -18,7 +18,9 @@ import {
   memberTier,
 } from "../loyalty.server";
 import { syncMemberTag } from "../levels.server";
-import { ColorDot, formatNumber, memberName, useActionToast } from "../components/ui";
+import { ColorDot, useActionToast, useMemberName } from "../components/ui";
+import { useI18n } from "../i18n/react";
+import { errorPayload } from "../errors";
 import { hideModal, showModal } from "../components/modal";
 import type { loader as searchLoader } from "./app.customers.search";
 
@@ -142,10 +144,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return {
         ok: true,
         added: member.id,
-        message: created ? `${memberName(member)} a rejoint le programme` : `Niveau de ${memberName(member)} mis à jour`,
+        message: {
+          key: created ? "members.joined" : "members.tierUpdated",
+          params: { name: [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email || "" },
+        },
       };
     } catch (e) {
-      return { error: e instanceof Error ? e.message : "Erreur inattendue" };
+      return { error: errorPayload(e) };
     }
   }
 
@@ -184,7 +189,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   return {
     ok: true,
-    message: imported ? `${imported} client(s) importé(s)` : "Tous vos clients sont déjà membres",
+    message: imported
+      ? { key: "members.imported", params: { count: imported } }
+      : { key: "members.allImported" },
   };
 };
 
@@ -194,18 +201,20 @@ export default function Members() {
   const navigate = useNavigate();
   const fetcher = useFetcher<typeof action>();
   useActionToast(fetcher.data);
+  const { t, number } = useI18n();
+  const memberName = useMemberName();
   const [search, setSearch] = useState(data.q);
 
   useEffect(() => {
     if (search === data.q) return;
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       const next = new URLSearchParams(params);
       if (search) next.set("q", search);
       else next.delete("q");
       next.delete("page");
       setParams(next, { replace: true });
     }, 300);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [search, data.q, params, setParams]);
 
   const setParam = (key: string, value: string) => {
@@ -217,16 +226,16 @@ export default function Members() {
   };
 
   return (
-    <s-page heading="Membres">
+    <s-page heading={t("members.title")}>
       <s-button slot="primary-action" variant="primary" onClick={() => showModal("add-member-modal")}>
-        Ajouter un client
+        {t("members.add")}
       </s-button>
       <s-button
         slot="secondary-actions"
         onClick={() => fetcher.submit({ intent: "import" }, { method: "POST", encType: "application/json" })}
         {...(fetcher.state !== "idle" ? { loading: true } : {})}
       >
-        Importer tous mes clients
+        {t("members.importAll")}
       </s-button>
 
       <s-section padding="none">
@@ -239,19 +248,19 @@ export default function Members() {
         >
           <s-grid slot="filters" gridTemplateColumns="1fr auto auto" gap="small">
             <s-search-field
-              label="Rechercher"
+              label={t("members.search")}
               labelAccessibilityVisibility="exclusive"
-              placeholder="Nom ou e-mail"
+              placeholder={t("members.searchPlaceholder")}
               value={search}
               onInput={(e) => setSearch(e.currentTarget.value)}
             />
             <s-select
-              label="Niveau"
+              label={t("members.tier")}
               labelAccessibilityVisibility="exclusive"
               value={data.tierFilter}
               onChange={(e) => setParam("tier", e.currentTarget.value)}
             >
-              <s-option value="">Tous les niveaux</s-option>
+              <s-option value="">{t("members.allTiers")}</s-option>
               {data.tiers.map((t) => (
                 <s-option key={t.id} value={t.id}>
                   {t.name}
@@ -259,22 +268,22 @@ export default function Members() {
               ))}
             </s-select>
             <s-select
-              label="Trier"
+              label={t("members.sort")}
               labelAccessibilityVisibility="exclusive"
               value={data.sort}
               onChange={(e) => setParam("sort", e.currentTarget.value)}
             >
-              <s-option value="points">Plus de points</s-option>
-              <s-option value="recent">Plus récents</s-option>
+              <s-option value="points">{t("members.sortPoints")}</s-option>
+              <s-option value="recent">{t("members.sortRecent")}</s-option>
             </s-select>
           </s-grid>
           <s-table-header-row>
-            <s-table-header listSlot="primary">Client</s-table-header>
-            <s-table-header listSlot="secondary">E-mail</s-table-header>
-            <s-table-header>Niveau</s-table-header>
-            <s-table-header format="numeric">Solde</s-table-header>
-            <s-table-header format="numeric">Cumulés</s-table-header>
-            <s-table-header format="numeric">Commandes</s-table-header>
+            <s-table-header listSlot="primary">{t("common.customer")}</s-table-header>
+            <s-table-header listSlot="secondary">{t("members.email")}</s-table-header>
+            <s-table-header>{t("members.tier")}</s-table-header>
+            <s-table-header format="numeric">{t("members.balance")}</s-table-header>
+            <s-table-header format="numeric">{t("members.lifetime")}</s-table-header>
+            <s-table-header format="numeric">{t("members.orders")}</s-table-header>
           </s-table-header-row>
           <s-table-body>
             {data.members.map((m) => (
@@ -290,17 +299,17 @@ export default function Members() {
                     <s-stack direction="inline" gap="small-300" alignItems="center">
                       <ColorDot color={m.tier.color} />
                       <s-text>{m.tier.name}</s-text>
-                      {m.tier.manual && <s-badge>Attribué</s-badge>}
+                      {m.tier.manual && <s-badge>{t("members.assigned")}</s-badge>}
                     </s-stack>
                   ) : (
                     "—"
                   )}
                 </s-table-cell>
                 <s-table-cell>
-                  <s-text type="strong">{formatNumber(m.points)}</s-text>
+                  <s-text type="strong">{number(m.points)}</s-text>
                 </s-table-cell>
-                <s-table-cell>{formatNumber(m.lifetimePoints)}</s-table-cell>
-                <s-table-cell>{m.ordersCount}</s-table-cell>
+                <s-table-cell>{number(m.lifetimePoints)}</s-table-cell>
+                <s-table-cell>{number(m.ordersCount)}</s-table-cell>
               </s-table-row>
             ))}
           </s-table-body>
@@ -310,13 +319,13 @@ export default function Members() {
             <span style={{ fontSize: 40 }} aria-hidden="true">👥</span>
             <s-text color="subdued">
               {data.q || data.tierFilter
-                ? "Aucun membre ne correspond à votre recherche."
-                : "Aucun membre pour l'instant. Ajoutez un client ou importez tous vos clients."}
+                ? t("members.noResults")
+                : t("members.empty")}
             </s-text>
           </s-stack>
         )}
       </s-section>
-      <s-text color="subdued">{formatNumber(data.total)} membre(s)</s-text>
+      <s-text color="subdued">{t("members.total", { count: data.total })}</s-text>
 
       <AddMemberModal
         tiers={data.tiers}
@@ -342,6 +351,7 @@ function AddMemberModal({
   const search = useFetcher<typeof searchLoader>();
   const add = useFetcher<typeof action>();
   useActionToast(add.data);
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<NonNullable<typeof search.data>["customers"][number] | null>(null);
   const [tierId, setTierId] = useState("");
@@ -365,21 +375,21 @@ function AddMemberModal({
   const results = search.data?.customers ?? [];
 
   return (
-    <s-modal id="add-member-modal" heading="Ajouter un client au programme" size="large">
+    <s-modal id="add-member-modal" heading={t("addMember.title")} size="large">
       {!selected ? (
         <s-stack gap="base">
           <s-search-field
-            label="Rechercher un client Shopify"
-            placeholder="Nom, e-mail ou téléphone"
+            label={t("addMember.search")}
+            placeholder={t("addMember.searchPlaceholder")}
             value={query}
             onInput={(e) => setQuery(e.currentTarget.value)}
           />
           {search.state === "loading" && results.length === 0 ? (
             <s-stack alignItems="center" padding="base">
-              <s-spinner accessibilityLabel="Recherche" />
+              <s-spinner accessibilityLabel={t("addMember.searching")} />
             </s-stack>
           ) : results.length === 0 ? (
-            <s-text color="subdued">Aucun client trouvé.</s-text>
+            <s-text color="subdued">{t("addMember.noResults")}</s-text>
           ) : (
             <s-stack gap="small-200">
               {results.map((c) => (
@@ -388,10 +398,10 @@ function AddMemberModal({
                     <s-stack gap="none">
                       <s-text type="strong">{c.name}</s-text>
                       <s-text color="subdued">
-                        {c.email ?? "Pas d'e-mail"} · {c.orders} commande(s)
+                        {c.email ?? t("addMember.noEmail")} · {t("addMember.orders", { count: c.orders })}
                       </s-text>
                     </s-stack>
-                    {c.memberId ? <s-badge tone="success">Déjà membre</s-badge> : <s-badge>Choisir</s-badge>}
+                    {c.memberId ? <s-badge tone="success">{t("addMember.alreadyMember")}</s-badge> : <s-badge>{t("addMember.choose")}</s-badge>}
                   </s-stack>
                 </s-clickable>
               ))}
@@ -404,30 +414,29 @@ function AddMemberModal({
             <s-stack direction="inline" justifyContent="space-between" alignItems="center">
               <s-stack gap="none">
                 <s-text type="strong">{selected.name}</s-text>
-                <s-text color="subdued">{selected.email ?? "Pas d'e-mail"}</s-text>
+                <s-text color="subdued">{selected.email ?? t("addMember.noEmail")}</s-text>
               </s-stack>
               <s-button variant="tertiary" onClick={() => setSelected(null)}>
-                Changer
+                {t("common.change")}
               </s-button>
             </s-stack>
           </s-box>
           <s-select
-            label="Niveau du client"
-            details="« Automatique » : le niveau évolue selon les points. Sinon, le niveau choisi est imposé."
+            label={t("addMember.tierLabel")}
+            details={t("addMember.tierDetails")}
             value={tierId}
             onChange={(e) => setTierId(e.currentTarget.value)}
           >
-            <s-option value="">Automatique (selon les {pointsName})</s-option>
-            {tiers.map((t) => (
-              <s-option key={t.id} value={t.id}>
-                {t.name}
-                {t.mode === "MANUAL" ? " (sur invitation)" : ""}
+            <s-option value="">{t("addMember.autoTier", { pointsName })}</s-option>
+            {tiers.map((tier) => (
+              <s-option key={tier.id} value={tier.id}>
+                {tier.mode === "MANUAL" ? t("addMember.invitationTier", { name: tier.name }) : tier.name}
               </s-option>
             ))}
           </s-select>
           {!selected.memberId && signupPoints > 0 && (
             <s-checkbox
-              label={`Offrir le bonus de bienvenue (${signupPoints} ${pointsName})`}
+              label={t("addMember.welcomeBonus", { points: signupPoints, pointsName })}
               checked={welcomeBonus}
               onChange={(e) => setWelcomeBonus(e.currentTarget.checked)}
             />
@@ -455,10 +464,10 @@ function AddMemberModal({
         }
         {...(add.state !== "idle" ? { loading: true } : {})}
       >
-        {selected?.memberId ? "Mettre à jour" : "Ajouter au programme"}
+        {selected?.memberId ? t("addMember.update") : t("addMember.submit")}
       </s-button>
       <s-button slot="secondary-actions" commandFor="add-member-modal" command="--hide">
-        Annuler
+        {t("common.cancel")}
       </s-button>
     </s-modal>
   );

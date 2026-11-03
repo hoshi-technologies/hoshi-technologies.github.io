@@ -9,9 +9,10 @@ import {
   PointsDelta,
   StatCard,
   TransactionBadge,
-  formatDate,
-  memberName,
+  TransactionDetail,
+  useMemberName,
 } from "../components/ui";
+import { useI18n } from "../i18n/react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -33,61 +34,60 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Dashboard() {
-  const { program, bonus, stats, rewards, tiers, apiKey } =
-    useLoaderData<typeof loader>();
-  const euros = (n: number) =>
-    new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+  const { program, bonus, stats, rewards, tiers, apiKey } = useLoaderData<typeof loader>();
+  const { t, money, date, dateTime } = useI18n();
+  const memberName = useMemberName();
+  const pointsName = program.pointsName;
   const themeEditorUrl = `shopify://admin/themes/current/editor?context=apps&activateAppId=${apiKey}/loyalty-embed`;
 
   const steps = [
     {
       done: program.enabled,
-      title: "Activer le programme",
-      text: "Vos clients gagnent des points dès que le programme est actif.",
-      action: { label: "Réglages", href: "/app/program" },
+      title: t("dashboard.steps.enableTitle"),
+      text: t("dashboard.steps.enableText"),
+      action: { label: t("nav.settings"), href: "/app/program" },
     },
     {
       done: rewards > 0,
-      title: "Proposer des récompenses",
-      text: "Des réductions que vos clients peuvent obtenir avec leurs points.",
-      action: { label: "Récompenses", href: "/app/rewards" },
+      title: t("dashboard.steps.rewardsTitle"),
+      text: t("dashboard.steps.rewardsText"),
+      action: { label: t("nav.rewards"), href: "/app/rewards" },
     },
     {
       done: tiers > 0,
-      title: "Définir vos niveaux clients",
-      text: "Bronze, Argent, Or ou niveaux sur invitation, avec remises automatiques.",
-      action: { label: "Niveaux clients", href: "/app/tiers" },
+      title: t("dashboard.steps.tiersTitle"),
+      text: t("dashboard.steps.tiersText"),
+      action: { label: t("nav.tiers"), href: "/app/tiers" },
     },
     {
       done: false,
-      title: "Afficher le widget sur la boutique",
-      text: "Activez « Fidélité Hoshi » dans l'éditeur de thème (Intégrations d'applications).",
-      action: { label: "Ouvrir l'éditeur de thème", href: themeEditorUrl, external: true },
+      title: t("dashboard.steps.widgetTitle"),
+      text: t("dashboard.steps.widgetText"),
+      action: { label: t("dashboard.steps.widgetAction"), href: themeEditorUrl, external: true },
     },
   ];
 
   return (
-    <s-page heading="Tableau de bord">
+    <s-page heading={t("dashboard.title")}>
       <s-button slot="primary-action" variant="primary" href="/app/rewards">
-        Gérer les récompenses
+        {t("dashboard.manageRewards")}
       </s-button>
       <s-button slot="secondary-actions" href="/app/program">
-        Réglages
+        {t("nav.settings")}
       </s-button>
 
       {!program.enabled && (
-        <s-banner tone="warning" heading="Le programme est en pause">
-          Vos clients ne gagnent plus de points et ne peuvent plus échanger de
-          récompenses. <s-link href="/app/program">Le réactiver</s-link>
+        <s-banner tone="warning" heading={t("dashboard.pausedTitle")}>
+          {t("dashboard.pausedText")} <s-link href="/app/program">{t("dashboard.reactivate")}</s-link>
         </s-banner>
       )}
 
       {bonus > 1 && (
-        <s-banner tone="info" heading={`Campagne en cours : ${program.pointsName} ×${bonus}`}>
+        <s-banner tone="info" heading={t("dashboard.campaignTitle", { pointsName, multiplier: bonus })}>
           {program.bonusEndsAt
-            ? `Jusqu'au ${new Date(program.bonusEndsAt).toLocaleDateString("fr-FR")}.`
-            : "Sans date de fin."}{" "}
-          <s-link href="/app/program">Modifier</s-link>
+            ? t("dashboard.campaignUntil", { date: date(program.bonusEndsAt) })
+            : t("dashboard.campaignNoEnd")}{" "}
+          <s-link href="/app/program">{t("common.edit")}</s-link>
         </s-banner>
       )}
 
@@ -109,12 +109,14 @@ export default function Dashboard() {
             ★
           </div>
           <div style={{ flex: 1, minWidth: 220 }}>
-            <div style={{ fontSize: 22, fontWeight: 700 }}>
-              Bienvenue dans Hoshi Fidélité
-            </div>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{t("dashboard.welcome")}</div>
             <div style={{ opacity: 0.85, marginTop: 4 }}>
-              1 € dépensé = {program.pointsPerUnit} {program.pointsName} ·{" "}
-              {program.signupPoints} {program.pointsName} offerts à l'inscription
+              {t("dashboard.summary", {
+                amount: money(1),
+                points: program.pointsPerUnit,
+                pointsName,
+                signup: program.signupPoints,
+              })}
             </div>
           </div>
           <span
@@ -125,75 +127,84 @@ export default function Dashboard() {
               fontWeight: 600,
             }}
           >
-            {program.enabled ? "● Actif" : "● En pause"}
+            ● {program.enabled ? t("common.active") : t("common.paused")}
           </span>
         </div>
       </s-section>
 
-      <s-grid
-        gridTemplateColumns="@container (inline-size > 640px) 1fr 1fr 1fr 1fr, 1fr 1fr"
-        gap="base"
-      >
-        <StatCard emoji="👥" label="Membres" value={stats.members} hint={`+${stats.newMembers} ces 30 derniers jours`} />
-        <StatCard emoji="✨" label={`${capitalize(program.pointsName)} distribués`} value={stats.pointsEarned} />
-        <StatCard emoji="🎁" label={`${capitalize(program.pointsName)} échangés`} value={stats.pointsSpent} />
-        <StatCard emoji="🏷️" label="Récompenses obtenues" value={stats.redemptions} hint={`${stats.rewardsUsed} utilisée(s) en commande`} />
+      <s-grid gridTemplateColumns="@container (inline-size > 640px) 1fr 1fr 1fr 1fr, 1fr 1fr" gap="base">
+        <StatCard
+          emoji="👥"
+          label={t("dashboard.stats.members")}
+          value={stats.members}
+          hint={t("dashboard.stats.newMembers", { count: stats.newMembers })}
+        />
+        <StatCard emoji="✨" label={t("dashboard.stats.pointsEarned", { pointsName })} value={stats.pointsEarned} />
+        <StatCard emoji="🎁" label={t("dashboard.stats.pointsSpent", { pointsName })} value={stats.pointsSpent} />
+        <StatCard
+          emoji="🏷️"
+          label={t("dashboard.stats.rewardsClaimed")}
+          value={stats.redemptions}
+          hint={t("dashboard.stats.rewardsUsed", { count: stats.rewardsUsed })}
+        />
       </s-grid>
 
       <s-grid gridTemplateColumns="@container (inline-size > 640px) 1fr 1fr 1fr, 1fr" gap="base">
         <StatCard
           emoji="💶"
-          label="CA généré par les récompenses"
-          value={euros(stats.rewardRevenue)}
-          hint="Commandes passées avec un code fidélité"
+          label={t("dashboard.stats.rewardRevenue")}
+          value={money(stats.rewardRevenue)}
+          hint={t("dashboard.stats.rewardRevenueHint")}
         />
         <StatCard
           emoji="🤝"
-          label="Filleuls convertis"
+          label={t("dashboard.stats.referrals")}
           value={stats.referrals}
-          hint={`${stats.pendingReferrals} invitation(s) en attente`}
+          hint={t("dashboard.stats.pendingReferrals", { count: stats.pendingReferrals })}
         />
-        <StatCard emoji="🛒" label="CA généré par le parrainage" value={euros(stats.referralRevenue)} hint="1res commandes des filleuls" />
+        <StatCard
+          emoji="🛒"
+          label={t("dashboard.stats.referralRevenue")}
+          value={money(stats.referralRevenue)}
+          hint={t("dashboard.stats.referralRevenueHint")}
+        />
       </s-grid>
 
-      <s-section heading={`${program.pointsName.charAt(0).toUpperCase() + program.pointsName.slice(1)} gagnés par jour (30 derniers jours)`}>
-        <DailyBars data={stats.daily} unit={program.pointsName} />
+      <s-section heading={t("dashboard.chartTitle", { pointsName })}>
+        <DailyBars data={stats.daily} unit={pointsName} />
       </s-section>
 
-      <s-section heading="Activité récente">
+      <s-section heading={t("dashboard.recentActivity")}>
         {stats.recent.length === 0 ? (
           <s-stack gap="small" alignItems="center" padding="large">
             <span style={{ fontSize: 36 }} aria-hidden="true">🌱</span>
-            <s-text color="subdued">
-              Aucune activité pour l'instant. Les points apparaîtront ici dès la
-              première commande ou inscription.
-            </s-text>
+            <s-text color="subdued">{t("dashboard.noActivity")}</s-text>
           </s-stack>
         ) : (
           <s-table>
             <s-table-header-row>
-              <s-table-header listSlot="primary">Client</s-table-header>
-              <s-table-header>Type</s-table-header>
-              <s-table-header>Détail</s-table-header>
-              <s-table-header format="numeric">Points</s-table-header>
-              <s-table-header>Date</s-table-header>
+              <s-table-header listSlot="primary">{t("common.customer")}</s-table-header>
+              <s-table-header>{t("common.type")}</s-table-header>
+              <s-table-header>{t("common.detail")}</s-table-header>
+              <s-table-header format="numeric">{t("common.points")}</s-table-header>
+              <s-table-header>{t("common.date")}</s-table-header>
             </s-table-header-row>
             <s-table-body>
               {stats.recent.map((tx) => (
                 <s-table-row key={tx.id}>
                   <s-table-cell>
-                    <s-link href={`/app/members/${tx.memberId}`}>
-                      {memberName(tx.member)}
-                    </s-link>
+                    <s-link href={`/app/members/${tx.memberId}`}>{memberName(tx.member)}</s-link>
                   </s-table-cell>
                   <s-table-cell>
                     <TransactionBadge type={tx.type} />
                   </s-table-cell>
-                  <s-table-cell>{tx.description}</s-table-cell>
+                  <s-table-cell>
+                    <TransactionDetail tx={tx} />
+                  </s-table-cell>
                   <s-table-cell>
                     <PointsDelta points={tx.points} />
                   </s-table-cell>
-                  <s-table-cell>{formatDate(tx.createdAt)}</s-table-cell>
+                  <s-table-cell>{dateTime(tx.createdAt)}</s-table-cell>
                 </s-table-row>
               ))}
             </s-table-body>
@@ -201,7 +212,7 @@ export default function Dashboard() {
         )}
       </s-section>
 
-      <s-section slot="aside" heading="Bien démarrer">
+      <s-section slot="aside" heading={t("dashboard.gettingStarted")}>
         <s-stack gap="base">
           {steps.map((step) => (
             <s-stack key={step.title} direction="inline" gap="small" alignItems="start">
@@ -225,11 +236,8 @@ export default function Dashboard() {
               <s-stack gap="small-300">
                 <s-text type="strong">{step.title}</s-text>
                 <s-text color="subdued">{step.text}</s-text>
-                <s-link
-                  href={step.action.href}
-                  {...("external" in step.action ? { target: "_blank" } : {})}
-                >
-                  {step.action.label} →
+                <s-link href={step.action.href} {...("external" in step.action ? { target: "_blank" } : {})}>
+                  {step.action.label}
                 </s-link>
               </s-stack>
             </s-stack>
@@ -237,25 +245,15 @@ export default function Dashboard() {
         </s-stack>
       </s-section>
 
-      <s-section slot="aside" heading="Comment ça marche ?">
+      <s-section slot="aside" heading={t("dashboard.howItWorks")}>
         <s-unordered-list>
-          <s-list-item>Le client crée un compte : bonus de bienvenue.</s-list-item>
-          <s-list-item>Chaque commande payée rapporte des points.</s-list-item>
-          <s-list-item>Plus il cumule, plus son niveau monte (ou vous lui attribuez un niveau).</s-list-item>
-          <s-list-item>Chaque niveau peut donner une remise automatique au paiement.</s-list-item>
-          <s-list-item>
-            Depuis le widget, il échange ses points contre un code de réduction
-            personnel.
-          </s-list-item>
-          <s-list-item>Il gagne aussi des points en parrainant, pour son anniversaire et en vous suivant sur les réseaux.</s-list-item>
+          {["signup", "orders", "tiers", "discounts", "rewards", "more"].map((key) => (
+            <s-list-item key={key}>{t(`dashboard.how.${key}`)}</s-list-item>
+          ))}
         </s-unordered-list>
       </s-section>
     </s-page>
   );
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 export const headers: HeadersFunction = (headersArgs) =>

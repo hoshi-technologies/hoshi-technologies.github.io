@@ -42,7 +42,9 @@ model Program {
   pointsPerUnit  Float    @default(1)    // points gagnés par unité de devise dépensée
   signupPoints   Int      @default(100)  // bonus à l'inscription
   firstOrderPoints Int    @default(0)    // bonus sur la première commande
-  widgetTitle    String   @default("Mes récompenses")
+  widgetTitle    String   @default("Rewards")
+  locale         String   @default("en")   // langue de l'administrateur (textes générés)
+  currency       String   @default("USD")  // devise de la boutique
   widgetColor    String   @default("#5C6AC4")
   widgetPosition String   @default("right") // right | left
 

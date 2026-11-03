@@ -1,11 +1,12 @@
 {%- comment -%}
   Intégration d'application : bouton flottant + panneau de fidélité.
   À activer dans Éditeur de thème > Intégrations d'applications.
+  Le widget s'affiche dans la langue de la boutique vue par le client.
 {%- endcomment -%}
 <div
   id="hoshi-loyalty"
   class="hoshi-loyalty"
-  data-endpoint="/apps/fidelite/loyalty"
+  data-hoshi-locale="{{ request.locale.iso_code }}"
   data-logged-in="{% if customer %}true{% else %}false{% endif %}"
   data-first-name="{{ customer.first_name | escape }}"
   data-login-url="{{ routes.account_login_url }}"
@@ -19,31 +20,31 @@
 
 {% schema %}
 {
-  "name": "Fidélité Hoshi",
+  "name": "Hoshi Club",
   "target": "body",
   "settings": [
     {
       "type": "text",
       "id": "label",
-      "label": "Texte du bouton (vide = titre défini dans l'application)",
-      "default": ""
+      "label": "t:settings.label.label",
+      "info": "t:settings.label.info"
     },
     {
       "type": "select",
       "id": "position",
-      "label": "Position",
+      "label": "t:settings.position.label",
       "options": [
-        { "value": "app", "label": "Réglage de l'application" },
-        { "value": "right", "label": "En bas à droite" },
-        { "value": "left", "label": "En bas à gauche" }
+        { "value": "app", "label": "t:settings.position.app" },
+        { "value": "right", "label": "t:settings.position.right" },
+        { "value": "left", "label": "t:settings.position.left" }
       ],
       "default": "app"
     },
     {
       "type": "textarea",
       "id": "guest_text",
-      "label": "Message pour les visiteurs non connectés",
-      "default": "Créez un compte pour gagner des points à chaque achat et profiter de réductions exclusives."
+      "label": "t:settings.guest_text.label",
+      "info": "t:settings.guest_text.info"
     }
   ]
 }

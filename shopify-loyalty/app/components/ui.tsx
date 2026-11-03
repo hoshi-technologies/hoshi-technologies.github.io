@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { useI18n, type UiMessage } from "../i18n/react";
+import { describeTransaction } from "../labels";
 
 /** Petite carte de statistique pour le tableau de bord. */
 export function StatCard({
@@ -13,6 +15,7 @@ export function StatCard({
   hint?: string;
   emoji: string;
 }) {
+  const { number } = useI18n();
   return (
     <s-box padding="base" background="base" borderRadius="large" border="base">
       <s-stack gap="small-200">
@@ -23,13 +26,9 @@ export function StatCard({
           <s-text color="subdued">{label}</s-text>
         </s-stack>
         <span style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2 }}>
-          {typeof value === "number" ? formatNumber(value) : value}
+          {typeof value === "number" ? number(value) : value}
         </span>
-        {hint && (
-          <s-text color="subdued">
-            {hint}
-          </s-text>
-        )}
+        {hint && <s-text color="subdued">{hint}</s-text>}
       </s-stack>
     </s-box>
   );
@@ -53,64 +52,56 @@ export function ColorDot({ color, size = 12 }: { color: string; size?: number })
   );
 }
 
-export function formatNumber(n: number) {
-  return new Intl.NumberFormat("fr-FR").format(n);
+/** Nom affiché d'un membre (nom, sinon e-mail). */
+export function useMemberName() {
+  const { t } = useI18n();
+  return (m: { firstName?: string | null; lastName?: string | null; email?: string | null }) =>
+    [m.firstName, m.lastName].filter(Boolean).join(" ") || m.email || t("common.anonymousCustomer");
 }
 
-export function formatDate(d: string | Date) {
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(d));
-}
-
-export function memberName(m: {
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-}) {
-  const name = [m.firstName, m.lastName].filter(Boolean).join(" ");
-  return name || m.email || "Client anonyme";
-}
-
-const TX_LABELS: Record<string, { label: string; tone: "success" | "info" | "critical" | "neutral" | "caution" }> = {
-  SIGNUP: { label: "Bienvenue", tone: "info" },
-  ORDER: { label: "Commande", tone: "success" },
-  FIRST_ORDER: { label: "1re commande", tone: "success" },
-  REDEEM: { label: "Échange", tone: "caution" },
-  REFUND: { label: "Remboursement", tone: "critical" },
-  ADJUST: { label: "Ajustement", tone: "neutral" },
-  BIRTHDAY: { label: "Anniversaire", tone: "info" },
-  REFERRAL: { label: "Parrainage", tone: "success" },
-  SOCIAL: { label: "Réseaux sociaux", tone: "info" },
-  EXPIRE: { label: "Expiration", tone: "critical" },
+const TX_TONES: Record<string, "success" | "info" | "critical" | "neutral" | "caution"> = {
+  SIGNUP: "info",
+  ORDER: "success",
+  FIRST_ORDER: "success",
+  REDEEM: "caution",
+  REFUND: "critical",
+  ADJUST: "neutral",
+  BIRTHDAY: "info",
+  REFERRAL: "success",
+  SOCIAL: "info",
+  EXPIRE: "critical",
 };
 
 export function TransactionBadge({ type }: { type: string }) {
-  const t = TX_LABELS[type] ?? { label: type, tone: "neutral" as const };
-  return <s-badge tone={t.tone}>{t.label}</s-badge>;
+  const { t } = useI18n();
+  return <s-badge tone={TX_TONES[type] ?? "neutral"}>{t(`tx.type.${type}`)}</s-badge>;
+}
+
+export function TransactionDetail({ tx }: { tx: { type: string; description: string } }) {
+  const { t, locale } = useI18n();
+  return <>{describeTransaction(tx, t, locale)}</>;
 }
 
 export function PointsDelta({ points }: { points: number }) {
+  const { number } = useI18n();
   return (
     <s-text tone={points >= 0 ? "success" : "critical"} type="strong">
       {points >= 0 ? "+" : ""}
-      {formatNumber(points)}
+      {number(points)}
     </s-text>
   );
 }
 
+/** Résultat d'une action serveur : message de succès ou d'erreur à traduire. */
+export type ActionResult = { ok?: boolean; message?: UiMessage; error?: UiMessage };
+
 /** Affiche un toast App Bridge quand une action renvoie un message. */
-export function useActionToast(
-  data: { ok?: boolean; message?: string; error?: string } | undefined,
-) {
+export function useActionToast(data: ActionResult | undefined) {
   const shopify = useAppBridge();
+  const { t } = useI18n();
   useEffect(() => {
     if (!data) return;
-    if (data.error) shopify.toast.show(data.error, { isError: true });
-    else if (data.message) shopify.toast.show(data.message);
-  }, [data, shopify]);
+    if (data.error) shopify.toast.show(t(data.error.key, data.error.params), { isError: true });
+    else if (data.message) shopify.toast.show(t(data.message.key, data.message.params));
+  }, [data, shopify, t]);
 }

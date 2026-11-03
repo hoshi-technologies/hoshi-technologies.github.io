@@ -5,9 +5,10 @@
 import { Prisma } from "./generated/prisma/client";
 import type { Member, Program, Reward, Tier } from "./generated/prisma/client";
 import db from "./db.server";
-import { rewardLabel } from "./rewards";
-
-export { rewardLabel };
+import { LoyaltyError } from "./errors";
+import { getT } from "./i18n/i18n.server";
+import { createFormatters } from "./i18n/translate";
+import { rewardTitle } from "./labels";
 
 export type RewardType = "AMOUNT" | "PERCENT" | "FREE_SHIPPING";
 
@@ -40,31 +41,42 @@ export function numericId(gid: string): string {
 /* ------------------------------------------------------------------ */
 
 /** Récupère les réglages ; à la première visite, crée un programme prêt à l'emploi. */
-export async function getProgram(shop: string): Promise<Program> {
+export async function getProgram(shop: string, locale?: string): Promise<Program> {
   const existing = await db.program.findUnique({ where: { shop } });
   if (existing) return existing;
 
+  // Programme prêt à l'emploi, dans la langue de l'administrateur qui installe.
+  const t = getT(locale ?? "en");
   let program: Program;
   try {
-    program = await db.program.create({ data: { shop } });
+    program = await db.program.create({
+      data: {
+        shop,
+        locale: locale ?? "en",
+        pointsName: t("seed.pointsName"),
+        widgetTitle: "",
+      },
+    });
   } catch (error) {
     // Deux requêtes simultanées : l'autre a déjà créé le programme.
     if (isUniqueError(error)) return db.program.findUniqueOrThrow({ where: { shop } });
     throw error;
   }
   // Programme prêt à l'emploi : 3 niveaux et 3 récompenses.
+  const tiers = [
+    { name: t("seed.tierBronze"), minPoints: 0, multiplier: 1, color: "#B08D57" },
+    { name: t("seed.tierSilver"), minPoints: 500, multiplier: 1.25, color: "#9CA3AF" },
+    { name: t("seed.tierGold"), minPoints: 1500, multiplier: 1.5, color: "#D4A017" },
+  ];
   await db.tier.createMany({
-    data: [
-      { shop, name: "Bronze", minPoints: 0, multiplier: 1, color: "#B08D57", tag: "Fidélité Bronze" },
-      { shop, name: "Argent", minPoints: 500, multiplier: 1.25, color: "#9CA3AF", tag: "Fidélité Argent" },
-      { shop, name: "Or", minPoints: 1500, multiplier: 1.5, color: "#D4A017", tag: "Fidélité Or" },
-    ],
+    data: tiers.map((tier) => ({ shop, ...tier, tag: `Hoshi Club ${tier.name}` })),
   });
   await db.reward.createMany({
     data: [
-      { shop, title: "5 € de réduction", type: "AMOUNT", value: 5, pointsCost: 500 },
-      { shop, title: "10 % de réduction", type: "PERCENT", value: 10, pointsCost: 1000 },
-      { shop, title: "Livraison offerte", type: "FREE_SHIPPING", value: 0, pointsCost: 300 },
+      // Titres vides : libellés traduits automatiquement dans la langue de chaque client.
+      { shop, title: "", type: "AMOUNT", value: 5, pointsCost: 500 },
+      { shop, title: "", type: "PERCENT", value: 10, pointsCost: 1000 },
+      { shop, title: "", type: "FREE_SHIPPING", value: 0, pointsCost: 300 },
     ],
   });
   return program;
@@ -107,7 +119,7 @@ export function nextTier<T extends TierLike>(tiers: T[], member: MemberTierInfo)
 
 /** Étiquette client Shopify unique pour un nouveau niveau. */
 export async function uniqueTierTag(shop: string, name: string, exceptId?: string) {
-  const base = `Fidélité ${name}`.replace(/,/g, " ").trim().slice(0, 40);
+  const base = `Hoshi Club ${name}`.replace(/,/g, " ").trim().slice(0, 40);
   const others = await db.tier.findMany({
     where: { shop, ...(exceptId ? { id: { not: exceptId } } : {}) },
     select: { tag: true },
@@ -116,29 +128,6 @@ export async function uniqueTierTag(shop: string, name: string, exceptId?: strin
   let tag = base;
   for (let i = 2; used.has(tag.toLowerCase()); i++) tag = `${base} ${i}`;
   return tag;
-}
-
-/** Description lisible des avantages d'un niveau. */
-export function tierPerks(
-  tier: Pick<Tier, "discountType" | "discountValue" | "discountMinSubtotal" | "freeShipping" | "multiplier" | "perks">,
-  pointsName = "points",
-): string[] {
-  const list: string[] = [];
-  if (tier.discountType !== "NONE" && tier.discountValue > 0) {
-    const value =
-      tier.discountType === "PERCENT"
-        ? `-${tier.discountValue.toLocaleString("fr-FR")} %`
-        : `-${tier.discountValue.toLocaleString("fr-FR")} €`;
-    list.push(
-      `${value} sur toutes les commandes` +
-        (tier.discountMinSubtotal ? ` dès ${tier.discountMinSubtotal} €` : ""),
-    );
-  }
-  if (tier.freeShipping) list.push("Livraison offerte");
-  const fr = (n: number) => n.toLocaleString("fr-FR");
-  if (tier.multiplier > 1) list.push(`${pointsName} ×${fr(tier.multiplier)}`);
-  if (tier.perks?.trim()) list.push(...tier.perks.split("\n").map((p) => p.trim()).filter(Boolean));
-  return list;
 }
 
 /* ------------------------------------------------------------------ */
@@ -200,7 +189,7 @@ export async function ensureMember(
       memberId: member.id,
       points: program.signupPoints,
       type: "SIGNUP",
-      description: "Bonus de bienvenue",
+      description: "{}",
       reference: customerId,
     });
     if (updated) member = updated;
@@ -249,10 +238,10 @@ export async function addMemberManually(
 export async function setMemberTier(shop: string, memberId: string, tierId: string | null) {
   if (tierId) {
     const tier = await db.tier.findFirst({ where: { id: tierId, shop } });
-    if (!tier) throw new Error("Niveau introuvable");
+    if (!tier) throw new LoyaltyError("tierNotFound");
   }
   const member = await db.member.findFirst({ where: { id: memberId, shop } });
-  if (!member) throw new Error("Membre introuvable");
+  if (!member) throw new LoyaltyError("memberNotFound");
   return db.member.update({ where: { id: member.id }, data: { manualTierId: tierId } });
 }
 
@@ -326,13 +315,13 @@ export async function adjustPoints(
   reason: string,
 ) {
   const member = await db.member.findFirst({ where: { id: memberId, shop } });
-  if (!member) throw new Error("Membre introuvable");
+  if (!member) throw new LoyaltyError("memberNotFound");
   return addPoints({
     shop,
     memberId,
     points,
     type: "ADJUST",
-    description: reason || (points > 0 ? "Ajout manuel" : "Retrait manuel"),
+    description: JSON.stringify({ reason: reason || "", points }),
   });
 }
 
@@ -391,14 +380,14 @@ export async function handleOrderPaid(shop: string, order: OrderPayload): Promis
     subtotal * program.pointsPerUnit * (tier?.multiplier ?? 1) * bonus,
   );
   const orderRef = String(order.id);
-  const label = (order.name ?? `#${orderRef}`) + (bonus > 1 ? ` (bonus ×${bonus})` : "");
+  const description = JSON.stringify({ order: order.name ?? `#${orderRef}`, bonus });
 
   const result = await addPoints({
     shop,
     memberId: member.id,
     points,
     type: "ORDER",
-    description: `Commande ${label}`,
+    description,
     reference: orderRef,
   });
 
@@ -416,7 +405,7 @@ export async function handleOrderPaid(shop: string, order: OrderPayload): Promis
       memberId: member.id,
       points: program.firstOrderPoints,
       type: "FIRST_ORDER",
-      description: "Bonus première commande",
+      description: JSON.stringify({ order: order.name ?? `#${orderRef}` }),
       reference: orderRef,
     });
   }
@@ -445,7 +434,7 @@ export async function handleRefund(shop: string, refund: RefundPayload): Promise
 
   // Points déjà retirés pour cette commande (remboursements partiels successifs).
   const previous = await db.transaction.aggregate({
-    where: { shop, type: "REFUND", memberId: earned.memberId, description: { endsWith: `(${orderRef})` } },
+    where: { shop, type: "REFUND", memberId: earned.memberId, description: { contains: `"order":"${orderRef}"` } },
     _sum: { points: true },
   });
   const alreadyRemoved = -(previous._sum.points ?? 0);
@@ -460,7 +449,7 @@ export async function handleRefund(shop: string, refund: RefundPayload): Promise
     memberId: earned.memberId,
     points: -toRemove,
     type: "REFUND",
-    description: `Remboursement (${orderRef})`,
+    description: JSON.stringify({ order: orderRef }),
     reference: String(refund.id),
   });
   return earned.memberId;
@@ -470,7 +459,7 @@ export async function handleRefund(shop: string, refund: RefundPayload): Promise
 /* Récompenses                                                         */
 /* ------------------------------------------------------------------ */
 
-function randomCode(prefix = "FID") {
+function randomCode(prefix = "HC") {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < 8; i++) {
@@ -505,9 +494,10 @@ async function createDiscountCode(
   reward: Reward,
   member: Member,
   code: string,
+  title: string,
 ): Promise<string> {
   const common = {
-    title: `Fidélité – ${reward.title} (${code})`,
+    title: `Hoshi Club – ${title} (${code})`,
     code,
     startsAt: new Date().toISOString(),
     usageLimit: 1,
@@ -553,10 +543,9 @@ async function createDiscountCode(
   };
   const payload = json.data?.[key];
   if (!payload?.codeDiscountNode?.id) {
-    const message =
-      payload?.userErrors?.map((e) => e.message).join(", ") ||
-      "Impossible de créer le code de réduction";
-    throw new Error(message);
+    throw new LoyaltyError("discountFailed", {
+      details: payload?.userErrors?.map((e) => e.message).join(", ") || "",
+    });
   }
   return payload.codeDiscountNode.id;
 }
@@ -570,21 +559,28 @@ export async function redeemReward(
   shop: string,
   memberId: string,
   rewardId: string,
+  locale?: string,
 ) {
   const [member, reward, program] = await Promise.all([
     db.member.findFirst({ where: { id: memberId, shop } }),
     db.reward.findFirst({ where: { id: rewardId, shop, active: true } }),
     getProgram(shop),
   ]);
-  if (!program.enabled) throw new Error("Le programme de fidélité est désactivé");
-  if (!member) throw new Error("Membre introuvable");
-  if (!reward) throw new Error("Récompense indisponible");
+  if (!program.enabled) throw new LoyaltyError("programDisabled");
+  if (!member) throw new LoyaltyError("memberNotFound");
+  if (!reward) throw new LoyaltyError("rewardUnavailable");
   if (member.points < reward.pointsCost) {
-    throw new Error(`Il vous manque ${reward.pointsCost - member.points} ${program.pointsName}`);
+    throw new LoyaltyError("notEnoughPoints", {
+      missing: reward.pointsCost - member.points,
+      pointsName: program.pointsName,
+    });
   }
 
+  // Titre de la récompense dans la langue du client (ou de la boutique).
+  const lang = locale ?? program.locale;
+  const title = rewardTitle(reward, getT(lang), createFormatters(lang, program.currency).money);
   const code = randomCode();
-  const discountId = await createDiscountCode(admin, reward, member, code);
+  const discountId = await createDiscountCode(admin, reward, member, code, title);
 
   // Débit conditionnel : évite un double échange simultané.
   const debited = await db.member.updateMany({
@@ -593,7 +589,7 @@ export async function redeemReward(
   });
   if (debited.count === 0) {
     await admin.graphql(DISCOUNT_DELETE, { variables: { id: discountId } }).catch(() => {});
-    throw new Error("Solde de points insuffisant");
+    throw new LoyaltyError("notEnoughPoints", { missing: reward.pointsCost, pointsName: program.pointsName });
   }
 
   await db.$transaction([
@@ -603,7 +599,7 @@ export async function redeemReward(
         memberId: member.id,
         points: -reward.pointsCost,
         type: "REDEEM",
-        description: `Échange : ${reward.title}`,
+        description: JSON.stringify({ reward: title }),
         reference: code,
       },
     }),
@@ -612,7 +608,7 @@ export async function redeemReward(
         shop,
         memberId: member.id,
         rewardId: reward.id,
-        title: reward.title,
+        title,
         code,
         discountId,
         pointsCost: reward.pointsCost,
@@ -620,7 +616,7 @@ export async function redeemReward(
     }),
   ]);
 
-  return { code, title: reward.title };
+  return { code, title };
 }
 
 /* ------------------------------------------------------------------ */

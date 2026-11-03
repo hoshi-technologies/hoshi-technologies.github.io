@@ -7,6 +7,7 @@ import { Prisma } from "./generated/prisma/client";
 import db from "./db.server";
 import type { AdminGraphql } from "./loyalty.server";
 import { addPoints, customerGid, getProgram } from "./loyalty.server";
+import { LoyaltyError } from "./errors";
 
 export const SOCIAL_NETWORKS = {
   instagram: { label: "Instagram", field: "instagramUrl" },
@@ -26,25 +27,14 @@ function randomChars(n: number) {
 /* Parrainage                                                          */
 /* ------------------------------------------------------------------ */
 
-/** Description de la récompense offerte au filleul. */
-export function friendRewardLabel(program: Pick<Program, "friendRewardType" | "friendRewardValue" | "friendMinSubtotal">) {
-  const base =
-    program.friendRewardType === "PERCENT"
-      ? `${program.friendRewardValue} % de réduction`
-      : program.friendRewardType === "FREE_SHIPPING"
-        ? "la livraison offerte"
-        : `${program.friendRewardValue} € de réduction`;
-  return base + (program.friendMinSubtotal ? ` dès ${program.friendMinSubtotal} € d'achat` : "");
-}
-
 /** Code de parrainage personnel du membre (créé à la demande). */
 export async function getReferralCode(member: Member): Promise<string> {
   if (member.referralCode) return member.referralCode;
-  const prefix = (member.firstName || "AMI")
+  const prefix = (member.firstName || "CLUB")
     .normalize("NFD")
     .replace(/[^A-Za-z]/g, "")
     .toUpperCase()
-    .slice(0, 6) || "AMI";
+    .slice(0, 6) || "CLUB";
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = `${prefix}-${randomChars(4)}`;
     try {
@@ -54,7 +44,7 @@ export async function getReferralCode(member: Member): Promise<string> {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")) throw error;
     }
   }
-  throw new Error("Impossible de générer un code de parrainage");
+  throw new LoyaltyError("referralCodeFailed");
 }
 
 export async function findReferrer(shop: string, code: string) {
@@ -84,30 +74,30 @@ const SHIPPING_CODE_CREATE = `#graphql
  */
 export async function claimReferral(admin: AdminGraphql, shop: string, referralCode: string, rawEmail: string) {
   const program = await getProgram(shop);
-  if (!program.enabled || !program.referralEnabled) throw new Error("Le parrainage n'est pas disponible");
+  if (!program.enabled || !program.referralEnabled) throw new LoyaltyError("referralUnavailable");
 
   const email = rawEmail.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Adresse e-mail invalide");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new LoyaltyError("invalidEmail");
 
   const referrer = await findReferrer(shop, referralCode);
-  if (!referrer) throw new Error("Lien de parrainage invalide");
-  if (referrer.email?.toLowerCase() === email) throw new Error("Vous ne pouvez pas vous parrainer vous-même");
+  if (!referrer) throw new LoyaltyError("invalidReferral");
+  if (referrer.email?.toLowerCase() === email) throw new LoyaltyError("selfReferral");
 
   const existing = await db.referral.findUnique({ where: { shop_friendEmail: { shop, friendEmail: email } } });
   if (existing) {
-    if (existing.status === "COMPLETED") throw new Error("Cette adresse a déjà profité d'un parrainage");
-    return { code: existing.code, reward: friendRewardLabel(program) };
+    if (existing.status === "COMPLETED") throw new LoyaltyError("referralAlreadyUsed");
+    return { code: existing.code };
   }
 
   const alreadyCustomer = await db.member.findFirst({
     where: { shop, email: { equals: email }, ordersCount: { gt: 0 } },
     select: { id: true },
   });
-  if (alreadyCustomer) throw new Error("Le parrainage est réservé aux nouveaux clients");
+  if (alreadyCustomer) throw new LoyaltyError("referralNewCustomersOnly");
 
-  const code = `AMI-${randomChars(8)}`;
+  const code = `HCR-${randomChars(8)}`;
   const common = {
-    title: `Parrainage – ${code}`,
+    title: `Hoshi Club – referral ${code}`,
     code,
     startsAt: new Date().toISOString(),
     usageLimit: 1,
@@ -141,13 +131,13 @@ export async function claimReferral(admin: AdminGraphql, shop: string, referralC
   };
   const payload = json.data?.[key];
   if (!payload?.codeDiscountNode?.id) {
-    throw new Error(payload?.userErrors?.map((e) => e.message).join(", ") || "Impossible de créer le code");
+    throw new LoyaltyError("discountFailed", { details: payload?.userErrors?.map((e) => e.message).join(", ") || "" });
   }
 
   await db.referral.create({
     data: { shop, referrerId: referrer.id, friendEmail: email, code, discountId: payload.codeDiscountNode.id },
   });
-  return { code, reward: friendRewardLabel(program) };
+  return { code };
 }
 
 interface PaidOrder {
@@ -198,7 +188,7 @@ export async function handleOrderCodes(shop: string, order: PaidOrder): Promise<
       memberId: referral.referrerId,
       points: program.referrerPoints,
       type: "REFERRAL",
-      description: `Parrainage : ${referral.friendEmail.replace(/(.{2}).*@/, "$1…@")}`,
+      description: JSON.stringify({ friend: referral.friendEmail.replace(/(.{2}).*@/, "$1…@") }),
       reference: orderId,
     });
   }
@@ -212,10 +202,10 @@ export async function handleOrderCodes(shop: string, order: PaidOrder): Promise<
 /** Le client renseigne sa date d'anniversaire (une seule fois). */
 export async function setBirthday(shop: string, memberId: string, month: number, day: number) {
   const valid = month >= 1 && month <= 12 && day >= 1 && day <= new Date(2024, month, 0).getDate();
-  if (!valid) throw new Error("Date invalide");
+  if (!valid) throw new LoyaltyError("invalidDate");
   const member = await db.member.findFirst({ where: { id: memberId, shop } });
-  if (!member) throw new Error("Membre introuvable");
-  if (member.birthday) throw new Error("Votre date d'anniversaire est déjà enregistrée");
+  if (!member) throw new LoyaltyError("memberNotFound");
+  if (member.birthday) throw new LoyaltyError("birthdayAlreadySet");
   const birthday = `${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   return db.member.update({ where: { id: member.id }, data: { birthday, birthdaySetAt: new Date() } });
 }
@@ -225,14 +215,14 @@ export async function claimSocial(shop: string, memberId: string, network: strin
   const program = await getProgram(shop);
   const info = SOCIAL_NETWORKS[network as SocialNetwork];
   if (!program.enabled || !info || !program[info.field] || program.socialPoints <= 0) {
-    throw new Error("Action indisponible");
+    throw new LoyaltyError("actionUnavailable");
   }
   const result = await addPoints({
     shop,
     memberId,
     points: program.socialPoints,
     type: "SOCIAL",
-    description: `Abonnement ${info.label}`,
+    description: JSON.stringify({ network: info.label }),
     reference: `${memberId}:${network}`,
   });
   return Boolean(result);
@@ -274,7 +264,7 @@ export async function awardBirthdays(shop: string, now = new Date()): Promise<st
       memberId: m.id,
       points: program.birthdayPoints,
       type: "BIRTHDAY",
-      description: `Joyeux anniversaire ! (${now.getFullYear()})`,
+      description: JSON.stringify({ year: now.getFullYear() }),
       reference: `${m.id}:${now.getFullYear()}`,
     });
     if (res) awarded.push(m.id);
@@ -299,7 +289,7 @@ export async function expirePoints(shop: string, now = new Date()): Promise<numb
       memberId: m.id,
       points: -m.points,
       type: "EXPIRE",
-      description: `Expiration après ${program.expirationMonths} mois d'inactivité`,
+      description: JSON.stringify({ months: program.expirationMonths }),
       reference: `${m.id}:${now.toISOString().slice(0, 10)}`,
     });
     if (res) count++;

@@ -1,9 +1,10 @@
 /**
  * API du widget de la boutique, appelée via le proxy d'application :
- *   GET  /apps/fidelite/loyalty               → programme, solde, niveau, récompenses…
- *   GET  /apps/fidelite/loyalty?ref=CODE      → infos de parrainage pour un ami invité
- *   POST /apps/fidelite/loyalty  { action, … } → redeem | referral | birthday | social
+ *   GET  /apps/hoshi-club/loyalty?locale=fr           → programme, solde, niveau, récompenses, textes
+ *   GET  /apps/hoshi-club/loyalty?ref=CODE&locale=fr  → infos de parrainage pour un ami invité
+ *   POST /apps/hoshi-club/loyalty?locale=fr { action } → redeem | referral | birthday | social
  * Shopify signe chaque requête et ajoute `logged_in_customer_id`.
+ * Le paramètre `locale` est la langue de la boutique affichée au client.
  */
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
@@ -17,8 +18,6 @@ import {
   memberTier,
   nextTier,
   redeemReward,
-  rewardLabel,
-  tierPerks,
 } from "../loyalty.server";
 import type { AdminGraphql } from "../loyalty.server";
 import {
@@ -26,12 +25,16 @@ import {
   claimReferral,
   claimSocial,
   findReferrer,
-  friendRewardLabel,
   getReferralCode,
   pointsExpireAt,
   setBirthday,
 } from "../engagement.server";
 import { syncMemberTag } from "../levels.server";
+import { friendRewardLabel, rewardLabel, rewardTitle, tierPerks } from "../labels";
+import { LoyaltyError } from "../errors";
+import { getT, pickMessages } from "../i18n/i18n.server";
+import { DEFAULT_LOCALE, isRtl, matchLocale } from "../i18n/config";
+import { createFormatters } from "../i18n/translate";
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -40,8 +43,23 @@ function json(data: unknown, status = 200) {
   });
 }
 
-async function memberState(shop: string, customerId: string | null, admin?: AdminGraphql) {
+/** Langue demandée par le widget (celle de la boutique affichée au client). */
+function widgetLocale(request: Request) {
+  return matchLocale(new URL(request.url).searchParams.get("locale")) ?? DEFAULT_LOCALE;
+}
+
+/** Message d'erreur traduit pour le client. */
+function errorJson(error: unknown, locale: string, status = 400) {
+  const t = getT(locale);
+  if (error instanceof LoyaltyError) return json({ error: t(`errors.${error.code}`, error.params) }, status);
+  console.error("Widget", error);
+  return json({ error: t("errors.generic") }, status);
+}
+
+async function memberState(shop: string, customerId: string | null, locale: string, admin?: AdminGraphql) {
   const program = await getProgram(shop);
+  const t = getT(locale);
+  const fmt = createFormatters(locale, program.currency);
   const [tiers, rewards] = await Promise.all([
     getTiers(shop),
     db.reward.findMany({ where: { shop, active: true }, orderBy: { pointsCost: "asc" } }),
@@ -53,6 +71,10 @@ async function memberState(shop: string, customerId: string | null, admin?: Admi
     .map((key) => ({ network: key, label: SOCIAL_NETWORKS[key].label, url: program[SOCIAL_NETWORKS[key].field] }));
 
   const base = {
+    locale,
+    dir: isRtl(locale) ? "rtl" : "ltr",
+    currency: program.currency,
+    i18n: pickMessages(locale, ["widget"]).widget,
     enabled: program.enabled,
     pointsName: program.pointsName,
     pointsPerUnit: program.pointsPerUnit,
@@ -62,26 +84,35 @@ async function memberState(shop: string, customerId: string | null, admin?: Admi
     socialPoints: program.socialPoints,
     social: program.socialPoints > 0 ? social : [],
     referral: program.referralEnabled
-      ? { referrerPoints: program.referrerPoints, friendReward: friendRewardLabel(program) }
+      ? { referrerPoints: program.referrerPoints, friendReward: friendRewardLabel(program, t, fmt.money) }
       : null,
     bonus:
       bonus > 1
-        ? { multiplier: bonus, label: program.bonusLabel, endsAt: program.bonusEndsAt }
+        ? {
+            multiplier: bonus,
+            label: program.bonusLabel || t("widget.bonusDefault", { pointsName: program.pointsName, multiplier: bonus }),
+            endsAt: program.bonusEndsAt,
+          }
         : null,
-    title: program.widgetTitle,
+    title: program.widgetTitle || t("widget.title"),
     color: program.widgetColor,
     position: program.widgetPosition,
     rewards: rewards.map((r) => ({
       id: r.id,
-      title: r.title,
-      description: rewardLabel(r),
+      title: rewardTitle(r, t, fmt.money),
+      description: rewardLabel(r, t, fmt.money),
       pointsCost: r.pointsCost,
-      minSubtotal: r.minSubtotal,
+      minSubtotal: r.minSubtotal ? fmt.money(r.minSubtotal) : null,
     })),
     // Seuls les niveaux automatiques sont présentés publiquement.
     tiers: tiers
-      .filter((t) => t.mode !== "MANUAL")
-      .map((t) => ({ name: t.name, minPoints: t.minPoints, color: t.color, perks: tierPerks(t, program.pointsName) })),
+      .filter((tier) => tier.mode !== "MANUAL")
+      .map((tier) => ({
+        name: tier.name,
+        minPoints: tier.minPoints,
+        color: tier.color,
+        perks: tierPerks(tier, t, fmt.money, program.pointsName),
+      })),
   };
 
   if (!customerId) return { ...base, member: null };
@@ -100,7 +131,7 @@ async function memberState(shop: string, customerId: string | null, admin?: Admi
 
   const tier = memberTier(tiers, member);
   const next = nextTier(tiers, member);
-  const doneSocial = new Set(member.transactions.map((t) => t.reference?.split(":")[1]));
+  const doneSocial = new Set(member.transactions.map((tx) => tx.reference?.split(":")[1]));
   return {
     ...base,
     member: {
@@ -109,7 +140,12 @@ async function memberState(shop: string, customerId: string | null, admin?: Admi
       firstName: member.firstName,
       multiplier: (tier?.multiplier ?? 1) * bonus,
       tier: tier
-        ? { name: tier.name, color: tier.color, multiplier: tier.multiplier, perks: tierPerks(tier, program.pointsName) }
+        ? {
+            name: tier.name,
+            color: tier.color,
+            multiplier: tier.multiplier,
+            perks: tierPerks(tier, t, fmt.money, program.pointsName),
+          }
         : null,
       nextTier: next ? { name: next.name, missing: next.minPoints - member.lifetimePoints } : null,
       codes: member.redemptions.map((r) => ({ title: r.title, code: r.code, createdAt: r.createdAt })),
@@ -123,8 +159,9 @@ async function memberState(shop: string, customerId: string | null, admin?: Admi
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const locale = widgetLocale(request);
   const { session, admin } = await authenticate.public.appProxy(request);
-  if (!session) return json({ error: "Application non installée" }, 404);
+  if (!session) return json({ error: getT(locale)("errors.notInstalled") }, 404);
   const url = new URL(request.url);
 
   // Ami invité : qui l'a parrainé et que gagne-t-il ?
@@ -132,21 +169,31 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   if (ref) {
     const program = await getProgram(session.shop);
     const referrer = program.enabled && program.referralEnabled ? await findReferrer(session.shop, ref) : null;
-    if (!referrer) return json({ error: "Lien de parrainage invalide" }, 404);
+    if (!referrer) return json({ error: getT(locale)("errors.invalidReferral") }, 404);
+    const t = getT(locale);
     return json({
-      referrerName: referrer.firstName || "Un ami",
-      reward: friendRewardLabel(program),
+      locale,
+      dir: isRtl(locale) ? "rtl" : "ltr",
+      i18n: pickMessages(locale, ["widget"]).widget,
+      referrerName: referrer.firstName || t("widget.aFriend"),
+      reward: friendRewardLabel(program, t, createFormatters(locale, program.currency).money),
       color: program.widgetColor,
     });
   }
 
   const customerId = url.searchParams.get("logged_in_customer_id") || null;
-  return json(await memberState(session.shop, customerId, admin));
+  try {
+    return json(await memberState(session.shop, customerId, locale, admin));
+  } catch (error) {
+    return errorJson(error, locale, 500);
+  }
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const locale = widgetLocale(request);
+  const t = getT(locale);
   const { session, admin } = await authenticate.public.appProxy(request);
-  if (!session || !admin) return json({ error: "Application non installée" }, 404);
+  if (!session || !admin) return json({ error: t("errors.notInstalled") }, 404);
   const shop = session.shop;
   const customerId = new URL(request.url).searchParams.get("logged_in_customer_id");
   const body = (await readJson(request)) as Record<string, string | number | undefined>;
@@ -155,30 +202,35 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     // Seule action possible sans être connecté : demander son code de parrainage.
     if (action === "referral") {
+      const program = await getProgram(shop);
       const result = await claimReferral(admin, shop, String(body.ref || ""), String(body.email || ""));
-      return json({ ok: true, ...result });
+      return json({
+        ok: true,
+        ...result,
+        reward: friendRewardLabel(program, t, createFormatters(locale, program.currency).money),
+      });
     }
 
-    if (!customerId) return json({ error: "Connectez-vous pour profiter du programme" }, 401);
+    if (!customerId) return json({ error: t("errors.loginRequired") }, 401);
     const member = await ensureMember(shop, { id: customerId });
 
     if (action === "birthday") {
       await setBirthday(shop, member.id, Number(body.month), Number(body.day));
-      return json({ ok: true, message: "Anniversaire enregistré 🎂", state: await memberState(shop, customerId, admin) });
+      return json({ ok: true, message: t("widget.birthdaySaved"), state: await memberState(shop, customerId, locale, admin) });
     }
     if (action === "social") {
       const credited = await claimSocial(shop, member.id, String(body.network));
       await syncMemberTag(admin, shop, member.id);
       return json({
         ok: true,
-        message: credited ? "Merci ! Vos points ont été ajoutés" : "Points déjà obtenus pour ce réseau",
-        state: await memberState(shop, customerId, admin),
+        message: credited ? t("widget.socialThanks") : t("widget.socialAlready"),
+        state: await memberState(shop, customerId, locale, admin),
       });
     }
-    if (!body.rewardId) return json({ error: "Récompense manquante" }, 400);
-    const result = await redeemReward(admin, shop, member.id, String(body.rewardId));
-    return json({ ok: true, ...result, state: await memberState(shop, customerId, admin) });
-  } catch (e) {
-    return json({ error: e instanceof Error ? e.message : "Erreur inattendue" }, 400);
+    if (!body.rewardId) throw new LoyaltyError("rewardUnavailable");
+    const result = await redeemReward(admin, shop, member.id, String(body.rewardId), locale);
+    return json({ ok: true, ...result, state: await memberState(shop, customerId, locale, admin) });
+  } catch (error) {
+    return errorJson(error, locale);
   }
 };

@@ -1,6 +1,6 @@
 /**
  * Synchronisation des niveaux clients avec Shopify :
- *  - chaque niveau a une étiquette client (ex. « Fidélité Or ») posée sur les membres ;
+ *  - chaque niveau a une étiquette client (ex. « Hoshi Club Or ») posée sur les membres ;
  *  - si le niveau a des avantages, un segment « clients avec cette étiquette » est créé
  *    et des remises automatiques (sans code) lui sont réservées.
  * Ainsi la remise s'applique toute seule au paiement, y compris hors du widget.
@@ -8,7 +8,9 @@
 import type { Tier } from "./generated/prisma/client";
 import db from "./db.server";
 import type { AdminGraphql } from "./loyalty.server";
-import { getTiers, memberTier } from "./loyalty.server";
+import { getProgram, getTiers, memberTier } from "./loyalty.server";
+import { getT } from "./i18n/i18n.server";
+import { createFormatters } from "./i18n/translate";
 
 type GqlResult = { data?: Record<string, any>; errors?: { message: string }[] };
 
@@ -155,13 +157,16 @@ export async function syncTierDiscounts(admin: AdminGraphql, tierId: string) {
     if (!segmentId) {
       const escaped = tier.tag.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
       const result = await gql(admin, SEGMENT_CREATE, {
-        name: `Fidélité – niveau ${tier.name} (${tier.id.slice(-5)})`,
+        name: `Hoshi Club – ${tier.name} (${tier.id.slice(-5)})`,
         query: `customer_tags CONTAINS '${escaped}'`,
       });
       segmentId = result.segment?.id as string;
       await db.tier.update({ where: { id: tier.id }, data: { segmentId } });
     }
 
+    const program = await getProgram(tier.shop);
+    const t = getT(program.locale);
+    const fmt = createFormatters(program.locale, program.currency);
     const common = {
       startsAt: new Date().toISOString(),
       context: { customerSegments: { add: [segmentId] } },
@@ -174,12 +179,15 @@ export async function syncTierDiscounts(admin: AdminGraphql, tierId: string) {
         tier.discountType === "PERCENT"
           ? { percentage: Math.min(100, tier.discountValue) / 100 }
           : { discountAmount: { amount: String(tier.discountValue), appliesOnEachItem: false } };
-      const label =
-        tier.discountType === "PERCENT" ? `${tier.discountValue} %` : `${tier.discountValue} €`;
+      const discount =
+        tier.discountType === "PERCENT"
+          ? t("labels.percentOff", { value: tier.discountValue })
+          : t("labels.amountOff", { amount: fmt.money(tier.discountValue) });
       const result = await gql(admin, AUTO_BASIC_CREATE, {
         discount: {
           ...common,
-          title: `Niveau ${tier.name} : -${label}`,
+          // Titre visible par le client au paiement, dans la langue de la boutique
+          title: t("server.tierDiscountTitle", { tier: tier.name, discount }),
           customerGets: { value, items: { all: true } },
           ...(tier.discountMinSubtotal
             ? { minimumRequirement: { subtotal: { greaterThanOrEqualToSubtotal: String(tier.discountMinSubtotal) } } }
@@ -193,7 +201,7 @@ export async function syncTierDiscounts(admin: AdminGraphql, tierId: string) {
       const result = await gql(admin, AUTO_SHIPPING_CREATE, {
         discount: {
           ...common,
-          title: `Niveau ${tier.name} : livraison offerte`,
+          title: t("server.tierShippingTitle", { tier: tier.name }),
           destination: { all: true },
         },
       });

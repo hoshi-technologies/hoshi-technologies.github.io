@@ -83,3 +83,13 @@
 .footer a {
   color: #5c6ac4;
 }
+.price {
+  display: inline-block;
+  margin: 0 0 1.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #5c6ac4;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(31, 33, 64, 0.06);
+}

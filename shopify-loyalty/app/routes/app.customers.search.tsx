@@ -46,7 +46,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return {
     customers: nodes.map((n) => ({
       id: n.id,
-      name: [n.firstName, n.lastName].filter(Boolean).join(" ") || n.defaultEmailAddress?.emailAddress || "Client sans nom",
+      name: [n.firstName, n.lastName].filter(Boolean).join(" ") || n.defaultEmailAddress?.emailAddress || "—",
       email: n.defaultEmailAddress?.emailAddress ?? null,
       firstName: n.firstName,
       lastName: n.lastName,

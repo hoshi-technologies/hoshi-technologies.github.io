@@ -1,4 +1,4 @@
-# Hoshi Fidélité – application Shopify de programme de fidélité
+# Hoshi Club – application Shopify de programme de fidélité
 
 Application Shopify intégrée à l'administration permettant de lancer un
 programme de fidélité complet en quelques minutes : points, niveaux clients
@@ -27,8 +27,8 @@ Un programme prêt à l'emploi (3 niveaux, 3 récompenses) est créé à la prem
 
 Les avantages d'un niveau sont appliqués **automatiquement au paiement**, sans code :
 
-1. chaque niveau possède une étiquette client Shopify (ex. `Fidélité Or`), posée et retirée automatiquement sur les clients quand leur niveau change ;
-2. si le niveau a une remise ou la livraison offerte, l'application crée un **segment de clients** « possède l'étiquette `Fidélité Or` » ;
+1. chaque niveau possède une étiquette client Shopify (ex. `Hoshi Club Gold`), posée et retirée automatiquement sur les clients quand leur niveau change ;
+2. si le niveau a une remise ou la livraison offerte, l'application crée un **segment de clients** « possède l'étiquette `Hoshi Club Gold` » ;
 3. des **remises automatiques** Shopify sont réservées à ce segment.
 
 Les remises sont visibles (et modifiables) dans *Shopify > Réductions*. Elles se
@@ -49,7 +49,7 @@ page Niveaux recrée tout en cas de modification manuelle.
 
 **Pour les clients (extension de thème)**
 
-- *Intégration d'application* « Fidélité Hoshi » : bouton flottant + panneau (solde, niveau et ses avantages, progression, récompenses, codes obtenus).
+- *Intégration d'application* « Hoshi Club » : bouton flottant + panneau (solde, niveau et ses avantages, progression, récompenses, codes obtenus).
 - *Bloc d'application* « Carte fidélité » à placer dans n'importe quelle page.
 - *Bloc d'application* « Points produit » pour la fiche produit : « Gagnez 124 points avec cet achat » (tient compte du niveau du client et de la campagne bonus, suit le changement de variante).
 - Fenêtre d'accueil pour les amis parrainés, bandeau de campagne bonus, date d'expiration des points.
@@ -70,6 +70,28 @@ Tous les webhooks sont idempotents : un webhook rejoué ne crédite jamais deux 
 anniversaires du jour et fait expirer les points des membres inactifs (si l'option est
 activée). Ces tâches sont idempotentes.
 
+## Langues
+
+L'application est traduite dans les **36 langues de l'administration Shopify** : anglais, allemand,
+arabe, bulgare, chinois (simplifié et traditionnel), coréen, croate, danois, espagnol, finnois,
+français, grec, hébreu, hindi, hongrois, indonésien, italien, japonais, lituanien, malais,
+néerlandais, norvégien (bokmål), ourdou, polonais, portugais (Brésil et Portugal), roumain, russe,
+slovaque, slovène, suédois, tchèque, thaï, turc et vietnamien.
+
+- **Administration** : suit la langue de l'administrateur Shopify (paramètre `locale` fourni par
+  Shopify, sinon la langue du navigateur). Arabe, hébreu et ourdou s'affichent de droite à gauche.
+- **Widget, carte et points produit** : suivent la langue de la boutique vue par le client
+  (`request.locale`), y compris pour les boutiques multilingues.
+- **Montants** : affichés dans la devise de la boutique, au format de la langue.
+- **Textes générés** (titres des remises automatiques, codes) : langue de l'administrateur.
+- Les noms de récompense et le titre du widget laissés **vides** sont traduits automatiquement
+  dans chaque langue ; un nom saisi par le marchand est affiché tel quel.
+- Pages publiques (`/`, `/privacy`, `/support`) : langue du navigateur ou `?lang=xx`.
+
+Les textes sont dans `app/i18n/locales/<langue>.json` (source : `en.json`) et
+`extensions/loyalty-widget/locales/*.schema.json` (réglages de l'éditeur de thème).
+`npm run i18n:check` vérifie que toutes les langues ont les mêmes clés et les mêmes variables.
+
 ## Architecture
 
 Hébergement **Cloudflare Workers** (application) + **D1** (base de données) + **Cron Trigger** (tâches horaires).
@@ -86,7 +108,7 @@ app/
   session-storage.server.ts sessions Shopify stockées dans D1
   routes/app.*.tsx         pages d'administration (Polaris web components)
   routes/webhooks.*.tsx    webhooks Shopify
-  routes/proxy.$.tsx       API du widget via le proxy d'application (/apps/fidelite/loyalty)
+  routes/proxy.$.tsx       API du widget via le proxy d'application (/apps/hoshi-club/loyalty)
   routes/privacy.tsx       politique de confidentialité (exigée par l'App Store)
   routes/support.tsx       page d'aide
 extensions/loyalty-widget  extension de thème (Liquid + JS/CSS sans dépendance)
@@ -108,7 +130,7 @@ npm run dev             # base D1 locale + Worker local (workerd) + tunnel Shopi
 
 En développement, la facturation est désactivée et l'app tourne dans `workerd`, le même moteur
 qu'en production. Appuyez sur `p` pour ouvrir l'application dans votre boutique de test, puis
-activez « Fidélité Hoshi » dans *Thème > Personnaliser > Intégrations d'applications*.
+activez « Hoshi Club » dans *Thème > Personnaliser > Intégrations d'applications*.
 
 ### Accès aux données client protégées
 
@@ -122,12 +144,12 @@ Une seule fois :
 
 ```bash
 npx wrangler login
-npx wrangler d1 create hoshi-fidelite          # copiez le database_id dans wrangler.jsonc
+npx wrangler d1 create hoshi-club             # copiez le database_id dans wrangler.jsonc
 npx wrangler secret put SHOPIFY_API_SECRET      # « Secret » de l'app (Partner Dashboard)
 ```
 
 Dans `wrangler.jsonc`, renseignez `SHOPIFY_API_KEY` (Client ID), `SHOPIFY_APP_URL` (ex.
-`https://fidelite.votre-domaine.com`), `SUPPORT_EMAIL` et décommentez `routes` pour utiliser un
+`https://hoshi-club.votre-domaine.com`), `SUPPORT_EMAIL` (déjà réglé sur hoshi.technologies@gmail.com) et décommentez `routes` pour utiliser un
 sous-domaine de votre zone Cloudflare.
 
 Dans `shopify.app.toml`, remplacez `https://example.com` par la même URL (application, redirection
@@ -147,6 +169,12 @@ requêtes plus larges) ; le Worker pèse environ 1 Mo compressé et tient aussi 
 1. Modifiez `prisma/schema.prisma`.
 2. Générez la migration SQL : `npx prisma migrate diff --from-local-d1 --to-schema-datamodel prisma/schema.prisma --script > migrations/000X_nom.sql`
 3. Appliquez-la : `npm run db:migrate:local` puis `npm run db:migrate:remote`.
+
+## Tarif
+
+**29 $ par mois, tout compris, 14 jours d'essai gratuit.** Le choix et l'étude de la concurrence
+sont détaillés dans [`docs/APP_STORE.md`](docs/APP_STORE.md#2-tarification). Le montant affiché sur la
+page d'accueil est défini dans `app/pricing.ts`.
 
 ## Facturation
 

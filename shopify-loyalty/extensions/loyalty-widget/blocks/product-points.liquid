@@ -7,6 +7,7 @@
   <div
     class="hoshi-product-points"
     data-hoshi-product-points
+    data-hoshi-locale="{{ request.locale.iso_code }}"
     data-price="{{ product.selected_or_first_available_variant.price }}"
     data-prices='{{ prices | strip }}'
     data-template="{{ block.settings.text | escape }}"
@@ -18,15 +19,15 @@
 
 {% schema %}
 {
-  "name": "Points produit",
+  "name": "t:product.name",
   "target": "section",
   "enabled_on": { "templates": ["product"] },
   "settings": [
     {
       "type": "text",
       "id": "text",
-      "label": "Texte ({points} et {name} sont remplacés)",
-      "default": "Gagnez {points} {name} avec cet achat"
+      "label": "t:product.text",
+      "info": "t:product.text_info"
     }
   ]
 }

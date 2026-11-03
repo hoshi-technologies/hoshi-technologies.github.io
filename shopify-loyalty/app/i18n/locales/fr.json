@@ -1,0 +1,599 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "members": "Membres",
+    "rewards": "Récompenses",
+    "tiers": "Niveaux clients",
+    "settings": "Réglages"
+  },
+  "common": {
+    "edit": "Modifier",
+    "active": "Actif",
+    "paused": "En pause",
+    "customer": "Client",
+    "type": "Type",
+    "detail": "Détail",
+    "points": "Points",
+    "date": "Date",
+    "anonymousCustomer": "Client anonyme",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "status": "Statut",
+    "actions": "Actions",
+    "change": "Changer",
+    "optional": "facultatif",
+    "color": "Couleur"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "manageRewards": "Gérer les récompenses",
+    "pausedTitle": "Le programme est en pause",
+    "pausedText": "Vos clients ne gagnent plus de points et ne peuvent plus échanger de récompenses.",
+    "reactivate": "Le réactiver",
+    "campaignTitle": "Campagne en cours : {pointsName} ×{multiplier}",
+    "campaignUntil": "Jusqu'au {date}.",
+    "campaignNoEnd": "Sans date de fin.",
+    "welcome": "Bienvenue dans Hoshi Club",
+    "summary": "{amount} dépensé = {points} {pointsName} · {signup} {pointsName} offerts à l'inscription",
+    "stats": {
+      "members": "Membres",
+      "newMembers_one": "+{count} ces 30 derniers jours",
+      "newMembers_other": "+{count} ces 30 derniers jours",
+      "pointsEarned": "{pointsName} distribués",
+      "pointsSpent": "{pointsName} échangés",
+      "rewardsClaimed": "Récompenses obtenues",
+      "rewardsUsed_one": "{count} utilisée en commande",
+      "rewardsUsed_other": "{count} utilisées en commande",
+      "rewardRevenue": "CA généré par les récompenses",
+      "rewardRevenueHint": "Commandes passées avec un code fidélité",
+      "referrals": "Filleuls convertis",
+      "pendingReferrals_one": "{count} invitation en attente",
+      "pendingReferrals_other": "{count} invitations en attente",
+      "referralRevenue": "CA généré par le parrainage",
+      "referralRevenueHint": "1res commandes des filleuls"
+    },
+    "chartTitle": "{pointsName} gagnés par jour (30 derniers jours)",
+    "chartAria": "{total} {unit} gagnés sur les 30 derniers jours",
+    "recentActivity": "Activité récente",
+    "noActivity": "Aucune activité pour l'instant. Les points apparaîtront ici dès la première commande ou inscription.",
+    "gettingStarted": "Bien démarrer",
+    "steps": {
+      "enableTitle": "Activer le programme",
+      "enableText": "Vos clients gagnent des points dès que le programme est actif.",
+      "rewardsTitle": "Proposer des récompenses",
+      "rewardsText": "Des réductions que vos clients peuvent obtenir avec leurs points.",
+      "tiersTitle": "Définir vos niveaux clients",
+      "tiersText": "Bronze, Argent, Or ou niveaux sur invitation, avec remises automatiques.",
+      "widgetTitle": "Afficher le widget sur la boutique",
+      "widgetText": "Activez « Hoshi Club » dans l'éditeur de thème (Intégrations d'applications).",
+      "widgetAction": "Ouvrir l'éditeur de thème"
+    },
+    "howItWorks": "Comment ça marche ?",
+    "how": {
+      "signup": "Le client crée un compte : bonus de bienvenue.",
+      "orders": "Chaque commande payée rapporte des points.",
+      "tiers": "Plus il cumule, plus son niveau monte (ou vous lui attribuez un niveau).",
+      "discounts": "Chaque niveau peut donner une remise automatique au paiement.",
+      "rewards": "Depuis le widget, il échange ses points contre un code de réduction personnel.",
+      "more": "Il gagne aussi des points en parrainant, pour son anniversaire et en vous suivant sur les réseaux."
+    }
+  },
+  "member": {
+    "viewCustomer": "Voir la fiche client",
+    "tierSaved": "Niveau mis à jour",
+    "codeCreated": "Code créé : {code}",
+    "pointsAdded": "Points ajoutés",
+    "pointsRemoved": "Points retirés",
+    "errors": {
+      "points": "Indiquez un nombre de points"
+    },
+    "available": "Solde disponible",
+    "tier": "Niveau",
+    "tierAssigned": "Niveau (attribué)",
+    "noTier": "Aucun",
+    "lifetimeAndOrders": "{lifetime} cumulés · {orders}",
+    "toNextTier": "Encore {points} {pointsName} pour atteindre {tier}",
+    "history": "Historique des points",
+    "noHistory": "Aucun mouvement pour l'instant.",
+    "codes": "Codes de réduction obtenus",
+    "code": "Code",
+    "codeUsed": "Utilisé",
+    "codeAvailable": "Disponible",
+    "adjust": "Ajuster le solde",
+    "adjustAction": "Action",
+    "addPoints": "Ajouter des points",
+    "removePoints": "Retirer des points",
+    "pointsCount": "Nombre de points",
+    "reason": "Motif (visible dans l'historique)",
+    "reasonPlaceholder": "Geste commercial",
+    "confirm": "Valider",
+    "giftReward": "Offrir une récompense",
+    "giftRewardText": "Génère un code personnel et débite les points du client.",
+    "generateCode": "Générer le code",
+    "info": "Informations",
+    "birthday": "Anniversaire : {date}",
+    "notProvided": "non renseigné",
+    "referralCode": "Code de parrainage : {code}",
+    "referrals": "Filleuls : {converted} converti(s) sur {invited} invité(s)",
+    "expiresAt": "Points valables jusqu'au {date}",
+    "tierSection": "Niveau du client",
+    "tierLocked": "Niveau imposé : il ne change plus avec les points.",
+    "tierAuto": "Automatique : actuellement {tier}, évolue avec les {pointsName}.",
+    "applyTier": "Appliquer le niveau",
+    "perks": "Avantages {tier}",
+    "noPerks": "Aucun avantage défini pour ce niveau.",
+    "shopifyTag": "Étiquette Shopify : {tag}",
+    "danger": "Zone sensible",
+    "confirmRemove": "Retirer ce client du programme ? Son solde et son historique seront supprimés.",
+    "remove": "Retirer du programme"
+  },
+  "members": {
+    "title": "Membres",
+    "add": "Ajouter un client",
+    "importAll": "Importer tous mes clients",
+    "joined": "{name} a rejoint le programme",
+    "tierUpdated": "Niveau de {name} mis à jour",
+    "imported_one": "{count} client importé",
+    "imported_other": "{count} clients importés",
+    "allImported": "Tous vos clients sont déjà membres",
+    "search": "Rechercher",
+    "searchPlaceholder": "Nom ou e-mail",
+    "tier": "Niveau",
+    "allTiers": "Tous les niveaux",
+    "sort": "Trier",
+    "sortPoints": "Plus de points",
+    "sortRecent": "Plus récents",
+    "email": "E-mail",
+    "balance": "Solde",
+    "lifetime": "Cumulés",
+    "orders": "Commandes",
+    "assigned": "Attribué",
+    "noResults": "Aucun membre ne correspond à votre recherche.",
+    "empty": "Aucun membre pour l'instant. Ajoutez un client ou importez tous vos clients.",
+    "total_one": "{count} membre",
+    "total_other": "{count} membres"
+  },
+  "addMember": {
+    "title": "Ajouter un client au programme",
+    "search": "Rechercher un client Shopify",
+    "searchPlaceholder": "Nom, e-mail ou téléphone",
+    "searching": "Recherche",
+    "noResults": "Aucun client trouvé.",
+    "noEmail": "Pas d'e-mail",
+    "orders_one": "{count} commande",
+    "orders_other": "{count} commandes",
+    "alreadyMember": "Déjà membre",
+    "choose": "Choisir",
+    "tierLabel": "Niveau du client",
+    "tierDetails": "« Automatique » : le niveau évolue selon les points. Sinon, le niveau choisi est imposé.",
+    "autoTier": "Automatique (selon les {pointsName})",
+    "invitationTier": "{name} (sur invitation)",
+    "welcomeBonus": "Offrir le bonus de bienvenue ({points} {pointsName})",
+    "update": "Mettre à jour",
+    "submit": "Ajouter au programme"
+  },
+  "program": {
+    "title": "Réglages du programme",
+    "saved": "Réglages enregistrés",
+    "pointsNameFallback": "points",
+    "status": {
+      "title": "Statut",
+      "label": "Programme de fidélité actif",
+      "details": "Désactivez-le pour mettre le programme en pause sans perdre les points de vos clients."
+    },
+    "earn": {
+      "title": "Gagner des points",
+      "pointsName": "Nom des points",
+      "pointsNameDetails": "Ex. : points, étoiles, coins…",
+      "perUnit": "Points par {currency} dépensé",
+      "perUnitDetails": "Exemple : une commande de {amount} rapporte {points} {pointsName} (avant multiplicateur du niveau).",
+      "signup": "Bonus de bienvenue",
+      "signupDetails": "Offert à la création du compte client.",
+      "firstOrder": "Bonus première commande",
+      "firstOrderDetails": "En plus des points de la commande."
+    },
+    "birthday": {
+      "title": "Anniversaire 🎂",
+      "label": "Points offerts le jour de l'anniversaire",
+      "details": "Le client renseigne sa date dans le widget. Pour éviter les abus, la date doit être enregistrée au moins 30 jours avant. 0 = désactivé."
+    },
+    "referral": {
+      "title": "Parrainage 🤝",
+      "enable": "Activer le parrainage",
+      "enableDetails": "Chaque membre a un lien personnel. L'ami reçoit un code de bienvenue ; le parrain gagne des points quand l'ami passe sa première commande.",
+      "referrerPoints": "Points gagnés par le parrain",
+      "friendGift": "Cadeau pour l'ami",
+      "value": "Valeur",
+      "minimum": "Montant minimum (facultatif)"
+    },
+    "social": {
+      "title": "Réseaux sociaux 📣",
+      "intro": "Renseignez vos pages : le widget proposera de vous suivre en échange de {pointsName} (une fois par réseau).",
+      "points": "Points par réseau suivi"
+    },
+    "bonus": {
+      "title": "Campagne de points bonus 🔥",
+      "intro": "Multipliez les {pointsName} gagnés sur une période (soldes, fêtes, lancement…). Un bandeau s'affiche dans le widget pendant la campagne.",
+      "multiplier": "Multiplicateur",
+      "none": "Aucune campagne",
+      "option": "{pointsName} ×{multiplier}",
+      "start": "Début (facultatif)",
+      "end": "Fin (facultatif)",
+      "message": "Message affiché",
+      "messageDetails": "Laissez vide pour afficher un message par défaut traduit.",
+      "messagePlaceholder": "Black Friday : {pointsName} ×{multiplier} !"
+    },
+    "expiration": {
+      "title": "Expiration des points ⏳",
+      "label": "Les points expirent après",
+      "details": "Chaque achat, échange ou gain de points repousse la date. Une date d'expiration incite les clients à revenir.",
+      "never": "Jamais",
+      "months_one": "{count} mois sans activité",
+      "months_other": "{count} mois sans activité"
+    },
+    "widget": {
+      "title": "Apparence du widget",
+      "languageNote": "Le widget s'affiche automatiquement dans la langue de votre boutique (36 langues prises en charge).",
+      "widgetTitle": "Titre du widget",
+      "widgetTitleDetails": "Laissez vide pour utiliser le titre par défaut, traduit dans chaque langue.",
+      "defaultTitle": "Mes récompenses",
+      "color": "Couleur principale",
+      "colorOption": "Couleur {color}",
+      "customColor": "Couleur personnalisée",
+      "position": "Position du bouton",
+      "right": "En bas à droite",
+      "left": "En bas à gauche"
+    },
+    "preview": "Aperçu",
+    "previewTier": "Niveau Argent",
+    "previewRedeem": "Obtenir"
+  },
+  "landing": {
+    "tagline": "Le programme de fidélité le plus simple pour votre boutique Shopify : points, niveaux VIP avec remises automatiques, parrainage et récompenses en quelques clics.",
+    "pricing": "{price}/mois · tout compris · {days} jours d'essai gratuit",
+    "shopDomain": "Domaine de la boutique",
+    "install": "Installer",
+    "login": "Se connecter",
+    "installFromStore": "Installez Hoshi Club depuis l'App Store Shopify.",
+    "errors": {
+      "missingShop": "Indiquez le domaine de votre boutique",
+      "invalidShop": "Ce domaine de boutique n'est pas valide"
+    },
+    "features": {
+      "points": {
+        "title": "Points automatiques.",
+        "text": "Vos clients gagnent des points à chaque commande, sans aucune configuration technique."
+      },
+      "tiers": {
+        "title": "Niveaux VIP.",
+        "text": "Bronze, Argent, Or ou niveaux sur invitation, avec remises automatiques et multiplicateurs de points pour vos meilleurs clients."
+      },
+      "referrals": {
+        "title": "Parrainage et bonus.",
+        "text": "Parrainage, cadeaux d'anniversaire, réseaux sociaux et campagnes de points doublés."
+      },
+      "widget": {
+        "title": "Widget élégant.",
+        "text": "Un bouton flottant aux couleurs de votre boutique pour consulter et échanger ses points."
+      },
+      "languages": {
+        "title": "36 langues.",
+        "text": "L'application et le widget parlent votre langue et celle de vos clients."
+      }
+    }
+  },
+  "legal": {
+    "privacyLink": "Politique de confidentialité",
+    "supportLink": "Aide et contact",
+    "language": "Langue",
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "updated": "Hoshi Club, édité par Hoshi Technologies. Mise à jour : {date}.",
+      "intro": "Hoshi Club (« l'application ») permet aux marchands Shopify de proposer un programme de fidélité à leurs clients. Cette politique explique quelles données l'application traite, pourquoi et comment.",
+      "collectedTitle": "Données collectées",
+      "collected": {
+        "store": {
+          "label": "Données de la boutique :",
+          "text": "domaine de la boutique et jetons d'accès fournis par Shopify lors de l'installation."
+        },
+        "members": {
+          "label": "Données des clients membres :",
+          "text": "identifiant client Shopify, prénom, nom, adresse e-mail, nombre de commandes, solde et historique de points, niveau de fidélité, codes de réduction obtenus, date d'anniversaire (jour et mois, si le client la renseigne) et code de parrainage."
+        },
+        "referrals": {
+          "label": "Données de parrainage :",
+          "text": "adresse e-mail saisie par la personne invitée pour recevoir son code de bienvenue."
+        },
+        "orders": {
+          "label": "Données de commande :",
+          "text": "identifiant, sous-total et total des commandes payées et codes de réduction utilisés, uniquement pour calculer les points."
+        }
+      },
+      "noPayment": "L'application ne collecte aucune donnée de paiement et n'utilise pas de cookies publicitaires.",
+      "useTitle": "Utilisation des données",
+      "use": "Les données servent exclusivement à faire fonctionner le programme de fidélité de la boutique : calculer et afficher les points, attribuer les niveaux et leurs avantages, créer les codes de réduction, gérer le parrainage et afficher les statistiques au marchand. Elles ne sont ni vendues, ni louées, ni partagées avec des tiers à des fins commerciales.",
+      "hostingTitle": "Hébergement et sous-traitants",
+      "hosting": "Les données sont hébergées par Cloudflare (Cloudflare Workers et D1). Shopify fournit les données de la boutique et des clients via ses API. Ces prestataires agissent comme sous-traitants et appliquent leurs propres garanties de sécurité.",
+      "retentionTitle": "Conservation et suppression",
+      "retention": {
+        "installed": "Les données sont conservées tant que l'application est installée.",
+        "customerRedact": "À la demande d'un client (via Shopify), ses données sont supprimées automatiquement (webhook customers/redact).",
+        "shopRedact": "48 heures après la désinstallation, Shopify demande la suppression des données de la boutique ; elles sont alors toutes effacées (webhook shop/redact).",
+        "merchant": "Le marchand peut retirer à tout moment un client du programme depuis l'application."
+      },
+      "rightsTitle": "Vos droits",
+      "rights": "Conformément au RGPD, les clients disposent d'un droit d'accès, de rectification, d'effacement et d'opposition. Ils peuvent l'exercer auprès de la boutique concernée (responsable du traitement) ou en nous écrivant. Les demandes d'accès transmises par Shopify (webhook customers/data_request) sont traitées.",
+      "contactTitle": "Contact",
+      "contact": "Pour toute question :"
+    },
+    "support": {
+      "title": "Aide et contact",
+      "intro": "Une question, un problème ? Écrivez-nous, nous répondons sous 2 jours ouvrés :",
+      "faqTitle": "Questions fréquentes",
+      "faq": {
+        "widget": {
+          "q": "Comment afficher le programme sur ma boutique ?",
+          "a": "Dans Shopify : Boutique en ligne → Thèmes → Personnaliser → Intégrations d'applications, puis activez « Hoshi Club ». Le tableau de bord de l'application contient un lien direct."
+        },
+        "points": {
+          "q": "Quand mes clients reçoivent-ils leurs points ?",
+          "a": "Automatiquement dès que la commande est payée. Les points sont retirés en cas de remboursement."
+        },
+        "tierDiscounts": {
+          "q": "Comment fonctionnent les remises des niveaux ?",
+          "a": "Chaque niveau pose une étiquette sur le client et crée une remise automatique Shopify réservée aux clients de ce niveau. Elle s'applique au paiement, sans code. Les remises sont visibles dans Shopify → Réductions."
+        },
+        "assignTier": {
+          "q": "Puis-je attribuer un niveau à un client précis ?",
+          "a": "Oui : page Membres → Ajouter un client, ou depuis la fiche d'un membre (section « Niveau du client »)."
+        },
+        "referrals": {
+          "q": "Comment fonctionne le parrainage ?",
+          "a": "Chaque membre a un lien personnel. L'ami invité saisit son e-mail et reçoit un code de bienvenue ; le parrain gagne des points quand ce code est utilisé dans une commande payée."
+        },
+        "languages": {
+          "q": "Quelles langues sont prises en charge ?",
+          "a": "L'application suit la langue de votre administration Shopify et le widget celle de votre boutique, dans 36 langues. Les noms de récompenses laissés vides sont traduits automatiquement."
+        },
+        "uninstall": {
+          "q": "Que se passe-t-il si je désinstalle l'application ?",
+          "a": "Les remises automatiques restent dans Shopify jusqu'à ce que vous les supprimiez. Les données du programme sont effacées 48 heures après la désinstallation."
+        }
+      }
+    }
+  },
+  "rewards": {
+    "title": "Récompenses",
+    "new": "Nouvelle récompense",
+    "create": "Créer une récompense",
+    "editTitle": "Modifier la récompense",
+    "deleted": "Récompense supprimée",
+    "hidden": "Récompense masquée",
+    "shown": "Récompense activée",
+    "updated": "Récompense mise à jour",
+    "created": "Récompense créée",
+    "errors": {
+      "cost": "Le coût en points doit être supérieur à 0",
+      "value": "Indiquez la valeur de la réduction",
+      "percent": "Une réduction ne peut pas dépasser 100 %"
+    },
+    "emptyTitle": "Aucune récompense pour l'instant",
+    "emptyText": "Créez une première récompense : vos clients pourront l'obtenir en échange de leurs {pointsName}.",
+    "columns": {
+      "reward": "Récompense",
+      "cost": "Coût",
+      "claimed": "Obtenue"
+    },
+    "types": {
+      "AMOUNT": "Montant fixe",
+      "PERCENT": "Pourcentage",
+      "FREE_SHIPPING": "Livraison offerte"
+    },
+    "minimumShort": "Dès {amount} d'achat",
+    "autoTranslated": "Nom traduit automatiquement",
+    "timesClaimed_one": "{count} fois",
+    "timesClaimed_other": "{count} fois",
+    "visible": "Visible",
+    "hiddenBadge": "Masquée",
+    "hide": "Masquer",
+    "show": "Afficher",
+    "confirmDelete": "Supprimer « {title} » ?",
+    "tipTitle": "Conseil",
+    "tip": "Une bonne première récompense s'obtient en 2 à 3 commandes. Avec 1 point par unité dépensée, 500 points pour 5 de réduction représentent 1 % de remise : attractif sans peser sur vos marges.",
+    "typeLabel": "Type de récompense",
+    "percentLabel": "Pourcentage de réduction",
+    "amountLabel": "Montant de la réduction",
+    "costLabel": "Coût en points",
+    "nameLabel": "Nom affiché (facultatif)",
+    "nameDetails": "Laissez vide pour afficher un nom traduit dans la langue de votre client.",
+    "minimumLabel": "Montant minimum de commande (facultatif)"
+  },
+  "labels": {
+    "rewardPercent": "{value} % de réduction",
+    "rewardAmount": "{amount} de réduction",
+    "freeShipping": "Livraison offerte",
+    "percentOff": "-{value} %",
+    "amountOff": "-{amount}",
+    "tierDiscount": "{discount} sur toutes les commandes",
+    "tierDiscountFrom": "{discount} sur toutes les commandes dès {minimum}",
+    "pointsMultiplier": "{pointsName} ×{multiplier}",
+    "withMinimum": "{reward} dès {minimum} d'achat"
+  },
+  "tx": {
+    "type": {
+      "SIGNUP": "Bienvenue",
+      "ORDER": "Commande",
+      "FIRST_ORDER": "1re commande",
+      "REDEEM": "Échange",
+      "REFUND": "Remboursement",
+      "ADJUST": "Ajustement",
+      "BIRTHDAY": "Anniversaire",
+      "REFERRAL": "Parrainage",
+      "SOCIAL": "Réseaux sociaux",
+      "EXPIRE": "Expiration"
+    },
+    "desc": {
+      "SIGNUP": "Bonus de bienvenue",
+      "ORDER": "Commande {order}",
+      "ORDER_BONUS": "Commande {order} (bonus ×{bonus})",
+      "FIRST_ORDER": "Bonus première commande ({order})",
+      "REDEEM": "Échange : {reward}",
+      "REFUND": "Remboursement (commande {order})",
+      "ADJUST_ADD": "Ajout manuel",
+      "ADJUST_REMOVE": "Retrait manuel",
+      "BIRTHDAY": "Joyeux anniversaire ! ({year})",
+      "REFERRAL": "Parrainage : {friend}",
+      "SOCIAL": "Abonnement {network}",
+      "EXPIRE": "Expiration après {months} mois d'inactivité"
+    }
+  },
+  "errors": {
+    "unexpected": "Une erreur est survenue : {details}",
+    "memberNotFound": "Membre introuvable",
+    "tierNotFound": "Niveau introuvable",
+    "rewardUnavailable": "Cette récompense n'est plus disponible",
+    "programDisabled": "Le programme de fidélité est momentanément en pause",
+    "notEnoughPoints": "Il vous manque {missing} {pointsName}",
+    "discountFailed": "Le code de réduction n'a pas pu être créé. {details}",
+    "referralCodeFailed": "Le code de parrainage n'a pas pu être généré",
+    "referralUnavailable": "Le parrainage n'est pas disponible",
+    "invalidEmail": "Adresse e-mail invalide",
+    "invalidReferral": "Lien de parrainage invalide",
+    "selfReferral": "Vous ne pouvez pas vous parrainer vous-même",
+    "referralAlreadyUsed": "Cette adresse a déjà profité d'un parrainage",
+    "referralNewCustomersOnly": "Le parrainage est réservé aux nouveaux clients",
+    "invalidDate": "Date invalide",
+    "birthdayAlreadySet": "Votre date d'anniversaire est déjà enregistrée",
+    "actionUnavailable": "Action indisponible",
+    "loginRequired": "Connectez-vous pour profiter du programme",
+    "notInstalled": "L'application n'est pas installée sur cette boutique",
+    "generic": "Une erreur est survenue, veuillez réessayer."
+  },
+  "seed": {
+    "pointsName": "points",
+    "tierBronze": "Bronze",
+    "tierSilver": "Argent",
+    "tierGold": "Or"
+  },
+  "server": {
+    "tierDiscountTitle": "Niveau {tier} : {discount}",
+    "tierShippingTitle": "Niveau {tier} : livraison offerte"
+  },
+  "tiers": {
+    "title": "Niveaux clients",
+    "new": "Nouveau niveau",
+    "create": "Créer un niveau",
+    "editTitle": "Modifier le niveau",
+    "resync": "Resynchroniser avec Shopify",
+    "deleted": "Niveau supprimé",
+    "created": "Niveau créé",
+    "updated": "Niveau mis à jour",
+    "resynced_one": "Synchronisation terminée ({count} client mis à jour)",
+    "resynced_other": "Synchronisation terminée ({count} clients mis à jour)",
+    "errors": {
+      "name": "Donnez un nom au niveau",
+      "value": "Indiquez la valeur de la remise",
+      "percent": "La remise ne peut pas dépasser 100 %",
+      "sync": "Niveau enregistré, mais la remise Shopify n'a pas pu être créée : {details}"
+    },
+    "intro": "Chaque niveau peut offrir des avantages appliqués automatiquement au paiement (remise permanente, livraison offerte), un multiplicateur de {pointsName} et des avantages libres. Un niveau est soit automatique (atteint en cumulant des {pointsName}), soit manuel (vous l'attribuez vous-même depuis la fiche du client, par exemple « Ambassadrice » ou « Professionnelle »). Un niveau manuel a toujours priorité.",
+    "emptyTitle": "Aucun niveau",
+    "emptyText": "Créez vos niveaux de clientèle et leurs avantages.",
+    "autoSection": "Niveaux automatiques (selon les points)",
+    "manualSection": "Niveaux attribués manuellement",
+    "levelNumber": "Niveau {number}",
+    "invitationOnly": "Sur invitation",
+    "assignedManually": "Attribué manuellement",
+    "fromPoints": "Dès {points} {pointsName} cumulés",
+    "noPerks": "Aucun avantage défini",
+    "customers_one": "{count} client",
+    "customers_other": "{count} clients",
+    "tag": "Étiquette : {tag}",
+    "syncError": "Remise Shopify non créée : {details}",
+    "confirmDelete": "Supprimer le niveau « {name} » ? Ses remises automatiques seront supprimées.",
+    "nameLabel": "Nom du niveau",
+    "namePlaceholder": "Ex. : Or, Ambassadrice, Cliente pro…",
+    "modeQuestion": "Comment le client obtient ce niveau ?",
+    "modeAuto": "Automatiquement",
+    "modeAutoText": "En cumulant des {pointsName}",
+    "modeManual": "Manuellement",
+    "modeManualText": "Vous l'attribuez vous-même",
+    "minPointsLabel": "{pointsName} cumulés nécessaires",
+    "perksTitle": "Avantages automatiques",
+    "discountLabel": "Remise permanente sur les commandes",
+    "discountNone": "Aucune remise",
+    "discountPercent": "Pourcentage (ex. -10 %)",
+    "discountAmount": "Montant fixe (ex. -5)",
+    "discountValue": "Valeur de la remise",
+    "discountMinimum": "À partir de (facultatif)",
+    "freeShipping": "Livraison offerte sur toutes les commandes",
+    "multiplierLabel": "Multiplicateur de {pointsName}",
+    "multiplierDetails": "1 = normal, 2 = deux fois plus de {pointsName} par commande.",
+    "otherPerks": "Autres avantages (un par ligne, affichés au client)",
+    "otherPerksPlaceholder": "Accès aux ventes privées\nCadeau d'anniversaire"
+  },
+  "widget": {
+    "title": "Mes récompenses",
+    "unavailable": "Le programme de fidélité est momentanément indisponible.",
+    "guestText": "Créez un compte pour gagner des points à chaque achat et profiter de réductions exclusives.",
+    "join": "Rejoindre le programme",
+    "haveAccount": "J'ai déjà un compte",
+    "hello": "Bonjour {name}",
+    "earnTitle": "Gagnez des {pointsName}",
+    "nextTier": "Encore {points} {pointsName} pour {tier}",
+    "bonusDefault": "{pointsName} ×{multiplier} !",
+    "bonusUntil": "jusqu'au {date}",
+    "rewardsTitle": "Récompenses",
+    "minimum": "dès {amount}",
+    "redeem": "Obtenir",
+    "missing": "Encore {points}",
+    "codesTitle": "Mes codes",
+    "useCode": "Utiliser",
+    "perksTitle": "Mes avantages {tier}",
+    "perUnit": "{points} {pointsName} par {amount} dépensé",
+    "signup": "{points} {pointsName} à l'inscription",
+    "firstOrder": "{points} {pointsName} pour votre 1re commande",
+    "follow": "Suivez-nous sur {network}",
+    "followButton": "Suivre",
+    "birthdayGuest": "{points} {pointsName} pour votre anniversaire",
+    "birthdaySet": "Anniversaire le {date} : {points} {pointsName} offerts",
+    "birthdayAsk": "Votre anniversaire :",
+    "birthdayConfirm": "Votre anniversaire est le {date} ? Il ne pourra plus être modifié.",
+    "birthdaySaved": "Anniversaire enregistré 🎂",
+    "day": "Jour",
+    "month": "Mois",
+    "ok": "OK",
+    "socialThanks": "Merci ! Vos points ont été ajoutés",
+    "socialAlready": "Points déjà obtenus pour ce réseau",
+    "referralTitle": "Parrainage",
+    "referralMemberTitle": "Parrainez vos amis",
+    "referralIntro": "Offrez {reward} à vos amis et gagnez {points} {pointsName} à leur première commande.",
+    "referralLink": "Lien de parrainage",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "share": "Partager…",
+    "shareText": "Profitez d'une réduction sur votre première commande !",
+    "referralsDone_one": "{count} ami parrainé 🎉",
+    "referralsDone_other": "{count} amis parrainés 🎉",
+    "tiersTitle": "Niveaux",
+    "tierFrom": "dès {points} {pointsName}",
+    "expires": "Vos {pointsName} restent valables jusqu'au {date} (prolongés à chaque achat).",
+    "confirmRedeem": "Échanger vos points contre « {reward} » ?",
+    "congrats": "Félicitations !",
+    "rewardReady": "Votre récompense « {reward} » est prête :",
+    "applyCart": "Appliquer à mon panier",
+    "close": "Fermer",
+    "errorGeneric": "Une erreur est survenue, réessayez.",
+    "aFriend": "Un ami",
+    "giftTitle": "{name} vous fait un cadeau !",
+    "giftText": "Profitez de {reward} sur votre première commande.",
+    "emailPlaceholder": "Votre adresse e-mail",
+    "getCode": "Recevoir mon code",
+    "later": "Plus tard",
+    "welcomeCodeTitle": "Votre code de bienvenue",
+    "welcomeCodeText": "{reward} sur votre première commande :",
+    "continueShopping": "Continuer mes achats",
+    "productPoints": "Gagnez {points} {pointsName} avec cet achat"
+  }
+}
