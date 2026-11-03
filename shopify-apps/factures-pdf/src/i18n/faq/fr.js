@@ -18,11 +18,11 @@ export default [
       ],
       [
         'Mon client reçoit-il sa facture automatiquement ?',
-        "Oui : un e-mail lui est envoyé avec la facture en PDF en pièce jointe. Il est envoyé au nom de votre boutique, et si le client y répond, la réponse arrive à l'adresse e-mail de votre entreprise. Vous pouvez désactiver l'envoi automatique dans les réglages. S'il a un compte client, il trouve aussi un bouton « Télécharger ma facture » sur chacune de ses commandes, sans aucun réglage de votre part.",
+        "Oui : un e-mail lui est envoyé avec la facture en PDF en pièce jointe. Il est envoyé au nom de votre boutique, et si le client y répond, la réponse arrive à l'adresse e-mail de votre entreprise. Vous pouvez désactiver l'envoi automatique dans les réglages.",
       ],
       [
         'Pourquoi la facture ne figure-t-elle pas dans l’e-mail de confirmation de Shopify ?',
-        "Shopify ne permet pas aux applis d’ajouter une pièce jointe à ses propres e-mails. Pour n’envoyer qu’un seul e-mail, choisissez « Un seul e-mail » : un bouton « Télécharger ma facture » est ajouté à la confirmation de Shopify. Il suffit de coller une fois un code dans Paramètres › Notifications › Confirmation de commande ; les réglages de l’appli vous guident pas à pas. Le client clique et le PDF s’ouvre, sans code ni compte.",
+        "Shopify ne permet pas aux applis d’ajouter une pièce jointe ni de modifier ses propres e-mails. Pour n’envoyer qu’un seul e-mail, deux solutions : le bouton « Télécharger ma facture » sur la page de commande (le client clique sur « Afficher votre commande » dans l’e-mail de Shopify ; aucun code, 3 clics pour l’activer une fois), ou un lien directement dans l’e-mail de confirmation (un code à coller une fois). Les réglages de l’appli vous guident pas à pas.",
       ],
       [
         'Comment recevoir une copie de mes factures ?',

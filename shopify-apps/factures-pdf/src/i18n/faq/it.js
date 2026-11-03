@@ -16,11 +16,11 @@ export default [
       ],
       [
         'Il mio cliente riceve la fattura automaticamente?',
-        "Sì: riceve un'email con la fattura in PDF allegata. Viene inviata a nome del tuo negozio e le risposte arrivano all'email della tua azienda. Puoi disattivare l'invio automatico nelle impostazioni. Se ha un account cliente, trova anche un pulsante «Scarica fattura» su ciascun ordine, senza alcuna configurazione da parte tua.",
+        "Sì: riceve un'email con la fattura in PDF allegata. Viene inviata a nome del tuo negozio e le risposte arrivano all'email della tua azienda. Puoi disattivare l'invio automatico nelle impostazioni.",
       ],
       [
         "Perché la fattura non è nell'email di conferma di Shopify?",
-        "Shopify non permette alle app di allegare file alle proprie email. Per inviare una sola email, scegli «Una sola email»: un pulsante «Scarica fattura» viene aggiunto alla conferma di Shopify. Basta incollare una volta un codice in Impostazioni › Notifiche › Conferma dell’ordine; le impostazioni dell’app ti guidano passo passo. Il cliente fa clic e il PDF si apre, senza codice né account.",
+        "Shopify non permette alle app di allegare file né di modificare le proprie email. Per inviare una sola email ci sono due soluzioni: il pulsante «Scarica fattura» sulla pagina dell’ordine (il cliente fa clic su «Visualizza ordine» nell’email di Shopify; nessun codice, 3 clic per attivarlo una volta) oppure un link direttamente nell’email di conferma (incollare un codice una volta). Le impostazioni dell’app ti guidano passo passo.",
       ],
       [
         'Come ricevo una copia delle mie fatture?',

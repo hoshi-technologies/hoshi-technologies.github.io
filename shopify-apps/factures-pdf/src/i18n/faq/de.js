@@ -16,11 +16,11 @@ export default [
       ],
       [
         'Erhält mein Kunde die Rechnung automatisch?',
-        'Ja: Er bekommt eine E-Mail mit der Rechnung als PDF im Anhang. Sie wird im Namen Ihres Shops versendet, Antworten gehen an Ihre geschäftliche E-Mail-Adresse. Den automatischen Versand können Sie in den Einstellungen abschalten. Hat er ein Kundenkonto, findet er dort außerdem bei jeder Bestellung eine Schaltfläche „Rechnung herunterladen“, ganz ohne Einrichtung.',
+        'Ja: Er bekommt eine E-Mail mit der Rechnung als PDF im Anhang. Sie wird im Namen Ihres Shops versendet, Antworten gehen an Ihre geschäftliche E-Mail-Adresse. Den automatischen Versand können Sie in den Einstellungen abschalten.',
       ],
       [
         'Warum ist die Rechnung nicht in der Shopify-Bestellbestätigung?',
-        "Shopify erlaubt Apps nicht, eigenen E-Mails Anhänge hinzuzufügen. Für nur eine E-Mail wählen Sie „Nur eine E-Mail“: Eine Schaltfläche „Rechnung herunterladen“ wird zur Shopify-Bestätigung hinzugefügt. Dazu einmalig einen Code unter Einstellungen › Benachrichtigungen › Bestellbestätigung einfügen; die App-Einstellungen führen Sie Schritt für Schritt. Der Kunde klickt und die PDF öffnet sich, ohne Code und ohne Konto.",
+        "Shopify erlaubt Apps weder Anhänge noch Änderungen an den eigenen E-Mails. Für nur eine E-Mail gibt es zwei Lösungen: die Schaltfläche „Rechnung herunterladen“ auf der Bestellseite (der Kunde klickt in der Shopify-E-Mail auf „Bestellung ansehen“; kein Code, einmalig 3 Klicks zum Aktivieren) oder einen Link direkt in der Bestellbestätigung (einmalig einen Code einfügen). Die App-Einstellungen führen Sie Schritt für Schritt.",
       ],
       [
         'Wie erhalte ich eine Kopie meiner Rechnungen?',

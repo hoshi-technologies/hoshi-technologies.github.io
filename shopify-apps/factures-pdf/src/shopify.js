@@ -42,40 +42,6 @@ export function verifySessionToken(token, { apiKey, apiSecret }, now = Date.now(
   return { shop, claims };
 }
 
-/**
- * Vérifie le jeton de session d'une extension de l'espace client (shopify.sessionToken.get()).
- * Différences avec App Bridge : `dest` est le domaine nu de la boutique, pas d'`iss`, et `sub`
- * (gid://shopify/Customer/…) n'est présent que si le client est connecté et que l'appli a le
- * droit read_customers. Renvoie la boutique et l'identifiant numérique du client (ou null).
- */
-export function verifyCustomerToken(token, { apiKey, apiSecret }, now = Date.now()) {
-  const parts = String(token || '').split('.');
-  if (parts.length !== 3) throw new Error('Jeton client mal formé');
-  const [header, payload, signature] = parts;
-  const expected = createHmac('sha256', apiSecret).update(`${header}.${payload}`).digest('base64url');
-  if (!safeEqual(expected, signature)) throw new Error('Signature du jeton invalide');
-  const { alg } = JSON.parse(Buffer.from(header, 'base64url').toString());
-  if (alg !== 'HS256') throw new Error('Algorithme de jeton inattendu');
-  const claims = JSON.parse(Buffer.from(payload, 'base64url').toString());
-  const seconds = now / 1000;
-  const leeway = 10;
-  if (!claims.exp || seconds > claims.exp + leeway) throw new Error('Jeton expiré');
-  if (claims.nbf && seconds < claims.nbf - leeway) throw new Error('Jeton pas encore valide');
-  if (claims.aud !== apiKey) throw new Error('Jeton destiné à une autre appli');
-  const dest = String(claims.dest || '');
-  const shop = dest.includes('://') ? new URL(dest).hostname : dest;
-  if (!isValidShop(shop)) throw new Error('Boutique invalide');
-  const customerId = /^gid:\/\/shopify\/Customer\/(\d+)$/.exec(claims.sub || '')?.[1] ?? null;
-  return { shop, customerId, claims };
-}
-
-/** Identifiant numérique d'une commande, à partir de son GID ou de son numéro. */
-export function numericOrderId(id) {
-  return /^(?:gid:\/\/shopify\/Order\/)?(\d+)$/.exec(String(id || ''))?.[1] ?? null;
-}
-
-export const ORDER_CUSTOMER_QUERY = `query OrderCustomer($id: ID!) { order(id: $id) { customer { id } } }`;
-
 /** Utilitaire de test : fabrique un jeton de session signé. */
 export function signSessionToken(claims, apiSecret) {
   const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
@@ -162,6 +128,10 @@ export const BUSINESS_ENTITY_QUERY = `#graphql
   }`;
 
 // ---------- Facturation de l'appli (Billing API) ----------
+
+export const METAFIELDS_SET = `mutation SetInvoiceLinks($metafields: [MetafieldsSetInput!]!) {
+  metafieldsSet(metafields: $metafields) { metafields { id } userErrors { field message } }
+}`;
 
 export const SHOP_PLAN_QUERY = `query ShopPlan { shop { plan { partnerDevelopment } } }`;
 

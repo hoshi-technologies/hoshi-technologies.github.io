@@ -75,9 +75,18 @@ export function createStore(sql, key) {
   if (!shopColumns.has('token_expires_at')) sql.exec('ALTER TABLE shops ADD COLUMN token_expires_at INTEGER');
   if (!shopColumns.has('refresh_expires_at')) sql.exec('ALTER TABLE shops ADD COLUMN refresh_expires_at INTEGER');
   const invoiceColumns = new Set(sql.all('PRAGMA table_info(invoices)').map((col) => col.name));
-  // Client Shopify de la commande : bouton « Télécharger ma facture » de l'espace client.
+  // Client Shopify de la commande (identifiant numérique).
   if (!invoiceColumns.has('customer_id')) sql.exec('ALTER TABLE invoices ADD COLUMN customer_id TEXT');
+  // Lien de la facture enregistré sur la commande Shopify (bloc « Télécharger ma facture »).
+  if (!invoiceColumns.has('link_published')) sql.exec('ALTER TABLE invoices ADD COLUMN link_published INTEGER NOT NULL DEFAULT 0');
   return new Store(sql, createCipher(key ?? randomBytes(32)));
+}
+
+/** Réglages enregistrés avant le choix « delivery » : déduit de l'ancien autoSend. */
+function withDelivery(settings, stored) {
+  if (!stored.delivery) settings.delivery = settings.autoSend ? 'email' : 'link';
+  settings.autoSend = settings.delivery === 'email';
+  return settings;
 }
 
 /** Adresse IP tronquée (dernier octet / derniers groupes masqués) : suffisante, moins identifiante. */
@@ -115,7 +124,7 @@ export class Store {
       ...row,
       access_token: this.cipher.decryptText(row.access_token),
       refresh_token: this.cipher.decryptText(row.refresh_token),
-      settings: { ...DEFAULT_SETTINGS, ...JSON.parse(row.settings) },
+      settings: withDelivery({ ...DEFAULT_SETTINGS, ...JSON.parse(row.settings) }, JSON.parse(row.settings)),
     };
   }
 
@@ -204,13 +213,17 @@ export class Store {
     return this.readInvoice(this.sql.get('SELECT * FROM invoices WHERE shop = ? AND order_id = ?', shop, String(orderId)));
   }
 
-  /** Facture d'une commande, sans le PDF (bouton de l'espace client). */
-  findInvoiceSummaryByOrder(shop, orderId) {
-    return this.sql.get(
-      'SELECT id, order_id, order_name, order_token, customer_id, number, language FROM invoices WHERE shop = ? AND order_id = ?',
+  /** Factures dont le lien n'est pas encore enregistré sur la commande Shopify. */
+  listUnpublishedLinks(shop, limit = 50) {
+    return this.sql.all(
+      'SELECT id, shop, order_id, order_token FROM invoices WHERE shop = ? AND link_published = 0 AND order_token IS NOT NULL ORDER BY id DESC LIMIT ?',
       shop,
-      String(orderId),
+      limit,
     );
+  }
+
+  markLinksPublished(ids) {
+    for (const id of ids) this.sql.run('UPDATE invoices SET link_published = 1 WHERE id = ?', id);
   }
 
   findInvoiceByToken(token) {

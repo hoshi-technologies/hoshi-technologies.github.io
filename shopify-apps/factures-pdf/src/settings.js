@@ -5,6 +5,10 @@ import { LANGUAGES, matchLanguage } from './i18n/index.js';
 export const DEFAULT_SETTINGS = {
   // Déclencheur : "paid" = à la commande payée (recommandé), "create" = dès la création.
   trigger: 'paid',
+  // Remise de la facture : "email" = e-mail séparé avec le PDF ; "page" = bouton sur la page de
+  // commande Shopify (aucun code) ; "link" = lien collé dans l'e-mail de confirmation de Shopify.
+  // Seul "email" envoie un e-mail : autoSend en découle.
+  delivery: 'email',
   autoSend: true,
   // Copie cachée au marchand : il garde ainsi ses propres archives (conservation 10 ans).
   bccMerchant: true,
@@ -62,6 +66,11 @@ export function sanitizeSettings(input, current = DEFAULT_SETTINGS) {
     if (typeof input[key] === 'boolean') out[key] = input[key];
   }
   if (!['paid', 'create'].includes(out.trigger)) out.trigger = 'paid';
+  const DELIVERY = ['email', 'page', 'link'];
+  if (DELIVERY.includes(input.delivery)) out.autoSend = input.delivery === 'email';
+  else if (typeof input.autoSend === 'boolean') out.delivery = input.autoSend ? 'email' : DELIVERY.includes(current.delivery) && current.delivery !== 'email' ? current.delivery : 'link';
+  if (!DELIVERY.includes(out.delivery)) out.delivery = out.autoSend ? 'email' : 'link';
+  out.autoSend = out.delivery === 'email';
   if (!/^#[0-9a-f]{6}$/i.test(out.accentColor)) out.accentColor = DEFAULT_SETTINGS.accentColor;
   if (out.logoUrl && !/^https:\/\//.test(out.logoUrl)) out.logoUrl = '';
   out.numberPrefix = out.numberPrefix.replace(/[^A-Za-z0-9_\-/]/g, '').slice(0, 12);

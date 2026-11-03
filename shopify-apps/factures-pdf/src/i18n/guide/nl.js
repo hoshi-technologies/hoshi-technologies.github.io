@@ -49,7 +49,7 @@ export default [
     intro: 'Standaard wordt de factuur aangemaakt bij betaling en meteen per e-mail naar de klant gestuurd.',
     steps: [
       'Kies bij Instellingen › Werking wanneer de factuur wordt aangemaakt: wanneer de bestelling is betaald (aanbevolen) of zodra ze is geplaatst.',
-      "Kies bij ‘Hoe je klanten hun factuur krijgen’: een e-mail met de pdf als bijlage (aanbevolen, niets in te stellen) of één e-mail met een knop ‘Factuur downloaden’ in de bevestiging van Shopify (één keer een code plakken; stap-voor-stap uitleg in de instellingen). Daarnaast kan er een knop op de bestelpagina van de klant verschijnen, na activering in de checkout-editor.",
+      "Kies bij ‘Hoe je klanten hun factuur krijgen’: een e-mail met de pdf als bijlage (aanbevolen, niets in te stellen); één e-mail met een knop ‘Factuur downloaden’ op de bestelpagina (geen code: 3 klikken om aan te zetten); of één e-mail met de link direct in de bevestiging van Shopify (één keer een code plakken). De instellingen leiden je stap voor stap.",
       'Vink „Stuur mij een kopie van elke factuur” aan om elke factuur te ontvangen en je archief op te bouwen.',
       'Open „E-mail naar de klant” om de e-mail aan te passen: onderwerp en bericht accepteren de variabelen {{first_name}}, {{name}}, {{invoice_number}}, {{order}} en {{shop}}.',
     ],

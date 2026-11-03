@@ -1,1 +1,4 @@
-{ "download": "Baixar fatura" }
+{
+  "title": "Fatura",
+  "download": "Baixar fatura"
+}

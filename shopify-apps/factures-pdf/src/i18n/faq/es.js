@@ -16,11 +16,11 @@ export default [
       ],
       [
         '¿Mi cliente recibe la factura automáticamente?',
-        'Sí: recibe un correo con la factura en PDF adjunta. Se envía en nombre de su tienda y las respuestas llegan al correo de su empresa. Puede desactivar el envío automático en los ajustes. Si tiene una cuenta de cliente, también encuentra un botón «Descargar factura» en cada uno de sus pedidos, sin que usted tenga que configurar nada.',
+        'Sí: recibe un correo con la factura en PDF adjunta. Se envía en nombre de su tienda y las respuestas llegan al correo de su empresa. Puede desactivar el envío automático en los ajustes.',
       ],
       [
         '¿Por qué la factura no está en el correo de confirmación de Shopify?',
-        "Shopify no permite que las aplicaciones adjunten archivos a sus propios correos. Para enviar un solo correo, elija «Un solo correo»: se añade un botón «Descargar factura» a la confirmación de Shopify. Basta con pegar una vez un código en Configuración › Notificaciones › Confirmación del pedido; la configuración de la aplicación le guía paso a paso. El cliente hace clic y se abre el PDF, sin código ni cuenta.",
+        "Shopify no permite que las aplicaciones adjunten archivos ni modifiquen sus propios correos. Para enviar un solo correo hay dos opciones: el botón «Descargar factura» en la página del pedido (el cliente hace clic en «Ver pedido» en el correo de Shopify; sin código, 3 clics para activarlo una vez) o un enlace directamente en el correo de confirmación (pegar un código una vez). La configuración de la aplicación le guía paso a paso.",
       ],
       [
         '¿Cómo recibo una copia de mis facturas?',

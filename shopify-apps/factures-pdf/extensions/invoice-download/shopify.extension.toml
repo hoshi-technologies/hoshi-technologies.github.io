@@ -1,6 +1,8 @@
-# Bouton « Télécharger ma facture » dans l'espace client Shopify (liste des commandes et page
-# de la commande). Ajouté automatiquement à toutes les boutiques qui installent l'appli :
-# le marchand n'a aucun code à coller.
+# Bloc « Télécharger ma facture » sur la page de commande Shopify : le client y arrive depuis
+# « Afficher votre commande » dans l'e-mail de confirmation, ou depuis son compte client.
+# Aucun code à coller pour le marchand (il ajoute le bloc une fois dans l'éditeur), aucune
+# connexion pour le client : le lien est lu dans un champ de la commande (metafield de l'appli),
+# que Shopify ne montre qu'à la personne qui consulte cette commande.
 api_version = "2026-10"
 
 [[extensions]]
@@ -10,10 +12,10 @@ handle = "invoice-download"
 uid = "99fa737f-b231-4d4f-bdd3-381620237228"
 
 [[extensions.targeting]]
-module = "./src/DownloadInvoiceButton.jsx"
-target = "customer-account.order.action.menu-item.render"
+module = "./src/DownloadInvoiceBlock.jsx"
+target = "customer-account.order-status.block.render"
 
-[extensions.capabilities]
-# Appel au serveur Hoshi Factures (autorisé dans le tableau de bord : « Demandes d'accès à l'API »
-# → « Autoriser l'accès au réseau dans les extensions de paiement et de compte »).
-network_access = true
+[[extensions.metafields]]
+namespace = "$app"
+key = "invoice_url"
+owner_type = "ORDER"

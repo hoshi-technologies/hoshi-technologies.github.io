@@ -8,9 +8,6 @@ import { buildInvoice } from './invoice.js';
 import {
   verifyWebhook,
   verifySessionToken,
-  verifyCustomerToken,
-  numericOrderId,
-  ORDER_CUSTOMER_QUERY,
   exchangeToken,
   refreshAccessToken,
   adminGraphql,
@@ -19,6 +16,7 @@ import {
   BUSINESS_ENTITY_QUERY,
   SUBSCRIPTION_CREATE,
   SHOP_PLAN_QUERY,
+  METAFIELDS_SET,
   SUBSCRIPTION_CANCEL,
   ACTIVE_SUBSCRIPTIONS,
 } from './shopify.js';
@@ -139,6 +137,43 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
     store.setPlan(shop, plan ? plan.key : 'free', plan ? active.id : null);
   }
 
+  // ---------- Lien de la facture enregistré sur la commande Shopify ----------
+  // Le bloc « Télécharger ma facture » de la page de commande le lit (champ de l'appli, visible
+  // seulement par la personne qui consulte cette commande) : ni code à coller, ni connexion.
+  const invoiceLink = (token) => `${String(config.appUrl).replace(/\/+$/, '')}/f/${token}.pdf`;
+  async function publishInvoiceLinks(shop, invoices) {
+    const pending = invoices.filter((i) => i.order_token);
+    for (let i = 0; i < pending.length; i += 25) {
+      const batch = pending.slice(i, i + 25);
+      const data = await graphql(shop, METAFIELDS_SET, {
+        metafields: batch.map((inv) => ({
+          ownerId: `gid://shopify/Order/${inv.order_id}`,
+          namespace: '$app',
+          key: 'invoice_url',
+          type: 'url',
+          value: invoiceLink(inv.order_token),
+        })),
+      });
+      const errors = data.metafieldsSet?.userErrors ?? [];
+      if (errors.length) throw new Error(`lien de facture non enregistré : ${errors.map((e) => e.message).join(' ; ')}`);
+      store.markLinksPublished(batch.map((inv) => inv.id));
+    }
+  }
+  /** Factures dont le lien n'est pas encore sur la commande (droit pas encore accordé, erreur…). */
+  async function publishPendingLinks(shop) {
+    const pending = store.listUnpublishedLinks(shop, 50);
+    if (pending.length) await publishInvoiceLinks(shop, pending);
+  }
+  if (service) {
+    const previous = service.onInvoiceCreated;
+    service.onInvoiceCreated = async (invoice) => {
+      await previous?.(invoice);
+      service.defer(
+        publishInvoiceLinks(invoice.shop, [invoice]).catch((error) => logger.warn(`${invoice.shop} : ${error.message}`)),
+      );
+    };
+  }
+
   const pdfResponse = (c, pdf, disposition) =>
     c.body(new Uint8Array(pdf), 200, { 'Content-Type': 'application/pdf', 'Content-Disposition': disposition });
 
@@ -235,52 +270,6 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
     return pdfResponse(c, invoice.pdf, `inline; filename="${dictionary(invoice.language).email.filename}-${invoice.number}.pdf"`);
   });
 
-  // ---------- Espace client : bouton « Télécharger ma facture » (extension Shopify) ----------
-  // Appelé depuis l'extension avec le jeton de session du client connecté. La facture n'est
-  // renvoyée que si la commande appartient bien à ce client (sinon : 404, sans rien révéler).
-  const customerCors = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-    'Access-Control-Max-Age': '86400',
-    'Cache-Control': 'private, no-store',
-  };
-  app.options('/customer-api/*', (c) => c.body(null, 204, customerCors));
-  app.get('/customer-api/invoice', async (c) => {
-    const reply = (body, status = 200) => c.json(body, status, customerCors);
-    let auth;
-    try {
-      auth = verifyCustomerToken(/^Bearer (.+)$/.exec(c.req.header('authorization') || '')?.[1], config);
-    } catch {
-      return reply({ error: 'unauthorized' }, 401);
-    }
-    const orderId = numericOrderId(c.req.query('order'));
-    if (!orderId) return reply({ error: 'order' }, 400);
-    const invoice = store?.findInvoiceSummaryByOrder(auth.shop, orderId);
-    if (!invoice || !invoice.order_token) return reply({ ready: false });
-    // Client non identifié : page de commande ouverte depuis l'e-mail de Shopify (« Voir ma
-    // commande »), sans connexion. Le bouton est affiché, mais le lien n'est donné qu'après la
-    // connexion du client (code reçu par e-mail).
-    if (!auth.customerId) return reply({ ready: true, login: true });
-
-    let owner = invoice.customer_id;
-    if (!owner) {
-      // Facture émise avant l'enregistrement du client : vérification auprès de Shopify.
-      try {
-        const data = await graphql(auth.shop, ORDER_CUSTOMER_QUERY, { id: `gid://shopify/Order/${orderId}` });
-        owner = /\/Customer\/(\d+)$/.exec(data.order?.customer?.id || '')?.[1] ?? null;
-      } catch (error) {
-        logger.warn(`${auth.shop} : propriétaire de la commande ${orderId} non vérifié (${error.message})`);
-        owner = null;
-      }
-    }
-    if (owner !== auth.customerId) return reply({ ready: false });
-
-    store.logAccess(auth.shop, { actor: 'customer', action: 'invoice.account_link', target: invoice.number, ip: clientIp(c) });
-    const base = String(config.appUrl || new URL(c.req.url).origin).replace(/\/+$/, '');
-    return reply({ ready: true, number: invoice.number, url: `${base}/f/${invoice.order_token}.pdf` });
-  });
-
   // ---------- Guide et FAQ publics (liens de la fiche App Store) : /guide?lang=de, /faq ----------
   const docsLanguage = (c) => matchLanguage(c.req.query('lang')) ?? preferredLanguage(c.req.header('accept-language'));
   const docsContext = (lang) => ({ lang, languages: LANGUAGES, t: dictionary(lang).admin, support: config.supportEmail });
@@ -359,6 +348,12 @@ export function createApp({ config, store, service, assets, fetchImpl = fetch, l
       } catch (error) {
         logger.error(`${shop} : initialisation impossible : ${error.message}`);
       }
+    }
+    // Liens de facture pas encore enregistrés sur les commandes (factures plus anciennes…).
+    try {
+      if (store.getShop(shop).access_token) await publishPendingLinks(shop);
+    } catch (error) {
+      logger.warn(`${shop} : ${error.message}`);
     }
     // Au retour de la page de confirmation d'abonnement, la formule est mise à jour ici.
     try {

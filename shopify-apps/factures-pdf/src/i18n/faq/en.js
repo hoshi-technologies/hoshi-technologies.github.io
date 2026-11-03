@@ -16,11 +16,11 @@ export default [
       ],
       [
         'Does my customer receive the invoice automatically?',
-        'Yes: they get an email with the PDF invoice attached. It is sent on behalf of your store, and replies go to your business email address. You can turn automatic sending off in the settings. If they have a customer account, they also find a “Download invoice” button on each of their orders, with no setup on your side.',
+        'Yes: they get an email with the PDF invoice attached. It is sent on behalf of your store, and replies go to your business email address. You can turn automatic sending off in the settings.',
       ],
       [
         'Why isn’t the invoice in the Shopify order confirmation email?',
-        "Shopify doesn’t let apps add attachments to its own emails. To send a single email, choose “A single email”: a “Download invoice” button is added to the Shopify confirmation. Just paste a code once in Settings › Notifications › Order confirmation; the app settings guide you step by step. The customer clicks and the PDF opens, with no code or account.",
+        "Shopify doesn’t let apps add attachments to or edit its own emails. To send a single email, there are two options: the “Download invoice” button on the order page (the customer clicks “View your order” in the Shopify email; no code, 3 clicks to turn it on once), or a link right in the confirmation email (paste a code once). The app settings guide you step by step.",
       ],
       [
         'How do I get a copy of my invoices?',

@@ -8,11 +8,19 @@ application_url = "https://hoshi-factures.hoshi-technologies.workers.dev"
 embedded = true
 
 [access_scopes]
-# Lecture des commandes (les webhooks de commande l'exigent) ; lecture des clients : Shopify
-# n'identifie le client connecté (bouton « Télécharger ma facture ») qu'avec ce droit.
+# Commandes : lecture (webhooks de commande) et écriture d'un seul champ de l'appli, le lien de la
+# facture, que le bloc « Télécharger ma facture » de la page de commande affiche.
 # Installation gérée par Shopify.
-scopes = "read_orders,read_customers"
+scopes = "write_orders"
 use_legacy_install_flow = false
+
+# Lien de la facture, enregistré sur chaque commande facturée (lu par le bloc de la page de commande).
+[order.metafields.app.invoice_url]
+type = "url"
+name = "Facture Hoshi Factures"
+description = "Lien de téléchargement de la facture PDF de la commande"
+access.admin = "merchant_read"
+access.customer_account = "read"
 
 [auth]
 redirect_urls = ["https://hoshi-factures.hoshi-technologies.workers.dev/auth/callback"]

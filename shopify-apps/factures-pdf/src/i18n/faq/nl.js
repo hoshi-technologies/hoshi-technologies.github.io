@@ -16,11 +16,11 @@ export default [
       ],
       [
         'Krijgt mijn klant de factuur automatisch?',
-        'Ja: hij ontvangt een e-mail met de factuur als pdf-bijlage. Die wordt verstuurd namens je winkel en antwoorden komen binnen op het e-mailadres van je bedrijf. Je kunt automatisch verzenden uitschakelen in de instellingen. Heeft hij een klantaccount, dan ziet hij bij elke bestelling ook een knop ‘Factuur downloaden’, zonder dat je iets hoeft in te stellen.',
+        'Ja: hij ontvangt een e-mail met de factuur als pdf-bijlage. Die wordt verstuurd namens je winkel en antwoorden komen binnen op het e-mailadres van je bedrijf. Je kunt automatisch verzenden uitschakelen in de instellingen.',
       ],
       [
         'Waarom zit de factuur niet in de orderbevestiging van Shopify?',
-        "Shopify staat apps niet toe bijlagen aan zijn eigen e-mails toe te voegen. Kies ‘Eén e-mail’ om maar één e-mail te sturen: er komt een knop ‘Factuur downloaden’ in de bevestiging van Shopify. Plak hiervoor één keer een code in Instellingen › Meldingen › Orderbevestiging; de app-instellingen leiden je stap voor stap. De klant klikt en de pdf opent, zonder code of account.",
+        "Shopify staat apps niet toe bijlagen toe te voegen of zijn eigen e-mails te wijzigen. Voor één e-mail zijn er twee oplossingen: de knop ‘Factuur downloaden’ op de bestelpagina (de klant klikt in de e-mail van Shopify op ‘Je bestelling bekijken’; geen code, één keer 3 klikken om aan te zetten) of een link direct in de orderbevestiging (één keer een code plakken). De app-instellingen leiden je stap voor stap.",
       ],
       [
         'Hoe krijg ik een kopie van mijn facturen?',

@@ -16,11 +16,11 @@ export default [
       ],
       [
         'Meu cliente recebe a fatura automaticamente?',
-        'Sim: ele recebe um e-mail com a fatura em PDF anexada. O e-mail é enviado em nome da sua loja e as respostas chegam ao e-mail da sua empresa. Você pode desativar o envio automático nas configurações. Se ele tiver uma conta de cliente, também encontra um botão “Baixar fatura” em cada pedido, sem nenhuma configuração da sua parte.',
+        'Sim: ele recebe um e-mail com a fatura em PDF anexada. O e-mail é enviado em nome da sua loja e as respostas chegam ao e-mail da sua empresa. Você pode desativar o envio automático nas configurações.',
       ],
       [
         'Por que a fatura não está no e-mail de confirmação da Shopify?',
-        "A Shopify não permite que apps anexem arquivos aos próprios e-mails. Para enviar um só e-mail, escolha “Um só e-mail”: um botão “Baixar fatura” é adicionado à confirmação da Shopify. Basta colar uma vez um código em Configurações › Notificações › Confirmação do pedido; as configurações do app guiam você passo a passo. O cliente clica e o PDF abre, sem código nem conta.",
+        "A Shopify não permite que apps anexem arquivos nem modifiquem os próprios e-mails. Para enviar um só e-mail há duas soluções: o botão “Baixar fatura” na página do pedido (o cliente clica em “Ver pedido” no e-mail da Shopify; sem código, 3 cliques para ativar uma vez) ou um link direto no e-mail de confirmação (colar um código uma vez). As configurações do app guiam você passo a passo.",
       ],
       [
         'Como recebo uma cópia das minhas faturas?',

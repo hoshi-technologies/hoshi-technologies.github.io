@@ -14,7 +14,7 @@ import { loadConfig } from './config.js';
 import { resolveKey } from './crypto.js';
 import { useFonts } from './pdf.js';
 import { createBrevoTransport } from './mailer.js';
-import { verifySessionToken, verifyCustomerToken, isValidShop } from './shopify.js';
+import { verifySessionToken, isValidShop } from './shopify.js';
 import adminHtml from '../public/admin.html';
 import sampleOrder from './sample-order.json';
 import regular from '../assets/fonts/LiberationSans-Regular.ttf';
@@ -111,17 +111,6 @@ export default {
       const token = /^Bearer (.+)$/.exec(request.headers.get('authorization') || '')?.[1];
       try {
         const { shop } = verifySessionToken(token, config);
-        return shopObject(env, shop).fetch(request);
-      } catch {
-        // Jeton absent ou invalide : l'application répond 401.
-      }
-    }
-
-    // Espace client (extension « Télécharger ma facture ») : boutique tirée du jeton du client.
-    if (pathname.startsWith('/customer-api/') && request.method !== 'OPTIONS') {
-      const token = /^Bearer (.+)$/.exec(request.headers.get('authorization') || '')?.[1];
-      try {
-        const { shop } = verifyCustomerToken(token, config);
         return shopObject(env, shop).fetch(request);
       } catch {
         // Jeton absent ou invalide : l'application répond 401.
