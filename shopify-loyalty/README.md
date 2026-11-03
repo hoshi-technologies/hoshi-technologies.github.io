@@ -121,20 +121,29 @@ prisma/schema.prisma       modèle de données (client Prisma généré pour Wor
 
 Stack : React Router 7, `@shopify/shopify-app-react-router`, Polaris web components, Prisma (adaptateur D1), plugin Vite Cloudflare.
 
-## Développement
+## Tester l'appli sur une boutique de test Shopify (gratuit)
 
-Prérequis : Node.js ≥ 22.12, un [compte Partenaire Shopify](https://partners.shopify.com) et une boutique de développement.
+Prérequis : [Node.js 22](https://nodejs.org) (version « LTS »).
 
-```bash
-cd shopify-loyalty
-npm install             # génère aussi le client Prisma
-npm run config:link     # crée/associe l'application dans votre compte Partenaire
-npm run dev             # base D1 locale + Worker local (workerd) + tunnel Shopify
-```
-
-En développement, la facturation est désactivée et l'app tourne dans `workerd`, le même moteur
-qu'en production. Appuyez sur `p` pour ouvrir l'application dans votre boutique de test, puis
-activez « Hoshi Club » dans *Thème > Personnaliser > Intégrations d'applications*.
+1. Créez un compte [Shopify Partners](https://www.shopify.com/fr/partenaires) (gratuit), puis une
+   **boutique de développement** : Boutiques › Ajouter une boutique.
+2. Récupérez le code et allez dans le dossier de l'appli :
+   ```sh
+   git clone https://github.com/hoshi-technologies/hoshi-technologies.github.io.git
+   cd hoshi-technologies.github.io
+   git checkout claude/shopify-loyalty-program-app-2bdmp3
+   cd shopify-loyalty
+   ```
+3. Installez [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) : `npm install -g @shopify/cli`.
+4. Lancez `shopify app config link` et choisissez « Créer une nouvelle appli » (nom : Hoshi Club).
+5. Dans le tableau de bord de l'appli : *Accès aux données client protégées* › cochez nom et
+   e-mail (sans examen pour une boutique de développement).
+6. Lancez `shopify app dev` (**sous Windows : double-cliquez sur `demarrer-windows.bat`**) : la CLI
+   crée la base locale, un tunnel HTTPS, déclare les webhooks et propose d'installer l'appli sur
+   la boutique de test (touche `p` pour l'ouvrir). La facturation est désactivée en test.
+7. Boutique en ligne › Thèmes › Personnaliser › Intégrations d'applications : activez « Hoshi Club ».
+8. Paramètres › Paiements › activez la **passerelle de test (Bogus)**, créez un compte client sur
+   la boutique et passez une commande avec la carte « 1 » : les points apparaissent.
 
 ### Accès aux données client protégées
 
@@ -142,31 +151,11 @@ Les webhooks `orders/paid` et `customers/create` contiennent des données person
 Partner Dashboard → *API access* → **Protected customer data access**, demandez l'accès (nom,
 e-mail) ; les justifications à copier sont dans [`docs/APP_STORE.md`](docs/APP_STORE.md).
 
-## Déploiement sur Cloudflare
+## Mise en ligne sur Cloudflare
 
-Une seule fois :
-
-```bash
-npx wrangler login
-npx wrangler d1 create hoshi-club             # copiez le database_id dans wrangler.jsonc
-npx wrangler secret put SHOPIFY_API_SECRET      # « Secret » de l'app (Partner Dashboard)
-```
-
-Dans `wrangler.jsonc`, renseignez `SHOPIFY_API_KEY` (Client ID), `SHOPIFY_APP_URL` (ex.
-`https://hoshi-club.votre-domaine.com`), `SUPPORT_EMAIL` (déjà réglé sur hoshi.technologies@gmail.com) et décommentez `routes` pour utiliser un
-sous-domaine de votre zone Cloudflare.
-
-Dans `shopify.app.toml`, remplacez `https://example.com` par la même URL (application, redirection
-OAuth et proxy), puis à chaque mise en production :
-
-```bash
-npm run db:migrate:remote   # applique les nouvelles migrations à D1
-npm run deploy:worker       # build + déploiement du Worker
-npm run deploy              # publie la configuration Shopify et l'extension de thème
-```
-
-Le plan **Workers Paid** (5 $/mois) est recommandé pour une app publique (limites de CPU et de
-requêtes plus larges) ; le Worker pèse environ 1 Mo compressé et tient aussi dans le plan gratuit.
+Comme Hoshi Factures, l'appli est publiée sur le compte Cloudflare de Hoshi Technologies, à
+l'adresse `https://hoshi-club.hoshi-technologies.workers.dev`. Guide pas à pas (Windows) :
+[`docs/cloudflare.md`](docs/cloudflare.md).
 
 ### Modifier la base de données
 

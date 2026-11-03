@@ -14,8 +14,8 @@ le tarif retenu, et les textes à copier-coller pour la fiche et la validation.
 | Nettoyage à la désinstallation (`app/uninstalled`) | ✅ |
 | Intégration au thème par extension (pas de modification du code du thème, pas de ScriptTag) | ✅ |
 | Application traduite (36 langues de l'admin Shopify, droite-à-gauche compris) | ✅ |
-| Politique de confidentialité publique, traduite | ✅ `https://VOTRE-DOMAINE/privacy` |
-| Page d'aide / contact, traduite | ✅ `https://VOTRE-DOMAINE/support` (hoshi.technologies@gmail.com) |
+| Politique de confidentialité publique, traduite | ✅ `https://hoshi-club.hoshi-technologies.workers.dev/privacy` |
+| Page d'aide / contact, traduite | ✅ `https://hoshi-club.hoshi-technologies.workers.dev/support` (hoshi.technologies@gmail.com) |
 | Accès aux données client protégées justifié | ⏳ à demander (§4) |
 | Fiche de l'app (textes, captures, icône) | ⏳ à remplir (§3, §5) |
 | Hébergement en production (Cloudflare) | ⏳ voir le README, section « Déploiement » |

@@ -25,13 +25,14 @@
   //   npx wrangler secret put SHOPIFY_API_SECRET
   "vars": {
     "SHOPIFY_API_KEY": "REMPLACER_PAR_LE_CLIENT_ID",
-    "SHOPIFY_APP_URL": "https://hoshi-club.example.com",
+    "SHOPIFY_APP_URL": "https://hoshi-club.hoshi-technologies.workers.dev",
     "SHOPIFY_APP_HANDLE": "hoshi-club",
     "SCOPES": "write_customers,read_orders,write_discounts",
     "BILLING_REQUIRED": "true",
     "SUPPORT_EMAIL": "hoshi.technologies@gmail.com"
   }
 
-  // Domaine personnalisé sur votre zone Cloudflare (décommentez et adaptez) :
-  // "routes": [{ "pattern": "hoshi-club.example.com", "custom_domain": true }]
+  // Adresse publique : https://hoshi-club.hoshi-technologies.workers.dev (comme Hoshi Factures).
+  // Pour un domaine personnalisé plus tard :
+  // "routes": [{ "pattern": "club.votre-domaine.com", "custom_domain": true }]
 }
