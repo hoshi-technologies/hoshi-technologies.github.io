@@ -41,9 +41,9 @@ publish() {
   git diff --cached --quiet && return 0
   local msg="Hoshi Turf : programme PMU du $(TZ=Europe/Paris date +'%d/%m/%Y %Hh%M')"
   git commit -qm "$msg" || return 1
-  for i in 1 2 3 4; do
+  for i in 1 2 3 4 5; do
     git push -q origin "HEAD:$BR" && return 0
-    sleep $((i * 3))
+    sleep $((i * 8))
     git fetch -q origin "$BR" || continue
     if ! git rebase -q -X theirs "origin/$BR" >/dev/null 2>&1; then
       git rebase --abort >/dev/null 2>&1 || true
@@ -60,6 +60,10 @@ publish() {
 }
 
 prev_ok=$(node -e "try{console.log(require('./$HEALTH').ok===false?0:1)}catch(e){console.log(1)}")
+# Une panne n'est signalée qu'après deux passages ratés d'affilée (le second, 2 min après le
+# premier) : une coupure passagère de quelques secondes ne doit pas déclencher d'alerte.
+fails=0
+alerted=$([ "$prev_ok" = 0 ] && echo 1 || echo 0)
 last_full=0
 while :; do
   now=$(date +%s)
@@ -67,32 +71,49 @@ while :; do
   h=$((10#$(TZ=Europe/Paris date +%H)))
   if [ "$h" -ge 8 ] && [ "$h" -lt 23 ]; then interval=600; else interval=3600; fi
   ok=1
+  why=""
+  fail() { ok=0; why="${why:+$why, }$1"; }
   if [ $((now - last_full)) -ge 3300 ]; then
     echo "::group::Passage complet $(TZ=Europe/Paris date +%H:%M)"
-    node scripts/pmu-fetch.mjs || ok=0
-    node scripts/calibrate.mjs || ok=0
+    node scripts/pmu-fetch.mjs || fail "récupération PMU"
+    node scripts/calibrate.mjs || fail "calibrage"
     # Sports : une panne de la source sportive ne doit pas bloquer les courses hippiques.
     node scripts/sports.mjs || echo "Sports : récupération en échec (sans effet sur les courses)."
     node scripts/sports-history.mjs || echo "Sports : étude historique en échec."
     last_full=$now
   else
     echo "::group::Cotes des courses proches $(TZ=Europe/Paris date +%H:%M)"
-    node scripts/pmu-fetch.mjs --quick || ok=0
+    node scripts/pmu-fetch.mjs --quick || fail "récupération PMU"
     node scripts/sports.mjs --quick || echo "Sports : récupération rapide en échec."
   fi
-  node scripts/pmu-alerts.mjs || ok=0
-  node scripts/bilan.mjs || ok=0
+  node scripts/pmu-alerts.mjs || fail "alertes"
+  node scripts/bilan.mjs || fail "bilan"
   echo "{\"ok\":$([ $ok = 1 ] && echo true || echo false),\"at\":\"$(date -u +%FT%TZ)\"}" > "$HEALTH"
-  publish || ok=0
+  publish || fail "publication sur GitHub"
+  [ $ok = 0 ] && echo "Passage en échec : $why"
   echo "::endgroup::"
-  # Panne : une notification au premier échec, une autre au retour à la normale.
-  if [ $ok = 0 ] && [ "$prev_ok" = 1 ]; then
-    notify "⚠️ Hoshi Turf : récupération en panne" "La mise à jour des courses a échoué (API du PMU modifiée ou indisponible ?). Les notifications sont suspendues jusqu'au retour à la normale." warning
-  elif [ $ok = 1 ] && [ "$prev_ok" = 0 ]; then
-    notify "✅ Hoshi Turf : de nouveau opérationnel" "La récupération des courses fonctionne à nouveau." white_check_mark
+  # Panne : une notification après deux échecs d'affilée, une autre au retour à la normale.
+  if [ $ok = 0 ]; then
+    fails=$((fails + 1))
+    if [ $fails -ge 2 ] && [ $alerted = 0 ]; then
+      case "$why" in
+        *PMU*) detail="API du PMU modifiée ou indisponible ?" ;;
+        "publication sur GitHub") detail="GitHub refuse l'envoi des données." ;;
+        *) detail="étape en échec." ;;
+      esac
+      notify "⚠️ Hoshi Turf : mise à jour en panne" "Échec : $why ($detail) Les notifications sont suspendues jusqu'au retour à la normale." warning
+      alerted=1
+    fi
+  else
+    fails=0
+    if [ $alerted = 1 ]; then
+      notify "✅ Hoshi Turf : de nouveau opérationnel" "La mise à jour des courses fonctionne à nouveau." white_check_mark
+      alerted=0
+    fi
   fi
-  prev_ok=$ok
   wait=$((interval - ($(date +%s) - now)))
+  # Après un échec, on réessaie vite pour confirmer (ou non) la panne.
+  [ $ok = 0 ] && [ $fails -lt 2 ] && wait=120
   [ $wait -lt 60 ] && wait=60
   [ $(( $(date +%s) + wait - START )) -ge $LIMIT ] && break
   sleep "$wait"
