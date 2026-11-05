@@ -2745,8 +2745,10 @@
             x.coteJuste = 1 / f.pWin;
             x.frozenCote = f.cote;
             x.value = f.cote ? f.pWin * f.cote : null;
+            if (f.pMarket != null) x.pMarket = f.pMarket;
           });
           a.frozenAt = r.prono.at;
+          a.frozenChoix = r.prono.choix || null;
         }
         var lastAdvice = null;
 
@@ -2891,6 +2893,67 @@
           };
 
           var html = '';
+          // 🎯 Choix Hoshi : le cheval que nos chances placent nettement au-dessus de sa cote.
+          (function () {
+            if (!a.market) return;
+            var ch;
+            if (a.frozenAt) {
+              // Course partie : le Choix Hoshi figé au départ, jamais recalculé.
+              if (!a.frozenChoix) return;
+              ch = {};
+              ['g', 'p'].forEach(function (ty) {
+                var f = a.frozenChoix[ty];
+                var x = f && a.runners.find((y) => String(y.runner.num) === String(f.num));
+                ch[ty] = x ? { x: x, ratio: f.ratio, p: f.p, cote: f.cote } : null;
+              });
+            } else ch = T.hoshiChoice(a);
+            if (!ch.g && !ch.p) {
+              html +=
+                '<div class="kpi" style="margin-bottom:14px;border:1px solid var(--line)"><small>🎯 Choix Hoshi</small>' +
+                '<p style="margin:6px 0 0;font-size:14px">Pas de Choix Hoshi : aucun cheval n\'est nettement sous-estimé par la cote dans cette course.</p></div>';
+              return;
+            }
+            html += '<div class="kpi" style="margin-bottom:14px;border:2px solid var(--accent)"><small>🎯 Choix Hoshi : un cheval que la cote sous-estime</small>';
+            ['g', 'p'].forEach(function (ty) {
+              var k = ch[ty];
+              if (!k) return;
+              var o = ty === 'g' ? k.cote : T.estimatePlaceOdds(k.cote, a.placesPayees, coefs);
+              html +=
+                '<div style="display:flex;align-items:center;gap:10px;margin:8px 0 4px"><span class="num-badge" style="min-width:34px;height:34px;font-size:16px">' +
+                esc(k.x.runner.num) +
+                '</span><b style="font-size:16px">' +
+                esc(k.x.runner.nom) +
+                '</b><span class="tag accent">' +
+                (ty === 'g' ? 'Gagnant' : 'Placé') +
+                '</span></div><div class="bday-stats"><span>Cote <b>' +
+                String(k.cote).replace('.', ',') +
+                '</b></span><span>Nos chances ' +
+                (ty === 'g' ? 'de gagner' : 'd\'être placé') +
+                ' <b>' +
+                Math.round(k.p * 100) +
+                ' %</b></span><span>La cote dit <b>' +
+                Math.round(k.x.pMarket * 100) +
+                ' %</b> de gagner</span><span>×<b>' +
+                k.ratio.toFixed(1).replace('.', ',') +
+                '</b></span></div>' +
+                (o
+                  ? '<p style="margin:6px 0 0;font-size:14px">Avec ' +
+                    money(stake) +
+                    ' ' +
+                    (ty === 'g' ? 'gagnant' : 'placé') +
+                    ' : <b>' +
+                    money(stake * o) +
+                    '</b> ' +
+                    (ty === 'g' ? 's\'il gagne' : 's\'il est placé') +
+                    (ty === 'p' ? ' (rapport estimé)' : '') +
+                    '.</p>'
+                  : '');
+            });
+            html +=
+              '<p class="hint" style="margin:8px 0 0">Ce n\'est pas forcément le favori : c\'est le cheval à qui nous donnons nettement plus de chances que sa cote (au moins 1,2 fois). ' +
+              'Sur l\'historique (1 500 courses jamais vues par le modèle), cette méthode a fait de +2 % à +9 % en gagnant, contre −13 % à −19 % en jouant le favori. ' +
+              'C\'est encourageant mais pas encore prouvé : petites mises, le bilan en conditions réelles tranchera.</p></div>';
+          })();
           // Meilleur rapport chances / cote
           var cand = a.runners.filter(function (x) {
             return x._ev != null && pp(x) >= 0.15;
@@ -3263,7 +3326,31 @@
               ' placés</strong><br><small>1 € placé : ' +
               signedMoney(gainSel) +
               '</small></div>';
+          [['choixG', 'gagnant', 'gagnés'], ['choixP', 'placé', 'placés']].forEach(function (k) {
+            if (!t[k[0]]) return;
+            var g = t[k[0] + 'Return'] - t[k[0] + 'Stake'];
+            html +=
+              '<div class="kpi"><small>🎯 Choix Hoshi ' +
+              k[1] +
+              '</small><strong>' +
+              t[k[0] + 'Won'] +
+              ' / ' +
+              t[k[0]] +
+              ' ' +
+              k[2] +
+              '</strong><br><small>1 € ' +
+              k[1] +
+              ' : <b style="color:' +
+              (g >= 0 ? 'var(--good)' : 'var(--bad)') +
+              '">' +
+              signedMoney(g) +
+              '</b> (' +
+              ((g / t[k[0] + 'Stake']) * 100).toFixed(1).replace('.', ',') +
+              ' %)</small></div>';
+          });
           html += '</div>';
+          if (!t.choixG && !t.choixP)
+            html += '<p class="hint" style="margin:0 0 12px">🎯 Le bilan du Choix Hoshi (chevaux que la cote sous-estime) apparaîtra dès les premières arrivées.</p>';
           html += '<div class="bdays">';
           days.forEach(function (d) {
             var a = d[scope];
@@ -3294,6 +3381,17 @@
               signedMoney(g) +
               '</span>' +
               (a.selCourses ? '<span>⭐ ' + a.selPlaced + '/' + a.selCourses + '</span>' : '') +
+              (a.choixG
+                ? '<span style="color:' +
+                  (a.choixGReturn >= a.choixGStake ? 'var(--good)' : 'var(--bad)') +
+                  '">🎯 ' +
+                  a.choixGWon +
+                  '/' +
+                  a.choixG +
+                  ' · ' +
+                  signedMoney(a.choixGReturn - a.choixGStake) +
+                  '</span>'
+                : '') +
               '</span></button>';
             if (open && d.details) {
               html += '<div class="bday-list">';
@@ -3324,7 +3422,34 @@
                     Math.round(x.top.p * 100) +
                     ' %) · arrivée ' +
                     x.arrivee.map((n) => '<span class="num-badge">' + esc(n) + '</span>').join(' ') +
-                    '</div></div>';
+                    '</div>' +
+                    (x.choix
+                      ? '<div class="hint" style="margin-top:4px">' +
+                        ['g', 'p']
+                          .filter(function (ty) {
+                            return x.choix[ty];
+                          })
+                          .map(function (ty) {
+                            var k = x.choix[ty];
+                            return (
+                              '🎯 ' +
+                              (ty === 'g' ? 'Gagnant' : 'Placé') +
+                              ' n°' +
+                              esc(k.num) +
+                              ' ' +
+                              esc(k.nom) +
+                              ' (cote ' +
+                              String(k.cote).replace('.', ',') +
+                              ') : ' +
+                              (k.rapport > 0
+                                ? '<span class="ok-mark">✓ ' + k.rapport.toFixed(2).replace('.', ',') + ' €</span>'
+                                : '<span class="ko-mark">✗ ' + (k.pos < 99 ? k.pos + 'e' : 'non placé') + '</span>')
+                            );
+                          })
+                          .join(' · ') +
+                        '</div>'
+                      : '') +
+                    '</div>';
                 });
               html += '</div>';
             }

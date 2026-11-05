@@ -396,12 +396,21 @@ const STRATEGIES = [
   { id: 'base_p', label: 'Placé sur la base du modèle', type: 'p' },
   ...[1.05, 1.15, 1.3].map((t) => ({ id: 'val_g_' + t, label: `Gagnant « valeur » ≥ ${t}`, type: 'g', t })),
   ...[1.05, 1.15, 1.3].map((t) => ({ id: 'val_p_' + t, label: `Placé « valeur » ≥ ${t}`, type: 'p', t })),
+  { id: 'choix_g', label: 'Choix Hoshi en gagnant', type: 'g', choice: true },
+  { id: 'choix_p', label: 'Choix Hoshi en placé', type: 'p', choice: true },
 ];
 function selections(st, it, pr, coefs) {
   const R = it.prep.runners;
   const cotes = R.map((r) => num(r.cote));
   const idx = R.map((_, i) => i);
   const argmax = (f) => idx.reduce((b, i) => (f(i) > f(b) ? i : b), 0);
+  if (st.choice) {
+    const m = it.prep.market;
+    if (!m || (st.type === 'p' && !it.nPlaces)) return [];
+    const pm = m.probs.map((q, i) => (cotes[i] > 1 ? q : null));
+    const k = Turf.choiceIndex(pr.p, it.nPlaces ? pr.place : null, pm, st.type);
+    return k < 0 ? [] : [k];
+  }
   switch (true) {
     case st.id === 'fav_marche_g':
       return cotes.some((c) => c) ? [argmax((i) => (cotes[i] ? -cotes[i] : -1e9))] : [];
@@ -481,7 +490,7 @@ function backtest(items, settingsOf, coefs) {
   }
   // Significatif : ROI positif même en retirant deux erreurs-types (marge de hasard).
   res.forEach((r) => (r.significant = r.bets >= 50 && r.roi - 2 * r.roiSE > 0));
-  const candidates = res.filter((r) => r.id.startsWith('val_') && r.bets >= 30 && r.roi > 0).sort((a, b) => b.roi - a.roi);
+  const candidates = res.filter((r) => (r.id.startsWith('val_') || r.id.startsWith('choix_')) && r.bets >= 30 && r.roi > 0).sort((a, b) => b.roi - a.roi);
   return { courses: withR.length, from: withR[0] ? withR[0].date : null, strategies: res, best: candidates[0] ? candidates[0].id : null };
 }
 
@@ -699,4 +708,6 @@ async function main() {
   console.log('Modèles retenus :', JSON.stringify(Object.fromEntries(Object.entries(out.groups).map(([g, o]) => [g, o.model]))));
   console.log(`Terminé en ${out.seconds} s.`);
 }
-main();
+// Lancé directement : calibrage. Importé (études) : fonctions seulement.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+export { buildDataset, predict, evaluate, fitWeighted, fitLearned, fitMarket, fitPlaceOdds, chooseModels, resolver, backtest };

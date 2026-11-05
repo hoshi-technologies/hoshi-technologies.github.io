@@ -42,6 +42,14 @@ function emptyAgg() {
     selPlaced: 0,
     selStake: 0,
     selReturn: 0,
+    choixG: 0, // Choix Hoshi en gagnant : paris, gagnés, mise, retour
+    choixGWon: 0,
+    choixGStake: 0,
+    choixGReturn: 0,
+    choixP: 0, // Choix Hoshi en placé
+    choixPWon: 0,
+    choixPStake: 0,
+    choixPReturn: 0,
   };
 }
 function add(a, b) {
@@ -85,6 +93,22 @@ function scoreCourse(reu, c) {
     o.selPlaced = placed ? 1 : 0;
     if (o.stakeP) (o.selStake = 1), (o.selReturn = o.returnP);
   }
+  // Choix Hoshi figé : 1 € gagnant et/ou 1 € placé, aux vrais rapports (non-partant : ignoré).
+  const ch = c.prono.choix || {};
+  const chDetail = {};
+  if (c.rapports)
+    for (const [ty, key] of [['g', 'choixG'], ['p', 'choixP']]) {
+      const k = ch[ty];
+      if (!k || np.has(String(k.num))) continue;
+      if (ty === 'p' && !c.prono.placesPayees) continue;
+      const pay = (ty === 'g' ? rg : rp)[String(k.num)] || 0;
+      o[key] = 1;
+      o[key + 'Won'] = pay > 0 ? 1 : 0;
+      o[key + 'Stake'] = 1;
+      o[key + 'Return'] = pay;
+      const pt = c.partants.find((p) => String(p.num) === String(k.num)) || {};
+      chDetail[ty] = { num: k.num, nom: pt.nom || '', cote: k.cote, p: k.p, ratio: k.ratio, pos: posOf({ num: k.num }), rapport: pay };
+    }
   const partant = c.partants.find((p) => String(p.num) === String(top.num)) || {};
   return {
     agg: o,
@@ -104,6 +128,7 @@ function scoreCourse(reu, c) {
       rapportP: rp[String(top.num)] || 0,
       podium: o.podium,
       selected: !!c.prono.selected,
+      choix: Object.keys(chDetail).length ? chDetail : undefined,
     },
   };
 }
