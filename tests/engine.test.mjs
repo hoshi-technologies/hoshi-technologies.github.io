@@ -205,3 +205,26 @@ test('paris combinés : chances cohérentes', () => {
   assert.equal(by.trio.formulas[0].combos, 1);
   close(by.couple_g.formulas[0].p, by.couple_g.best.find((b) => b.idx.join() === by.couple_g.formulas[0].idx.slice().sort((x, y) => x - y).join())?.p ?? by.couple_g.formulas[0].p, 0.02);
 });
+
+test('Choix Hoshi : cheval sous-estimé par la cote, pas forcément le favori', () => {
+  // Favori : 50 % pour nous, 50 % pour la cote (ratio 1). Le n°2 : 30 % pour nous, 15 % pour la cote.
+  const pw = [0.5, 0.3, 0.2],
+    pm = [0.5, 0.15, 0.35];
+  assert.equal(T.choiceIndex(pw, null, pm, 'g'), 1);
+  // Trop peu de chances : pas de choix.
+  assert.equal(T.choiceIndex([0.9, 0.08, 0.02], null, [0.95, 0.03, 0.02], 'g'), -1);
+  // Aucun cheval sous-estimé : pas de choix.
+  assert.equal(T.choiceIndex([0.5, 0.3, 0.2], null, [0.5, 0.3, 0.2], 'g'), -1);
+  // Placé : seuil sur les chances d'être placé.
+  assert.equal(T.choiceIndex(pw, [0.8, 0.45, 0.4], pm, 'p'), -1);
+  assert.equal(T.choiceIndex(pw, [0.8, 0.6, 0.4], pm, 'p'), 1);
+  // Course analysée : choix cohérent avec les règles.
+  const a = T.analyzeRace(race(10), { simulations: 0 });
+  const ch = T.hoshiChoice(a);
+  for (const ty of ['g', 'p'])
+    if (ch[ty]) {
+      assert.ok(ch[ty].ratio >= T.CHOICE_RULES[ty].ratio);
+      assert.ok(ch[ty].p >= T.CHOICE_RULES[ty].pMin);
+    }
+  assert.deepEqual(T.hoshiChoice(T.analyzeRace(race(8, false), { simulations: 0 })), { g: null, p: null });
+});

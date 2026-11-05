@@ -691,7 +691,7 @@
     var bt = calibration && calibration.backtest;
     if (!bt) return null;
     var ok = bt.strategies
-      .filter((x) => x.validated && x.id.indexOf('val_') === 0)
+      .filter((x) => x.validated && (x.id.indexOf('val_') === 0 || x.id.indexOf('choix_') === 0))
       .sort((a, b) => b.roi - a.roi);
     return ok[0] || null;
   }
@@ -717,6 +717,60 @@
     });
     out.forEach((b) => (b.kelly = kelly(b.p, b.o)));
     return out.sort((a, b) => b.ev - a.ev);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Choix Hoshi : le cheval que le modèle estime nettement plus que la cote
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Règles du « Choix Hoshi ». Au lieu de prendre le cheval le plus probable (souvent le
+   * favori, mal payé), on prend celui dont nos chances dépassent le plus celles que lui
+   * donne la cote (ratio modèle / marché), parmi ceux qui ont assez de chances.
+   * Réglées sur l'historique (nov. 2026, 1 500 courses jamais vues par le modèle) :
+   *  - gagnant : chances de gagner ≥ 12 % et ratio ≥ 1,2 ;
+   *  - placé   : chances d'être placé ≥ 50 % et ratio ≥ 1,2.
+   * Pas de cheval qui remplit les conditions → pas de Choix Hoshi dans la course.
+   */
+  var CHOICE_RULES = {
+    g: { pMin: 0.12, ratio: 1.2 },
+    p: { pMin: 0.5, ratio: 1.2 },
+  };
+
+  /** Indice du Choix Hoshi (ou -1) à partir des tableaux de probabilités. */
+  function choiceIndex(pWin, pPlace, pMarket, type, rules) {
+    var r = (rules || CHOICE_RULES)[type];
+    if (!r || !pMarket) return -1;
+    var best = -1,
+      bestR = 0;
+    for (var i = 0; i < pWin.length; i++) {
+      var pm = pMarket[i];
+      if (!(pm > 0)) continue;
+      var p = type === 'g' ? pWin[i] : pPlace ? pPlace[i] : null;
+      if (p == null || p < r.pMin) continue;
+      var ratio = pWin[i] / pm;
+      if (ratio >= r.ratio && ratio > bestR) (bestR = ratio), (best = i);
+    }
+    return best;
+  }
+
+  /**
+   * Choix Hoshi d'une course analysée : { g, p }, chacun { x, ratio, p, cote } ou null.
+   * `x` est l'élément de analysis.runners.
+   */
+  function hoshiChoice(analysis, rules) {
+    var out = { g: null, p: null };
+    if (!analysis || analysis.error || !analysis.market) return out;
+    var R = analysis.runners;
+    var pw = R.map((x) => x.pWin),
+      pl = analysis.placesPayees ? R.map((x) => x.pPlace) : null,
+      pm = R.map((x) => (num(x.runner.cote) > 1 ? x.pMarket : null));
+    ['g', 'p'].forEach(function (t) {
+      var i = choiceIndex(pw, pl, pm, t, rules);
+      if (i < 0) return;
+      out[t] = { x: R[i], ratio: pw[i] / pm[i], p: t === 'g' ? pw[i] : pl[i], cote: num(R[i].runner.cote) };
+    });
+    return out;
   }
 
   // ---------------------------------------------------------------------------
@@ -925,6 +979,9 @@
     comb: comb,
     validatedStrategy: validatedStrategy,
     valueBets: valueBets,
+    CHOICE_RULES: CHOICE_RULES,
+    choiceIndex: choiceIndex,
+    hoshiChoice: hoshiChoice,
     featureVector: featureVector,
     learnedProbs: learnedProbs,
     disciplineGroup: disciplineGroup,

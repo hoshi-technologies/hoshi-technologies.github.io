@@ -32,7 +32,8 @@ const TOPIC = (process.env.NTFY_TOPIC || '').trim();
 const WINDOW_MIN = Number(process.env.ALERT_WINDOW_MIN) || 45; // courses qui partent dans les 45 minutes
 const SELECT_MIN = Number(process.env.SELECT_MIN) || 0.6; // chances de placé minimum pour la sélection
 const SELECT_MAX = Number(process.env.SELECT_MAX) || 10; // courses maximum dans la sélection
-const VALUE_MIN = 1.05; // « cote intéressante » (indicatif)
+const VALUE_MIN = 1.05;
+const CHOICE_MAX = Number(process.env.CHOICE_MAX) || 5; // Choix Hoshi annoncés le matin // « cote intéressante » (indicatif)
 const ALL_COUNTRIES = process.env.ALERT_ALL_COUNTRIES === '1';
 const link = (date, r, c) => `${PAGE}#${date}/R${r}C${c}`;
 const MAX_STAKE = 0.02, KELLY_FRAC = 0.25;
@@ -106,7 +107,7 @@ async function selectionAndReminders(state, today, cal, stats, day) {
       const a = analyze(c, cal, stats, today);
       if (a.error) continue;
       const top = a.runners.slice().sort((x, y) => pp(y) - pp(x))[0];
-      rows.push({ reu, c, a, top, p: pp(top) });
+      rows.push({ reu, c, a, top, p: pp(top), ch: Turf.hoshiChoice(a) });
     }
   }
   // Sélection : courses où notre favori a au moins SELECT_MIN de chances d'être placé.
@@ -118,22 +119,39 @@ async function selectionAndReminders(state, today, cal, stats, day) {
       .slice(0, SELECT_MAX)
       .sort((x, y) => x.c.heure - y.c.heure);
     state.selection[today] = sel.map((x) => `R${x.reu.r}C${x.c.c}`);
-    if (sel.length) {
+    // Choix Hoshi du jour : les courses où le modèle croit le plus à un cheval que la cote sous-estime.
+    const chs = rows
+      .filter((x) => x.ch.g)
+      .sort((x, y) => y.ch.g.ratio - x.ch.g.ratio)
+      .slice(0, CHOICE_MAX)
+      .sort((x, y) => x.c.heure - y.c.heure);
+    state.choix = state.choix || {};
+    state.choix[today] = chs.map((x) => `R${x.reu.r}C${x.c.c}`);
+    if (sel.length || chs.length) {
       const lines = sel.map(
         (x) => `${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${x.top.runner.num} ${x.top.runner.nom} (${Math.round(x.p * 100)} % placé)`,
       );
+      if (chs.length) {
+        lines.push((sel.length ? '\n' : '') + '🎯 Choix Hoshi (gagnant, cote sous-estimée) :');
+        for (const x of chs)
+          lines.push(
+            `${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${x.ch.g.x.runner.num} ${x.ch.g.x.runner.nom}, cote ${fr(x.ch.g.cote)} (${Math.round(x.ch.g.p * 100)} % gagnant, ×${fr(x.ch.g.ratio, 1)} la cote)`,
+          );
+      }
       const msg =
         lines.join('\n') +
         '\nVous recevrez un rappel avant chaque course. ' +
         (Turf.validatedStrategy(cal) ? '' : 'Aucun pari n\'est validé à ce jour : petites mises seulement.');
       console.log('SÉLECTION\n' + msg);
-      await notify(`📋 Sélection du jour : ${sel.length} course${sel.length > 1 ? 's' : ''}`, msg, 'clipboard', { priority: 3 });
+      const n = new Set([...state.selection[today], ...state.choix[today]]).size;
+      await notify(`📋 Sélection du jour : ${n} course${n > 1 ? 's' : ''}`, msg, 'clipboard', { priority: 3 });
     } else {
       await notify('📋 Sélection du jour', `Aucune course où notre favori dépasse ${Math.round(SELECT_MIN * 100)} % de chances d'être placé.`, 'clipboard', { priority: 2 });
     }
   }
   // Rappels : 10 à 40 minutes avant chaque course sélectionnée (ou avec une cote intéressante).
   const selected = new Set(state.selection[today] || []);
+  const chosen = new Set((state.choix && state.choix[today]) || []);
   for (const x of rows) {
     const mins = (x.c.heure - now) / 60000;
     if (mins < 10 || mins > 40) continue;
@@ -141,14 +159,20 @@ async function selectionAndReminders(state, today, cal, stats, day) {
     const key = `${today}-${id}-rappel`;
     if (state.sent[key]) continue;
     const val = Turf.valueBets(x.a, cal, { minEdge: VALUE_MIN })[0];
-    if (!selected.has(id) && !val) continue;
+    if (!selected.has(id) && !chosen.has(id) && !val) continue;
     const t = x.top.runner;
-    let msg = `n°${t.num} ${t.nom} : ${Math.round(x.p * 100)} % de chances d'être placé`;
+    let msg = `Base : n°${t.num} ${t.nom} : ${Math.round(x.p * 100)} % de chances d'être placé`;
     if (t.cote) {
       const est = Turf.estimatePlaceOdds(t.cote, x.a.placesPayees, cal && cal.placeOdds);
       msg += `, cote ${fr(Number(t.cote))}` + (est ? ` (placé estimé ${fr(est, 2)} €)` : '');
     } else msg += ' (cotes pas encore publiées)';
     msg += '.';
+    // Choix Hoshi recalculé avec la cote à jour.
+    for (const [ty, lab] of [['g', 'gagnant'], ['p', 'placé']]) {
+      const k = x.ch[ty];
+      if (k) msg += `\n🎯 Choix Hoshi ${lab} : n°${k.x.runner.num} ${k.x.runner.nom}, cote ${fr(k.cote)}, ${Math.round(k.p * 100)} % de chances (×${fr(k.ratio, 1)} ce que dit la cote).`;
+    }
+    if (chosen.has(id) && !x.ch.g) msg += '\n🎯 Le Choix Hoshi du matin ne tient plus avec la cote actuelle : pas de pari conseillé.';
     if (val)
       msg += `\n💰 Cote intéressante : n°${val.x.runner.num} ${val.x.runner.nom} en ${val.type === 'g' ? 'gagnant' : 'placé'}, valeur ${fr(val.ev, 2)} (non validé).`;
     msg += '\nIndicatif : vérifiez le rapport probable au placé sur le PMU avant de jouer.';
@@ -158,6 +182,7 @@ async function selectionAndReminders(state, today, cal, stats, day) {
     state.sent[key] = new Date().toISOString();
   }
   for (const d of Object.keys(state.selection)) if (d < parisDate(-3)) delete state.selection[d];
+  for (const d of Object.keys(state.choix || {})) if (d < parisDate(-3)) delete state.choix[d];
 }
 
 /**
@@ -184,8 +209,16 @@ async function freezePronos(day, cal, stats, today, state) {
           pWin: +x.pWin.toFixed(4),
           pPlace: x.pPlace == null ? null : +x.pPlace.toFixed(4),
           pTop3: +x.pTop3.toFixed(4),
+          pMarket: x.pMarket == null ? null : +x.pMarket.toFixed(4),
           cote: x.runner.cote || null,
         })),
+      };
+      // Choix Hoshi au moment du départ (figé comme le reste).
+      const ch = Turf.hoshiChoice(a);
+      c.prono.choix = {
+        g: ch.g ? { num: ch.g.x.runner.num, p: +ch.g.p.toFixed(4), ratio: +ch.g.ratio.toFixed(3), cote: ch.g.cote } : null,
+        p: ch.p ? { num: ch.p.x.runner.num, p: +ch.p.p.toFixed(4), ratio: +ch.p.ratio.toFixed(3), cote: ch.p.cote } : null,
+        announced: ((state && state.choix && state.choix[today]) || []).includes(`R${reu.r}C${c.c}`),
       };
       // Quinté+ : nos 5 chevaux, l'ordre proposé et les chances de chaque formule, figés aussi.
       if (c.quinte) {
@@ -252,7 +285,13 @@ async function main() {
           { discipline: c.discipline, allocation: c.allocation, runners: enrich(c.partants, stats, today) },
           Object.assign({}, settings || {}, { simulations: 0 }),
         );
-        const bets = Turf.valueBets(a, cal, { minEdge: strat.threshold, types: strat.type });
+        let bets;
+        if (strat.id.startsWith('choix_')) {
+          // Stratégie « Choix Hoshi » validée : on joue le Choix Hoshi de la course.
+          const ch = Turf.hoshiChoice(a)[strat.type];
+          const o = ch && (strat.type === 'g' ? ch.cote : Turf.estimatePlaceOdds(ch.cote, a.placesPayees, cal && cal.placeOdds));
+          bets = ch && o ? [{ x: ch.x, type: strat.type, p: ch.p, o, ev: ch.p * o, kelly: Math.max(0.02, Turf.kelly(ch.p, o)) }] : [];
+        } else bets = Turf.valueBets(a, cal, { minEdge: strat.threshold, types: strat.type });
         for (const b of bets) {
           const key = `${today}-R${reu.r}C${c.c}-${b.x.runner.num}-${b.type}`;
           if (state.sent[key]) continue;

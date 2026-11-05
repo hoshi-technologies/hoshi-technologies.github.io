@@ -44,6 +44,20 @@ Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PM
   navigateur, exportable) règle automatiquement les paris avec les rapports définitifs.
 
 
+### 🎯 Choix Hoshi : ne pas suivre la cote
+
+Jouer le cheval le plus probable revient souvent à jouer le favori, mal payé. Le Choix Hoshi
+prend à la place le cheval dont nos chances dépassent le plus celles que lui donne la cote
+(ratio modèle / marché ≥ 1,2), parmi ceux qui ont assez de chances (gagnant ≥ 12 %, placé ≥ 50 %).
+Pas de cheval qui remplit ces conditions → pas de Choix Hoshi dans la course.
+
+Sur l'historique (courses jamais vues par le modèle, vrais rapports PMU) : environ +2 % à +9 %
+en gagnant et +3 % à +4 % en placé, contre −13 % à −19 % en jouant le favori. Ce n'est pas
+encore significatif : la stratégie est suivie par le calibrage quotidien (`choix_g`, `choix_p`)
+et devient « validée » seulement si son rendement reste positif à deux écarts-types près.
+Le Choix Hoshi est figé avant le départ comme le reste du pronostic et compté dans le bilan,
+annoncé dans la sélection du matin (5 au plus) et rappelé avant la course.
+
 ### Mises à jour fréquentes et alertes
 
 - En plus du passage complet chaque heure, la tâche relit toutes les 10 minutes (de 9 h à 23 h environ) les cotes
