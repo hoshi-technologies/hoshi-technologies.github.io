@@ -9,6 +9,16 @@ set -u
 cd "$(dirname "$0")/.."
 START=$(date +%s)
 LIMIT=$((5 * 3600 + 40 * 60))
+END=$((START + LIMIT))
+# Relance quotidienne à 1 h (heure de Paris), quand il n'y a pas de course : c'est là que les
+# modifications du code sont prises en compte. La boucle s'arrête donc au plus tard à 1 h.
+NEXT1=$(node -e "
+  const f = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  for (let t = Math.ceil(Date.now() / 60000) * 60000, k = 0; k < 1500; t += 60000, k++)
+    if (f.format(t) === '01:00') { console.log(Math.floor(t / 1000)); break; }
+" 2>/dev/null || echo 0)
+AT1=0
+if [ "${NEXT1:-0}" -gt $((START + 900)) ] && [ "$NEXT1" -lt "$END" ]; then END=$NEXT1; AT1=1; fi
 TOPIC="${NTFY_TOPIC:-hoshi-turf-b12tj5jfgndm}"
 HEALTH=hippique/data/health.json
 
@@ -67,7 +77,7 @@ alerted=$([ "$prev_ok" = 0 ] && echo 1 || echo 0)
 last_full=0
 while :; do
   now=$(date +%s)
-  [ $((now - START)) -ge $LIMIT ] && break
+  [ "$now" -ge "$END" ] && break
   h=$((10#$(TZ=Europe/Paris date +%H)))
   if [ "$h" -ge 8 ] && [ "$h" -lt 23 ]; then interval=600; else interval=3600; fi
   ok=1
@@ -115,9 +125,15 @@ while :; do
   # Après un échec, on réessaie vite pour confirmer (ou non) la panne.
   [ $ok = 0 ] && [ $fails -lt 2 ] && wait=120
   [ $wait -lt 60 ] && wait=60
-  [ $(( $(date +%s) + wait - START )) -ge $LIMIT ] && break
+  if [ $(( $(date +%s) + wait )) -ge "$END" ]; then
+    # Relance de 1 h : on attend l'heure exacte avant de passer la main.
+    rem=$((END - $(date +%s)))
+    [ $AT1 = 1 ] && [ $rem -gt 0 ] && sleep "$rem"
+    break
+  fi
   sleep "$wait"
 done
 
-echo "Relance de la boucle."
+echo "Relance de la boucle$([ $AT1 = 1 ] && echo ' (relance quotidienne de 1 h)')."
+
 gh workflow run pmu-programme.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" -f loop=true
