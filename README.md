@@ -100,7 +100,8 @@ annoncé dans la sélection du matin (5 au plus) et rappelé avant la course.
 GitHub ne garantit pas les horaires planifiés : ils peuvent être retardés, voire sautés, ce qui est arrivé la
 première nuit. La mise à jour tourne donc dans une **boucle qui se relance elle-même** (`scripts/run-loop.sh`) :
 toutes les 10 minutes de 8 h à 23 h (heure de Paris), toutes les heures la nuit, puis une nouvelle boucle prend le
-relais toutes les ~5 h 40. La tâche planifiée horaire ne sert qu'à redémarrer la boucle si elle s'est arrêtée.
+relais toutes les ~5 h 40, et chaque nuit à **1 h** (heure de Paris) : c'est à ce moment que les modifications du
+code sont prises en compte, quand il n'y a pas de course. La tâche planifiée horaire ne sert qu'à redémarrer la boucle si elle s'est arrêtée.
 `hippique/data/health.json` indique l'état du dernier passage.
 
 ### Quinté+ et application mobile
