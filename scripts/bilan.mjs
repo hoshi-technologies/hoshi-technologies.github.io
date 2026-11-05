@@ -179,6 +179,18 @@ function scoreQuinte(reu, c) {
   const picks = new Set(q.picks.map(String));
   const first = (k) => order.slice(0, k);
   const inPicks = (arr) => arr.every((n) => picks.has(n));
+  // Rapport réel pour 1 € sur une combinaison de 5 chevaux (le meilleur rapport gagné).
+  const rq = (c.rapports && c.rapports.q) || null;
+  const div = (re) => ((rq || []).find((x) => re.test(x.lib)) || {}).div || 0;
+  const play = (nums) => {
+    const S = new Set(nums.map(String));
+    const inn = first(5).filter((n) => S.has(n)).length;
+    const kind = inn === 5 ? 'desordre' : inn === 4 ? 'bonus4' : first(3).every((n) => S.has(n)) ? 'bonus3' : null;
+    const ret = !rq ? null : kind === 'desordre' ? div(/D[ée]sordre/) : kind === 'bonus4' ? div(/4sur5/) : kind === 'bonus3' ? div(/Bonus 3/) : 0;
+    return { hits: inn, kind, ret };
+  };
+  const base = play(q.picks);
+  const val = q.valeur ? play(q.valeur.picks) : null;
   const res = {
     date: null,
     r: reu.r,
@@ -190,12 +202,14 @@ function scoreQuinte(reu, c) {
     arrivee: first(5),
     hits: first(5).filter((n) => picks.has(n)).length,
     desordre: inPicks(first(5)),
-    bonus4: inPicks(first(4)),
+    bonus4: base.kind === 'bonus4' || base.kind === 'desordre', // bonus 4 sur 5 (ou mieux)
     bonus3: inPicks(first(3)),
+    ret: base.ret, // rapport réel pour 1 € (null si rapports inconnus)
+    valeur: val ? { picks: q.valeur.picks, hits: val.hits, kind: val.kind, ret: val.ret, same: q.valeur.picks.map(String).sort().join() === q.picks.map(String).sort().join() } : undefined,
     ordreExact: q.ordre.map(String).join('-') === first(5).join('-'),
     combines: (q.combines || []).map((x) => {
       const S = new Set(x.nums.map(String));
-      return { n: x.n, combos: x.combos, desordre: first(5).every((n) => S.has(n)), bonus3: first(3).every((n) => S.has(n)) };
+      return { n: x.n, combos: x.combos, desordre: first(5).every((n) => S.has(n)), bonus4: first(5).filter((n) => S.has(n)).length >= 4, bonus3: first(3).every((n) => S.has(n)) };
     }),
     announced: q.p,
     rapports: (c.rapports && c.rapports.q) || null,
@@ -237,8 +251,18 @@ async function main() {
     out.days.push(d);
   }
   recent.sort((a, b) => a.h - b.h);
-  const qt = { courses: quinte.length, hits: 0, desordre: 0, bonus4: 0, bonus3: 0, announcedDesordre: 0, announcedBonus3: 0 };
+  const qt = { courses: quinte.length, hits: 0, desordre: 0, bonus4: 0, bonus3: 0, announcedDesordre: 0, announcedBonus3: 0, stake: 0, ret: 0, vCourses: 0, vHits: 0, vDesordre: 0, vBonus4: 0, vBonus3: 0, vStake: 0, vRet: 0 };
   for (const q of quinte) {
+    if (q.ret != null) (qt.stake++, (qt.ret += q.ret));
+    const v = q.valeur;
+    if (v) {
+      qt.vCourses++;
+      qt.vHits += v.hits;
+      if (v.kind === 'desordre') qt.vDesordre++;
+      if (v.kind === 'desordre' || v.kind === 'bonus4') qt.vBonus4++;
+      if (v.kind) qt.vBonus3 += v.kind === 'bonus3' ? 1 : 0;
+      if (v.ret != null) (qt.vStake++, (qt.vRet += v.ret));
+    }
     qt.hits += q.hits;
     qt.desordre += q.desordre ? 1 : 0;
     qt.bonus4 += q.bonus4 ? 1 : 0;
