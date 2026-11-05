@@ -58,6 +58,17 @@ et devient « validée » seulement si son rendement reste positif à deux écar
 Le Choix Hoshi est figé avant le départ comme le reste du pronostic et compté dans le bilan,
 annoncé dans la sélection du matin (5 au plus) et rappelé avant la course.
 
+### 🎯 Quinté « valeur »
+
+Au Quinté+, le rapport dépend de la popularité de la combinaison : sur 31 Quintés, log(rapport)
+suit log(probabilité donnée par les cotes) avec une corrélation de −0,80 (désordre), −0,80
+(bonus 4 sur 5) et −0,84 (bonus 3). `quinteValue` cherche, parmi les combinaisons de 5 chevaux
+prises dans nos 10 meilleurs, celle qui rapporte le plus en moyenne (nos chances × rapport attendu),
+et la compare à nos 5 chevaux les plus probables. Les chances annoncées sont bien calibrées
+(89 Quintés : 14 « 4 sur 5 » annoncés, 14 obtenus), mais sur 30 Quintés avec rapports les deux
+méthodes ont perdu environ 70 % des mises : le Quinté reste le pari le plus défavorable.
+Le quinté valeur est figé avant le départ et suivi dans le bilan avec les vrais rapports.
+
 ### Mises à jour fréquentes et alertes
 
 - En plus du passage complet chaque heure, la tâche relit toutes les 10 minutes (de 9 h à 23 h environ) les cotes

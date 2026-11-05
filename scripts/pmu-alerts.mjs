@@ -243,6 +243,18 @@ async function freezePronos(day, cal, stats, today, state) {
               pBonus3: +x.pBonus3.toFixed(4),
             })),
           };
+          // Quinté « valeur » (chances × rapport attendu), figé lui aussi.
+          if (a.market) {
+            const v = Turf.quinteValue(
+              a.runners.map((x) => x.pWin),
+              a.runners.map((x) => (Number(x.runner.cote) > 1 ? x.pMarket : null)),
+              { placeDiscount: a.settings.placeDiscount, base: q.picks },
+            );
+            if (v) {
+              const r = (x) => ({ p: x.p, pay: Object.fromEntries(Object.entries(x.pay).map(([k, y]) => [k, +y.toFixed(2)])), ev: +x.ev.toFixed(4) });
+              c.prono.quinte.valeur = { picks: v.best.idx.map(numOf), best: r(v.best), base: r(v.base) };
+            }
+          }
         }
       }
       n++;

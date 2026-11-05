@@ -784,6 +784,148 @@
     return Math.round(r);
   }
 
+  function popcount(m) {
+    var c = 0;
+    while (m) (m &= m - 1), c++;
+    return c;
+  }
+
+  /**
+   * Probabilité Plackett-Luce que les |S| premiers soient exactement les chevaux de S
+   * (dans n'importe quel ordre) : le 1er selon p, les suivants selon a = p^λ.
+   */
+  function plSetProb(p, a, S) {
+    var A = 0;
+    for (var i = 0; i < a.length; i++) A += a[i];
+    var k = S.length;
+    var used = new Array(k).fill(false);
+    var rec = function (depth, rest) {
+      if (depth === k) return 1;
+      var tot = 0;
+      for (var j = 0; j < k; j++) {
+        if (used[j]) continue;
+        var x = S[j];
+        var pr = depth === 0 ? p[x] : a[x] / rest;
+        if (!(pr > 0)) continue;
+        used[j] = true;
+        tot += pr * rec(depth + 1, rest - a[x]);
+        used[j] = false;
+      }
+      return tot;
+    };
+    return rec(0, A);
+  }
+
+  /**
+   * Rapports du Quinté+ (pour 1 €) en fonction de la popularité de la combinaison :
+   * log(rapport) = a + b × log(P_marché), où P_marché est la probabilité que le public
+   * (les cotes du matin) donne à la combinaison gagnante. Réglé sur les rapports réels du PMU
+   * (31 Quintés d'août à novembre 2026, corrélation −0,80 à −0,84).
+   *   des : désordre (P des 5 premiers) ; b4 : bonus 4 sur 5 (P des 5 premiers) ;
+   *   b3  : bonus 3 (P des 3 premiers).
+   */
+  var QUINTE_PAYOUTS = {
+    des: { a: -0.241, b: -0.814 },
+    b4: { a: -2.002, b: -0.531 },
+    b3: { a: -2.167, b: -0.69 },
+  };
+
+  /**
+   * Quinté+ « valeur » : parmi les combinaisons de 5 chevaux pris dans nos 10 meilleurs,
+   * celle qui rapporte le plus en moyenne (espérance pour 1 €), en tenant compte de nos
+   * chances ET du rapport attendu (une combinaison boudée par le public paie plus).
+   * Renvoie { best, base, candidates } : best = combinaison valeur, base = nos 5 plus probables.
+   * Chaque combinaison : { idx, ev, p: { des, b4, b3 }, pay: { des, b4, b3 } } (pay : rapport
+   * moyen attendu quand on touche). Simulation de l'arrivée selon nos probabilités.
+   */
+  function quinteValue(pWin, pMarket, opts) {
+    opts = opts || {};
+    var n = pWin.length;
+    if (n < 6 || !pMarket) return null;
+    var lam = opts.placeDiscount || 0.8,
+      N = opts.simulations || 20000,
+      rand = rng(opts.seed || 20261105),
+      C = opts.payouts || QUINTE_PAYOUTS,
+      K = Math.min(n, opts.candidates || 10);
+    var pm = pMarket.map((x) => (x > 0 ? x : 1e-4));
+    var tm = pm.reduce((s, x) => s + x, 0);
+    pm = pm.map((x) => x / tm);
+    var am = pm.map((x) => Math.pow(x, lam));
+    var aw = pWin.map((x) => Math.pow(x, lam));
+    var cache5 = new Map(),
+      cache3 = new Map();
+    var idxOf = function (m) {
+      var r = [];
+      for (var i = 0; i < n; i++) if (m & (1 << i)) r.push(i);
+      return r;
+    };
+    var pay = function (t, m, cache) {
+      var v = cache.get(m);
+      if (v === undefined) {
+        var pr = Math.max(plSetProb(pm, am, idxOf(m)), 1e-9);
+        v = [Math.exp(C.des.a + C.des.b * Math.log(pr)), Math.exp(C.b4.a + C.b4.b * Math.log(pr)), Math.exp(C.b3.a + C.b3.b * Math.log(pr))];
+        cache.set(m, v);
+      }
+      return v[t];
+    };
+    // Arrivées simulées (5 premiers) selon nos probabilités.
+    var m5s = new Int32Array(N),
+      m3s = new Int32Array(N),
+      top5 = new Float64Array(n),
+      used = new Uint8Array(n);
+    for (var k = 0; k < N; k++) {
+      used.fill(0);
+      var m = 0;
+      for (var pos = 0; pos < 5; pos++) {
+        var w = pos === 0 ? pWin : aw,
+          tot = 0,
+          i;
+        for (i = 0; i < n; i++) if (!used[i]) tot += w[i];
+        var x = rand() * tot,
+          j = -1;
+        for (i = 0; i < n; i++) {
+          if (used[i]) continue;
+          x -= w[i];
+          j = i;
+          if (x <= 0) break;
+        }
+        used[j] = 1;
+        m |= 1 << j;
+        top5[j]++;
+        if (pos === 2) m3s[k] = m;
+      }
+      m5s[k] = m;
+    }
+    var order = Array.from(top5, (c, i) => i).sort((a, b) => top5[b] - top5[a] || pWin[b] - pWin[a]);
+    var pool = order.slice(0, K);
+    var evalSet = function (idx) {
+      var S = idx.reduce((mm, i) => mm | (1 << i), 0);
+      var h = { des: 0, b4: 0, b3: 0 },
+        g = { des: 0, b4: 0, b3: 0 };
+      for (var k2 = 0; k2 < N; k2++) {
+        var a5 = m5s[k2];
+        if (a5 === S) (h.des++, (g.des += pay(0, a5, cache5)));
+        else if (popcount(a5 & S) === 4) (h.b4++, (g.b4 += pay(1, a5, cache5)));
+        else if ((m3s[k2] & ~S) === 0) (h.b3++, (g.b3 += pay(2, m3s[k2], cache3)));
+      }
+      return {
+        idx: idx.slice().sort((a, b) => top5[b] - top5[a]),
+        ev: (g.des + g.b4 + g.b3) / N,
+        p: { des: h.des / N, b4: h.b4 / N, b3: h.b3 / N },
+        pay: { des: h.des ? g.des / h.des : 0, b4: h.b4 ? g.b4 / h.b4 : 0, b3: h.b3 ? g.b3 / h.b3 : 0 },
+      };
+    };
+    var cands = [];
+    var pick = function (start, chosen) {
+      if (chosen.length === 5) return void cands.push(evalSet(chosen));
+      for (var i = start; i < pool.length; i++) pick(i + 1, chosen.concat([pool[i]]));
+    };
+    pick(0, []);
+    cands.sort((a, b) => b.ev - a.ev);
+    var base = evalSet(opts.base && opts.base.length === 5 ? opts.base : order.slice(0, 5));
+    return { best: cands[0], base: base, candidates: cands.slice(0, 5), pTop5: Array.from(top5, (c) => c / N) };
+  }
+
   /**
    * Analyse Quinté+ par simulation de l'arrivée (Plackett-Luce, correctif des places) :
    * chances de chaque cheval de finir dans les 5 premiers, nos 5 chevaux, chances du
@@ -839,12 +981,13 @@
         c.desordre++;
         if (sims[o] === ordre[0] && sims[o + 1] === ordre[1] && sims[o + 2] === ordre[2] && sims[o + 3] === ordre[3] && sims[o + 4] === ordre[4]) c.ordre++;
       }
-      if ((m4 & ~S5) === 0) c.bonus4++;
+      // Bonus 4 sur 5 : au moins 4 de nos chevaux parmi les 5 premiers (règle PMU actuelle).
+      if (popcount(m5 & S5) >= 4) c.bonus4++;
       if ((m3 & ~S5) === 0) c.bonus3++;
       for (var q = 0; q < sets.length; q++) {
         var S = sets[q].mask;
         if ((m5 & ~S) === 0) cs[q].d++;
-        if ((m4 & ~S) === 0) cs[q].b4++;
+        if (popcount(m5 & S) >= 4) cs[q].b4++;
         if ((m3 & ~S) === 0) cs[q].b3++;
       }
     }
@@ -977,6 +1120,9 @@
     comboAnalysis: comboAnalysis,
     COMBO_BETS: COMBO_BETS,
     comb: comb,
+    plSetProb: plSetProb,
+    quinteValue: quinteValue,
+    QUINTE_PAYOUTS: QUINTE_PAYOUTS,
     validatedStrategy: validatedStrategy,
     valueBets: valueBets,
     CHOICE_RULES: CHOICE_RULES,

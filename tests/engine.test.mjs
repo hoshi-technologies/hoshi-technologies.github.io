@@ -183,7 +183,7 @@ test('Quinté+ : chances cohérentes', () => {
   );
   close(sum(q.pTop5), 5, 1e-9, 'top 5');
   assert.equal(q.picks.length, 5);
-  assert.ok(q.p.ordre <= q.p.desordre && q.p.desordre <= q.p.bonus4 && q.p.bonus4 <= q.p.bonus3);
+  assert.ok(q.p.ordre <= q.p.desordre && q.p.desordre <= q.p.bonus4 && q.p.desordre <= q.p.bonus3);
   for (let i = 1; i < q.combines.length; i++) assert.ok(q.combines[i].pDesordre >= q.combines[i - 1].pDesordre);
   assert.equal(q.combines[0].combos, 1);
   assert.equal(q.combines[3].combos, 56); // 8 chevaux : C(8,5)
@@ -227,4 +227,19 @@ test('Choix Hoshi : cheval sous-estimé par la cote, pas forcément le favori', 
       assert.ok(ch[ty].p >= T.CHOICE_RULES[ty].pMin);
     }
   assert.deepEqual(T.hoshiChoice(T.analyzeRace(race(8, false), { simulations: 0 })), { g: null, p: null });
+});
+
+test('Quinté valeur : probabilités d\'ensemble et meilleure espérance', () => {
+  // Plackett-Luce : la somme des probabilités sur toutes les paires = 1 (3 chevaux, 2 premiers).
+  const p = [0.5, 0.3, 0.2], a = p.map((x) => Math.pow(x, 0.8));
+  const s = T.plSetProb(p, a, [0, 1]) + T.plSetProb(p, a, [0, 2]) + T.plSetProb(p, a, [1, 2]);
+  close(s, 1, 1e-12);
+  close(T.plSetProb(p, p, [0, 1]), 0.5 * 0.6 + 0.3 * (0.5 / 0.7), 1e-12);
+  const r = race(14);
+  const an = T.analyzeRace(r, { simulations: 0 });
+  const v = T.quinteValue(an.runners.map((x) => x.pWin), an.runners.map((x) => x.pMarket), { simulations: 4000 });
+  assert.equal(v.best.idx.length, 5);
+  assert.ok(v.best.ev >= v.base.ev - 1e-12, 'la combinaison valeur rapporte au moins autant que la base');
+  for (const k of ['des', 'b4', 'b3']) assert.ok(v.best.p[k] >= 0 && v.best.p[k] <= 1);
+  assert.equal(T.quinteValue([0.5, 0.3, 0.2], [0.4, 0.4, 0.2]), null);
 });
