@@ -2908,9 +2908,15 @@
               ['g', 'p'].forEach(function (ty) {
                 var f = a.frozenChoix[ty];
                 var x = f && a.runners.find((y) => String(y.runner.num) === String(f.num));
-                ch[ty] = x ? { x: x, ratio: f.ratio, p: f.p, cote: f.cote } : null;
+                ch[ty] = x ? { x: x, ratio: f.ratio, p: f.p, cote: f.cote, matin: !!f.matin, coteLive: f.coteLive } : null;
               });
-            } else ch = T.hoshiChoice(a);
+            } else {
+              // Décidé sur les cotes du matin, comme dans l'étude (voir T.morningRunners).
+              ch = T.hoshiChoiceMorning({ discipline: state.race.discipline, allocation: state.race.allocation, runners: state.race.runners }, effectiveSettings());
+              ['g', 'p'].forEach(function (ty) {
+                if (ch[ty]) (ch[ty].matin = ch[ty].x.runner.coteLive != null), (ch[ty].coteLive = ch[ty].x.runner.coteLive);
+              });
+            }
             if (!ch.g && !ch.p) {
               html +=
                 '<div class="kpi" style="margin-bottom:14px;border:1px solid var(--line)"><small>🎯 Choix Hoshi</small>' +
@@ -2921,7 +2927,8 @@
             ['g', 'p'].forEach(function (ty) {
               var k = ch[ty];
               if (!k) return;
-              var o = ty === 'g' ? k.cote : T.estimatePlaceOdds(k.cote, a.placesPayees, coefs);
+              var cNow = parseFloat(String(k.coteLive || k.cote).replace(',', '.'));
+              var o = ty === 'g' ? cNow : T.estimatePlaceOdds(cNow, a.placesPayees, coefs);
               html +=
                 '<div style="display:flex;align-items:center;gap:10px;margin:8px 0 4px"><span class="num-badge" style="min-width:34px;height:34px;font-size:16px">' +
                 esc(k.x.runner.num) +
@@ -2929,14 +2936,20 @@
                 esc(k.x.runner.nom) +
                 '</b><span class="tag accent">' +
                 (ty === 'g' ? 'Gagnant' : 'Placé') +
-                '</span></div><div class="bday-stats"><span>Cote <b>' +
+                '</span></div><div class="bday-stats"><span>' +
+                (k.matin ? 'Cote du matin' : 'Cote') +
+                ' <b>' +
                 String(k.cote).replace('.', ',') +
-                '</b></span><span>Nos chances ' +
+                '</b>' +
+                (k.matin && k.coteLive ? ' (actuelle ' + String(k.coteLive).replace('.', ',') + ')' : '') +
+                '</span><span>Nos chances ' +
                 (ty === 'g' ? 'de gagner' : 'd\'être placé') +
                 ' <b>' +
                 Math.round(k.p * 100) +
-                ' %</b></span><span>La cote dit <b>' +
-                Math.round(k.x.pMarket * 100) +
+                ' %</b></span><span>La cote ' +
+                (k.matin ? 'du matin ' : '') +
+                'dit <b>' +
+                Math.round(((ty === 'g' ? k.p : k.x.pWin) / k.ratio) * 100) +
                 ' %</b> de gagner</span><span>×<b>' +
                 k.ratio.toFixed(1).replace('.', ',') +
                 '</b></span></div>' +
@@ -2954,9 +2967,10 @@
                   : '');
             });
             html +=
-              '<p class="hint" style="margin:8px 0 0">Ce n\'est pas forcément le favori : c\'est le cheval à qui nous donnons nettement plus de chances que sa cote (au moins 1,2 fois). ' +
-              'Sur l\'historique (1 500 courses jamais vues par le modèle), cette méthode a fait de +2 % à +9 % en gagnant, contre −13 % à −19 % en jouant le favori. ' +
-              'C\'est encourageant mais pas encore prouvé : petites mises, le bilan en conditions réelles tranchera.</p></div>';
+              '<p class="hint" style="margin:8px 0 0">Ce n\'est pas forcément le favori : c\'est le cheval à qui nous donnons nettement plus de chances que sa <b>cote du matin</b> (au moins 1,2 fois). ' +
+              'Il se décide sur la cote du matin, car c\'est là que le modèle a un temps d\'avance : face aux cotes de dernière minute, cet avantage disparaît. ' +
+              'Sur l\'historique, les résultats changent beaucoup selon la période (de −25 % à +9 % en gagnant, de −2 % à +4 % en placé) : <b>aucun avantage prouvé</b>. ' +
+              'À suivre dans le bilan ; si vous jouez, petites mises et plutôt en placé.</p></div>';
           })();
           // Meilleur rapport chances / cote
           var cand = a.runners.filter(function (x) {

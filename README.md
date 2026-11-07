@@ -51,10 +51,15 @@ prend à la place le cheval dont nos chances dépassent le plus celles que lui d
 (ratio modèle / marché ≥ 1,2), parmi ceux qui ont assez de chances (gagnant ≥ 12 %, placé ≥ 50 %).
 Pas de cheval qui remplit ces conditions → pas de Choix Hoshi dans la course.
 
-Sur l'historique (courses jamais vues par le modèle, vrais rapports PMU) : environ +2 % à +9 %
-en gagnant et +3 % à +4 % en placé, contre −13 % à −19 % en jouant le favori. Ce n'est pas
-encore significatif : la stratégie est suivie par le calibrage quotidien (`choix_g`, `choix_p`)
-et devient « validée » seulement si son rendement reste positif à deux écarts-types près.
+Le choix se décide sur la **cote de référence du matin** (`morningRunners`) : face aux cotes du
+matin, les chevaux que le modèle préfère perdent moins que les autres (le marché finit souvent par
+leur donner raison) ; face aux cotes de la dernière minute, ils perdent plus (−36 % contre −26 %
+en moyenne sur 26 000 chevaux). Le calibrage utilise aussi la cote du matin comme cote de décision.
+
+Résultats instables selon la période (de −25 % à +9 % en gagnant, de −2 % à +4 % en placé, contre
+−13 % à −19 % en jouant le favori) : aucun avantage prouvé. La stratégie est suivie par le
+calibrage quotidien (`choix_g`, `choix_p`) et ne devient « validée » que si son rendement reste
+positif à deux écarts-types près.
 Le Choix Hoshi est figé avant le départ comme le reste du pronostic et compté dans le bilan,
 annoncé dans la sélection du matin (5 au plus) et rappelé avant la course.
 

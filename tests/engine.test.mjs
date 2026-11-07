@@ -243,3 +243,15 @@ test('Quinté valeur : probabilités d\'ensemble et meilleure espérance', () =>
   for (const k of ['des', 'b4', 'b3']) assert.ok(v.best.p[k] >= 0 && v.best.p[k] <= 1);
   assert.equal(T.quinteValue([0.5, 0.3, 0.2], [0.4, 0.4, 0.2]), null);
 });
+
+test('Choix Hoshi décidé sur la cote du matin', () => {
+  const r = race(10);
+  r.runners.forEach((x) => (x.coteRef = x.cote * 2));
+  const m = T.morningRunners(r.runners);
+  assert.equal(m[0].cote, r.runners[0].coteRef);
+  assert.equal(m[0].coteLive, r.runners[0].cote);
+  // Sans cote du matin : la cote du moment est gardée.
+  assert.equal(T.morningRunners([{ cote: 5 }])[0].cote, 5);
+  const ch = T.hoshiChoiceMorning(r, {});
+  for (const ty of ['g', 'p']) if (ch[ty]) assert.equal(ch[ty].cote, ch[ty].x.runner.coteRef);
+});
