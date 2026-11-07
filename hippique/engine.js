@@ -755,6 +755,27 @@
   }
 
   /**
+   * Partants avec la cote de RÉFÉRENCE du matin à la place de la cote du moment
+   * (la cote du moment est gardée dans coteLive).
+   *
+   * Pourquoi : face aux cotes du matin, les chevaux que notre modèle préfère perdent moins que
+   * les autres (le marché finit souvent par leur donner raison) ; face aux cotes de la dernière
+   * minute, c'est l'inverse : ils perdent PLUS (−36 % contre −26 % en moyenne, 26 000 chevaux).
+   * Le Choix Hoshi doit donc se décider sur les cotes du matin, comme dans l'étude qui l'a validé.
+   */
+  function morningRunners(runners) {
+    return (runners || []).map(function (r) {
+      return num(r.coteRef) > 1 ? Object.assign({}, r, { cote: r.coteRef, coteLive: r.cote }) : r;
+    });
+  }
+
+  /** Choix Hoshi d'une course, décidé sur les cotes du matin (voir morningRunners). */
+  function hoshiChoiceMorning(race, settings, rules) {
+    var a = analyzeRace(Object.assign({}, race, { runners: morningRunners(race.runners) }), Object.assign({}, settings || {}, { simulations: 0 }));
+    return hoshiChoice(a, rules);
+  }
+
+  /**
    * Choix Hoshi d'une course analysée : { g, p }, chacun { x, ratio, p, cote } ou null.
    * `x` est l'élément de analysis.runners.
    */
@@ -1128,6 +1149,8 @@
     CHOICE_RULES: CHOICE_RULES,
     choiceIndex: choiceIndex,
     hoshiChoice: hoshiChoice,
+    morningRunners: morningRunners,
+    hoshiChoiceMorning: hoshiChoiceMorning,
     featureVector: featureVector,
     learnedProbs: learnedProbs,
     disciplineGroup: disciplineGroup,

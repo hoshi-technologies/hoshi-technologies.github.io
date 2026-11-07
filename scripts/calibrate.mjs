@@ -89,10 +89,12 @@ async function buildDataset() {
             const last = lastSeen[p.nom];
             r.repos = last && last < day.date ? daysBetween(last, day.date) : '';
           }
-          // Cote au moment de parier (≈ 20 min avant), sinon cote du matin, sinon cote finale.
+          // Cote de décision : la cote de référence du matin (c'est sur elle que se décide le
+          // Choix Hoshi : face aux cotes de dernière minute, l'avantage du modèle disparaît),
+          // sinon la cote ≈ 20 min avant le départ, sinon la cote finale.
           r.coteFinal = p.cote;
-          if (p.coteT) (r.cote = p.coteT), oddsSource.T++;
-          else if (p.coteRef) (r.cote = p.coteRef), oddsSource.ref++;
+          if (p.coteRef) (r.cote = p.coteRef), oddsSource.ref++;
+          else if (p.coteT) (r.cote = p.coteT), oddsSource.T++;
           else if (p.cote) oddsSource.final++;
           const el = ratings[p.nom];
           if (el) (r.rating = el[0]), (r.ratingN = el[1]);
