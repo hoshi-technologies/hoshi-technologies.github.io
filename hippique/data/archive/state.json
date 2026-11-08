@@ -1,10 +1,10 @@
 {
  "done": false,
  "emptyStreak": 0,
- "days": 2870,
- "courses": 138870,
+ "days": 3114,
+ "courses": 150690,
  "errors": 0,
- "oldest": "2018-09-30",
- "cursor": "2018-09-30",
- "updated": "2026-11-08T19:46:59.570Z"
+ "oldest": "2018-01-29",
+ "cursor": "2018-01-29",
+ "updated": "2026-11-08T20:27:37.593Z"
 }
