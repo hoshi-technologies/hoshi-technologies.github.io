@@ -17,6 +17,7 @@ import { mkdir, readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { writeArchiveDay } from './archive.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -391,10 +392,16 @@ async function main() {
     if (iso < parisDate(0) && updateStats(stats, day)) console.log('  statistiques mises à jour');
   }
 
-  // Ménage : journées trop anciennes, chevaux non revus depuis un an.
+  // Ménage : les journées trop anciennes passent dans l'archive compressée (historique du
+  // calibrage), puis quittent le dossier du site. Chevaux non revus depuis un an oubliés.
   const limit = parisDate(-KEEP_DAYS);
   const files = (await readdir(DATA)).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f));
-  for (const f of files) if (f.slice(0, 10) < limit) await unlink(path.join(DATA, f));
+  for (const f of files)
+    if (f.slice(0, 10) < limit) {
+      const old = await readJson(path.join(DATA, f), null);
+      if (old) await writeArchiveDay(old);
+      await unlink(path.join(DATA, f));
+    }
   const yearAgo = parisDate(-365);
   for (const k of Object.keys(stats.chevaux)) if (stats.chevaux[k] < yearAgo) delete stats.chevaux[k];
   stats.dates = stats.dates.filter((d) => d >= yearAgo);
@@ -412,4 +419,6 @@ async function main() {
     process.exitCode = 1;
   }
 }
-main();
+// Lancé directement : mise à jour. Importé (historique) : fonctions seulement.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+export { fetchDay, finished, parisDate };

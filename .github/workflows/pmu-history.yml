@@ -1,0 +1,29 @@
+name: Historique PMU (Hoshi Turf)
+
+# Récupère l'historique des courses le plus loin possible dans le passé (archive compressée
+# pour le calibrage). Se relance d'elle-même toutes les ~5 h 20 jusqu'à ce que l'historique
+# soit complet (hippique/data/archive/state.json : done).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: pmu-history
+  cancel-in-progress: false
+
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Récupération de l'historique
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/history-loop.sh

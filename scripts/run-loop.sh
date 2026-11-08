@@ -61,6 +61,8 @@ publish() {
       mine=$(git rev-parse HEAD)
       git reset -q --hard "origin/$BR"
       git checkout "$mine" -- hippique/data
+      # Archive : fichiers écrits une seule fois ; la version distante prime (historique).
+      git checkout "origin/$BR" -- hippique/data/archive >/dev/null 2>&1 || true
       git add -A hippique/data
       git diff --cached --quiet && return 0
       git commit -qm "$msg" || return 1
@@ -86,7 +88,15 @@ while :; do
   if [ $((now - last_full)) -ge 3300 ]; then
     echo "::group::Passage complet $(TZ=Europe/Paris date +%H:%M)"
     node scripts/pmu-fetch.mjs || fail "récupération PMU"
-    node scripts/calibrate.mjs || fail "calibrage"
+    # Calibrage (long avec l'historique) : en arrière-plan, publié au passage suivant.
+    # Pas de nouveau calibrage à moins de 45 min de la fin de la boucle.
+    if [ -n "${CALPID:-}" ] && ! kill -0 "$CALPID" 2>/dev/null; then
+      wait "$CALPID" || echo "Calibrage en échec :"; tail -n 25 /tmp/calibrate.log; CALPID=""
+    fi
+    if [ -z "${CALPID:-}" ] && [ $((END - now)) -gt 2700 ]; then
+      node scripts/calibrate.mjs > /tmp/calibrate.log 2>&1 &
+      CALPID=$!
+    fi
     # Sports : une panne de la source sportive ne doit pas bloquer les courses hippiques.
     node scripts/sports.mjs || echo "Sports : récupération en échec (sans effet sur les courses)."
     node scripts/sports-history.mjs || echo "Sports : étude historique en échec."
@@ -134,6 +144,12 @@ while :; do
   sleep "$wait"
 done
 
+# Calibrage encore en cours : on l'attend (il s'arrête de lui-même bien avant la limite).
+if [ -n "${CALPID:-}" ] && kill -0 "$CALPID" 2>/dev/null; then
+  echo "Attente de la fin du calibrage…"
+  wait "$CALPID"; tail -n 25 /tmp/calibrate.log
+  publish || true
+fi
 echo "Relance de la boucle$([ $AT1 = 1 ] && echo ' (relance quotidienne de 1 h)')."
 
 gh workflow run pmu-programme.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" -f loop=true
