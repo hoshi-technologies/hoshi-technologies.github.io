@@ -21,7 +21,8 @@
  *   node scripts/calibrate.mjs --force  → recalcule tout de suite
  */
 import { createRequire } from 'node:module';
-import { readFile, writeFile, readdir } from 'node:fs/promises';
+import { readFile, writeFile as writeFileRaw, readdir, rename } from 'node:fs/promises';
+import { archiveDates, readArchiveDay } from './archive.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -34,6 +35,17 @@ const MIN_COURSES = 150; // en dessous, pas assez de recul pour calibrer
 const MIN_GROUP = 250; // courses minimum pour des réglages propres à un groupe
 const MIN_LEARNED = 600; // courses d'entraînement minimum pour le modèle appris
 const FORCE = process.argv.includes('--force');
+// Historique (archive) : Elo sur tout l'historique, jockeys/entraîneurs sur STATS_DAYS,
+// modèles ajustés sur les FIT_DAYS derniers jours (au plus MAX_FIT courses, les plus récentes).
+const STATS_DAYS = Number(process.env.STATS_DAYS) || 1095;
+const FIT_DAYS = Number(process.env.FIT_DAYS) || 540;
+const MAX_FIT = Number(process.env.MAX_FIT) || 25000;
+// Écriture atomique : la boucle peut publier pendant que le calibrage tourne en arrière-plan.
+const writeFile = async (f, data) => {
+  await writeFileRaw(f + '.tmp', data);
+  await rename(f + '.tmp', f);
+};
+const isoMinus = (iso, d) => new Date(Date.parse(iso + 'T12:00:00Z') - d * 86400000).toISOString().slice(0, 10);
 
 const parisToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date());
 const daysBetween = (a, b) => Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 86400000);
@@ -54,9 +66,13 @@ const round = (m) => Object.fromEntries(Object.entries(m).map(([k, v]) => [k, ty
 // ------------------------------------------------------------------ jeu de données
 async function buildDataset() {
   const today = parisToday();
-  const days = (await readdir(DATA))
-    .filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f) && f.slice(0, 10) < today)
-    .sort();
+  const siteDays = (await readdir(DATA)).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f) && f.slice(0, 10) < today).map((f) => f.slice(0, 10));
+  const inSite = new Set(siteDays);
+  const archived = (await archiveDates()).filter((d) => d < today && !inSite.has(d));
+  const days = [...archived.map((d) => ({ d, arch: true })), ...siteDays.map((d) => ({ d, arch: false }))].sort((a, b) => (a.d < b.d ? -1 : 1));
+  const statsFrom = isoMinus(today, STATS_DAYS),
+    fitFrom = isoMinus(today, FIT_DAYS);
+  const statDates = [];
   const jockeys = {},
     entraineurs = {},
     lastSeen = {},
@@ -70,9 +86,11 @@ async function buildDataset() {
     if (pos <= 3) s[2]++;
   };
   const items = [];
-  for (const f of days) {
-    const day = await readJson(path.join(DATA, f));
+  for (const { d, arch } of days) {
+    const day = arch ? await readArchiveDay(d) : await readJson(path.join(DATA, d + '.json'));
     if (!day) continue;
+    const fit = day.date >= fitFrom,
+      withStats = day.date >= statsFrom;
     const pending = [];
     for (const reu of day.reunions || [])
       for (const c of reu.courses || []) {
@@ -101,6 +119,11 @@ async function buildDataset() {
           r._pos = p.arrivee || rankOf[p.num] || 99;
           return r;
         });
+        if (!fit) {
+          // Avant la fenêtre d'ajustement : seulement pour les notes et statistiques.
+          pending.push(runners);
+          continue;
+        }
         const prep = Turf.prepareRace({ discipline: c.discipline, allocation: c.allocation, runners });
         if (!prep) continue;
         const pos = prep.runners.map((r) => r._pos);
@@ -122,16 +145,25 @@ async function buildDataset() {
       }
     // Les statistiques n'intègrent la journée qu'après l'avoir rejouée.
     for (const runners of pending) {
-      eloUpdate(ratings, runners);
+      eloUpdate(
+        ratings,
+        runners.filter((r) => !r.nonPartant),
+      );
       for (const r of runners) {
-        add(jockeys, r.jockeyNom, r._pos);
-        add(entraineurs, r.entraineurNom, r._pos);
+        if (r.nonPartant) continue;
+        if (withStats) {
+          add(jockeys, r.jockeyNom, r._pos);
+          add(entraineurs, r.entraineurNom, r._pos);
+        }
         lastSeen[r.nom] = day.date;
       }
     }
+    if (withStats && pending.length) statDates.push(day.date);
   }
   items.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.heure - b.heure));
-  return { items, days: days.length, ratings, oddsSource };
+  const all = items.length;
+  if (items.length > MAX_FIT) items.splice(0, items.length - MAX_FIT);
+  return { items, all, days: days.length, archived: archived.length, ratings, oddsSource, stats: { jockeys, entraineurs, lastSeen, dates: statDates } };
 }
 
 /**
@@ -599,8 +631,8 @@ async function main() {
     return;
   }
   const t0 = Date.now();
-  const { items, days, ratings, oddsSource } = await buildDataset();
-  console.log(`${items.length} courses terminées sur ${days} journées`);
+  const { items, all, days, archived, ratings, oddsSource, stats } = await buildDataset();
+  console.log(`${all} courses terminées dans la fenêtre d'ajustement (${items.length} utilisées) · ${days} journées lues dont ${archived} archivées`);
   console.log(`cotes utilisées : ${oddsSource.T} au moment du pari, ${oddsSource.ref} du matin, ${oddsSource.final} finales`);
   const defaults = Turf.mergeSettings({});
   const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 4, oddsSource };
@@ -609,6 +641,16 @@ async function main() {
   const rt = {};
   for (const [k, v] of Object.entries(ratings)) rt[k] = [Math.round(v[0]), v[1]];
   await writeFile(path.join(DATA, 'ratings.json'), JSON.stringify({ updated: out.updated, ratings: rt }));
+  // Statistiques jockeys / entraîneurs pour la page et les alertes : mêmes chiffres que ceux du
+  // calibrage (fenêtre de STATS_DAYS jours, archive comprise). La mise à jour courante y ajoute
+  // ensuite chaque journée terminée.
+  const yearAgo = isoMinus(parisToday(), 365);
+  const chevaux = {};
+  for (const [k, v] of Object.entries(stats.lastSeen)) if (v >= yearAgo) chevaux[k] = v;
+  await writeFile(
+    path.join(DATA, 'stats.json'),
+    JSON.stringify({ dates: stats.dates.filter((d) => d >= yearAgo), jockeys: stats.jockeys, entraineurs: stats.entraineurs, chevaux, updated: out.updated }),
+  );
 
   if (items.length < MIN_COURSES) {
     out.status = 'insufficient';

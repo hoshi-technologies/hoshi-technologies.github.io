@@ -111,6 +111,20 @@ Le quinté valeur est figé avant le départ et suivi dans le bilan avec les vra
 - **Rapports probables au placé** : la tâche enregistre un exemplaire de la réponse de l'API
   (`hippique/data/_sample-combinaisons.json`) pour pouvoir les exploiter une fois leur format connu.
 
+### Historique long (archive)
+
+`scripts/pmu-history.mjs` remonte le temps jour après jour, aussi loin que l'API du PMU a des
+programmes (arrêt après 60 jours consécutifs sans programme), et archive chaque journée dans
+`hippique/data/archive/AAAA/AAAA-MM-JJ.json.gz` (≈ 35 Ko par journée). Il tourne dans sa propre
+tâche (`pmu-history.yml`, `scripts/history-loop.sh`) par tranches de 40 minutes et se relance
+jusqu'à ce que `archive/state.json` indique `done`. Les journées de plus de 90 jours du site
+passent aussi dans l'archive au lieu d'être supprimées.
+
+Le calibrage lit l'archive : notes Elo des chevaux sur tout l'historique, statistiques jockeys et
+entraîneurs sur 3 ans (`STATS_DAYS`, réécrites dans `stats.json` pour la page), modèles ajustés
+sur les 18 derniers mois (`FIT_DAYS`, au plus `MAX_FIT` = 25 000 courses). Il tourne en
+arrière-plan dans la boucle, sans bloquer la mise à jour des cotes.
+
 ### Planification
 
 GitHub ne garantit pas les horaires planifiés : ils peuvent être retardés, voire sautés, ce qui est arrivé la
