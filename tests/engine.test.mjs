@@ -255,3 +255,17 @@ test('Choix Hoshi décidé sur la cote du matin', () => {
   const ch = T.hoshiChoiceMorning(r, {});
   for (const ty of ['g', 'p']) if (ch[ty]) assert.equal(ch[ty].cote, ch[ty].x.runner.coteRef);
 });
+
+test('Outsiders Hoshi : seuil de 2,5 fois la cote du matin', () => {
+  const r = race(12);
+  r.runners.forEach((x) => (x.coteRef = x.cote));
+  const prep = T.prepareRace(r);
+  const F = T.featureVector(prep, 0).length;
+  // Modèle factice qui ignore le marché et favorise le dernier cheval (gros outsider).
+  const L = { beta: new Array(F).fill(0), mean: new Array(F).fill(0), sd: new Array(F).fill(1), threshold: 2.5 };
+  const picks = T.outsiderPicks(r, L);
+  for (const o of picks) assert.ok(o.ratio >= 2.5 && o.cote > 1);
+  // Modèle uniforme : 1/12 chacun ; seuls les chevaux que la cote crédite de moins de 1/30 passent.
+  for (const o of picks) assert.ok(o.pMarket <= 1 / 12 / 2.5 + 1e-9);
+  assert.deepEqual(T.outsiderPicks(r, null), []);
+});

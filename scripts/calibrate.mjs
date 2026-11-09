@@ -40,6 +40,9 @@ const FORCE = process.argv.includes('--force');
 const STATS_DAYS = Number(process.env.STATS_DAYS) || 1095;
 const FIT_DAYS = Number(process.env.FIT_DAYS) || 540;
 const MAX_FIT = Number(process.env.MAX_FIT) || 25000;
+// Modèle « Outsiders » : logit conditionnel sur les OUT_DAYS derniers jours (cotes du matin).
+const OUT_DAYS = Number(process.env.OUT_DAYS) || 730;
+const OUT_MAX = 40000;
 // Écriture atomique : la boucle peut publier pendant que le calibrage tourne en arrière-plan.
 const writeFile = async (f, data) => {
   await writeFileRaw(f + '.tmp', data);
@@ -71,7 +74,9 @@ async function buildDataset() {
   const archived = (await archiveDates()).filter((d) => d < today && !inSite.has(d));
   const days = [...archived.map((d) => ({ d, arch: true })), ...siteDays.map((d) => ({ d, arch: false }))].sort((a, b) => (a.d < b.d ? -1 : 1));
   const statsFrom = isoMinus(today, STATS_DAYS),
-    fitFrom = isoMinus(today, FIT_DAYS);
+    fitFrom = isoMinus(today, FIT_DAYS),
+    outFrom = isoMinus(today, OUT_DAYS);
+  const outsider = []; // jeu de données compact du modèle Outsiders
   const statDates = [];
   const jockeys = {},
     entraineurs = {},
@@ -119,13 +124,44 @@ async function buildDataset() {
           r._pos = p.arrivee || rankOf[p.num] || 99;
           return r;
         });
-        if (!fit) {
-          // Avant la fenêtre d'ajustement : seulement pour les notes et statistiques.
+        const wantOut = day.date >= outFrom && c.rapports;
+        if (!fit && !wantOut) {
+          // Avant les fenêtres d'ajustement : seulement pour les notes et statistiques.
           pending.push(runners);
           continue;
         }
         const prep = Turf.prepareRace({ discipline: c.discipline, allocation: c.allocation, runners });
-        if (!prep) continue;
+        if (!prep) {
+          pending.push(runners);
+          continue;
+        }
+        if (wantOut && prep.market) {
+          const R = prep.runners,
+            w = R.findIndex((r) => r._pos === 1);
+          if (w >= 0) {
+            const F = Turf.featureVector(prep, 0).length;
+            const X = new Float32Array(R.length * F);
+            R.forEach((_, i) => X.set(Turf.featureVector(prep, i), i * F));
+            outsider.push({
+              date: day.date,
+              fr: !reu.pays || reu.pays === 'FRA',
+              n: R.length,
+              np: Turf.placesPayees(R.length),
+              F,
+              X,
+              w,
+              pm: Float32Array.from(prep.market.probs),
+              cm: R.map((r) => num(r.cote)),
+              pg: R.map((r) => (c.rapports.g ? c.rapports.g[String(r.num)] || 0 : 0)),
+              pp: R.map((r) => (c.rapports.p ? c.rapports.p[String(r.num)] || 0 : 0)),
+              hasP: !!(c.rapports.p && Object.keys(c.rapports.p).length),
+            });
+          }
+        }
+        if (!fit) {
+          pending.push(prep.runners);
+          continue;
+        }
         const pos = prep.runners.map((r) => r._pos);
         const winner = pos.indexOf(1);
         if (winner < 0) continue;
@@ -163,7 +199,7 @@ async function buildDataset() {
   items.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.heure - b.heure));
   const all = items.length;
   if (items.length > MAX_FIT) items.splice(0, items.length - MAX_FIT);
-  return { items, all, days: days.length, archived: archived.length, ratings, oddsSource, stats: { jockeys, entraineurs, lastSeen, dates: statDates } };
+  return { items, all, days: days.length, archived: archived.length, ratings, oddsSource, outsider, stats: { jockeys, entraineurs, lastSeen, dates: statDates } };
 }
 
 /**
@@ -191,6 +227,106 @@ function eloUpdate(ratings, runners) {
     const o = ratings[r.nom] || [1500, 0];
     ratings[r.nom] = [R[i] + d[i], o[1] + 1];
   });
+}
+
+// ------------------------------------------------------------------ modèle Outsiders
+/** Logit conditionnel sur jeu compact (même méthode que l'étude sur 142 000 courses). */
+function fitCL(list, iters = 150, l2 = 0.002) {
+  const F = list[0].F;
+  const mean = new Float64Array(F),
+    sd = new Float64Array(F);
+  let cnt = 0;
+  for (const r of list)
+    for (let i = 0; i < r.n; i++) {
+      cnt++;
+      for (let k = 0; k < F; k++) mean[k] += r.X[i * F + k];
+    }
+  for (let k = 0; k < F; k++) mean[k] /= cnt;
+  for (const r of list) for (let i = 0; i < r.n; i++) for (let k = 0; k < F; k++) sd[k] += (r.X[i * F + k] - mean[k]) ** 2;
+  for (let k = 0; k < F; k++) sd[k] = Math.sqrt(sd[k] / cnt) || 1;
+  const beta = new Float64Array(F),
+    m = new Float64Array(F),
+    v = new Float64Array(F);
+  const u = new Float64Array(64),
+    z = new Float64Array(64 * F);
+  for (let t = 1; t <= iters; t++) {
+    const g = new Float64Array(F);
+    for (let k = 0; k < F; k++) g[k] = l2 * beta[k];
+    for (const r of list) {
+      let mx = -1e9;
+      for (let i = 0; i < r.n; i++) {
+        let a = 0;
+        for (let k = 0; k < F; k++) {
+          const zz = (r.X[i * F + k] - mean[k]) / sd[k];
+          z[i * F + k] = zz;
+          a += zz * beta[k];
+        }
+        u[i] = a;
+        if (a > mx) mx = a;
+      }
+      let tot = 0;
+      for (let i = 0; i < r.n; i++) (u[i] = Math.exp(u[i] - mx)), (tot += u[i]);
+      for (let i = 0; i < r.n; i++) {
+        const coef = (u[i] / tot - (i === r.w ? 1 : 0)) / list.length;
+        for (let k = 0; k < F; k++) g[k] += coef * z[i * F + k];
+      }
+    }
+    for (let k = 0; k < F; k++) {
+      m[k] = 0.9 * m[k] + 0.1 * g[k];
+      v[k] = 0.999 * v[k] + 0.001 * g[k] * g[k];
+      beta[k] -= (0.05 * (m[k] / (1 - 0.9 ** t))) / (Math.sqrt(v[k] / (1 - 0.999 ** t)) + 1e-8);
+    }
+  }
+  const r5 = (a) => Array.from(a, (x) => +x.toFixed(5));
+  return { beta: r5(beta), mean: r5(mean), sd: r5(sd) };
+}
+function clProbs(L, r) {
+  const F = r.F,
+    u = [];
+  let mx = -1e9;
+  for (let i = 0; i < r.n; i++) {
+    let a = 0;
+    for (let k = 0; k < F; k++) a += L.beta[k] * ((r.X[i * F + k] - L.mean[k]) / L.sd[k]);
+    u.push(a);
+    if (a > mx) mx = a;
+  }
+  const e = u.map((x) => Math.exp(x - mx)),
+    t = e.reduce((a, b) => a + b, 0);
+  return e.map((x) => x / t);
+}
+const thin = (list, max) => (list.length > max ? list.filter((_, i) => i % Math.ceil(list.length / max) === 0) : list);
+/** Contrôle : réglé sur la 1re moitié de la fenêtre, mesuré sur la 2de (≈ un an de courses, France). */
+function outsiderModel(list) {
+  if (list.length < 3000) return null;
+  const cut = Math.floor(list.length * 0.5);
+  const Lt = fitCL(thin(list.slice(0, cut), OUT_MAX));
+  const pays = [];
+  let wins = 0;
+  for (const r of list.slice(cut)) {
+    if (!r.fr) continue;
+    const p = clProbs(Lt, r);
+    for (let i = 0; i < r.n; i++) {
+      if (!(r.cm[i] > 1) || !(r.pm[i] > 0) || p[i] / r.pm[i] < Turf.OUTSIDER_RATIO) continue;
+      pays.push(r.pg[i] + (r.hasP ? r.pp[i] : 1)); // 1 € gagnant + 1 € placé (placé inconnu : remboursé)
+      if (r.pg[i] > 0) wins++;
+    }
+  }
+  const n = pays.length,
+    mean = n ? pays.reduce((a, b) => a + b, 0) / n : 0;
+  const sdv = n > 1 ? Math.sqrt(pays.reduce((a, x) => a + (x - mean) ** 2, 0) / (n - 1)) : 0;
+  const test = {
+    from: list[cut].date,
+    bets: n,
+    wins,
+    staked: 2 * n,
+    returned: +pays.reduce((a, b) => a + b, 0).toFixed(1),
+    roi: n ? +(mean / 2 - 1).toFixed(4) : 0,
+    roiSE: n ? +(sdv / 2 / Math.sqrt(n)).toFixed(4) : null,
+  };
+  test.validated = n >= 100 && test.roi - 2 * test.roiSE > 0;
+  // Modèle publié : réajusté sur toute la fenêtre.
+  const L = fitCL(thin(list, OUT_MAX));
+  return Object.assign(L, { threshold: Turf.OUTSIDER_RATIO, placeDiscount: 0.7, courses: list.length, from: list[0].date, test });
 }
 
 // ------------------------------------------------------------------ mesures
@@ -626,16 +762,16 @@ const resolver = (groups, globalS) => (it) => {
 
 async function main() {
   const prev = await readJson(OUT, null);
-  if (!FORCE && prev && prev.status === 'ok' && prev.version === 4 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
+  if (!FORCE && prev && prev.status === 'ok' && prev.version === 5 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
     console.log('Calibrage récent (' + prev.updated + '), rien à faire.');
     return;
   }
   const t0 = Date.now();
-  const { items, all, days, archived, ratings, oddsSource, stats } = await buildDataset();
+  const { items, all, days, archived, ratings, oddsSource, stats, outsider } = await buildDataset();
   console.log(`${all} courses terminées dans la fenêtre d'ajustement (${items.length} utilisées) · ${days} journées lues dont ${archived} archivées`);
   console.log(`cotes utilisées : ${oddsSource.T} au moment du pari, ${oddsSource.ref} du matin, ${oddsSource.final} finales`);
   const defaults = Turf.mergeSettings({});
-  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 4, oddsSource };
+  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 5, oddsSource };
 
   // Notes Elo à jour pour la page et les alertes.
   const rt = {};
@@ -652,6 +788,17 @@ async function main() {
     JSON.stringify({ dates: stats.dates.filter((d) => d >= yearAgo), jockeys: stats.jockeys, entraineurs: stats.entraineurs, chevaux, updated: out.updated }),
   );
 
+  // Modèle Outsiders (indépendant des autres réglages).
+  const tO = Date.now();
+  out.outsider = outsiderModel(outsider);
+  outsider.length = 0;
+  if (out.outsider) {
+    const t = out.outsider.test;
+    console.log(
+      `Outsiders : modèle sur ${out.outsider.courses} courses depuis le ${out.outsider.from} (${Math.round((Date.now() - tO) / 1000)} s) · ` +
+        `contrôle depuis le ${t.from} : ${t.bets} paris, ${t.wins} gagnés, ${t.returned} € pour ${t.staked} € (${(t.roi * 100).toFixed(1)} % ± ${(t.roiSE * 200).toFixed(1)})${t.validated ? ' ✔ VALIDÉ' : ''}`,
+    );
+  }
   if (items.length < MIN_COURSES) {
     out.status = 'insufficient';
     await writeFile(OUT, JSON.stringify(out, null, 1));
@@ -754,4 +901,4 @@ async function main() {
 }
 // Lancé directement : calibrage. Importé (études) : fonctions seulement.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
-export { buildDataset, predict, evaluate, fitWeighted, fitLearned, fitMarket, fitPlaceOdds, chooseModels, resolver, backtest };
+export { outsiderModel, buildDataset, predict, evaluate, fitWeighted, fitLearned, fitMarket, fitPlaceOdds, chooseModels, resolver, backtest };
