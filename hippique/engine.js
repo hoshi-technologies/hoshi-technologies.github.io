@@ -788,6 +788,14 @@
    * sans victoire. Le modèle (logit conditionnel) est réentraîné chaque jour par le calibrage.
    */
   var OUTSIDER_RATIO = 2.5;
+  // Disciplines retenues : le trot seul est prouvé sur les deux périodes (+69 % puis +98 %,
+  // 4 372 paris) ; le galop est positif mais sur trop peu de paris pour être prouvé.
+  var OUTSIDER_DISCIPLINES = ['trot'];
+  function outsiderDiscipline(discipline, L) {
+    var list = (L && L.disciplines) || OUTSIDER_DISCIPLINES;
+    var d = String(discipline || '').toLowerCase();
+    return list.some((x) => d.indexOf(x) >= 0);
+  }
 
   /**
    * Outsiders d'une course : [{ runner, p, pPlace, pMarket, ratio, cote (matin), coteLive }],
@@ -796,6 +804,7 @@
   function outsiderPicks(race, L, opts) {
     opts = opts || {};
     if (!L || !L.beta) return [];
+    if (!opts.allDisciplines && !outsiderDiscipline(race.discipline, L)) return [];
     var prep = prepareRace(Object.assign({}, race, { runners: morningRunners(race.runners) }));
     if (!prep || !prep.market) return [];
     var pw = learnedProbs(prep, L).pWin;
@@ -1199,6 +1208,8 @@
     hoshiChoiceMorning: hoshiChoiceMorning,
     OUTSIDER_RATIO: OUTSIDER_RATIO,
     outsiderPicks: outsiderPicks,
+    OUTSIDER_DISCIPLINES: OUTSIDER_DISCIPLINES,
+    outsiderDiscipline: outsiderDiscipline,
     featureVector: featureVector,
     learnedProbs: learnedProbs,
     disciplineGroup: disciplineGroup,

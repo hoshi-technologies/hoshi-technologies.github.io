@@ -145,6 +145,7 @@ async function buildDataset() {
             outsider.push({
               date: day.date,
               fr: !reu.pays || reu.pays === 'FRA',
+              disc: c.discipline,
               n: R.length,
               np: Turf.placesPayees(R.length),
               F,
@@ -303,7 +304,7 @@ function outsiderModel(list) {
   const pays = [];
   let wins = 0;
   for (const r of list.slice(cut)) {
-    if (!r.fr) continue;
+    if (!r.fr || !Turf.outsiderDiscipline(r.disc)) continue;
     const p = clProbs(Lt, r);
     for (let i = 0; i < r.n; i++) {
       if (!(r.cm[i] > 1) || !(r.pm[i] > 0) || p[i] / r.pm[i] < Turf.OUTSIDER_RATIO) continue;
@@ -326,7 +327,7 @@ function outsiderModel(list) {
   test.validated = n >= 100 && test.roi - 2 * test.roiSE > 0;
   // Modèle publié : réajusté sur toute la fenêtre.
   const L = fitCL(thin(list, OUT_MAX));
-  return Object.assign(L, { threshold: Turf.OUTSIDER_RATIO, placeDiscount: 0.7, courses: list.length, from: list[0].date, test });
+  return Object.assign(L, { threshold: Turf.OUTSIDER_RATIO, disciplines: Turf.OUTSIDER_DISCIPLINES, placeDiscount: 0.7, courses: list.length, from: list[0].date, test });
 }
 
 // ------------------------------------------------------------------ mesures

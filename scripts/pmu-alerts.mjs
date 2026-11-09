@@ -139,11 +139,11 @@ async function selectionAndReminders(state, today, cal, stats, day) {
     if (sel.length || outs.length) {
       const lines = [];
       if (outs.length) {
-        lines.push(`🎯 Outsiders Hoshi (${OUT_STAKE} sur chacun) :`);
+        lines.push(`🎯 Outsiders Hoshi au trot (${OUT_STAKE} sur chacun) :`);
         for (const x of outs)
           for (const o of x.out)
             lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${o.runner.num} ${o.runner.nom}, cote du matin ${fr(o.cote)} (×${fr(o.ratio, 1)} ce que dit la cote)`);
-        lines.push('Gros outsiders : ils gagnent rarement (4 à 6 %), mais ont rapporté +70 à +96 % des mises sur 10 ans. Jouez-les tous, même mise, sans augmenter après une perte.');
+        lines.push('Gros outsiders au trot : ils gagnent rarement (3 à 6 %), mais ont rapporté +69 % (2017-2022) et +98 % (2023-2026) des mises. Jouez-les tous, même mise, sans augmenter après une perte.');
       }
       if (sel.length) {
         lines.push((outs.length ? '\n' : '') + '📋 Pour info, nos chevaux les plus sûrs (placé, perd ≈ 5 % à long terme) :');

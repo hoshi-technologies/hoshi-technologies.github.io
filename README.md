@@ -54,6 +54,10 @@ chevaux dont nos chances dépassent **2,5 fois** celles de la cote du matin ont 
 2023-2026 (3 065 paris). Ce sont de gros outsiders : 4 à 6 % de paris gagnants, séries de plus
 de 100 paris sans victoire, creux de 170 à 280 € pour des mises de 1 €.
 
+**Limité au trot** (attelé et monté) : seule discipline prouvée sur les deux périodes (+69 % puis
++98 %, 4 372 paris, pire série de 166 paris sans victoire) ; le galop est positif (+78 % / +77 %)
+mais sur 579 paris seulement, sans preuve statistique (`OUTSIDER_DISCIPLINES`).
+
 Le calibrage réentraîne chaque jour ce modèle (logit conditionnel, cotes du matin, 2 dernières
 années, `calibration.outsider`) et le contrôle sur la dernière année (réglé sur la première
 moitié de la fenêtre, mesuré sur la seconde ; « validé » si le rendement reste positif à deux

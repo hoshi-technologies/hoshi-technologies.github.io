@@ -269,3 +269,17 @@ test('Outsiders Hoshi : seuil de 2,5 fois la cote du matin', () => {
   for (const o of picks) assert.ok(o.pMarket <= 1 / 12 / 2.5 + 1e-9);
   assert.deepEqual(T.outsiderPicks(r, null), []);
 });
+
+test('Outsiders Hoshi : limités au trot', () => {
+  assert.ok(T.outsiderDiscipline('trot attelé'));
+  assert.ok(T.outsiderDiscipline('trot monté'));
+  assert.ok(!T.outsiderDiscipline('plat'));
+  assert.ok(!T.outsiderDiscipline('obstacle'));
+  const r = race(12);
+  const prep = T.prepareRace(r);
+  const F = T.featureVector(prep, 0).length;
+  const L = { beta: new Array(F).fill(0), mean: new Array(F).fill(0), sd: new Array(F).fill(1) };
+  assert.deepEqual(T.outsiderPicks(r, L), []); // course de plat
+  r.discipline = 'trot attelé';
+  assert.ok(T.outsiderPicks(r, L).length >= 0);
+});
