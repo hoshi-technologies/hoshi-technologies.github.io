@@ -156,6 +156,23 @@ async function selectionAndReminders(state, today, cal, stats, day) {
     } else {
       await notify('📋 Sélection du jour', `Aucune course où notre favori dépasse ${Math.round(SELECT_MIN * 100)} % de chances d'être placé.`, 'clipboard', { priority: 2 });
     }
+    if (cal && cal.outsider) (state.outAnnounced = state.outAnnounced || {})[today] = true;
+  } else if (parisHour >= 9 && cal && cal.outsider && !(state.outAnnounced && state.outAnnounced[today])) {
+    // Sélection déjà partie sans les Outsiders (modèle pas encore prêt) : annonce séparée.
+    const outs = rows.filter((x) => x.out.length).sort((x, y) => x.c.heure - y.c.heure);
+    const no = outs.reduce((a, x) => a + x.out.length, 0);
+    if (no) {
+      const lines = [`🎯 Outsiders Hoshi au trot pour la suite de la journée (${OUT_STAKE} sur chacun) :`];
+      for (const x of outs)
+        for (const o of x.out)
+          lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${o.runner.num} ${o.runner.nom}, cote du matin ${fr(o.cote)} (×${fr(o.ratio, 1)} ce que dit la cote)`);
+      lines.push('Jouez-les tous, même mise, sans augmenter après une perte. Rappel avant chaque course.');
+      console.log('OUTSIDERS\n' + lines.join('\n'));
+      await notify(`🎯 ${no} Outsider${no > 1 ? 's' : ''} Hoshi aujourd'hui`, lines.join('\n'), 'dart', { priority: 4 });
+    } else console.log('Aucun Outsider Hoshi pour la suite de la journée.');
+    state.choix = state.choix || {};
+    state.choix[today] = outs.map((x) => `R${x.reu.r}C${x.c.c}`);
+    (state.outAnnounced = state.outAnnounced || {})[today] = true;
   }
   // Rappels : 10 à 40 minutes avant chaque course où figure un Outsider Hoshi.
   for (const x of rows) {
@@ -183,6 +200,7 @@ async function selectionAndReminders(state, today, cal, stats, day) {
   }
   for (const d of Object.keys(state.selection)) if (d < parisDate(-3)) delete state.selection[d];
   for (const d of Object.keys(state.choix || {})) if (d < parisDate(-3)) delete state.choix[d];
+  for (const d of Object.keys(state.outAnnounced || {})) if (d < parisDate(-3)) delete state.outAnnounced[d];
 }
 
 /**
