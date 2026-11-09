@@ -44,7 +44,28 @@ Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PM
   navigateur, exportable) règle automatiquement les paris avec les rapports définitifs.
 
 
-### 🎯 Choix Hoshi : ne pas suivre la cote
+### 🎯 Outsiders Hoshi (méthode retenue)
+
+Étude sur tout l'historique (142 000 courses de 2017 à 2026, modèle réentraîné chaque année sur
+les deux années précédentes et testé sur l'année suivante, vrais rapports PMU) : toutes les
+méthodes perdent (favori, n°1 du modèle, « valeur », Choix Hoshi), sauf une. En France, les
+chevaux dont nos chances dépassent **2,5 fois** celles de la cote du matin ont rapporté, pour
+1 € gagnant + 1 € placé chacun, **+70 %** des mises en 2017-2022 (1 886 paris) et **+96 %** en
+2023-2026 (3 065 paris). Ce sont de gros outsiders : 4 à 6 % de paris gagnants, séries de plus
+de 100 paris sans victoire, creux de 170 à 280 € pour des mises de 1 €.
+
+Le calibrage réentraîne chaque jour ce modèle (logit conditionnel, cotes du matin, 2 dernières
+années, `calibration.outsider`) et le contrôle sur la dernière année (réglé sur la première
+moitié de la fenêtre, mesuré sur la seconde ; « validé » si le rendement reste positif à deux
+écarts-types près). `outsiderPicks` (engine.js) donne les Outsiders d'une course ; ils sont
+annoncés le matin, rappelés avant la course, figés et comptés dans le bilan.
+
+### Choix Hoshi (abandonné)
+
+Sur l'historique complet, le Choix Hoshi perd (−15 % / −12 % en gagnant, −8 % / −5 % en placé) :
+il n'est plus conseillé.
+
+#### Ancienne description
 
 Jouer le cheval le plus probable revient souvent à jouer le favori, mal payé. Le Choix Hoshi
 prend à la place le cheval dont nos chances dépassent le plus celles que lui donne la cote
@@ -60,8 +81,7 @@ Résultats instables selon la période (de −25 % à +9 % en gagnant, de −2 %
 −13 % à −19 % en jouant le favori) : aucun avantage prouvé. La stratégie est suivie par le
 calibrage quotidien (`choix_g`, `choix_p`) et ne devient « validée » que si son rendement reste
 positif à deux écarts-types près.
-Le Choix Hoshi est figé avant le départ comme le reste du pronostic et compté dans le bilan,
-annoncé dans la sélection du matin (5 au plus) et rappelé avant la course.
+Il reste figé et compté dans le bilan pour mémoire, mais n'est plus annoncé ni rappelé.
 
 ### 🎯 Quinté « valeur »
 

@@ -2753,6 +2753,7 @@
           });
           a.frozenAt = r.prono.at;
           a.frozenChoix = r.prono.choix || null;
+          a.frozenOutsiders = r.prono.outsiders || null;
         }
         var lastAdvice = null;
 
@@ -2897,80 +2898,60 @@
           };
 
           var html = '';
-          // 🎯 Choix Hoshi : le cheval que nos chances placent nettement au-dessus de sa cote.
+          // 🎯 Outsiders Hoshi : chevaux que nos chances placent au moins 2,5 fois au-dessus de la cote du matin.
           (function () {
-            if (!a.market) return;
-            var ch;
+            var outs;
             if (a.frozenAt) {
-              // Course partie : le Choix Hoshi figé au départ, jamais recalculé.
-              if (!a.frozenChoix) return;
-              ch = {};
-              ['g', 'p'].forEach(function (ty) {
-                var f = a.frozenChoix[ty];
-                var x = f && a.runners.find((y) => String(y.runner.num) === String(f.num));
-                ch[ty] = x ? { x: x, ratio: f.ratio, p: f.p, cote: f.cote, matin: !!f.matin, coteLive: f.coteLive } : null;
-              });
+              if (!a.frozenOutsiders) return; // course partie avant la mise en place des Outsiders
+              outs = a.frozenOutsiders
+                .map(function (f) {
+                  var x = a.runners.find((y) => String(y.runner.num) === String(f.num));
+                  return x ? { runner: x.runner, p: f.p, ratio: f.ratio, cote: f.cote, coteLive: f.coteLive } : null;
+                })
+                .filter(Boolean);
             } else {
-              // Décidé sur les cotes du matin, comme dans l'étude (voir T.morningRunners).
-              ch = T.hoshiChoiceMorning({ discipline: state.race.discipline, allocation: state.race.allocation, runners: state.race.runners }, effectiveSettings());
-              ['g', 'p'].forEach(function (ty) {
-                if (ch[ty]) (ch[ty].matin = ch[ty].x.runner.coteLive != null), (ch[ty].coteLive = ch[ty].x.runner.coteLive);
-              });
+              if (!calibration || !calibration.outsider) return;
+              outs = T.outsiderPicks({ discipline: state.race.discipline, allocation: state.race.allocation, runners: state.race.runners }, calibration.outsider);
             }
-            if (!ch.g && !ch.p) {
+            var fmt = function (v) {
+              return String(v).replace('.', ',');
+            };
+            if (!outs.length) {
               html +=
-                '<div class="kpi" style="margin-bottom:14px;border:1px solid var(--line)"><small>🎯 Choix Hoshi</small>' +
-                '<p style="margin:6px 0 0;font-size:14px">Pas de Choix Hoshi : aucun cheval n\'est nettement sous-estimé par la cote dans cette course.</p></div>';
+                '<div class="kpi" style="margin-bottom:14px;border:1px solid var(--line)"><small>🎯 Outsiders Hoshi</small>' +
+                '<p style="margin:6px 0 0;font-size:14px">Pas d\'Outsider Hoshi dans cette course : <b>aucun pari conseillé</b>. ' +
+                'Nos autres pronostics sont justes, mais perdent à long terme face à la commission du PMU (≈ −5 % en placé).</p></div>';
               return;
             }
-            html += '<div class="kpi" style="margin-bottom:14px;border:2px solid var(--accent)"><small>🎯 Choix Hoshi : un cheval que la cote sous-estime</small>';
-            ['g', 'p'].forEach(function (ty) {
-              var k = ch[ty];
-              if (!k) return;
-              var cNow = parseFloat(String(k.coteLive || k.cote).replace(',', '.'));
-              var o = ty === 'g' ? cNow : T.estimatePlaceOdds(cNow, a.placesPayees, coefs);
+            html += '<div class="kpi" style="margin-bottom:14px;border:2px solid var(--accent)"><small>🎯 Outsider Hoshi : à jouer 1 € gagnant + 1 € placé</small>';
+            outs.forEach(function (o) {
+              var cNow = o.coteLive || o.cote;
+              var oP = a.placesPayees ? T.estimatePlaceOdds(cNow, a.placesPayees, coefs) : null;
               html +=
                 '<div style="display:flex;align-items:center;gap:10px;margin:8px 0 4px"><span class="num-badge" style="min-width:34px;height:34px;font-size:16px">' +
-                esc(k.x.runner.num) +
+                esc(o.runner.num) +
                 '</span><b style="font-size:16px">' +
-                esc(k.x.runner.nom) +
-                '</b><span class="tag accent">' +
-                (ty === 'g' ? 'Gagnant' : 'Placé') +
-                '</span></div><div class="bday-stats"><span>' +
-                (k.matin ? 'Cote du matin' : 'Cote') +
-                ' <b>' +
-                String(k.cote).replace('.', ',') +
+                esc(o.runner.nom) +
+                '</b></div><div class="bday-stats"><span>Cote du matin <b>' +
+                fmt(o.cote) +
                 '</b>' +
-                (k.matin && k.coteLive ? ' (actuelle ' + String(k.coteLive).replace('.', ',') + ')' : '') +
-                '</span><span>Nos chances ' +
-                (ty === 'g' ? 'de gagner' : 'd\'être placé') +
-                ' <b>' +
-                Math.round(k.p * 100) +
-                ' %</b></span><span>La cote ' +
-                (k.matin ? 'du matin ' : '') +
-                'dit <b>' +
-                Math.round(((ty === 'g' ? k.p : k.x.pWin) / k.ratio) * 100) +
-                ' %</b> de gagner</span><span>×<b>' +
-                k.ratio.toFixed(1).replace('.', ',') +
-                '</b></span></div>' +
-                (o
-                  ? '<p style="margin:6px 0 0;font-size:14px">Avec ' +
-                    money(stake) +
-                    ' ' +
-                    (ty === 'g' ? 'gagnant' : 'placé') +
-                    ' : <b>' +
-                    money(stake * o) +
-                    '</b> ' +
-                    (ty === 'g' ? 's\'il gagne' : 's\'il est placé') +
-                    (ty === 'p' ? ' (rapport estimé)' : '') +
-                    '.</p>'
-                  : '');
+                (o.coteLive && o.coteLive !== o.cote ? ' (actuelle ' + fmt(o.coteLive) + ')' : '') +
+                '</span><span>Nos chances de gagner <b>' +
+                (o.p * 100).toFixed(1).replace('.', ',') +
+                ' %</b></span><span>La cote dit <b>' +
+                ((o.p / o.ratio) * 100).toFixed(1).replace('.', ',') +
+                ' %</b></span><span>×<b>' +
+                o.ratio.toFixed(1).replace('.', ',') +
+                '</b></span></div><p style="margin:6px 0 0;font-size:14px">S\'il gagne : environ <b>' +
+                money(cNow + (oP || 0)) +
+                '</b> pour 2 € misés' +
+                (oP ? ' ; seulement placé : environ <b>' + money(oP) + '</b>' : '') +
+                '.</p>';
             });
             html +=
-              '<p class="hint" style="margin:8px 0 0">Ce n\'est pas forcément le favori : c\'est le cheval à qui nous donnons nettement plus de chances que sa <b>cote du matin</b> (au moins 1,2 fois). ' +
-              'Il se décide sur la cote du matin, car c\'est là que le modèle a un temps d\'avance : face aux cotes de dernière minute, cet avantage disparaît. ' +
-              'Sur l\'historique, les résultats changent beaucoup selon la période (de −25 % à +9 % en gagnant, de −2 % à +4 % en placé) : <b>aucun avantage prouvé</b>. ' +
-              'À suivre dans le bilan ; si vous jouez, petites mises et plutôt en placé.</p></div>';
+              '<p class="hint" style="margin:8px 0 0">Gros outsider que notre modèle estime au moins 2,5 fois plus que sa cote du matin. ' +
+              'Sur 10 ans d\'historique (courses en France jamais vues par le modèle, vrais rapports PMU), 1 € gagnant + 1 € placé sur chacun a rapporté <b>+70 %</b> des mises en 2017-2022 et <b>+96 %</b> en 2023-2026. ' +
+              '<b>Attention</b> : on ne gagne que 4 à 6 % des paris, avec des séries de plus de 100 paris sans victoire. Jouez-les tous, toujours la même petite mise, sans augmenter après une perte.</p></div>';
           })();
           // Meilleur rapport chances / cote
           var cand = a.runners.filter(function (x) {
@@ -3344,11 +3325,26 @@
               ' placés</strong><br><small>1 € placé : ' +
               signedMoney(gainSel) +
               '</small></div>';
+          if (t.out) {
+            var go = t.outReturn - t.outStake;
+            html +=
+              '<div class="kpi" style="border:2px solid var(--accent)"><small>🎯 Outsiders Hoshi</small><strong style="color:' +
+              (go >= 0 ? 'var(--good)' : 'var(--bad)') +
+              '">' +
+              signedMoney(go) +
+              '</strong><br><small>' +
+              t.outWon +
+              ' gagnés, ' +
+              t.outPlaced +
+              ' placés sur ' +
+              t.out +
+              ' (1 € G + 1 € P)</small></div>';
+          }
           [['choixG', 'gagnant', 'gagnés'], ['choixP', 'placé', 'placés']].forEach(function (k) {
             if (!t[k[0]]) return;
             var g = t[k[0] + 'Return'] - t[k[0] + 'Stake'];
             html +=
-              '<div class="kpi"><small>🎯 Choix Hoshi ' +
+              '<div class="kpi"><small>Choix Hoshi (abandonné) ' +
               k[1] +
               '</small><strong>' +
               t[k[0] + 'Won'] +
@@ -3367,8 +3363,8 @@
               ' %)</small></div>';
           });
           html += '</div>';
-          if (!t.choixG && !t.choixP)
-            html += '<p class="hint" style="margin:0 0 12px">🎯 Le bilan du Choix Hoshi (chevaux que la cote sous-estime) apparaîtra dès les premières arrivées.</p>';
+          if (!t.out)
+            html += '<p class="hint" style="margin:0 0 12px">🎯 Le bilan des Outsiders Hoshi apparaîtra dès les premières arrivées. Le Choix Hoshi est abandonné : sur 10 ans d\'historique, il perdait (−12 % en gagnant, −5 % en placé).</p>';
           html += '<div class="bdays">';
           days.forEach(function (d) {
             var a = d[scope];
@@ -3399,10 +3395,21 @@
               signedMoney(g) +
               '</span>' +
               (a.selCourses ? '<span>⭐ ' + a.selPlaced + '/' + a.selCourses + '</span>' : '') +
+              (a.out
+                ? '<span style="color:' +
+                  (a.outReturn >= a.outStake ? 'var(--good)' : 'var(--bad)') +
+                  ';font-weight:600">🎯 ' +
+                  a.outWon +
+                  '/' +
+                  a.out +
+                  ' · ' +
+                  signedMoney(a.outReturn - a.outStake) +
+                  '</span>'
+                : '') +
               (a.choixG
                 ? '<span style="color:' +
                   (a.choixGReturn >= a.choixGStake ? 'var(--good)' : 'var(--bad)') +
-                  '">🎯 ' +
+                  '">Choix ' +
                   a.choixGWon +
                   '/' +
                   a.choixG +
@@ -3441,6 +3448,28 @@
                     ' %) · arrivée ' +
                     x.arrivee.map((n) => '<span class="num-badge">' + esc(n) + '</span>').join(' ') +
                     '</div>' +
+                    (x.outsiders
+                      ? '<div class="hint" style="margin-top:4px">' +
+                        x.outsiders
+                          .map(function (k) {
+                            return (
+                              '🎯 Outsider n°' +
+                              esc(k.num) +
+                              ' ' +
+                              esc(k.nom) +
+                              ' (cote ' +
+                              String(k.cote).replace('.', ',') +
+                              ') : ' +
+                              (k.g > 0
+                                ? '<span class="ok-mark">✓ gagnant ' + money(k.g + k.p) + '</span>'
+                                : k.p > 0 && k.pos < 99 && k.pos <= 3
+                                  ? '<span class="ok-mark">placé ' + money(k.p) + '</span>'
+                                  : '<span class="ko-mark">✗ ' + (k.pos < 99 ? k.pos + 'e' : 'non placé') + '</span>')
+                            );
+                          })
+                          .join(' · ') +
+                        '</div>'
+                      : '') +
                     (x.choix
                       ? '<div class="hint" style="margin-top:4px">' +
                         ['g', 'p']

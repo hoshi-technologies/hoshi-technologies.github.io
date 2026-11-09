@@ -775,6 +775,52 @@
     return hoshiChoice(a, rules);
   }
 
+  // ---------------------------------------------------------------------------
+  // Outsiders Hoshi : chevaux que le modèle estime au moins 2,5 fois plus que la cote du matin
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Étude sur 142 000 courses (2017-2026, modèle réentraîné chaque année sur les deux années
+   * précédentes, jamais testé sur des courses vues, vrais rapports PMU) : en France, les chevaux
+   * dont nos chances dépassent 2,5 fois celles de la cote du matin ont rapporté, pour 1 € gagnant
+   * + 1 € placé, +70 % des mises en 2017-2022 et +96 % en 2023-2026. Ce sont surtout de gros
+   * outsiders : on gagne rarement (4 à 6 % des paris), avec des séries de plus de 100 paris
+   * sans victoire. Le modèle (logit conditionnel) est réentraîné chaque jour par le calibrage.
+   */
+  var OUTSIDER_RATIO = 2.5;
+
+  /**
+   * Outsiders d'une course : [{ runner, p, pPlace, pMarket, ratio, cote (matin), coteLive }],
+   * à partir du modèle `L` (calibration.outsider) et des cotes de référence du matin.
+   */
+  function outsiderPicks(race, L, opts) {
+    opts = opts || {};
+    if (!L || !L.beta) return [];
+    var prep = prepareRace(Object.assign({}, race, { runners: morningRunners(race.runners) }));
+    if (!prep || !prep.market) return [];
+    var pw = learnedProbs(prep, L).pWin;
+    var np = placesPayees(prep.runners.length);
+    var pos = positionProbs(pw, L.placeDiscount || 0.7);
+    var thr = opts.ratio || L.threshold || OUTSIDER_RATIO;
+    var out = [];
+    prep.runners.forEach(function (r, i) {
+      var pm = prep.market.probs[i];
+      if (!(num(r.cote) > 1) || !(pm > 0)) return;
+      var ratio = pw[i] / pm;
+      if (ratio < thr) return;
+      out.push({
+        runner: r,
+        p: pw[i],
+        pPlace: np ? pos.pos1[i] + pos.pos2[i] + (np === 3 ? pos.pos3[i] : 0) : null,
+        pMarket: pm,
+        ratio: ratio,
+        cote: num(r.cote),
+        coteLive: num(r.coteLive) || num(r.cote),
+      });
+    });
+    return out.sort((a, b) => b.ratio - a.ratio);
+  }
+
   /**
    * Choix Hoshi d'une course analysée : { g, p }, chacun { x, ratio, p, cote } ou null.
    * `x` est l'élément de analysis.runners.
@@ -1151,6 +1197,8 @@
     hoshiChoice: hoshiChoice,
     morningRunners: morningRunners,
     hoshiChoiceMorning: hoshiChoiceMorning,
+    OUTSIDER_RATIO: OUTSIDER_RATIO,
+    outsiderPicks: outsiderPicks,
     featureVector: featureVector,
     learnedProbs: learnedProbs,
     disciplineGroup: disciplineGroup,

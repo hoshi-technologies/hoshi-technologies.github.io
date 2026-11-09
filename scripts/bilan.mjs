@@ -50,6 +50,11 @@ function emptyAgg() {
     choixPWon: 0,
     choixPStake: 0,
     choixPReturn: 0,
+    out: 0, // Outsiders Hoshi : chevaux joués (1 € gagnant + 1 € placé chacun)
+    outWon: 0,
+    outPlaced: 0,
+    outStake: 0,
+    outReturn: 0,
   };
 }
 function add(a, b) {
@@ -109,6 +114,21 @@ function scoreCourse(reu, c) {
       const pt = c.partants.find((p) => String(p.num) === String(k.num)) || {};
       chDetail[ty] = { num: k.num, nom: pt.nom || '', cote: k.cote, p: k.p, ratio: k.ratio, pos: posOf({ num: k.num }), rapport: pay };
     }
+  // Outsiders Hoshi figés : 1 € gagnant + 1 € placé chacun, aux vrais rapports.
+  const outDetail = [];
+  if (c.rapports)
+    for (const k of c.prono.outsiders || []) {
+      if (np.has(String(k.num))) continue;
+      const g = rg[String(k.num)] || 0;
+      const pl = c.prono.placesPayees ? rp[String(k.num)] || 0 : 1; // pas de placé : mise remboursée
+      o.out++;
+      o.outWon += g > 0 ? 1 : 0;
+      o.outPlaced += c.prono.placesPayees && rp[String(k.num)] > 0 ? 1 : 0;
+      o.outStake += 2;
+      o.outReturn += g + pl;
+      const pt = c.partants.find((p) => String(p.num) === String(k.num)) || {};
+      outDetail.push({ num: k.num, nom: pt.nom || '', cote: k.cote, ratio: k.ratio, pos: posOf({ num: k.num }), g, p: pl });
+    }
   const partant = c.partants.find((p) => String(p.num) === String(top.num)) || {};
   return {
     agg: o,
@@ -129,6 +149,7 @@ function scoreCourse(reu, c) {
       podium: o.podium,
       selected: !!c.prono.selected,
       choix: Object.keys(chDetail).length ? chDetail : undefined,
+      outsiders: outDetail.length ? outDetail : undefined,
     },
   };
 }
