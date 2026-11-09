@@ -2917,9 +2917,12 @@
               return String(v).replace('.', ',');
             };
             if (!outs.length) {
+              var trot = T.outsiderDiscipline(state.race.discipline, calibration && calibration.outsider);
               html +=
                 '<div class="kpi" style="margin-bottom:14px;border:1px solid var(--line)"><small>🎯 Outsiders Hoshi</small>' +
-                '<p style="margin:6px 0 0;font-size:14px">Pas d\'Outsider Hoshi dans cette course : <b>aucun pari conseillé</b>. ' +
+                '<p style="margin:6px 0 0;font-size:14px">' +
+                (trot ? 'Pas d\'Outsider Hoshi dans cette course' : 'Course de galop : les Outsiders sont limités au trot, seule discipline où la méthode est prouvée') +
+                ' : <b>aucun pari conseillé</b>. ' +
                 'Nos autres pronostics sont justes, mais perdent à long terme face à la commission du PMU (≈ −5 % en placé).</p></div>';
               return;
             }
@@ -2949,9 +2952,9 @@
                 '.</p>';
             });
             html +=
-              '<p class="hint" style="margin:8px 0 0">Gros outsider que notre modèle estime au moins 2,5 fois plus que sa cote du matin. ' +
-              'Sur 10 ans d\'historique (courses en France jamais vues par le modèle, vrais rapports PMU), 1 € gagnant + 1 € placé sur chacun a rapporté <b>+70 %</b> des mises en 2017-2022 et <b>+96 %</b> en 2023-2026. ' +
-              '<b>Attention</b> : on ne gagne que 4 à 6 % des paris, avec des séries de plus de 100 paris sans victoire. Jouez-les tous, toujours la même petite mise, sans augmenter après une perte.</p></div>';
+              '<p class="hint" style="margin:8px 0 0">Gros outsider au trot que notre modèle estime au moins 2,5 fois plus que sa cote du matin. ' +
+              'Sur 10 ans d\'historique (trot en France, courses jamais vues par le modèle, vrais rapports PMU), 1 € gagnant + 1 € placé sur chacun a rapporté <b>+69 %</b> des mises en 2017-2022 et <b>+98 %</b> en 2023-2026. ' +
+              '<b>Attention</b> : on ne gagne que 3 à 6 % des paris, avec des séries de plus de 100 paris sans victoire. Jouez-les tous, toujours la même petite mise, sans augmenter après une perte.</p></div>';
           })();
           // Meilleur rapport chances / cote
           var cand = a.runners.filter(function (x) {
