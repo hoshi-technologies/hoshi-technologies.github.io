@@ -71,6 +71,10 @@ jobs:
           MESSAGE: ${{ inputs.notify_message }}
           CLICK: ${{ inputs.notify_click }}
         run: |
+          if [ "$MESSAGE" = "__history__" ]; then
+            curl -s "https://ntfy.sh/$NTFY_TOPIC/json?poll=1&since=all" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>d.split("\n").filter(Boolean).forEach(l=>{const m=JSON.parse(l);console.log(new Date(m.time*1000).toISOString(),"|",m.title,"|",(m.message||"").slice(0,300).replace(/\n/g," / "))}))'
+            exit 0
+          fi
           node -e '
             const b = { topic: process.env.NTFY_TOPIC, title: process.env.TITLE || "Hoshi Turf", message: process.env.MESSAGE, tags: ["memo"], priority: 3 };
             if (process.env.CLICK) b.click = process.env.CLICK;
