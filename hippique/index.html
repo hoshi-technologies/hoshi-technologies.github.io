@@ -2898,7 +2898,7 @@
           };
 
           var html = '';
-          // 🎯 Outsiders Hoshi : chevaux que nos chances placent au moins 2,5 fois au-dessus de la cote du matin.
+          // 🎯 Outsiders Hoshi : chevaux que nos chances placent au moins 2,5 fois au-dessus de la cote de référence du PMU.
           (function () {
             var outs;
             if (a.frozenAt) {
@@ -2926,7 +2926,17 @@
                 'Nos autres pronostics sont justes, mais perdent à long terme face à la commission du PMU (≈ −5 % en placé).</p></div>';
               return;
             }
-            html += '<div class="kpi" style="margin-bottom:14px;border:2px solid var(--accent)"><small>🎯 Outsider Hoshi : à jouer 1 € gagnant + 1 € placé</small>';
+            var minsLeft = state.race.heure ? (state.race.heure - Date.now()) / 60000 : 0;
+            var provisoire = !a.frozenAt && minsLeft > 22;
+            html +=
+              '<div class="kpi" style="margin-bottom:14px;border:2px ' +
+              (provisoire ? 'dashed' : 'solid') +
+              ' var(--accent)"><small>🎯 Outsider Hoshi : ' +
+              (provisoire ? '<b>provisoire</b>' : 'à jouer') +
+              ' 1 € gagnant + 1 € placé</small>' +
+              (provisoire
+                ? '<p class="hint" style="margin:4px 0 0">La décision se prend 20 minutes avant le départ, quand le PMU fixe sa cote de référence définitive : ce cheval peut encore sortir de la liste (ou un autre y entrer). Une notification vous prévient à ce moment-là.</p>'
+                : '');
             outs.forEach(function (o) {
               var cNow = o.coteLive || o.cote;
               var oP = a.placesPayees ? T.estimatePlaceOdds(cNow, a.placesPayees, coefs) : null;
@@ -2935,7 +2945,7 @@
                 esc(o.runner.num) +
                 '</span><b style="font-size:16px">' +
                 esc(o.runner.nom) +
-                '</b></div><div class="bday-stats"><span>Cote du matin <b>' +
+                '</b></div><div class="bday-stats"><span>Cote de référence <b>' +
                 fmt(o.cote) +
                 '</b>' +
                 (o.coteLive && o.coteLive !== o.cote ? ' (actuelle ' + fmt(o.coteLive) + ')' : '') +
@@ -2952,7 +2962,7 @@
                 '.</p>';
             });
             html +=
-              '<p class="hint" style="margin:8px 0 0">Gros outsider au trot que notre modèle estime au moins 2,5 fois plus que sa cote du matin. ' +
+              '<p class="hint" style="margin:8px 0 0">Gros outsider au trot que notre modèle estime au moins 2,5 fois plus que sa cote de référence (fixée par le PMU ≈ 25 min avant le départ). ' +
               'Sur 10 ans d\'historique (trot en France, courses jamais vues par le modèle, vrais rapports PMU), 1 € gagnant + 1 € placé sur chacun a rapporté <b>+69 %</b> des mises en 2017-2022 et <b>+98 %</b> en 2023-2026. ' +
               '<b>Attention</b> : on ne gagne que 3 à 6 % des paris, avec des séries de plus de 100 paris sans victoire. Jouez-les tous, toujours la même petite mise, sans augmenter après une perte.</p></div>';
           })();
