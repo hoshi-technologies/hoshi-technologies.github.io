@@ -97,7 +97,7 @@ function choice(c, cal, stats, today) {
   return Turf.hoshiChoiceMorning({ discipline: c.discipline, allocation: c.allocation, runners: enrich(c.partants, stats, today) }, settings);
 }
 const live = (k) => Number(k.x.runner.coteLive || k.cote);
-/** Outsiders Hoshi d'une course (cote du matin, modèle du calibrage). */
+/** Outsiders Hoshi d'une course (cote de référence du PMU, modèle du calibrage). */
 function outsiders(c, cal, stats, today) {
   const L = cal && cal.outsider;
   if (!L) return [];
@@ -137,55 +137,34 @@ async function selectionAndReminders(state, today, cal, stats, day) {
     state.choix = state.choix || {};
     state.choix[today] = outs.map((x) => `R${x.reu.r}C${x.c.c}`);
     if (sel.length || outs.length) {
-      const lines = [];
-      if (outs.length) {
-        lines.push(`🎯 Outsiders Hoshi au trot (${OUT_STAKE} sur chacun) :`);
-        for (const x of outs)
-          for (const o of x.out)
-            lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${o.runner.num} ${o.runner.nom}, cote du matin ${fr(o.cote)} (×${fr(o.ratio, 1)} ce que dit la cote)`);
-        lines.push('Gros outsiders au trot : ils gagnent rarement (3 à 6 %), mais ont rapporté +69 % (2017-2022) et +98 % (2023-2026) des mises. Jouez-les tous, même mise, sans augmenter après une perte.');
-      }
+      const lines = [
+        '🎯 Les Outsiders Hoshi (trot) se décident 20 minutes avant chaque course, quand le PMU fixe sa cote de référence définitive : vous recevrez une notification « à jouer maintenant » à ce moment-là, et seulement là.',
+      ];
       if (sel.length) {
-        lines.push((outs.length ? '\n' : '') + '📋 Pour info, nos chevaux les plus sûrs (placé, perd ≈ 5 % à long terme) :');
+        lines.push('\n📋 Pour info, nos chevaux les plus sûrs (placé, perd ≈ 5 % à long terme, pas un conseil de jeu) :');
         for (const x of sel) lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${x.top.runner.num} ${x.top.runner.nom} (${Math.round(x.p * 100)} % placé)`);
       }
-      const msg = lines.join('\n') + '\nRappel avant chaque course des Outsiders.';
+      const msg = lines.join('\n');
       console.log('SÉLECTION\n' + msg);
-      const no = outs.reduce((a, x) => a + x.out.length, 0);
-      await notify(no ? `🎯 ${no} Outsider${no > 1 ? 's' : ''} Hoshi aujourd'hui` : '📋 Sélection du jour', msg, 'clipboard', { priority: 3 });
+      await notify('📋 Hoshi Turf : programme du jour', msg, 'clipboard', { priority: 2 });
     } else {
       await notify('📋 Sélection du jour', `Aucune course où notre favori dépasse ${Math.round(SELECT_MIN * 100)} % de chances d'être placé.`, 'clipboard', { priority: 2 });
     }
-    if (cal && cal.outsider) (state.outAnnounced = state.outAnnounced || {})[today] = true;
-  } else if (parisHour >= 9 && cal && cal.outsider && !(state.outAnnounced && state.outAnnounced[today])) {
-    // Sélection déjà partie sans les Outsiders (modèle pas encore prêt) : annonce séparée.
-    const outs = rows.filter((x) => x.out.length).sort((x, y) => x.c.heure - y.c.heure);
-    const no = outs.reduce((a, x) => a + x.out.length, 0);
-    if (no) {
-      const lines = [`🎯 Outsiders Hoshi au trot pour la suite de la journée (${OUT_STAKE} sur chacun) :`];
-      for (const x of outs)
-        for (const o of x.out)
-          lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${o.runner.num} ${o.runner.nom}, cote du matin ${fr(o.cote)} (×${fr(o.ratio, 1)} ce que dit la cote)`);
-      lines.push('Jouez-les tous, même mise, sans augmenter après une perte. Rappel avant chaque course.');
-      console.log('OUTSIDERS\n' + lines.join('\n'));
-      await notify(`🎯 ${no} Outsider${no > 1 ? 's' : ''} Hoshi aujourd'hui`, lines.join('\n'), 'dart', { priority: 4 });
-    } else console.log('Aucun Outsider Hoshi pour la suite de la journée.');
-    state.choix = state.choix || {};
-    state.choix[today] = outs.map((x) => `R${x.reu.r}C${x.c.c}`);
-    (state.outAnnounced = state.outAnnounced || {})[today] = true;
   }
-  // Rappels : 10 à 40 minutes avant chaque course où figure un Outsider Hoshi.
+  // « À jouer maintenant » : 5 à 18 minutes avant chaque course où figure un Outsider Hoshi, avec
+  // la cote de référence définitive (le PMU la fixe ≈ 25 min avant le départ ; c'est elle que
+  // contient l'historique sur lequel la méthode a été mesurée).
   for (const x of rows) {
     const mins = (x.c.heure - now) / 60000;
-    if (mins < 10 || mins > 40) continue;
+    if (mins < 5 || mins > 18) continue;
     const id = `R${x.reu.r}C${x.c.c}`;
     const key = `${today}-${id}-rappel`;
     if (state.sent[key]) continue;
-    // Rappels : seulement les courses avec un Outsider Hoshi (les autres conseils perdent à long terme).
+    // Seulement les courses avec un Outsider Hoshi (les autres conseils perdent à long terme).
     if (!x.out.length) continue;
     const t = x.top.runner;
     let msg = x.out
-      .map((o) => `🎯 Outsider : n°${o.runner.num} ${o.runner.nom} — ${OUT_STAKE}. Cote du matin ${fr(o.cote)}, actuelle ${fr(o.coteLive)}.`)
+      .map((o) => `🎯 À jouer maintenant : n°${o.runner.num} ${o.runner.nom} — ${OUT_STAKE}. Cote ${fr(o.coteLive)} (référence ${fr(o.cote)}).`)
       .join('\n');
     msg += `\nPour info, le plus sûr : n°${t.num} ${t.nom} (${Math.round(x.p * 100)} % placé)`;
     if (t.cote) {
@@ -240,7 +219,7 @@ async function freezePronos(day, cal, stats, today, state) {
         p: fz(ch.p),
         announced: ((state && state.choix && state.choix[today]) || []).includes(`R${reu.r}C${c.c}`),
       };
-      // Outsiders Hoshi (cote du matin), figés eux aussi.
+      // Outsiders Hoshi (cote de référence au départ), figés eux aussi.
       if (!ALL_COUNTRIES && reu.pays && reu.pays !== 'FRA') c.prono.outsiders = [];
       else
         c.prono.outsiders = outsiders(c, cal, stats, today).map((o) => ({

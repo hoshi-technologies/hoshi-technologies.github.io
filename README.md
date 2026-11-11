@@ -61,8 +61,13 @@ mais sur 579 paris seulement, sans preuve statistique (`OUTSIDER_DISCIPLINES`).
 Le calibrage réentraîne chaque jour ce modèle (logit conditionnel, cotes du matin, 2 dernières
 années, `calibration.outsider`) et le contrôle sur la dernière année (réglé sur la première
 moitié de la fenêtre, mesuré sur la seconde ; « validé » si le rendement reste positif à deux
-écarts-types près). `outsiderPicks` (engine.js) donne les Outsiders d'une course ; ils sont
-annoncés le matin, rappelés avant la course, figés et comptés dans le bilan.
+écarts-types près). `outsiderPicks` (engine.js) donne les Outsiders d'une course.
+
+**Quand décider :** la cote de référence du PMU change au fil de la journée et n'est fixée
+définitivement qu'environ 25 minutes avant le départ (exemple suivi le 10/11 : 14 à 9 h, 6,7 à
+midi, 10 à 23 min du départ). C'est cette dernière valeur que contient l'historique de l'étude :
+les Outsiders sont donc décidés et notifiés 5 à 18 minutes avant le départ (« à jouer
+maintenant »), jamais le matin, puis figés et comptés dans le bilan.
 
 ### Choix Hoshi (abandonné)
 
