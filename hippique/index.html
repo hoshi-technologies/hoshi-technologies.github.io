@@ -3331,7 +3331,7 @@
             ')</small></div>';
           if (t.selCourses)
             html +=
-              '<div class="kpi"><small>Sélection ⭐</small><strong>' +
+              '<div class="kpi"><small>🛡️ Placé sûr (sélection)</small><strong>' +
               t.selPlaced +
               ' / ' +
               t.selCourses +
@@ -5185,6 +5185,13 @@
           var out = $('out');
           var a = T.analyzeRace(race, effectiveSettings());
           applyFrozen(a);
+          // Chances d'être placé affichées : corrigées pour être réalistes (le modèle est un peu trop
+          // sûr de lui pour ses meilleurs chevaux : annoncé 90 % → observé ≈ 80 %).
+          if (a && !a.error && calibration && calibration.reliability)
+            a.runners.forEach(function (x) {
+              if (x.pPlace != null) (x.pPlaceRaw = x.pPlace), (x.pPlace = T.realPlace(x.pPlace, calibration));
+              if (x.pTop3 != null && a.placesPayees !== 2) x.pTop3 = T.realPlace(x.pTop3, calibration);
+            });
           lastAnalysis = a;
           renderAdvisor();
           renderSimple();

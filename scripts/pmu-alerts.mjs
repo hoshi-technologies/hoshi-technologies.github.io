@@ -30,8 +30,8 @@ const OUT = path.join(DATA, 'alerts.json');
 const PAGE = 'https://hoshi-technologies.github.io/hippique/';
 const TOPIC = (process.env.NTFY_TOPIC || '').trim();
 const WINDOW_MIN = Number(process.env.ALERT_WINDOW_MIN) || 45; // courses qui partent dans les 45 minutes
-const SELECT_MIN = Number(process.env.SELECT_MIN) || 0.6; // chances de placé minimum pour la sélection
-const SELECT_MAX = Number(process.env.SELECT_MAX) || 10; // courses maximum dans la sélection
+const SELECT_MIN = Number(process.env.SELECT_MIN) || 0.66; // chances RÉELLES de placé minimum (« Placé sûr »)
+const SELECT_MAX = Number(process.env.SELECT_MAX) || 5; // courses maximum dans la sélection
 const VALUE_MIN = 1.05;
 const CHOICE_MAX = Number(process.env.CHOICE_MAX) || 5; // Choix Hoshi annoncés le matin // « cote intéressante » (indicatif)
 const ALL_COUNTRIES = process.env.ALERT_ALL_COUNTRIES === '1';
@@ -120,7 +120,7 @@ async function selectionAndReminders(state, today, cal, stats, day) {
       const a = analyze(c, cal, stats, today);
       if (a.error) continue;
       const top = a.runners.slice().sort((x, y) => pp(y) - pp(x))[0];
-      rows.push({ reu, c, a, top, p: pp(top), ch: choice(c, cal, stats, today), out: outsiders(c, cal, stats, today) });
+      rows.push({ reu, c, a, top, p: Turf.realPlace(pp(top), cal), ch: choice(c, cal, stats, today), out: outsiders(c, cal, stats, today) });
     }
   }
   // Sélection : courses où notre favori a au moins SELECT_MIN de chances d'être placé.
@@ -141,14 +141,14 @@ async function selectionAndReminders(state, today, cal, stats, day) {
         '🎯 Les Outsiders Hoshi (trot) se décident 20 minutes avant chaque course, quand le PMU fixe sa cote de référence définitive : vous recevrez une notification « à jouer maintenant » à ce moment-là, et seulement là.',
       ];
       if (sel.length) {
-        lines.push('\n📋 Pour info, nos chevaux les plus sûrs (placé, perd ≈ 5 % à long terme, pas un conseil de jeu) :');
-        for (const x of sel) lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${x.top.runner.num} ${x.top.runner.nom} (${Math.round(x.p * 100)} % placé)`);
+        lines.push('\n🛡️ Placé sûr : nos chevaux les plus sûrs du jour (passent ≈ 2 fois sur 3 à 3 fois sur 4, rapportent ≈ 1,30 à 1,40 € pour 1 €, mais perdent ≈ 3 % à long terme : rien n\'est « quasiment sûr » aux courses) :');
+        for (const x of sel) lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${x.top.runner.num} ${x.top.runner.nom} (${Math.round(x.p * 100)} % de chances réelles)`);
       }
       const msg = lines.join('\n');
       console.log('SÉLECTION\n' + msg);
       await notify('📋 Hoshi Turf : programme du jour', msg, 'clipboard', { priority: 2 });
     } else {
-      await notify('📋 Sélection du jour', `Aucune course où notre favori dépasse ${Math.round(SELECT_MIN * 100)} % de chances d'être placé.`, 'clipboard', { priority: 2 });
+      await notify('📋 Hoshi Turf : programme du jour', `Pas de Placé sûr aujourd'hui (aucun cheval à ${Math.round(SELECT_MIN * 100)} % de chances réelles). Les Outsiders sont notifiés 20 min avant chaque course.`, 'clipboard', { priority: 2 });
     }
   }
   // « À jouer maintenant » : 5 à 18 minutes avant chaque course où figure un Outsider Hoshi, avec
@@ -164,9 +164,9 @@ async function selectionAndReminders(state, today, cal, stats, day) {
     if (!x.out.length) continue;
     const t = x.top.runner;
     let msg = x.out
-      .map((o) => `🎯 À jouer maintenant : n°${o.runner.num} ${o.runner.nom} — ${OUT_STAKE}. Cote ${fr(o.coteLive)} (référence ${fr(o.cote)}).`)
+      .map((o) => `🎯 À jouer maintenant : n°${o.runner.num} ${o.runner.nom} — ${OUT_STAKE} (ou 1 € placé seul, plus régulier). Cote ${fr(o.coteLive)} (référence ${fr(o.cote)}).`)
       .join('\n');
-    msg += `\nPour info, le plus sûr : n°${t.num} ${t.nom} (${Math.round(x.p * 100)} % placé)`;
+    msg += `\nPour info, le plus sûr : n°${t.num} ${t.nom} (${Math.round(x.p * 100)} % de chances réelles d'être placé)`;
     if (t.cote) {
       const est = Turf.estimatePlaceOdds(t.cote, x.a.placesPayees, cal && cal.placeOdds);
       msg += `, cote ${fr(Number(t.cote))}` + (est ? ` (placé estimé ${fr(est, 2)} €)` : '');

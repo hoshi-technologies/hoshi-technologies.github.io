@@ -69,6 +69,15 @@ midi, 10 à 23 min du départ). C'est cette dernière valeur que contient l'hist
 les Outsiders sont donc décidés et notifiés 5 à 18 minutes avant le départ (« à jouer
 maintenant »), jamais le matin, puis figés et comptés dans le bilan.
 
+### 🛡️ Placé sûr
+
+Le plus sûr possible en placé, d'après 100 000 paris (France, 2017-2026) : les chevaux annoncés
+à 90 % ne passent en réalité que 80 % du temps (rapport moyen 1,20 €), ceux à 80 % passent 75 %
+du temps (1,30 €) ; à long terme, tous perdent 2 à 4 %. Les chances affichées sont désormais
+corrigées par la table de fiabilité du calibrage (`realPlace`) ; la sélection « Placé sûr » du
+matin prend les chevaux à au moins 66 % de chances réelles (5 au plus), sans les présenter comme
+rentables.
+
 ### Choix Hoshi (abandonné)
 
 Sur l'historique complet, le Choix Hoshi perd (−15 % / −12 % en gagnant, −8 % / −5 % en placé) :

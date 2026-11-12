@@ -283,3 +283,14 @@ test('Outsiders Hoshi : limités au trot', () => {
   r.discipline = 'trot attelé';
   assert.ok(T.outsiderPicks(r, L).length >= 0);
 });
+
+test('chances réelles de placé : correction de la confiance excessive', () => {
+  const cal = { reliability: [
+    { n: 500, predicted: 0.15, observed: 0.15 }, { n: 500, predicted: 0.45, observed: 0.46 },
+    { n: 500, predicted: 0.74, observed: 0.68 }, { n: 450, predicted: 0.84, observed: 0.73 }, { n: 180, predicted: 0.94, observed: 0.84 } ] };
+  close(T.realPlace(0.84, cal), 0.73, 1e-9);
+  assert.ok(T.realPlace(0.9, cal) < 0.85 && T.realPlace(0.9, cal) > 0.75);
+  assert.ok(T.realPlace(0.3, cal) > 0.25 && T.realPlace(0.3, cal) < 0.35);
+  assert.equal(T.realPlace(0.5, null), 0.5);
+  for (let p = 0; p <= 1; p += 0.05) assert.ok(T.realPlace(p, cal) <= T.realPlace(Math.min(1, p + 0.05), cal) + 1e-12);
+});

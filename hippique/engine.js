@@ -696,6 +696,27 @@
     return ok[0] || null;
   }
 
+  /**
+   * Chances « réelles » d'être placé : le modèle est un peu trop sûr de lui pour ses meilleurs
+   * chevaux (annoncé 84 % → observé 73 %, annoncé 94 % → observé 84 % sur les courses de
+   * contrôle). On corrige par interpolation sur la table de fiabilité du calibrage.
+   */
+  function realPlace(p, calibration) {
+    var rel = calibration && calibration.reliability;
+    if (p == null || !rel) return p;
+    var pts = rel.filter((b) => b.n >= 50 && b.predicted != null && b.observed != null).map((b) => [b.predicted, b.observed]);
+    if (pts.length < 3) return p;
+    pts.unshift([0, 0]);
+    pts.push([1, Math.max(pts[pts.length - 1][1], Math.min(1, pts[pts.length - 1][1] + (1 - pts[pts.length - 1][0]) * 0.8))]);
+    for (var k = 1; k < pts.length; k++)
+      if (p <= pts[k][0]) {
+        var a = pts[k - 1],
+          b = pts[k];
+        return clamp(a[1] + ((b[1] - a[1]) * (p - a[0])) / Math.max(1e-9, b[0] - a[0]), 0, 1);
+      }
+    return pts[pts.length - 1][1];
+  }
+
   /** Paris « valeur » d'une course analysée : probabilité × cote ≥ seuil. */
   function valueBets(analysis, calibration, opts) {
     opts = opts || {};
@@ -1201,6 +1222,7 @@
     QUINTE_PAYOUTS: QUINTE_PAYOUTS,
     validatedStrategy: validatedStrategy,
     valueBets: valueBets,
+    realPlace: realPlace,
     CHOICE_RULES: CHOICE_RULES,
     choiceIndex: choiceIndex,
     hoshiChoice: hoshiChoice,
