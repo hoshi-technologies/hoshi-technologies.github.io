@@ -2901,6 +2901,14 @@
           // 🎯 Outsiders Hoshi : chevaux que nos chances placent au moins 2,5 fois au-dessus de la cote de référence du PMU.
           (function () {
             var outs;
+            if (!T.OUTSIDER_ENABLED) {
+              html +=
+                '<div class="kpi" style="margin-bottom:14px;border:1px solid var(--line)"><small>ℹ️ Aucun pari rentable</small>' +
+                '<p style="margin:6px 0 0;font-size:14px">Vérifiées sur 100 000 courses aux données complètes (2017-2026), <b>toutes nos méthodes perdent à long terme</b> à cause de la commission du PMU : ' +
+                'placé sur le favori ≈ −9 %, placé sur nos chevaux les plus sûrs ≈ −5 %, gagnant ≈ −14 %. Les « Outsiders » ont été retirés : leur avantage venait d\'un défaut des données historiques. ' +
+                'Nos pourcentages restent justes et utiles pour comprendre une course, mais aucun pari n\'est conseillé.</p></div>';
+              return;
+            }
             if (a.frozenAt) {
               if (!a.frozenOutsiders) return; // course partie avant la mise en place des Outsiders
               outs = a.frozenOutsiders

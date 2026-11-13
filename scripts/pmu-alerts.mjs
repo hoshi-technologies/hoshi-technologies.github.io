@@ -138,17 +138,17 @@ async function selectionAndReminders(state, today, cal, stats, day) {
     state.choix[today] = outs.map((x) => `R${x.reu.r}C${x.c.c}`);
     if (sel.length || outs.length) {
       const lines = [
-        '🎯 Les Outsiders Hoshi (trot) se décident 20 minutes avant chaque course, quand le PMU fixe sa cote de référence définitive : vous recevrez une notification « à jouer maintenant » à ce moment-là, et seulement là.',
+        'ℹ️ Aucun pari rentable : vérifiées sur 100 000 courses aux données complètes, toutes les méthodes perdent à long terme (commission du PMU). Les chevaux ci-dessous sont les plus sûrs, pas des paris gagnants.',
       ];
       if (sel.length) {
-        lines.push('\n🛡️ Placé sûr : nos chevaux les plus sûrs du jour (passent ≈ 2 fois sur 3 à 3 fois sur 4, rapportent ≈ 1,30 à 1,40 € pour 1 €, mais perdent ≈ 3 % à long terme : rien n\'est « quasiment sûr » aux courses) :');
+        lines.push('\n🛡️ Placé sûr : passent ≈ 2 fois sur 3, rapportent ≈ 1,30 € pour 1 €, perdent ≈ 5 % à long terme :');
         for (const x of sel) lines.push(`${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — n°${x.top.runner.num} ${x.top.runner.nom} (${Math.round(x.p * 100)} % de chances réelles)`);
       }
       const msg = lines.join('\n');
       console.log('SÉLECTION\n' + msg);
       await notify('📋 Hoshi Turf : programme du jour', msg, 'clipboard', { priority: 2 });
     } else {
-      await notify('📋 Hoshi Turf : programme du jour', `Pas de Placé sûr aujourd'hui (aucun cheval à ${Math.round(SELECT_MIN * 100)} % de chances réelles). Les Outsiders sont notifiés 20 min avant chaque course.`, 'clipboard', { priority: 2 });
+      await notify('📋 Hoshi Turf : programme du jour', `Pas de Placé sûr aujourd'hui (aucun cheval à ${Math.round(SELECT_MIN * 100)} % de chances réelles). Rappel : aucun pari rentable n'a été trouvé.`, 'clipboard', { priority: 2 });
     }
   }
   // « À jouer maintenant » : 5 à 18 minutes avant chaque course où figure un Outsider Hoshi, avec

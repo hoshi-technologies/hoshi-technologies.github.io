@@ -44,7 +44,20 @@ Pour lancer la tâche à la main : onglet *Actions* du dépôt → *Programme PM
   navigateur, exportable) règle automatiquement les paris avec les rapports définitifs.
 
 
-### 🎯 Outsiders Hoshi (méthode retenue)
+### ⚠️ Bilan honnête (13/11/2026)
+
+Vérifiées sur 100 000 courses françaises **aux données complètes** (tous les partants avec leur
+cote de référence archivée), toutes les méthodes perdent à long terme : gagnant sur le favori
+−14 %, placé sur le favori −9,5 %, placé sur le n°1 du modèle −9,6 %, « Placé sûr » (n°1 à 80 %
+et plus) −4,5 à −5 %, meilleure règle « valeur » en placé −5 %. Le modèle est bien calibré et
+prévoit un peu mieux que les cotes du matin, mais pas assez pour battre la commission du PMU.
+
+**Les Outsiders sont retirés** (`OUTSIDER_ENABLED = false`) : 9 sur 10 des chevaux retenus par
+l'étude n'avaient pas de cote de référence dans l'historique, et l'étude avait alors utilisé leur
+cote finale. Sur les courses aux données complètes, la règle perd (−53 % puis −26 %). Leçon : toute
+étude doit écarter les courses où une cote manque.
+
+### Outsiders Hoshi (retirés, description d'origine)
 
 Étude sur tout l'historique (142 000 courses de 2017 à 2026, modèle réentraîné chaque année sur
 les deux années précédentes et testé sur l'année suivante, vrais rapports PMU) : toutes les
