@@ -789,9 +789,9 @@ async function main() {
     JSON.stringify({ dates: stats.dates.filter((d) => d >= yearAgo), jockeys: stats.jockeys, entraineurs: stats.entraineurs, chevaux, updated: out.updated }),
   );
 
-  // Modèle Outsiders (indépendant des autres réglages).
+  // Modèle Outsiders : retiré (avantage dû à un défaut des données, voir engine.js). Plus calculé.
   const tO = Date.now();
-  out.outsider = outsiderModel(outsider);
+  out.outsider = Turf.OUTSIDER_ENABLED ? outsiderModel(outsider) : null;
   outsider.length = 0;
   if (out.outsider) {
     const t = out.outsider.test;

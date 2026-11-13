@@ -809,6 +809,11 @@
    * sans victoire. Le modèle (logit conditionnel) est réentraîné chaque jour par le calibrage.
    */
   var OUTSIDER_RATIO = 2.5;
+  // RETIRÉ le 13/11/2026 : l'avantage mesuré venait d'un défaut des données historiques. 9 Outsiders
+  // sur 10 de l'étude étaient des chevaux SANS cote de référence archivée (leur cote finale avait été
+  // utilisée à la place, ce qui fausse la comparaison). Sur les courses aux données complètes
+  // (100 000 courses), la méthode perd : −53 % en 2017-2022, −26 % en 2023-2026.
+  var OUTSIDER_ENABLED = false;
   // Disciplines retenues : le trot seul est prouvé sur les deux périodes (+69 % puis +98 %,
   // 4 372 paris) ; le galop est positif mais sur trop peu de paris pour être prouvé.
   var OUTSIDER_DISCIPLINES = ['trot'];
@@ -825,6 +830,7 @@
   function outsiderPicks(race, L, opts) {
     opts = opts || {};
     if (!L || !L.beta) return [];
+    if (!OUTSIDER_ENABLED && !opts.force) return [];
     if (!opts.allDisciplines && !outsiderDiscipline(race.discipline, L)) return [];
     var prep = prepareRace(Object.assign({}, race, { runners: morningRunners(race.runners) }));
     if (!prep || !prep.market) return [];
@@ -1229,6 +1235,7 @@
     morningRunners: morningRunners,
     hoshiChoiceMorning: hoshiChoiceMorning,
     OUTSIDER_RATIO: OUTSIDER_RATIO,
+    OUTSIDER_ENABLED: OUTSIDER_ENABLED,
     outsiderPicks: outsiderPicks,
     OUTSIDER_DISCIPLINES: OUTSIDER_DISCIPLINES,
     outsiderDiscipline: outsiderDiscipline,
