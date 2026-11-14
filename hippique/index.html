@@ -1124,7 +1124,7 @@
           <button id="btnProgRefresh" class="ghost">Actualiser</button>
         </div>
         <div class="chips" id="progMode" style="margin-top: 12px">
-          <button class="chip" data-mode="jouer">⭐ À jouer</button>
+          <button class="chip" data-mode="jouer">⭐ Les plus sûrs</button>
           <button class="chip" data-mode="toutes">Toutes les courses</button>
         </div>
         <div id="progList" class="reus" style="margin-top: 4px"></div>
@@ -1877,9 +1877,11 @@
                   return x.pPlace != null ? x.pPlace : x.pTop3;
                 };
                 var top = a.runners.slice().sort((x, y) => pp(y) - pp(x))[0];
-                var val = T.valueBets(a, calibration, { minEdge: store.oppValue })[0] || null;
+                // Les « cotes intéressantes » (valeur selon le modèle) ne sont plus signalées : sur
+                // 100 000 courses vérifiées, les jouer perd 11 à 20 %.
+                var val = null;
                 var al = alerts.filter((x) => x.r == reu.r && x.c == c.c)[0] || null;
-                var o = { reu: reu, course: c, top: top, pTop: pp(top), value: val, alert: al, hasOdds: !!a.market, nPlaces: a.placesPayees };
+                var o = { reu: reu, course: c, top: top, pTop: T.realPlace(pp(top), calibration), value: val, alert: al, hasOdds: !!a.market, nPlaces: a.placesPayees };
                 o.kind = al ? 'alert' : val ? 'value' : o.pTop >= store.oppSolid ? 'solid' : null;
                 prog.opps[reu.r + '-' + c.c] = o;
               } catch (e) {}
@@ -1942,9 +1944,6 @@
             '<div class="row" style="margin-bottom:10px">' +
             '<label class="f">⭐ Favori placé au moins<select id="oppSolid">' +
             opt([0.45, 0.5, 0.55, 0.6, 0.65, 0.7], store.oppSolid, (v) => Math.round(v * 100) + ' %') +
-            '</select></label>' +
-            '<label class="f">💰 Valeur minimale<select id="oppValue">' +
-            opt([1, 1.05, 1.1, 1.2], store.oppValue, (v) => v.toFixed(2).replace('.', ',')) +
             '</select></label></div>';
           var fallback = false;
           if (!list.length) {
@@ -1987,9 +1986,9 @@
           });
           html += '</div>';
           html +=
-            '<p class="hint" style="margin-top:10px">🔔 pari validé par la simulation (le seul signal fiable) · 💰 cote au-dessus de notre estimation, non validé · ⭐ ' +
-            (fallback ? 'meilleures chances de placé de la journée' : 'favori placé ' + Math.round(store.oppSolid * 100) + ' % du temps ou plus selon nous') +
-            ', mais un favori placé rapporte souvent peu.</p>';
+            '<p class="hint" style="margin-top:10px">⭐ ' +
+            (fallback ? 'meilleures chances de placé de la journée' : 'favori placé ' + Math.round(store.oppSolid * 100) + ' % du temps ou plus (chances réelles)') +
+            '. Ce sont les chevaux les plus sûrs, pas des paris rentables : un favori placé rapporte peu et perd environ 5 % à long terme. 🔔 n\'apparaît que si une stratégie est un jour validée par la simulation.</p>';
           return html;
         }
         $('progList').addEventListener('change', function (e) {
@@ -2026,7 +2025,7 @@
                   }).length
                 : null;
             b.classList.toggle('on', b.dataset.mode === store.progMode);
-            if (n != null) b.textContent = '⭐ À jouer' + (prog.day ? ' (' + n + ')' : '');
+            if (n != null) b.textContent = '⭐ Les plus sûrs' + (prog.day ? ' (' + n + ')' : '');
           });
           if (store.progMode === 'jouer') {
             $('progList').innerHTML = renderOpportunities();
@@ -3349,7 +3348,7 @@
           if (t.out) {
             var go = t.outReturn - t.outStake;
             html +=
-              '<div class="kpi" style="border:2px solid var(--accent)"><small>🎯 Outsiders Hoshi</small><strong style="color:' +
+              '<div class="kpi"><small>Outsiders (retirés)</small><strong style="color:' +
               (go >= 0 ? 'var(--good)' : 'var(--bad)') +
               '">' +
               signedMoney(go) +
@@ -3384,8 +3383,8 @@
               ' %)</small></div>';
           });
           html += '</div>';
-          if (!t.out)
-            html += '<p class="hint" style="margin:0 0 12px">🎯 Le bilan des Outsiders Hoshi apparaîtra dès les premières arrivées. Le Choix Hoshi est abandonné : sur 10 ans d\'historique, il perdait (−12 % en gagnant, −5 % en placé).</p>';
+          html +=
+            '<p class="hint" style="margin:0 0 12px">Aucune méthode de pari n\'est rentable à long terme sur 100 000 courses vérifiées. Le Choix Hoshi et les Outsiders ont été retirés ; leurs anciens paris restent comptés ici pour mémoire.</p>';
           html += '<div class="bdays">';
           days.forEach(function (d) {
             var a = d[scope];

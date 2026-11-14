@@ -129,6 +129,8 @@ test('stratégie validée : seulement si marquée validée', () => {
   assert.equal(T.validatedStrategy(cal), null);
   cal.backtest.strategies[0].validated = true;
   assert.equal(T.validatedStrategy(cal).id, 'val_p_1.05');
+  // Les méthodes retirées ne peuvent plus déclencher d'alerte, même marquées validées.
+  assert.equal(T.validatedStrategy({ backtest: { strategies: [{ id: 'choix_g', validated: true, roi: 0.5 }] } }), null);
 });
 
 test('groupes de réglages par type de course', () => {
@@ -258,12 +260,16 @@ test('Choix Hoshi décidé sur la cote du matin', () => {
 
 test('Outsiders Hoshi : seuil de 2,5 fois la cote du matin', () => {
   const r = race(12);
+  r.runners[11].cote = 80; // un gros outsider
   r.runners.forEach((x) => (x.coteRef = x.cote));
   const prep = T.prepareRace(r);
   const F = T.featureVector(prep, 0).length;
   // Modèle factice qui ignore le marché et favorise le dernier cheval (gros outsider).
   const L = { beta: new Array(F).fill(0), mean: new Array(F).fill(0), sd: new Array(F).fill(1), threshold: 2.5 };
-  const picks = T.outsiderPicks(r, L);
+  r.discipline = 'trot attelé';
+  assert.deepEqual(T.outsiderPicks(r, L), []); // méthode retirée : rien sans « force »
+  const picks = T.outsiderPicks(r, L, { force: true });
+  assert.ok(picks.length > 0);
   for (const o of picks) assert.ok(o.ratio >= 2.5 && o.cote > 1);
   // Modèle uniforme : 1/12 chacun ; seuls les chevaux que la cote crédite de moins de 1/30 passent.
   for (const o of picks) assert.ok(o.pMarket <= 1 / 12 / 2.5 + 1e-9);
@@ -276,12 +282,14 @@ test('Outsiders Hoshi : limités au trot', () => {
   assert.ok(!T.outsiderDiscipline('plat'));
   assert.ok(!T.outsiderDiscipline('obstacle'));
   const r = race(12);
+  r.runners[11].cote = 80;
+  r.runners.forEach((x) => (x.coteRef = x.cote));
   const prep = T.prepareRace(r);
   const F = T.featureVector(prep, 0).length;
   const L = { beta: new Array(F).fill(0), mean: new Array(F).fill(0), sd: new Array(F).fill(1) };
-  assert.deepEqual(T.outsiderPicks(r, L), []); // course de plat
+  assert.deepEqual(T.outsiderPicks(r, L, { force: true }), []); // course de plat
   r.discipline = 'trot attelé';
-  assert.ok(T.outsiderPicks(r, L).length >= 0);
+  assert.ok(T.outsiderPicks(r, L, { force: true }).length > 0);
 });
 
 test('chances réelles de placé : correction de la confiance excessive', () => {

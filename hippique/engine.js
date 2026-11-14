@@ -691,7 +691,7 @@
     var bt = calibration && calibration.backtest;
     if (!bt) return null;
     var ok = bt.strategies
-      .filter((x) => x.validated && (x.id.indexOf('val_') === 0 || x.id.indexOf('choix_') === 0))
+      .filter((x) => x.validated && x.id.indexOf('val_') === 0)
       .sort((a, b) => b.roi - a.roi);
     return ok[0] || null;
   }
