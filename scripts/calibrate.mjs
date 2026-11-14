@@ -76,7 +76,8 @@ async function buildDataset() {
   const statsFrom = isoMinus(today, STATS_DAYS),
     fitFrom = isoMinus(today, FIT_DAYS),
     outFrom = isoMinus(today, OUT_DAYS);
-  const outsider = []; // jeu de données compact du modèle Outsiders
+  const outsider = []; // jeu de données compact du modèle Outsiders (retiré)
+  let incomplete = 0;
   const statDates = [];
   const jockeys = {},
     entraineurs = {},
@@ -124,7 +125,16 @@ async function buildDataset() {
           r._pos = p.arrivee || rankOf[p.num] || 99;
           return r;
         });
-        const wantOut = day.date >= outFrom && c.rapports;
+        // Données complètes uniquement : une course où un partant a une cote mais pas de cote de
+        // référence mélange deux moments du marché (c'est ce qui avait créé le faux avantage des
+        // « Outsiders »). Elle sert aux notes et statistiques, jamais aux modèles ni aux simulations.
+        const complete = c.partants.every((p) => p.nonPartant || p.coteRef || !(p.cote || p.coteT));
+        if (!complete) {
+          incomplete++;
+          pending.push(runners);
+          continue;
+        }
+        const wantOut = Turf.OUTSIDER_ENABLED && day.date >= outFrom && c.rapports;
         if (!fit && !wantOut) {
           // Avant les fenêtres d'ajustement : seulement pour les notes et statistiques.
           pending.push(runners);
@@ -200,7 +210,7 @@ async function buildDataset() {
   items.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.heure - b.heure));
   const all = items.length;
   if (items.length > MAX_FIT) items.splice(0, items.length - MAX_FIT);
-  return { items, all, days: days.length, archived: archived.length, ratings, oddsSource, outsider, stats: { jockeys, entraineurs, lastSeen, dates: statDates } };
+  return { items, all, incomplete, days: days.length, archived: archived.length, ratings, oddsSource, outsider, stats: { jockeys, entraineurs, lastSeen, dates: statDates } };
 }
 
 /**
@@ -659,9 +669,11 @@ function backtest(items, settingsOf, coefs) {
       curve: curve.filter((_, k) => k % step === 0 || k === curve.length - 1),
     });
   }
-  // Significatif : ROI positif même en retirant deux erreurs-types (marge de hasard).
-  res.forEach((r) => (r.significant = r.bets >= 50 && r.roi - 2 * r.roiSE > 0));
-  const candidates = res.filter((r) => (r.id.startsWith('val_') || r.id.startsWith('choix_')) && r.bets >= 30 && r.roi > 0).sort((a, b) => b.roi - a.roi);
+  // Significatif : ROI positif même en retirant TROIS erreurs-types, sur au moins 300 paris.
+  // (Onze stratégies recontrôlées chaque jour : à deux erreurs-types, une fausse validation
+  // finirait par arriver par simple hasard.)
+  res.forEach((r) => (r.significant = r.bets >= 300 && r.roi - 3 * r.roiSE > 0));
+  const candidates = res.filter((r) => r.id.startsWith('val_') && r.bets >= 100 && r.roi > 0).sort((a, b) => b.roi - a.roi);
   return { courses: withR.length, from: withR[0] ? withR[0].date : null, strategies: res, best: candidates[0] ? candidates[0].id : null };
 }
 
@@ -763,30 +775,36 @@ const resolver = (groups, globalS) => (it) => {
 
 async function main() {
   const prev = await readJson(OUT, null);
-  if (!FORCE && prev && prev.status === 'ok' && prev.version === 5 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
+  if (!FORCE && prev && prev.status === 'ok' && prev.version === 6 && Date.now() - new Date(prev.updated) < 20 * 3600000) {
     console.log('Calibrage récent (' + prev.updated + '), rien à faire.');
     return;
   }
   const t0 = Date.now();
-  const { items, all, days, archived, ratings, oddsSource, stats, outsider } = await buildDataset();
+  const { items, all, incomplete, days, archived, ratings, oddsSource, stats, outsider } = await buildDataset();
+  console.log(`${incomplete} courses écartées (cotes de référence incomplètes)`);
   console.log(`${all} courses terminées dans la fenêtre d'ajustement (${items.length} utilisées) · ${days} journées lues dont ${archived} archivées`);
   console.log(`cotes utilisées : ${oddsSource.T} au moment du pari, ${oddsSource.ref} du matin, ${oddsSource.final} finales`);
   const defaults = Turf.mergeSettings({});
-  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 5, oddsSource };
+  const out = { updated: new Date().toISOString(), days, courses: items.length, minCourses: MIN_COURSES, version: 6, oddsSource, incomplete };
 
   // Notes Elo à jour pour la page et les alertes.
+  // Seulement les chevaux vus depuis un an (les autres ne courent plus) : 7 Mo → ≈ 1,3 Mo à
+  // télécharger par l'application.
+  const seenFrom = isoMinus(parisToday(), 365);
   const rt = {};
-  for (const [k, v] of Object.entries(ratings)) rt[k] = [Math.round(v[0]), v[1]];
+  for (const [k, v] of Object.entries(ratings)) if (stats.lastSeen[k] >= seenFrom) rt[k] = [Math.round(v[0]), v[1]];
   await writeFile(path.join(DATA, 'ratings.json'), JSON.stringify({ updated: out.updated, ratings: rt }));
   // Statistiques jockeys / entraîneurs pour la page et les alertes : mêmes chiffres que ceux du
   // calibrage (fenêtre de STATS_DAYS jours, archive comprise). La mise à jour courante y ajoute
   // ensuite chaque journée terminée.
   const yearAgo = isoMinus(parisToday(), 365);
+  const useful = (m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v[0] >= 3));
   const chevaux = {};
   for (const [k, v] of Object.entries(stats.lastSeen)) if (v >= yearAgo) chevaux[k] = v;
   await writeFile(
     path.join(DATA, 'stats.json'),
-    JSON.stringify({ dates: stats.dates.filter((d) => d >= yearAgo), jockeys: stats.jockeys, entraineurs: stats.entraineurs, chevaux, updated: out.updated }),
+    // Moins de 3 courses : statistique inutilisable (statRate renvoie null), inutile de la publier.
+    JSON.stringify({ dates: stats.dates.filter((d) => d >= yearAgo), jockeys: useful(stats.jockeys), entraineurs: useful(stats.entraineurs), chevaux, updated: out.updated }),
   );
 
   // Modèle Outsiders : retiré (avantage dû à un défaut des données, voir engine.js). Plus calculé.

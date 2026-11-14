@@ -91,20 +91,6 @@ function analyze(c, cal, stats, today) {
   );
 }
 const pp = (x) => (x.pPlace != null ? x.pPlace : x.pTop3);
-/** Choix Hoshi décidé sur les cotes du matin (cote du moment dans coteLive). */
-function choice(c, cal, stats, today) {
-  const settings = Turf.settingsFor(cal, { discipline: c.discipline, categorie: c.categorie });
-  return Turf.hoshiChoiceMorning({ discipline: c.discipline, allocation: c.allocation, runners: enrich(c.partants, stats, today) }, settings);
-}
-const live = (k) => Number(k.x.runner.coteLive || k.cote);
-/** Outsiders Hoshi d'une course (cote de référence du PMU, modèle du calibrage). */
-function outsiders(c, cal, stats, today) {
-  const L = cal && cal.outsider;
-  if (!L) return [];
-  return Turf.outsiderPicks({ discipline: c.discipline, allocation: c.allocation, runners: enrich(c.partants, stats, today) }, L);
-}
-const OUT_STAKE = '1 € gagnant + 1 € placé';
-
 /** Sélection du jour (une fois, vers 9 h) et rappels avant les courses sélectionnées. */
 async function selectionAndReminders(state, today, cal, stats, day) {
   if (!day) return;
@@ -120,7 +106,7 @@ async function selectionAndReminders(state, today, cal, stats, day) {
       const a = analyze(c, cal, stats, today);
       if (a.error) continue;
       const top = a.runners.slice().sort((x, y) => pp(y) - pp(x))[0];
-      rows.push({ reu, c, a, top, p: Turf.realPlace(pp(top), cal), ch: choice(c, cal, stats, today), out: outsiders(c, cal, stats, today) });
+      rows.push({ reu, c, a, top, p: Turf.realPlace(pp(top), cal) });
     }
   }
   // Sélection : courses où notre favori a au moins SELECT_MIN de chances d'être placé.
@@ -132,11 +118,7 @@ async function selectionAndReminders(state, today, cal, stats, day) {
       .slice(0, SELECT_MAX)
       .sort((x, y) => x.c.heure - y.c.heure);
     state.selection[today] = sel.map((x) => `R${x.reu.r}C${x.c.c}`);
-    // Outsiders Hoshi du jour : la seule méthode positive sur 10 ans d'historique.
-    const outs = rows.filter((x) => x.out.length).sort((x, y) => x.c.heure - y.c.heure);
-    state.choix = state.choix || {};
-    state.choix[today] = outs.map((x) => `R${x.reu.r}C${x.c.c}`);
-    if (sel.length || outs.length) {
+    if (sel.length) {
       const lines = [
         'ℹ️ Aucun pari rentable : vérifiées sur 100 000 courses aux données complètes, toutes les méthodes perdent à long terme (commission du PMU). Les chevaux ci-dessous sont les plus sûrs, pas des paris gagnants.',
       ];
@@ -151,35 +133,9 @@ async function selectionAndReminders(state, today, cal, stats, day) {
       await notify('📋 Hoshi Turf : programme du jour', `Pas de Placé sûr aujourd'hui (aucun cheval à ${Math.round(SELECT_MIN * 100)} % de chances réelles). Rappel : aucun pari rentable n'a été trouvé.`, 'clipboard', { priority: 2 });
     }
   }
-  // « À jouer maintenant » : 5 à 18 minutes avant chaque course où figure un Outsider Hoshi, avec
-  // la cote de référence définitive (le PMU la fixe ≈ 25 min avant le départ ; c'est elle que
-  // contient l'historique sur lequel la méthode a été mesurée).
-  for (const x of rows) {
-    const mins = (x.c.heure - now) / 60000;
-    if (mins < 5 || mins > 18) continue;
-    const id = `R${x.reu.r}C${x.c.c}`;
-    const key = `${today}-${id}-rappel`;
-    if (state.sent[key]) continue;
-    // Seulement les courses avec un Outsider Hoshi (les autres conseils perdent à long terme).
-    if (!x.out.length) continue;
-    const t = x.top.runner;
-    let msg = x.out
-      .map((o) => `🎯 À jouer maintenant : n°${o.runner.num} ${o.runner.nom} — ${OUT_STAKE} (ou 1 € placé seul, plus régulier). Cote ${fr(o.coteLive)} (référence ${fr(o.cote)}).`)
-      .join('\n');
-    msg += `\nPour info, le plus sûr : n°${t.num} ${t.nom} (${Math.round(x.p * 100)} % de chances réelles d'être placé)`;
-    if (t.cote) {
-      const est = Turf.estimatePlaceOdds(t.cote, x.a.placesPayees, cal && cal.placeOdds);
-      msg += `, cote ${fr(Number(t.cote))}` + (est ? ` (placé estimé ${fr(est, 2)} €)` : '');
-    } else msg += ' (cotes pas encore publiées)';
-    msg += '.';
-    const title = `⏰ ${hour(x.c.heure)} R${x.reu.r}C${x.c.c} ${x.reu.hippodrome} — dans ${Math.round(mins)} min`;
-    console.log('RAPPEL ' + title + ' — ' + msg);
-    await notify(title, msg, 'dart', { priority: 4, click: link(today, x.reu.r, x.c.c) });
-    state.sent[key] = new Date().toISOString();
-  }
   for (const d of Object.keys(state.selection)) if (d < parisDate(-3)) delete state.selection[d];
-  for (const d of Object.keys(state.choix || {})) if (d < parisDate(-3)) delete state.choix[d];
-  for (const d of Object.keys(state.outAnnounced || {})) if (d < parisDate(-3)) delete state.outAnnounced[d];
+  delete state.choix; // anciennes méthodes retirées (Choix Hoshi, Outsiders)
+  delete state.outAnnounced;
 }
 
 /**
@@ -210,25 +166,6 @@ async function freezePronos(day, cal, stats, today, state) {
           cote: x.runner.cote || null,
         })),
       };
-      // Choix Hoshi au moment du départ (figé comme le reste).
-      // Décidé sur les cotes du matin (voir Turf.morningRunners) ; cote = cote du matin, coteLive = cote au départ.
-      const ch = choice(c, cal, stats, today);
-      const fz = (k) => (k ? { num: k.x.runner.num, p: +k.p.toFixed(4), ratio: +k.ratio.toFixed(3), cote: k.cote, coteLive: live(k) || null, matin: true } : null);
-      c.prono.choix = {
-        g: fz(ch.g),
-        p: fz(ch.p),
-        announced: ((state && state.choix && state.choix[today]) || []).includes(`R${reu.r}C${c.c}`),
-      };
-      // Outsiders Hoshi (cote de référence au départ), figés eux aussi.
-      if (!ALL_COUNTRIES && reu.pays && reu.pays !== 'FRA') c.prono.outsiders = [];
-      else
-        c.prono.outsiders = outsiders(c, cal, stats, today).map((o) => ({
-          num: o.runner.num,
-          p: +o.p.toFixed(4),
-          ratio: +o.ratio.toFixed(3),
-          cote: o.cote,
-          coteLive: o.coteLive || null,
-        }));
       // Quinté+ : nos 5 chevaux, l'ordre proposé et les chances de chaque formule, figés aussi.
       if (c.quinte) {
         const q = Turf.quinteAnalysis(
@@ -306,13 +243,7 @@ async function main() {
           { discipline: c.discipline, allocation: c.allocation, runners: enrich(c.partants, stats, today) },
           Object.assign({}, settings || {}, { simulations: 0 }),
         );
-        let bets;
-        if (strat.id.startsWith('choix_')) {
-          // Stratégie « Choix Hoshi » validée : on joue le Choix Hoshi de la course.
-          const ch = choice(c, cal, stats, today)[strat.type];
-          const o = ch && (strat.type === 'g' ? live(ch) : Turf.estimatePlaceOdds(live(ch), a.placesPayees, cal && cal.placeOdds));
-          bets = ch && o ? [{ x: ch.x, type: strat.type, p: ch.p, o, ev: ch.p * o, kelly: Math.max(0.02, Turf.kelly(ch.p, o)) }] : [];
-        } else bets = Turf.valueBets(a, cal, { minEdge: strat.threshold, types: strat.type });
+        const bets = Turf.valueBets(a, cal, { minEdge: strat.threshold, types: strat.type });
         for (const b of bets) {
           const key = `${today}-R${reu.r}C${c.c}-${b.x.runner.num}-${b.type}`;
           if (state.sent[key]) continue;

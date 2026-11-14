@@ -57,6 +57,17 @@ l'étude n'avaient pas de cote de référence dans l'historique, et l'étude ava
 cote finale. Sur les courses aux données complètes, la règle perd (−53 % puis −26 %). Leçon : toute
 étude doit écarter les courses où une cote manque.
 
+**Garde-fous ajoutés (14/11/2026) :**
+- le calibrage écarte toute course où un partant a une cote mais pas de cote de référence
+  (≈ 18 % des courses) : elles servent aux notes Elo et aux statistiques, jamais aux modèles ni
+  aux simulations de paris ;
+- une stratégie n'est « validée » (et ne déclenche une alerte 🔔) que si son rendement reste
+  positif en retirant **trois** erreurs-types, sur au moins 300 paris ; seules les stratégies
+  « valeur » peuvent l'être ;
+- l'application ne signale plus les « cotes intéressantes » (elles perdent 11 à 20 %) ; l'onglet
+  « ⭐ Les plus sûrs » montre les chevaux les plus sûrs, avec leurs chances réelles ;
+- `ratings.json` ne garde que les chevaux vus depuis un an (7 Mo → 1,3 Mo à charger).
+
 ### Outsiders Hoshi (retirés, description d'origine)
 
 Étude sur tout l'historique (142 000 courses de 2017 à 2026, modèle réentraîné chaque année sur
